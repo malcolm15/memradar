@@ -1,0 +1,10 @@
+{
+  "name": "memradar",
+  "version": "1.0.0",
+  "description": "RAM & SSD price tracker for PC builders",
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.0.0",
+    "dotenv": "^16.0.0"
+  }
+}
