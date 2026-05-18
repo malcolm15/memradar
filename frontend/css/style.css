@@ -42,7 +42,7 @@ a { color: inherit; text-decoration: none; }
 .logo-mem { color: #111827; }
 .logo-radar { color: #2563eb; }
 
-nav {
+.site-header nav {
   display: flex;
   align-items: center;
   gap: 24px;
