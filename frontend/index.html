@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MemRadar — RAM & SSD Price Tracker</title>
+  <meta name="description" content="Track RAM and SSD prices across retailers. Historical price charts and alerts for PC builders.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container">
+      <a href="/" class="logo">
+        <span class="logo-mem">Mem</span><span class="logo-radar">Radar</span>
+      </a>
+      <nav>
+        <a href="#" class="nav-link">RAM</a>
+        <a href="#" class="nav-link">SSDs</a>
+        <a href="#" class="btn-alert">Set an Alert</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <section class="hero">
+      <div class="container">
+        <h1>Track RAM & SSD prices.<br>Know when to buy.</h1>
+        <p class="hero-sub">Historical price charts and drop alerts for PC builders — across all major retailers.</p>
+        <form class="search-form" id="searchForm">
+          <input
+            type="text"
+            class="search-input"
+            id="searchInput"
+            placeholder="Search by product name, brand, or spec — e.g. G.Skill DDR5 32GB"
+            autocomplete="off"
+          >
+          <button type="submit" class="search-btn">Search</button>
+        </form>
+        <p class="search-hint">Try: G.Skill Trident Z5 &nbsp;·&nbsp; Samsung 990 Pro &nbsp;·&nbsp; Crucial DDR5</p>
+      </div>
+    </section>
+
+    <section class="market-pulse">
+      <div class="container">
+        <h2 class="section-label">Market Pulse</h2>
+        <div class="pulse-grid">
+          <div class="pulse-card pulse-up">
+            <span class="pulse-category">DDR5</span>
+            <span class="pulse-change">+42%</span>
+            <span class="pulse-detail">vs. 6 months ago</span>
+          </div>
+          <div class="pulse-card pulse-up">
+            <span class="pulse-category">DDR4</span>
+            <span class="pulse-change">+18%</span>
+            <span class="pulse-detail">vs. 6 months ago</span>
+          </div>
+          <div class="pulse-card pulse-up">
+            <span class="pulse-category">NVMe SSD</span>
+            <span class="pulse-change">+31%</span>
+            <span class="pulse-detail">vs. 6 months ago</span>
+          </div>
+          <div class="pulse-card pulse-neutral">
+            <span class="pulse-category">SATA SSD</span>
+            <span class="pulse-change">+5%</span>
+            <span class="pulse-detail">vs. 6 months ago</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="popular-products">
+      <div class="container">
+        <h2 class="section-title">Popular Right Now</h2>
+        <div class="products-grid" id="productsGrid">
+
+          <div class="product-card placeholder">
+            <div class="product-image-placeholder"></div>
+            <div class="product-info">
+              <p class="product-brand">G.Skill</p>
+              <p class="product-name">Trident Z5 RGB 32GB DDR5-6000</p>
+              <p class="product-price">$<span>—</span></p>
+              <p class="product-retailer">Best Buy</p>
+            </div>
+            <a href="#" class="product-track-btn">Track Price</a>
+          </div>
+
+          <div class="product-card placeholder">
+            <div class="product-image-placeholder"></div>
+            <div class="product-info">
+              <p class="product-brand">Samsung</p>
+              <p class="product-name">990 Pro 2TB NVMe M.2 SSD</p>
+              <p class="product-price">$<span>—</span></p>
+              <p class="product-retailer">Best Buy</p>
+            </div>
+            <a href="#" class="product-track-btn">Track Price</a>
+          </div>
+
+          <div class="product-card placeholder">
+            <div class="product-image-placeholder"></div>
+            <div class="product-info">
+              <p class="product-brand">Crucial</p>
+              <p class="product-name">Pro 32GB DDR5-5600</p>
+              <p class="product-price">$<span>—</span></p>
+              <p class="product-retailer">Best Buy</p>
+            </div>
+            <a href="#" class="product-track-btn">Track Price</a>
+          </div>
+
+          <div class="product-card placeholder">
+            <div class="product-image-placeholder"></div>
+            <div class="product-info">
+              <p class="product-brand">WD</p>
+              <p class="product-name">Black SN850X 1TB NVMe SSD</p>
+              <p class="product-price">$<span>—</span></p>
+              <p class="product-retailer">Best Buy</p>
+            </div>
+            <a href="#" class="product-track-btn">Track Price</a>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>
+        <strong>MemRadar</strong> — RAM & SSD price tracking for PC builders.
+        Prices sourced from Best Buy. Affiliate links may earn a commission.
+      </p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
