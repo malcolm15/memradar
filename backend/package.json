@@ -1,0 +1,12 @@
+{
+  "name": "memradar-backend",
+  "version": "1.0.0",
+  "description": "MemRadar backend - Best Buy API price fetcher",
+  "main": "index.js",
+  "scripts": {
+    "test": "node scripts/test-api.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.0"
+  }
+}
