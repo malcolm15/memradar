@@ -85,6 +85,13 @@ The frontend is fully designed and built but the product cards show placeholder 
 
 **Design system:** blue accent `#2563eb`, neutral grays, clean sans-serif. No CSS framework. Mobile responsive with breakpoints at 768px and 480px.
 
+## Deployment Status
+
+- **GitHub Pages:** Live at [malcolm15.github.io/memradar](https://malcolm15.github.io/memradar). Deployed via GitHub Actions workflow (`.github/workflows/deploy-frontend.yml`) — triggers on any push to `main` that touches `frontend/`.
+- **Custom domain:** memradar.com — owned in Cloudflare, DNS not yet configured. Cloudflare DNS records and SSL/TLS → Full still need to be added to point the domain at GitHub Pages.
+- **Vercel:** Redeployed and live. All env vars set in Vercel dashboard. `BBY_API_KEY` is set to `pending` — awaiting Best Buy API approval before the cron fetch will work.
+- **Best Buy API:** Access pending approval. Cron is configured but non-functional until approved.
+
 ## What's Not Built Yet
 
 - Frontend → Supabase data connection (product cards, prices, search results)
@@ -101,6 +108,15 @@ The frontend is fully designed and built but the product cards show placeholder 
 - Run `node scripts/test-api.js` to verify the Best Buy API key works before touching the cron logic
 - Vercel Hobby plan limits cron to once per day — the `0 6 * * *` schedule reflects this
 - The `supabase.js` client uses the **service role key** intentionally — it runs server-side only and needs to bypass RLS for writes
+
+## Affiliate Tags
+
+- **Amazon Associates:** `memradar-20`
+  - All Amazon product URLs must include the tag: `https://amazon.com/dp/PRODUCTID?tag=memradar-20`
+- **Best Buy:** pending API approval — update when confirmed
+  - Same principle applies: append affiliate tag to all Best Buy product URLs once confirmed
+
+Never generate Amazon or Best Buy product links without the appropriate affiliate tag appended.
 
 ## Code Conventions
 
