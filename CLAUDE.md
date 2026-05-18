@@ -33,8 +33,19 @@ memradar/
 │   └── schema.sql           # Full DB schema — run in Supabase SQL Editor
 ├── frontend/
 │   ├── index.html           # Landing page
+│   ├── about.html           # About page
+│   ├── contact.html         # Contact page (hello@memradar.com)
+│   ├── privacy.html         # Privacy Policy
+│   ├── terms.html           # Terms of Service
+│   ├── affiliate.html       # Affiliate Disclosure
+│   ├── sitemap.xml          # XML sitemap for search engines
+│   ├── robots.txt           # Allows all crawlers, points to sitemap
+│   ├── CNAME                # Sets custom domain for GitHub Pages
 │   ├── css/style.css        # All styles — no CSS framework
 │   └── js/main.js           # Minimal JS, search handler stub
+├── .github/
+│   └── workflows/
+│       └── deploy-frontend.yml  # GitHub Actions — deploys frontend/ to GitHub Pages on push to main
 ├── scripts/
 │   └── test-api.js          # Manual Best Buy API sanity check
 ├── vercel.json              # Vercel cron config
@@ -87,10 +98,11 @@ The frontend is fully designed and built but the product cards show placeholder 
 
 ## Deployment Status
 
-- **GitHub Pages:** Live at [malcolm15.github.io/memradar](https://malcolm15.github.io/memradar). Deployed via GitHub Actions workflow (`.github/workflows/deploy-frontend.yml`) — triggers on any push to `main` that touches `frontend/`.
-- **Custom domain:** memradar.com — owned in Cloudflare, DNS not yet configured. Cloudflare DNS records and SSL/TLS → Full still need to be added to point the domain at GitHub Pages.
-- **Vercel:** Redeployed and live. All env vars set in Vercel dashboard. `BBY_API_KEY` is set to `pending` — awaiting Best Buy API approval before the cron fetch will work.
+- **GitHub Pages:** Live at [memradar.com](https://memradar.com). Deployed via GitHub Actions workflow (`.github/workflows/deploy-frontend.yml`) — triggers on any push to `main` that touches `frontend/`.
+- **Custom domain:** memradar.com — fully configured. Cloudflare DNS A records point to GitHub Pages IPs, SSL/TLS set to Full, CNAME file committed to `frontend/`. Custom domain set in GitHub Pages settings.
+- **Vercel:** Live. All env vars set in Vercel dashboard. `BBY_API_KEY` is set to `pending` — awaiting Best Buy API approval before the cron fetch will work.
 - **Best Buy API:** Access pending approval. Cron is configured but non-functional until approved.
+- **Google Search Console:** memradar.com added as a property. Sitemap submitted at `https://memradar.com/sitemap.xml`.
 
 ## What's Not Built Yet
 
