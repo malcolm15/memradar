@@ -104,6 +104,9 @@ The frontend is fully designed and built but the product cards show placeholder 
 - **Best Buy API:** Access pending approval. Cron is configured but non-functional until approved.
 - **Google Search Console:** memradar.com added as a property. Sitemap submitted at `https://memradar.com/sitemap.xml`.
 - **Google Analytics:** GA4 installed on all HTML pages. Measurement ID: `G-797Q89S8GG`. Snippet is in the `<head>` of every page.
+- **SEO:** Full SEO pass complete. All pages have unique titles, descriptions, Open Graph, Twitter cards, canonical tags, and JSON-LD structured data (WebSite schema on homepage, WebPage/ContactPage on inner pages). Keywords targeted: "RAM price tracker", "SSD price history", "DDR5 price drops", "PC memory deals", "best time to buy RAM", "SSD price alert".
+- **OG image:** All pages reference `https://memradar.com/og-image.png` — this file does not exist yet and needs to be created (1200×630px, MemRadar branding). Social share previews will be broken until it's created.
+- **Privacy policy / GA cookies:** `privacy.html` currently states no tracking cookies are used, but GA4 uses cookies by default. This needs to be resolved — either update the policy or configure GA in cookieless mode. Flagged, awaiting decision.
 
 ## What's Not Built Yet
 
