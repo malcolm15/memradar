@@ -103,6 +103,7 @@ The frontend is fully designed and built but the product cards show placeholder 
 - **Vercel:** Live. All env vars set in Vercel dashboard. `BBY_API_KEY` is set to `pending` — awaiting Best Buy API approval before the cron fetch will work.
 - **Best Buy API:** Access pending approval. Cron is configured but non-functional until approved.
 - **Google Search Console:** memradar.com added as a property. Sitemap submitted at `https://memradar.com/sitemap.xml`.
+- **Google Analytics:** GA4 installed on all HTML pages. Measurement ID: `G-797Q89S8GG`. Snippet is in the `<head>` of every page.
 
 ## What's Not Built Yet
 
