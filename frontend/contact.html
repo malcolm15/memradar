@@ -11,6 +11,7 @@
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>(function(){var t=localStorage.getItem('memradar-theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark');}})();</script>
   <title>Contact | MemRadar</title>
   <meta name="description" content="Have a question or suggestion for MemRadar? Get in touch at hello@memradar.com — we read every message.">
   <link rel="canonical" href="https://memradar.com/contact.html">
@@ -46,6 +47,7 @@
         <a href="#" class="nav-link">RAM</a>
         <a href="#" class="nav-link">SSDs</a>
         <a href="#" class="btn-alert">Set an Alert</a>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode"></button>
       </nav>
     </div>
   </header>
@@ -82,5 +84,6 @@
   </footer>
 
   <script src="js/main.js"></script>
+  <script src="js/theme.js"></script>
 </body>
 </html>

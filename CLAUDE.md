@@ -134,6 +134,17 @@ The frontend is fully designed and built but the product cards show placeholder 
 
 Never generate Amazon or Best Buy product links without the appropriate affiliate tag appended.
 
+## Dark Mode
+
+Implemented across all pages via:
+- **localStorage key:** `memradar-theme` — values: `'dark'` or `'light'`
+- **CSS class:** `dark` on `<html>` element (`document.documentElement`)
+- **Flash prevention:** inline synchronous `<script>` in each `<head>` (after viewport meta, before stylesheet) reads localStorage and applies `html.dark` before any CSS renders
+- **System preference:** on first visit (no saved preference), respects `prefers-color-scheme: dark`
+- **Toggle button:** `.theme-toggle` button in every page's `<nav>` — moon icon in light mode, sun icon in dark mode, SVG injected by `js/theme.js`
+- **JS file:** `frontend/js/theme.js` — handles icon rendering and localStorage persistence
+- **Dark palette:** background `#0f1623`, surface `#1a2332`, text `#f1f5f9`, secondary text `#94a3b8`, borders `#2d3f55`, blue accent `#2563eb` unchanged
+
 ## Code Conventions
 
 - Vanilla JS only on the frontend — no bundler, no framework

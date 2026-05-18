@@ -1,7 +1,7 @@
 const searchForm = document.getElementById('searchForm');
 const searchInput = document.getElementById('searchInput');
 
-searchForm.addEventListener('submit', (e) => {
+if (searchForm) searchForm.addEventListener('submit', (e) => {
   e.preventDefault();
   const query = searchInput.value.trim();
   if (!query) return;
