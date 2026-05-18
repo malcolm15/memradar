@@ -407,7 +407,9 @@ html.dark .site-header {
   border-bottom-color: #2d3f55;
 }
 
-html.dark .logo-mem { color: #f1f5f9; }
+html.dark .logo-mem,
+html.dark a.logo .logo-mem,
+html.dark .site-header .logo-mem { color: #ffffff !important; }
 
 html.dark .nav-link { color: #94a3b8; }
 html.dark .nav-link:hover { color: #2563eb; }
