@@ -32,22 +32,34 @@ memradar/
 │   ├── package.json
 │   └── schema.sql           # Full DB schema — run in Supabase SQL Editor
 ├── frontend/
-│   ├── index.html           # Landing page
-│   ├── about.html           # About page
-│   ├── contact.html         # Contact page (hello@memradar.com)
-│   ├── privacy.html         # Privacy Policy
-│   ├── terms.html           # Terms of Service
-│   ├── affiliate.html       # Affiliate Disclosure
-│   ├── sitemap.xml          # XML sitemap for search engines
-│   ├── robots.txt           # Allows all crawlers, points to sitemap
-│   ├── CNAME                # Sets custom domain for GitHub Pages
-│   ├── css/style.css        # All styles — no CSS framework
-│   └── js/main.js           # Minimal JS, search handler stub
+│   ├── index.html                   # Landing page
+│   ├── about.html                   # About page
+│   ├── contact.html                 # Contact page (hello@memradar.com)
+│   ├── privacy.html                 # Privacy Policy
+│   ├── terms.html                   # Terms of Service
+│   ├── affiliate.html               # Affiliate Disclosure
+│   ├── sitemap.xml                  # XML sitemap for search engines
+│   ├── robots.txt                   # Allows all crawlers, points to sitemap
+│   ├── site.webmanifest             # PWA manifest (theme color, icons)
+│   ├── CNAME                        # Sets custom domain for GitHub Pages
+│   ├── favicon.ico                  # 16×16 + 32×32 embedded
+│   ├── favicon-16x16.png
+│   ├── favicon-32x32.png
+│   ├── apple-touch-icon.png         # 180×180
+│   ├── android-chrome-192x192.png
+│   ├── android-chrome-512x512.png
+│   ├── favicon-source.svg           # Editable favicon source — re-run generate-favicons.js after changes
+│   ├── og-image.png                 # Social share image (1200×630)
+│   ├── og-image.svg                 # Editable OG image source
+│   ├── css/style.css                # All styles — no CSS framework
+│   ├── js/main.js                   # Search handler stub
+│   └── js/theme.js                  # Dark mode toggle + localStorage persistence
 ├── .github/
 │   └── workflows/
 │       └── deploy-frontend.yml  # GitHub Actions — deploys frontend/ to GitHub Pages on push to main
 ├── scripts/
-│   └── test-api.js          # Manual Best Buy API sanity check
+│   ├── test-api.js              # Manual Best Buy API sanity check
+│   └── generate-favicons.js     # Regenerates all favicon PNGs + ICO from favicon-source.svg
 ├── vercel.json              # Vercel cron config
 ├── package.json
 └── .env                     # Local secrets — NEVER commit this file
@@ -107,7 +119,7 @@ The frontend is fully designed and built but the product cards show placeholder 
 - **SEO:** Full SEO pass complete. All pages have unique titles, descriptions, Open Graph, Twitter cards, canonical tags, and JSON-LD structured data (WebSite schema on homepage, WebPage/ContactPage on inner pages). Keywords targeted: "RAM price tracker", "SSD price history", "DDR5 price drops", "PC memory deals", "best time to buy RAM", "SSD price alert".
 - **OG image:** `https://memradar.com/og-image.png` — live and confirmed working (1200×630px). Source SVG at `frontend/og-image.svg` for future edits. Convert with Sharp: `node -e "require('sharp')(fs.readFileSync('frontend/og-image.svg')).png().toFile('frontend/og-image.png', ...)"` .
 - **Favicons:** Full set generated from `frontend/favicon-source.svg` using `node scripts/generate-favicons.js` (requires sharp + to-ico dev deps). Files: `favicon.ico` (16+32px), `favicon-16x16.png`, `favicon-32x32.png`, `apple-touch-icon.png` (180px), `android-chrome-192x192.png`, `android-chrome-512x512.png`, `site.webmanifest`. All 6 HTML pages include the full favicon `<link>` block.
-- **Privacy policy / GA cookies:** `privacy.html` currently states no tracking cookies are used, but GA4 uses cookies by default. This needs to be resolved — either update the policy or configure GA in cookieless mode. Flagged, awaiting decision.
+- **Privacy policy / GA cookies:** Resolved — `privacy.html` updated to accurately state that Google Analytics is used and may set anonymous cookies for traffic measurement.
 
 ## What's Not Built Yet
 
@@ -122,6 +134,7 @@ The frontend is fully designed and built but the product cards show placeholder 
 ## Development Notes
 
 - **Node ≥ 18** required (native `fetch` used, no node-fetch)
+- **Dev dependencies:** `sharp` and `to-ico` installed for image generation scripts. Run `npm install` before running `generate-favicons.js` or any image conversion scripts.
 - Run `node scripts/test-api.js` to verify the Best Buy API key works before touching the cron logic
 - Vercel Hobby plan limits cron to once per day — the `0 6 * * *` schedule reflects this
 - The `supabase.js` client uses the **service role key** intentionally — it runs server-side only and needs to bypass RLS for writes
