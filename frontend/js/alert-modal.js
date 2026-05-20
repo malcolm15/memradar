@@ -234,6 +234,7 @@
       if (!validate()) return;
       const price = parseFloat(document.getElementById('modalPriceInput').value);
       const email = document.getElementById('modalEmailInput').value.trim();
+      // TODO: Add server-side rate limiting (max 3 submissions per IP per hour) before production launch
       console.log('Alert queued for Supabase:', { product: selectedProduct, targetPrice: price, email });
       document.getElementById('modalSuccessText').innerHTML =
         `We'll email you at <strong>${email}</strong> when <strong>${selectedProduct.name}</strong> drops below $${price.toFixed(0)}.`;

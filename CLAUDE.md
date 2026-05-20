@@ -182,6 +182,21 @@ Implemented across all pages via:
 - **JS file:** `frontend/js/theme.js` — handles icon rendering and localStorage persistence
 - **Dark palette:** background `#0f1623`, surface `#1a2332`, text `#f1f5f9`, secondary text `#94a3b8`, borders `#2d3f55`, blue accent `#2563eb` unchanged
 
+## Safety Rules for Claude Code
+- NEVER run destructive database operations (DROP TABLE, DELETE, TRUNCATE) without explicit written confirmation from Malc first
+- NEVER modify or delete .env files
+- NEVER commit any file containing API keys, secrets, or environment variables
+- NEVER expose the SUPABASE_SECRET_KEY in any frontend file
+- Always prefer additive operations over destructive ones
+- When in doubt about a destructive action, stop and ask
+
+## Security Notes
+- **HTTPS:** Vercel enforces HTTPS automatically. On Cloudflare, "Always Use HTTPS" must be enabled under SSL/TLS → Edge Certificates to prevent any plain HTTP access via the CDN layer.
+- **Cron endpoint:** `/api/fetch-prices` is protected by `Authorization: Bearer <CRON_SECRET>`. Returns 401 for any other request. Vercel sends this header automatically on cron triggers.
+- **RLS:** All three Supabase tables have Row Level Security enabled. `products` and `price_history` are public read only. `alerts` is service-role only — no public access to user emails.
+- **Secrets:** All secrets are in `.env` (local) and Vercel environment variables (production). `.env` is in `.gitignore` and was never committed. `SUPABASE_SECRET_KEY` is server-side only.
+- **Frontend deps:** Zero production vulnerabilities (`npm audit --omit=dev`). Dev-only scripts (`generate-favicons.js`) are excluded from Vercel builds and GitHub Pages deploys.
+
 ## Code Conventions
 
 - Vanilla JS only on the frontend — no bundler, no framework

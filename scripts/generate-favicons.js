@@ -1,3 +1,5 @@
+// to-ico was removed from devDependencies due to critical vulnerabilities in its dep chain.
+// If you need to regenerate favicons: npm install to-ico --no-save
 const sharp = require('sharp');
 const toIco = require('to-ico');
 const fs = require('fs');

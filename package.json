@@ -10,7 +10,6 @@
     "dotenv": "^16.0.0"
   },
   "devDependencies": {
-    "sharp": "^0.34.5",
-    "to-ico": "^1.1.5"
+    "sharp": "^0.34.5"
   }
 }

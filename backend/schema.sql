@@ -45,8 +45,11 @@ ALTER TABLE alerts ENABLE ROW LEVEL SECURITY;
 
 -- For now (no auth yet): only the backend service role can read/write alerts
 -- This policy gets updated when we add user accounts
+-- WITH CHECK is explicit here — do not rely on PostgreSQL's implicit fallback
 CREATE POLICY "Service role only" ON alerts
-  USING (auth.role() = 'service_role');
+  FOR ALL
+  USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');
 
 -- Products and price_history are public read (no user data)
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;

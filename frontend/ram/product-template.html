@@ -483,6 +483,7 @@
         var price = document.getElementById('pdpAlertPrice').value;
         var email = document.getElementById('pdpAlertEmail').value;
         if (!price || !email) return;
+        // TODO: Add server-side rate limiting (max 3 submissions per IP per hour) before production launch
         console.log('MemRadar alert set:', {
           product: 'G.Skill Trident Z5 RGB DDR5-6000 32GB (2x16GB)',
           sku: 'F5-6000J3038F16GX2-TZ5RK',
