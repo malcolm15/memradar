@@ -121,6 +121,29 @@ The frontend is fully designed and built but the product cards show placeholder 
 - **Favicons:** Full set generated from `frontend/favicon-source.svg` using `node scripts/generate-favicons.js` (requires sharp + to-ico dev deps). Files: `favicon.ico` (16+32px), `favicon-16x16.png`, `favicon-32x32.png`, `apple-touch-icon.png` (180px), `android-chrome-192x192.png`, `android-chrome-512x512.png`, `site.webmanifest`. All 6 HTML pages include the full favicon `<link>` block.
 - **Privacy policy / GA cookies:** Resolved — `privacy.html` updated to accurately state that Google Analytics is used and may set anonymous cookies for traffic measurement.
 
+## Listing Pages
+
+`frontend/ram.html` and `frontend/ssd.html` are fully designed product listing pages.
+
+**What's built:**
+- Page hero (h1, subtitle, Set an Alert CTA)
+- Sticky filter bar with pill selectors (Type, Capacity, Speed/Form Factor, Brand, Sort by)
+- Filter interaction handled by `js/filters.js` — clicking pills toggles active state and `console.log`s the selection. No actual filtering yet.
+- Animated radar pulse empty state ("Prices incoming.") shown until live data flows
+- Product card component fully styled (`.listing-card`) — includes image slot, brand, name, current price, strikethrough previous price, price change indicator (up/down with %), sparkline placeholder, retailer, View Deal + Set Alert actions
+- 3 commented-out example product cards in each page's HTML — uncomment to see the populated grid
+
+**What's not wired up:**
+- No data from Supabase yet — waiting on Best Buy API key for first price fetch
+- Filters don't actually filter anything — purely visual for now
+- Sparkline chart areas are placeholder boxes — Chart.js integration comes later
+- View Deal links are `href="#"` — will become affiliate links once products are in DB
+
+**Files:**
+- `frontend/ram.html` — DDR5/DDR4 RAM listing
+- `frontend/ssd.html` — NVMe/SATA SSD listing
+- `frontend/js/filters.js` — filter pill toggle + console.log stub
+
 ## What's Not Built Yet
 
 - Frontend → Supabase data connection (product cards, prices, search results)
