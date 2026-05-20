@@ -123,7 +123,7 @@ The frontend is fully designed and built but the product cards show placeholder 
 
 ## Listing Pages
 
-`frontend/ram.html` and `frontend/ssd.html` are fully designed product listing pages.
+`frontend/ram/index.html` and `frontend/ssd/index.html` are fully designed product listing pages. They use clean URLs (`/ram/` and `/ssd/`) via folder-based index files — GitHub Pages serves these automatically.
 
 **What's built:**
 - Page hero (h1, subtitle, Set an Alert CTA)
@@ -140,8 +140,8 @@ The frontend is fully designed and built but the product cards show placeholder 
 - View Deal links are `href="#"` — will become affiliate links once products are in DB
 
 **Files:**
-- `frontend/ram.html` — DDR5/DDR4 RAM listing
-- `frontend/ssd.html` — NVMe/SATA SSD listing
+- `frontend/ram/index.html` — DDR5/DDR4 RAM listing (serves at `/ram/`)
+- `frontend/ssd/index.html` — NVMe/SATA SSD listing (serves at `/ssd/`)
 - `frontend/js/filters.js` — filter pill toggle + console.log stub
 
 ## What's Not Built Yet
