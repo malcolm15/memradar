@@ -104,7 +104,7 @@ The script can also run directly via `node api/fetch-prices.js` for manual testi
 
 ## Frontend State
 
-The frontend is fully designed and built but the product cards show placeholder data — prices display as `$—`. The next step is wiring up the frontend to read live data from Supabase. Search form submission is stubbed (`console.log` only).
+The frontend is fully designed and built but the product cards show placeholder data — prices display as `$—`. A "coming soon" banner on the homepage communicates pre-launch status and includes a "Set an Alert" CTA. The Market Pulse section shows "Last updated: May 20, 2026" — replace this with a dynamic timestamp once real data is flowing. Search form submission is stubbed (`console.log` only).
 
 **Design system:** blue accent `#2563eb`, neutral grays, clean sans-serif. No CSS framework. Mobile responsive with breakpoints at 768px and 480px.
 
@@ -120,6 +120,16 @@ The frontend is fully designed and built but the product cards show placeholder 
 - **OG image:** `https://memradar.com/og-image.png` — live and confirmed working (1200×630px). Source SVG at `frontend/og-image.svg` for future edits. Convert with Sharp: `node -e "require('sharp')(fs.readFileSync('frontend/og-image.svg')).png().toFile('frontend/og-image.png', ...)"` .
 - **Favicons:** Full set generated from `frontend/favicon-source.svg` using `node scripts/generate-favicons.js` (requires sharp + to-ico dev deps). Files: `favicon.ico` (16+32px), `favicon-16x16.png`, `favicon-32x32.png`, `apple-touch-icon.png` (180px), `android-chrome-192x192.png`, `android-chrome-512x512.png`, `site.webmanifest`. All 6 HTML pages include the full favicon `<link>` block.
 - **Privacy policy / GA cookies:** Resolved — `privacy.html` updated to accurately state that Google Analytics is used and may set anonymous cookies for traffic measurement.
+
+## FAQ Page
+
+`frontend/faq/index.html` — serves at `/faq/`. Accordion-style Q&A page with 13 questions covering what MemRadar is, how price tracking works, retailers covered, how alerts work, and more.
+
+- SEO: `FAQPage` JSON-LD schema included — Google can show FAQ rich results directly in search
+- First question open by default; clicking any question toggles it open and closes others
+- Vanilla JS accordion — no libraries, inline IIFE at bottom of the file
+- Linked from nav and footer on every page
+- Added to sitemap.xml with `changefreq: monthly`, `priority: 0.7`
 
 ## Listing Pages
 

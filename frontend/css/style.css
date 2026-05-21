@@ -1912,3 +1912,175 @@ html.dark .pdp-related-per-gb { color: #64748b; }
   .pdp-section { padding: 28px 0; }
   .pdp-related-section { padding: 28px 0 44px; }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   Coming Soon Banner
+   ══════════════════════════════════════════════════════════════ */
+.coming-soon-banner {
+  background: #eff6ff;
+  border-top: 1px solid #bfdbfe;
+  border-bottom: 1px solid #bfdbfe;
+  padding: 14px 0;
+}
+.coming-soon-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.coming-soon-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #2563eb;
+  flex-shrink: 0;
+  position: relative;
+}
+.coming-soon-dot::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 2px solid #2563eb;
+  opacity: 0;
+  animation: cs-pulse 1.8s ease-out infinite;
+}
+@keyframes cs-pulse {
+  0%   { transform: scale(0.6); opacity: 0.8; }
+  100% { transform: scale(2);   opacity: 0; }
+}
+.coming-soon-text {
+  flex: 1;
+  font-size: 0.9rem;
+  color: #1e40af;
+  line-height: 1.4;
+  min-width: 0;
+}
+.coming-soon-text strong { font-weight: 700; }
+.coming-soon-cta {
+  display: inline-block;
+  background: #2563eb;
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 6px 16px;
+  border-radius: 20px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.15s;
+  cursor: pointer;
+  border: none;
+}
+.coming-soon-cta:hover { background: #1d4ed8; }
+
+html.dark .coming-soon-banner {
+  background: #0c1829;
+  border-top-color: #1e3a5f;
+  border-bottom-color: #1e3a5f;
+}
+html.dark .coming-soon-text  { color: #93c5fd; }
+html.dark .coming-soon-dot   { background: #3b82f6; }
+html.dark .coming-soon-dot::after { border-color: #3b82f6; }
+
+@media (max-width: 600px) {
+  .coming-soon-text { font-size: 0.85rem; }
+  .coming-soon-cta  { width: 100%; text-align: center; }
+}
+
+/* ── Market Pulse — last updated ── */
+.pulse-updated {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 14px;
+  text-align: right;
+}
+html.dark .pulse-updated { color: #64748b; }
+
+/* ══════════════════════════════════════════════════════════════
+   FAQ Page
+   ══════════════════════════════════════════════════════════════ */
+.faq-hero {
+  padding: 56px 0 40px;
+  border-bottom: 1px solid #e5e7eb;
+}
+.faq-hero h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 10px;
+}
+.faq-hero p {
+  font-size: 1.05rem;
+  color: #6b7280;
+}
+.faq-section {
+  padding: 48px 0 72px;
+}
+.faq-list {
+  max-width: 760px;
+  margin: 0 auto;
+}
+.faq-item {
+  border-bottom: 1px solid #e5e7eb;
+}
+.faq-item:first-child {
+  border-top: 1px solid #e5e7eb;
+}
+.faq-question {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 20px 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  cursor: pointer;
+  text-align: left;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+  line-height: 1.4;
+  font-family: inherit;
+}
+.faq-question:hover { color: #2563eb; }
+.faq-chevron {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  color: #9ca3af;
+  transition: transform 0.2s ease;
+  margin-top: 2px;
+}
+.faq-item.open .faq-chevron { transform: rotate(180deg); }
+.faq-answer {
+  display: none;
+  padding: 0 24px 20px 0;
+  font-size: 0.95rem;
+  color: #4b5563;
+  line-height: 1.75;
+}
+.faq-answer a { color: #2563eb; }
+.faq-answer a:hover { text-decoration: underline; }
+.faq-item.open .faq-answer { display: block; }
+
+html.dark .faq-hero { border-bottom-color: #2d3f55; }
+html.dark .faq-hero h1 { color: #f1f5f9; }
+html.dark .faq-hero p  { color: #64748b; }
+html.dark .faq-item { border-bottom-color: #2d3f55; }
+html.dark .faq-item:first-child { border-top-color: #2d3f55; }
+html.dark .faq-question { color: #f1f5f9; }
+html.dark .faq-question:hover { color: #60a5fa; }
+html.dark .faq-chevron { color: #64748b; }
+html.dark .faq-answer { color: #94a3b8; }
+html.dark .faq-answer a { color: #60a5fa; }
+
+@media (max-width: 768px) {
+  .faq-hero h1    { font-size: 1.6rem; }
+  .faq-question   { font-size: 0.95rem; }
+}
+@media (max-width: 480px) {
+  .faq-hero       { padding: 36px 0 28px; }
+  .faq-hero h1    { font-size: 1.4rem; }
+  .faq-answer     { padding-right: 0; }
+}
