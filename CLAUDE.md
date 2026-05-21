@@ -190,6 +190,10 @@ Implemented across all pages via:
 - Always prefer additive operations over destructive ones
 - When in doubt about a destructive action, stop and ask
 
+## Social
+
+- **X (Twitter):** `@memradar` — official account at `https://x.com/memradar`. The X icon link appears in the footer of every HTML page (`index.html`, `about.html`, `contact.html`, `privacy.html`, `terms.html`, `affiliate.html`, `ram/index.html`, `ssd/index.html`, `ram/product-template.html`).
+
 ## Security Notes
 - **HTTPS:** Vercel enforces HTTPS automatically. On Cloudflare, "Always Use HTTPS" must be enabled under SSL/TLS → Edge Certificates to prevent any plain HTTP access via the CDN layer.
 - **Cron endpoint:** `/api/fetch-prices` is protected by `Authorization: Bearer <CRON_SECRET>`. Returns 401 for any other request. Vercel sends this header automatically on cron triggers.

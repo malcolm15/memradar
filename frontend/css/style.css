@@ -300,6 +300,19 @@ a { color: inherit; text-decoration: none; }
   color: #9ca3af;
 }
 
+.footer-social { display: flex; justify-content: center; }
+.footer-social-link {
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  padding: 5px;
+  border-radius: 6px;
+  transition: color 0.15s;
+}
+.footer-social-link:hover { color: #6b7280; }
+html.dark .footer-social-link { color: #64748b; }
+html.dark .footer-social-link:hover { color: #94a3b8; }
+
 /* ── Content Pages ── */
 .content-page {
   max-width: 720px;
