@@ -86,6 +86,7 @@ Required in `.env` (local) and Vercel project settings (production):
 | `SUPABASE_SECRET_KEY` | Supabase service role key (not the anon key) |
 | `CRON_SECRET` | Random secret — Vercel sends as Bearer token to protect `/api/fetch-prices` |
 | `RESEND_API_KEY` | Resend email sending API key — production key from resend.com |
+| `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile secret key — from dash.cloudflare.com. Site key (public, already in frontend): `0x4AAAAAADTmp79GaQVF5cAu` |
 
 **Security notes:**
 - `.env` must never be committed — it is (and must stay) in `.gitignore`
@@ -204,6 +205,18 @@ Implemented across all pages via:
 ## Social
 
 - **X (Twitter):** `@memradar` — official account at `https://x.com/memradar`. The X icon link appears in the footer of every HTML page (`index.html`, `about.html`, `contact.html`, `privacy.html`, `terms.html`, `affiliate.html`, `ram/index.html`, `ssd/index.html`, `ram/product-template.html`).
+
+## Rate Limiting & Spam Protection
+
+Four layers are in place:
+
+1. **Cloudflare Turnstile** — CAPTCHA widget embedded in the alert modal (Step 3) and PDP inline alert form. Site key `0x4AAAAAADTmp79GaQVF5cAu` is public and already in the frontend. Server-side token verification is implemented in `backend/lib/turnstile.js` — wire it into the alert submission endpoint when built. Requires `TURNSTILE_SECRET_KEY` in `.env` and Vercel before server-side verification is active. Script loaded in `<head>` of `index.html` and `ram/product-template.html` (add to other pages that use the alert modal when enforcing CAPTCHA site-wide).
+
+2. **Honeypot fields** — Hidden `name="website"` input in both the alert modal (`id="modalHoneypot"`) and PDP form (`id="pdpHoneypot"`). Positioned off-screen via `position:absolute;left:-9999px;opacity:0` (not `display:none` — bots detect that). If the field contains any value, the submission is silently rejected. Check is already wired into both form submit handlers.
+
+3. **Server-side rate limiting** — `backend/lib/rateLimiter.js` implements a sliding-window in-memory limiter: max 3 alert submissions per IP per hour. Import and call `rateLimit(ip)` in the alert submission endpoint before processing. Note: in-memory only — replace with Upstash Redis before running multiple Vercel instances.
+
+4. **Client-side search rate limiting** — `frontend/js/main.js` limits search submissions to 30 per minute. Shows "Too many searches — please wait a moment." if exceeded. Server-side rate limiting should also be added at the Supabase/API level when search is wired up.
 
 ## Email / Alerts
 - Email sending: Resend (resend.com)

@@ -61,6 +61,7 @@
   <link rel="manifest" href="/site.webmanifest">
   <meta name="theme-color" content="#0f1623">
   <link rel="stylesheet" href="../../css/style.css">
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
 
@@ -297,7 +298,11 @@
             <p>Set your target price and we'll email you the moment this product hits it. No account required.</p>
           </div>
           <div class="pdp-alert-card-right">
-            <form class="pdp-alert-form" id="pdpAlertForm" novalidate>
+            <form class="pdp-alert-form" id="pdpAlertForm" novalidate style="position:relative;">
+              <div style="position:absolute;left:-9999px;opacity:0;" aria-hidden="true">
+                <label for="pdpHoneypot">Website (leave blank)</label>
+                <input type="text" id="pdpHoneypot" name="website" tabindex="-1" autocomplete="off">
+              </div>
               <div class="pdp-alert-product-tag">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
                 G.Skill Trident Z5 RGB DDR5-6000 32GB
@@ -316,6 +321,7 @@
                 </div>
                 <button type="submit" class="pdp-alert-submit-btn">Set Alert</button>
               </div>
+              <div class="cf-turnstile" data-sitekey="0x4AAAAAADTmp79GaQVF5cAu" data-theme="auto" style="margin:8px 0;"></div>
               <p class="pdp-alert-disclaimer">Note: Price alerts are based on Best Buy and Newegg pricing only. Amazon price changes will not trigger alerts.</p>
             </form>
             <div class="pdp-alert-success" id="pdpAlertSuccess" hidden>
@@ -491,6 +497,8 @@
     if (alertForm) {
       alertForm.addEventListener('submit', function (e) {
         e.preventDefault();
+        // Honeypot check — if website field has any value, silently reject (bot detected)
+        if (document.getElementById('pdpHoneypot').value) return;
         var price = document.getElementById('pdpAlertPrice').value;
         var email = document.getElementById('pdpAlertEmail').value;
         if (!price || !email) return;

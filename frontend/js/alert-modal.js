@@ -71,6 +71,11 @@
               <span class="modal-field-error" id="emailError"></span>
               <span class="modal-field-hint">We'll send you a one-time email when this price is hit. No spam, ever.</span>
             </div>
+            <div style="position:absolute;left:-9999px;opacity:0;" aria-hidden="true">
+              <label for="modalHoneypot">Website (leave blank)</label>
+              <input type="text" id="modalHoneypot" name="website" tabindex="-1" autocomplete="off">
+            </div>
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAADTmp79GaQVF5cAu" data-theme="auto" style="margin-top:12px;"></div>
             <div class="modal-footer-row">
               <button class="modal-btn-back" id="step3Back">← Back</button>
               <button class="modal-btn-primary" id="modalSetAlertBtn">Set Alert</button>
@@ -232,6 +237,8 @@
 
     document.getElementById('modalSetAlertBtn').addEventListener('click', () => {
       if (!validate()) return;
+      // Honeypot check — if website field has any value, silently reject (bot detected)
+      if (document.getElementById('modalHoneypot').value) return;
       const price = parseFloat(document.getElementById('modalPriceInput').value);
       const email = document.getElementById('modalEmailInput').value.trim();
       // TODO: Add server-side rate limiting (max 3 submissions per IP per hour) before production launch
