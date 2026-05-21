@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-797Q89S8GG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-797Q89S8GG');
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>(function(){var t=localStorage.getItem('memradar-theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark');}})();</script>
+  <title>404 — Page Not Found | MemRadar</title>
+  <meta name="description" content="The page you're looking for doesn't exist. Head back to MemRadar to track RAM and SSD prices.">
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#0f1623">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    .not-found-main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 64px 24px;
+    }
+    .not-found-inner {
+      max-width: 480px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      text-align: center;
+    }
+    .not-found-turtle {
+      width: 190px;
+      height: auto;
+      margin-bottom: 8px;
+      animation: turtleFloat 3.4s ease-in-out infinite;
+    }
+    @keyframes turtleFloat {
+      0%, 100% { transform: translateY(0px); }
+      50%       { transform: translateY(-14px); }
+    }
+    .not-found-code {
+      font-size: 5.5rem;
+      font-weight: 900;
+      color: #2563eb;
+      letter-spacing: -4px;
+      line-height: 1;
+    }
+    .not-found-heading {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #111827;
+      letter-spacing: -0.3px;
+      margin: 0;
+    }
+    .not-found-body {
+      font-size: 0.95rem;
+      color: #6b7280;
+      line-height: 1.65;
+      max-width: 360px;
+      margin: 0;
+    }
+    .not-found-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 8px;
+    }
+    .not-found-btn-primary {
+      display: inline-block;
+      background: #2563eb;
+      color: #fff;
+      padding: 11px 26px;
+      border-radius: 6px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      transition: background 0.15s;
+      text-decoration: none;
+    }
+    .not-found-btn-primary:hover { background: #1d4ed8; }
+    .not-found-btn-secondary {
+      display: inline-block;
+      background: transparent;
+      color: #374151;
+      padding: 10px 26px;
+      border-radius: 6px;
+      border: 1.5px solid #e5e7eb;
+      font-size: 0.92rem;
+      font-weight: 600;
+      transition: background 0.15s, border-color 0.15s;
+      text-decoration: none;
+    }
+    .not-found-btn-secondary:hover { background: #f9fafb; border-color: #d1d5db; }
+
+    html.dark .not-found-heading { color: #f1f5f9; }
+    html.dark .not-found-body    { color: #94a3b8; }
+    html.dark .not-found-btn-secondary {
+      color: #94a3b8;
+      border-color: #2d3f55;
+    }
+    html.dark .not-found-btn-secondary:hover {
+      background: #141e2d;
+      border-color: #374151;
+    }
+
+    @media (max-width: 480px) {
+      .not-found-code    { font-size: 4rem; }
+      .not-found-heading { font-size: 1.2rem; }
+      .not-found-actions { flex-direction: column; align-items: stretch; }
+      .not-found-btn-primary,
+      .not-found-btn-secondary { text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container">
+      <a href="/" class="logo">
+        <span class="logo-mem">Mem</span><span class="logo-radar">Radar</span>
+      </a>
+      <nav>
+        <a href="/ram/" class="nav-link">RAM</a>
+        <a href="/ssd/" class="nav-link">SSDs</a>
+        <a href="/faq/" class="nav-link">FAQ</a>
+        <a href="#" class="btn-alert">Set an Alert</a>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode"></button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="not-found-main">
+    <div class="not-found-inner">
+      <img
+        src="images/ram-turtle.png"
+        alt="A slow-moving turtle — like this lost page"
+        class="not-found-turtle"
+        width="190"
+        height="190"
+      >
+      <p class="not-found-code">404</p>
+      <h1 class="not-found-heading">This page took the slow route.</h1>
+      <p class="not-found-body">Looks like this page doesn't exist. Let's get you back on track.</p>
+      <div class="not-found-actions">
+        <a href="/" class="not-found-btn-primary">Go Home</a>
+        <a href="/ram/" class="not-found-btn-secondary">Track RAM Prices</a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-inner">
+        <p class="footer-brand"><strong>MemRadar</strong> — RAM &amp; SSD price tracking for PC builders.</p>
+        <nav class="footer-nav">
+          <a href="/about.html">About</a>
+          <a href="/contact.html">Contact</a>
+          <a href="/privacy.html">Privacy Policy</a>
+          <a href="/terms.html">Terms of Service</a>
+          <a href="/affiliate.html">Affiliate Disclosure</a>
+          <a href="/faq/">FAQ</a>
+        </nav>
+        <div class="footer-social">
+          <a href="https://x.com/memradar" target="_blank" rel="noopener noreferrer" class="footer-social-link" aria-label="MemRadar on X">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.259 5.63L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"/></svg>
+          </a>
+        </div>
+        <p class="footer-legal">MemRadar participates in the Amazon Associates Program and the Best Buy Affiliate Program. Links to products may be affiliate links — if you purchase through them, we may earn a small commission at no extra cost to you.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/alert-modal.js"></script>
+</body>
+</html>
