@@ -85,6 +85,7 @@ Required in `.env` (local) and Vercel project settings (production):
 | `SUPABASE_URL` | Supabase project URL |
 | `SUPABASE_SECRET_KEY` | Supabase service role key (not the anon key) |
 | `CRON_SECRET` | Random secret — Vercel sends as Bearer token to protect `/api/fetch-prices` |
+| `RESEND_API_KEY` | Resend email sending API key — production key from resend.com |
 
 **Security notes:**
 - `.env` must never be committed — it is (and must stay) in `.gitignore`
@@ -203,6 +204,14 @@ Implemented across all pages via:
 ## Social
 
 - **X (Twitter):** `@memradar` — official account at `https://x.com/memradar`. The X icon link appears in the footer of every HTML page (`index.html`, `about.html`, `contact.html`, `privacy.html`, `terms.html`, `affiliate.html`, `ram/index.html`, `ssd/index.html`, `ram/product-template.html`).
+
+## Email / Alerts
+- Email sending: Resend (resend.com)
+- Sending address: hello@memradar.com
+- API key stored as `RESEND_API_KEY`
+- Used for: price drop alert notifications to users
+- Alert logic: fires when `price_history` current price <= `alerts.target_price` and `alerts.triggered = false`
+- After sending: update `alerts.triggered = true` so user only receives one email
 
 ## Security Notes
 - **HTTPS:** Vercel enforces HTTPS automatically. On Cloudflare, "Always Use HTTPS" must be enabled under SSL/TLS → Edge Certificates to prevent any plain HTTP access via the CDN layer.
