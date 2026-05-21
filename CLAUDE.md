@@ -113,6 +113,7 @@ The frontend is fully designed and built but the product cards show placeholder 
 ## Deployment Status
 
 - **GitHub Pages:** Live at [memradar.com](https://memradar.com). Deployed via GitHub Actions workflow (`.github/workflows/deploy-frontend.yml`) — triggers on any push to `main` that touches `frontend/`.
+- **Custom 404 page:** `frontend/404.html` is served automatically by GitHub Pages for any missing URL. A copy lives at `frontend/404/index.html` so `memradar.com/404/` works as a clean URL — both files are identical and use absolute asset paths so they work from either location. Note: a Cloudflare redirect from `memradar.com/404.html` → `memradar.com/404/` would be clean, but `404.html` must remain at root level for GitHub Pages' automatic 404 handling — it cannot be moved.
 - **Custom domain:** memradar.com — fully configured. Cloudflare DNS A records point to GitHub Pages IPs, SSL/TLS set to Full, CNAME file committed to `frontend/`. Custom domain set in GitHub Pages settings.
 - **Vercel:** Live. All env vars set in Vercel dashboard. `BBY_API_KEY` is set to `pending` — awaiting Best Buy API approval before the cron fetch will work.
 - **Best Buy API:** Access pending approval. Cron is configured but non-functional until approved.
@@ -225,6 +226,7 @@ Four layers are in place:
 - Used for: price drop alert notifications to users
 - Alert logic: fires when `price_history` current price <= `alerts.target_price` and `alerts.triggered = false`
 - After sending: update `alerts.triggered = true` so user only receives one email
+- **Input validation:** When alert endpoint is built, import `validateAlert` from `backend/lib/validateAlert.js` and run before any database operation. Use `sanitized` values from the result, never raw user input.
 
 ## Security Notes
 - **HTTPS:** Vercel enforces HTTPS automatically. On Cloudflare, "Always Use HTTPS" must be enabled under SSL/TLS → Edge Certificates to prevent any plain HTTP access via the CDN layer.
@@ -232,6 +234,10 @@ Four layers are in place:
 - **RLS:** All three Supabase tables have Row Level Security enabled. `products` and `price_history` are public read only. `alerts` is service-role only — no public access to user emails.
 - **Secrets:** All secrets are in `.env` (local) and Vercel environment variables (production). `.env` is in `.gitignore` and was never committed. `SUPABASE_SECRET_KEY` is server-side only.
 - **Frontend deps:** Zero production vulnerabilities (`npm audit --omit=dev`). Dev-only scripts (`generate-favicons.js`) are excluded from Vercel builds and GitHub Pages deploys.
+
+## Database Performance
+
+Indexes are defined in `backend/schema.sql` but must be manually applied in the Supabase SQL Editor — they are not created automatically. Apply once `price_history` has real data flowing. Partial index on `alerts(triggered) WHERE triggered = false` keeps the alert check query fast as the table grows (only indexes the untriggered rows, which shrinks over time as alerts fire).
 
 ## Code Conventions
 
