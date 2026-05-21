@@ -1917,20 +1917,20 @@ html.dark .pdp-related-per-gb { color: #64748b; }
    Coming Soon Banner
    ══════════════════════════════════════════════════════════════ */
 .coming-soon-banner {
-  background: #eff6ff;
-  border-top: 1px solid #bfdbfe;
-  border-bottom: 1px solid #bfdbfe;
+  background: rgba(37, 99, 235, 0.08);
+  border-top: 1px solid rgba(37, 99, 235, 0.15);
+  border-bottom: 1px solid rgba(37, 99, 235, 0.15);
   padding: 14px 0;
 }
 .coming-soon-inner {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   flex-wrap: wrap;
 }
 .coming-soon-dot {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: #2563eb;
   flex-shrink: 0;
@@ -1947,7 +1947,7 @@ html.dark .pdp-related-per-gb { color: #64748b; }
 }
 @keyframes cs-pulse {
   0%   { transform: scale(0.6); opacity: 0.8; }
-  100% { transform: scale(2);   opacity: 0; }
+  100% { transform: scale(2.2); opacity: 0; }
 }
 .coming-soon-text {
   flex: 1;
@@ -1957,26 +1957,14 @@ html.dark .pdp-related-per-gb { color: #64748b; }
   min-width: 0;
 }
 .coming-soon-text strong { font-weight: 700; }
-.coming-soon-cta {
-  display: inline-block;
-  background: #2563eb;
-  color: #fff;
-  font-size: 0.82rem;
-  font-weight: 600;
-  padding: 6px 16px;
-  border-radius: 20px;
-  text-decoration: none;
-  white-space: nowrap;
-  transition: background 0.15s;
-  cursor: pointer;
-  border: none;
+.coming-soon-banner .btn-alert {
+  flex-shrink: 0;
 }
-.coming-soon-cta:hover { background: #1d4ed8; }
 
 html.dark .coming-soon-banner {
-  background: #0c1829;
-  border-top-color: #1e3a5f;
-  border-bottom-color: #1e3a5f;
+  background: rgba(37, 99, 235, 0.14);
+  border-top-color: rgba(37, 99, 235, 0.28);
+  border-bottom-color: rgba(37, 99, 235, 0.28);
 }
 html.dark .coming-soon-text  { color: #93c5fd; }
 html.dark .coming-soon-dot   { background: #3b82f6; }
@@ -1984,7 +1972,7 @@ html.dark .coming-soon-dot::after { border-color: #3b82f6; }
 
 @media (max-width: 600px) {
   .coming-soon-text { font-size: 0.85rem; }
-  .coming-soon-cta  { width: 100%; text-align: center; }
+  .coming-soon-banner .btn-alert { width: 100%; text-align: center; }
 }
 
 /* ── Market Pulse — last updated ── */
@@ -2037,50 +2025,60 @@ html.dark .pulse-updated { color: #64748b; }
   gap: 16px;
   cursor: pointer;
   text-align: left;
+  font-family: inherit;
+}
+.faq-question:hover .faq-q-text { color: #2563eb; }
+.faq-q-text {
+  flex: 1;
   font-size: 1rem;
   font-weight: 600;
   color: #111827;
-  line-height: 1.4;
-  font-family: inherit;
+  line-height: 1.45;
+  min-width: 0;
 }
-.faq-question:hover { color: #2563eb; }
 .faq-chevron {
   flex-shrink: 0;
-  width: 20px;
-  height: 20px;
+  display: block;
+  width: 18px;
+  height: 18px;
   color: #9ca3af;
-  transition: transform 0.2s ease;
-  margin-top: 2px;
+  transition: transform 0.22s ease;
+  margin-top: 3px;
 }
 .faq-item.open .faq-chevron { transform: rotate(180deg); }
+
+/* max-height transition — no display:none so toggle is always reliable */
 .faq-answer {
-  display: none;
-  padding: 0 24px 20px 0;
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.28s ease;
+}
+.faq-item.open .faq-answer { max-height: 600px; }
+.faq-answer-body {
+  padding: 0 0 22px;
   font-size: 0.95rem;
   color: #4b5563;
   line-height: 1.75;
 }
-.faq-answer a { color: #2563eb; }
-.faq-answer a:hover { text-decoration: underline; }
-.faq-item.open .faq-answer { display: block; }
+.faq-answer-body a { color: #2563eb; }
+.faq-answer-body a:hover { text-decoration: underline; }
 
 html.dark .faq-hero { border-bottom-color: #2d3f55; }
 html.dark .faq-hero h1 { color: #f1f5f9; }
 html.dark .faq-hero p  { color: #64748b; }
 html.dark .faq-item { border-bottom-color: #2d3f55; }
 html.dark .faq-item:first-child { border-top-color: #2d3f55; }
-html.dark .faq-question { color: #f1f5f9; }
-html.dark .faq-question:hover { color: #60a5fa; }
+html.dark .faq-q-text { color: #f1f5f9; }
+html.dark .faq-question:hover .faq-q-text { color: #60a5fa; }
 html.dark .faq-chevron { color: #64748b; }
-html.dark .faq-answer { color: #94a3b8; }
-html.dark .faq-answer a { color: #60a5fa; }
+html.dark .faq-answer-body { color: #94a3b8; }
+html.dark .faq-answer-body a { color: #60a5fa; }
 
 @media (max-width: 768px) {
-  .faq-hero h1    { font-size: 1.6rem; }
-  .faq-question   { font-size: 0.95rem; }
+  .faq-hero h1  { font-size: 1.6rem; }
+  .faq-q-text   { font-size: 0.95rem; }
 }
 @media (max-width: 480px) {
-  .faq-hero       { padding: 36px 0 28px; }
-  .faq-hero h1    { font-size: 1.4rem; }
-  .faq-answer     { padding-right: 0; }
+  .faq-hero     { padding: 36px 0 28px; }
+  .faq-hero h1  { font-size: 1.4rem; }
 }
