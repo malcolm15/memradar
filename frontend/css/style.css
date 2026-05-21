@@ -1957,9 +1957,6 @@ html.dark .pdp-related-per-gb { color: #64748b; }
   min-width: 0;
 }
 .coming-soon-text strong { font-weight: 700; }
-.coming-soon-banner .btn-alert {
-  flex-shrink: 0;
-}
 
 html.dark .coming-soon-banner {
   background: rgba(37, 99, 235, 0.14);
@@ -1972,7 +1969,6 @@ html.dark .coming-soon-dot::after { border-color: #3b82f6; }
 
 @media (max-width: 600px) {
   .coming-soon-text { font-size: 0.85rem; }
-  .coming-soon-banner .btn-alert { width: 100%; text-align: center; }
 }
 
 /* ── Market Pulse — last updated ── */
