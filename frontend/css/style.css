@@ -2004,10 +2004,7 @@ html.dark .pulse-updated { color: #64748b; }
 .faq-section {
   padding: 48px 0 72px;
 }
-.faq-list {
-  max-width: 760px;
-  margin: 0 auto;
-}
+.faq-list {}
 .faq-item {
   border-bottom: 1px solid #e5e7eb;
 }
