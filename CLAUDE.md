@@ -124,6 +124,19 @@ The frontend is fully designed and built but the product cards show placeholder 
 - **Favicons:** Full set generated from `frontend/favicon-source.svg` using `node scripts/generate-favicons.js` (requires sharp + to-ico dev deps). Files: `favicon.ico` (16+32px), `favicon-16x16.png`, `favicon-32x32.png`, `apple-touch-icon.png` (180px), `android-chrome-192x192.png`, `android-chrome-512x512.png`, `site.webmanifest`. All 6 HTML pages include the full favicon `<link>` block.
 - **Privacy policy / GA cookies:** Resolved — `privacy.html` updated to accurately state that Google Analytics is used and may set anonymous cookies for traffic measurement.
 
+## Blog
+
+`frontend/blog/index.html` — blog index page, serves at `/blog/`. Individual posts live at `blog/[slug]/index.html` (GitHub Pages serves these as clean URLs automatically).
+
+**Current posts:**
+- `frontend/blog/why-ram-prices-are-so-high/index.html` — "Why RAM Prices Are So High Right Now" (published 2026-05-22)
+
+**Structure notes:**
+- All blog pages use absolute asset paths (`/css/style.css`, `/js/*.js`) since they're nested 2–3 levels deep
+- Article pages include: breadcrumb, article header (h1, date, badge, read time), SVG hero, full article body, CTA box (`btn-alert` triggers alert modal), share buttons (`.pdp-share-btn` pattern)
+- JSON-LD on index: `Blog` schema. On article pages: `Article` schema with `datePublished`, `dateModified`, `author`/`publisher` as Organization
+- Blog linked from nav and footer on every page
+
 ## FAQ Page
 
 `frontend/faq/index.html` — serves at `/faq/`. Accordion-style Q&A page with 13 questions covering what MemRadar is, how price tracking works, retailers covered, how alerts work, and more.
