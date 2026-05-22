@@ -51,6 +51,7 @@ memradar/
 │   ├── favicon-source.svg           # Editable favicon source — re-run generate-favicons.js after changes
 │   ├── og-image.png                 # Social share image (1200×630)
 │   ├── og-image.svg                 # Editable OG image source
+│   ├── brand/                       # Brand assets — og-image.png, og-image.svg, memradar-x-header.png, memradar-x-profile.png
 │   ├── css/style.css                # All styles — no CSS framework
 │   ├── js/main.js                   # Search handler stub
 │   └── js/theme.js                  # Dark mode toggle + localStorage persistence
@@ -120,6 +121,7 @@ The frontend is fully designed and built but the product cards show placeholder 
 - **Google Search Console:** memradar.com added as a property. Sitemap submitted at `https://memradar.com/sitemap.xml`.
 - **Google Analytics:** GA4 installed on all HTML pages. Measurement ID: `G-797Q89S8GG`. Snippet is in the `<head>` of every page.
 - **SEO:** Full SEO pass complete. All pages have unique titles, descriptions, Open Graph, Twitter cards, canonical tags, and JSON-LD structured data (WebSite schema on homepage, WebPage/ContactPage on inner pages). Keywords targeted: "RAM price tracker", "SSD price history", "DDR5 price drops", "PC memory deals", "best time to buy RAM", "SSD price alert".
+- **Brand assets:** `frontend/brand/` contains brand assets for safekeeping — og-image.png, og-image.svg, memradar-x-header.png, and memradar-x-profile.png. The X header/profile images are uploaded manually on GitHub.
 - **OG image:** `https://memradar.com/og-image.png` — live and confirmed working (1200×630px). Source SVG at `frontend/og-image.svg` for future edits. Convert with Sharp: `node -e "require('sharp')(fs.readFileSync('frontend/og-image.svg')).png().toFile('frontend/og-image.png', ...)"` .
 - **Favicons:** Full set generated from `frontend/favicon-source.svg` using `node scripts/generate-favicons.js` (requires sharp + to-ico dev deps). Files: `favicon.ico` (16+32px), `favicon-16x16.png`, `favicon-32x32.png`, `apple-touch-icon.png` (180px), `android-chrome-192x192.png`, `android-chrome-512x512.png`, `site.webmanifest`. All 6 HTML pages include the full favicon `<link>` block.
 - **Privacy policy / GA cookies:** Resolved — `privacy.html` updated to accurately state that Google Analytics is used and may set anonymous cookies for traffic measurement.
