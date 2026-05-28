@@ -189,6 +189,13 @@ The frontend is fully designed and built but the product cards show placeholder 
 - Auth: Same `CRON_SECRET` Bearer token as `fetch-prices`
 - Can be removed once `fetch-prices` is running daily with real Best Buy data
 
+## Seed Data
+`scripts/seed-database.js` has been run once (2026-05-27). The database currently contains:
+- 3 seed products (SKUs: `SEED-RAM-001`, `SEED-RAM-002`, `SEED-SSD-001`)
+- 3 seed price history rows
+
+When real Best Buy data starts flowing, the cron's upsert logic will add real products alongside these seed rows without conflict (different SKUs). The seed rows can be safely deleted from the Supabase dashboard once real data is confirmed flowing — they won't interfere with anything in the meantime.
+
 ## Development Notes
 
 - **Node ≥ 18** required (native `fetch` used, no node-fetch)
