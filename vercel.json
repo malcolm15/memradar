@@ -3,6 +3,10 @@
     {
       "path": "/api/fetch-prices",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/keep-alive",
+      "schedule": "0 12 */3 * *"
     }
   ]
 }

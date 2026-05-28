@@ -182,6 +182,13 @@ The frontend is fully designed and built but the product cards show placeholder 
 - User accounts (currently no auth; alerts use plain email)
 - Affiliate link tracking
 
+## Keep-Alive Cron
+- Endpoint: `/api/keep-alive`
+- Schedule: Every 3 days at 12:00 UTC (`0 12 */3 * *`)
+- Purpose: Prevents Supabase free tier from pausing the project due to inactivity
+- Auth: Same `CRON_SECRET` Bearer token as `fetch-prices`
+- Can be removed once `fetch-prices` is running daily with real Best Buy data
+
 ## Development Notes
 
 - **Node ≥ 18** required (native `fetch` used, no node-fetch)
