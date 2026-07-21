@@ -83,6 +83,7 @@ Required in `.env` (local) and Vercel project settings (production):
 | Variable | Purpose |
 |---|---|
 | `BBY_API_KEY` | Best Buy Open API key |
+| `PRICE_API_KEY` | PriceAPI.com key for price data (trial, evaluating as Best Buy replacement) |
 | `SUPABASE_URL` | Supabase project URL |
 | `SUPABASE_SECRET_KEY` | Supabase service role key (not the anon key) |
 | `CRON_SECRET` | Random secret — Vercel sends as Bearer token to protect `/api/fetch-prices` |
@@ -181,6 +182,18 @@ The frontend is fully designed and built but the product cards show placeholder 
 - Amazon data source
 - User accounts (currently no auth; alerts use plain email)
 - Affiliate link tracking
+
+## Data Source Evaluation Findings (July 2026)
+
+Findings from evaluating price-data providers as a Best Buy replacement (Best Buy never approved API access). Use `scripts/test-priceapi.js [source]` to re-run a PriceAPI schema check at any time.
+
+**PriceAPI trial:**
+- US retail sources are limited to **amazon**, **ebay**, and **google_shopping** — and `google_shopping` **cannot keyword-search** on the trial (its `search_results`/`term` topic is not entitled; only `product`/`offers`/`product_and_offers`/`reviews` keyed by `id`/`gtin`). **Walmart, Newegg, and Best Buy are NOT available at all.** Everything else offered is mostly EU comparison sites (billiger, idealo, geizhals, galaxus, pricerunner, bol, medizinfuchs).
+- **Validation is loose:** bogus upstream params return generic, unfiltered allowed-value lists for downstream params, so a source/topic combo only appears valid until you send a real job. **Only an actual job run truly validates a source/topic/key combination.** (Unknown sources/topics return HTTP 500 rather than a clean error.)
+- **Amazon `search_results` schema notes:** ASIN arrives as `id`; prices are **strings** split into `min_price`/`max_price` (range across sellers); `brand_name` is **null** on search results; `review_rating` is a **0–100** scale, not 5-star; seller-level data requires a **second `offers` call keyed by ASIN**. **No price history on any topic** — all responses are point-in-time snapshots.
+- **Cost observed:** **1 credit** per search job returning 16 products (`max_pages=1`).
+
+**Strategic conclusion:** PriceAPI is **not worth the €99/month** post-trial for our needs (no Walmart/Newegg/Best Buy, no price history). **Keepa** (Amazon price-history API, ~€49/month) is the **leading candidate for launch data**, pending their reply about public-display terms. The `test-priceapi.js` script remains useful for schema reference and any future re-evaluation.
 
 ## Keep-Alive Cron
 - Endpoint: `/api/keep-alive`
