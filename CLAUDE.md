@@ -268,6 +268,19 @@ Four layers are in place:
 
 Indexes are defined in `backend/schema.sql` but must be manually applied in the Supabase SQL Editor — they are not created automatically. Apply once `price_history` has real data flowing. Partial index on `alerts(triggered) WHERE triggered = false` keeps the alert check query fast as the table grows (only indexes the untriggered rows, which shrinks over time as alerts fire).
 
+## Git Identity
+
+Commits in this repo must use this author identity so GitHub attributes contributions to Malcolm's account (github.com/malcolm15):
+
+```
+git config --global user.email "malcolmkonner@gmail.com"
+git config --global user.name "MemRadar"
+```
+
+- **Email** must be exactly `malcolmkonner@gmail.com` — this is the email on the GitHub account, which is how GitHub credits contributions.
+- **Name** is intentionally `MemRadar`, not Malcolm's real name — git author names are publicly visible in repo history, and personal identity is kept separate from this project.
+- Apply this config at the start of any session before committing. If it's already set, no action needed.
+
 ## Code Conventions
 
 - Vanilla JS only on the frontend — no bundler, no framework
