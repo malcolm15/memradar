@@ -1,5 +1,6 @@
 const API_KEY = process.env.BBY_API_KEY;
 const BASE = 'https://api.bestbuy.com/v1';
+const FETCH_TIMEOUT_MS = 10_000;
 
 const FIELDS = 'sku,name,manufacturer,salePrice,regularPrice,url,images.href,inStoreAvailability,onlineAvailability';
 
@@ -7,10 +8,32 @@ async function fetchProducts(categoryId) {
   const url = `${BASE}/products(categoryPath.id=${categoryId}&onlineAvailability=true)?` +
     `format=json&show=${FIELDS}&pageSize=100&sort=bestSellingRank.asc&apiKey=${API_KEY}`;
 
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Best Buy API error: ${res.status}`);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+  let res;
+  try {
+    res = await fetch(url, { signal: controller.signal });
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      throw new Error(`Best Buy API timed out after ${FETCH_TIMEOUT_MS}ms (category ${categoryId})`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+
+  if (!res.ok) {
+    throw new Error(`Best Buy API ${res.status} ${res.statusText} (category ${categoryId})`);
+  }
+
   const data = await res.json();
-  return data.products || [];
+
+  if (!Array.isArray(data.products)) {
+    throw new Error(`Best Buy API response missing products array (category ${categoryId})`);
+  }
+
+  return data.products;
 }
 
 // Best Buy category IDs
