@@ -3,15 +3,26 @@ require('dotenv').config();
 const supabase = require('../backend/lib/supabase');
 const { fetchRAM, fetchSSDs, normalizeProduct, normalizePrice } = require('../backend/lib/bestbuy');
 
-async function processProducts(rawProducts, category) {
+function log(msg) {
+  console.log(`[${new Date().toISOString()}] ${msg}`);
+}
+
+function logError(msg, err) {
+  console.error(`[${new Date().toISOString()}] ERROR ${msg}:`, err.message);
+}
+
+async function processProducts(rawProducts, category, errors) {
   let saved = 0;
-  let errors = 0;
 
   for (const item of rawProducts) {
+    if (!item.sku || item.salePrice == null) {
+      errors.push({ category, sku: item.sku || '(unknown)', error: 'Missing required fields (sku or salePrice)' });
+      continue;
+    }
+
     try {
       const product = normalizeProduct(item, category);
 
-      // Upsert product (insert or update if SKU already exists)
       const { data: upserted, error: upsertError } = await supabase
         .from('products')
         .upsert(product, { onConflict: 'sku' })
@@ -20,7 +31,6 @@ async function processProducts(rawProducts, category) {
 
       if (upsertError) throw upsertError;
 
-      // Insert price snapshot
       const priceData = { product_id: upserted.id, ...normalizePrice(item) };
       const { error: priceError } = await supabase
         .from('price_history')
@@ -30,48 +40,73 @@ async function processProducts(rawProducts, category) {
 
       saved++;
     } catch (err) {
-      console.error(`Error saving SKU ${item.sku}:`, err.message);
-      errors++;
+      errors.push({ category, sku: String(item.sku), error: err.message });
+      logError(`SKU ${item.sku} (${category})`, err);
     }
   }
 
-  return { saved, errors };
+  return saved;
 }
 
 async function run() {
-  console.log(`[${new Date().toISOString()}] Starting price fetch...`);
+  const startTime = Date.now();
+  log('Job started');
 
-  const [ramProducts, ssdProducts] = await Promise.all([
-    fetchRAM(),
-    fetchSSDs(),
+  const errors = [];
+
+  let ramProducts = [];
+  let ssdProducts = [];
+
+  try {
+    ramProducts = await fetchRAM();
+    log(`Fetched ${ramProducts.length} RAM products`);
+  } catch (err) {
+    logError('fetchRAM failed', err);
+    errors.push({ category: 'ram', sku: null, error: err.message });
+  }
+
+  try {
+    ssdProducts = await fetchSSDs();
+    log(`Fetched ${ssdProducts.length} SSD products`);
+  } catch (err) {
+    logError('fetchSSDs failed', err);
+    errors.push({ category: 'ssd', sku: null, error: err.message });
+  }
+
+  const [ramSaved, ssdSaved] = await Promise.all([
+    processProducts(ramProducts, 'ram', errors),
+    processProducts(ssdProducts, 'ssd', errors),
   ]);
 
-  console.log(`Fetched ${ramProducts.length} RAM products, ${ssdProducts.length} SSD products`);
+  const duration_ms = Date.now() - startTime;
 
-  const [ramResult, ssdResult] = await Promise.all([
-    processProducts(ramProducts, 'ram'),
-    processProducts(ssdProducts, 'ssd'),
-  ]);
+  log(`RAM: ${ramProducts.length} fetched, ${ramSaved} saved`);
+  log(`SSD: ${ssdProducts.length} fetched, ${ssdSaved} saved`);
+  if (errors.length > 0) log(`Errors: ${errors.length}`);
+  log(`Job completed in ${duration_ms}ms`);
 
-  console.log(`RAM: ${ramResult.saved} saved, ${ramResult.errors} errors`);
-  console.log(`SSD: ${ssdResult.saved} saved, ${ssdResult.errors} errors`);
-  console.log('Done.');
+  return {
+    success: true,
+    ram: { fetched: ramProducts.length, saved: ramSaved },
+    ssd: { fetched: ssdProducts.length, saved: ssdSaved },
+    errors,
+    duration_ms,
+  };
 }
 
-// Vercel cron handler
 module.exports = async (req, res) => {
-  // Protect the endpoint so only Vercel's cron can trigger it
   if (req.headers['authorization'] !== `Bearer ${process.env.CRON_SECRET}`) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
   try {
-    await run();
-    res.status(200).json({ ok: true });
+    const summary = await run();
+    res.status(200).json(summary);
   } catch (err) {
-    console.error('Fatal error:', err);
+    logError('Unhandled exception in run()', err);
     res.status(500).json({ error: err.message });
   }
 };
 
-// Allow running directly from command line for testing
-if (require.main === module) run();
+if (require.main === module) {
+  run().then(summary => console.log('\nSummary:', JSON.stringify(summary, null, 2)));
+}

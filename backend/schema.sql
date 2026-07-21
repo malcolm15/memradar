@@ -26,10 +26,6 @@ CREATE TABLE price_history (
   fetched_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Index for fast lookups of a product's price history
-CREATE INDEX idx_price_history_product_id ON price_history(product_id);
-CREATE INDEX idx_price_history_fetched_at ON price_history(fetched_at);
-
 -- Alert subscriptions: user enters email + target price for a product
 CREATE TABLE alerts (
   id            BIGSERIAL PRIMARY KEY,
@@ -66,3 +62,21 @@ CREATE POLICY "Public read price_history" ON price_history
 
 CREATE POLICY "Service role write price_history" ON price_history
   FOR ALL USING (auth.role() = 'service_role');
+
+-- -----------------------------------------------
+-- INDEXES
+-- Run these in Supabase SQL Editor after data starts flowing.
+-- These are not created automatically — must be applied manually.
+-- -----------------------------------------------
+
+-- price_history: most queries will filter by product_id and order by fetched_at
+CREATE INDEX IF NOT EXISTS idx_price_history_product_id ON price_history(product_id);
+CREATE INDEX IF NOT EXISTS idx_price_history_fetched_at ON price_history(fetched_at DESC);
+
+-- alerts: alert trigger logic queries by triggered status and product_id
+CREATE INDEX IF NOT EXISTS idx_alerts_triggered ON alerts(triggered) WHERE triggered = false;
+CREATE INDEX IF NOT EXISTS idx_alerts_product_id ON alerts(product_id);
+
+-- products: category filter used on RAM and SSD listing pages
+CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
+CREATE INDEX IF NOT EXISTS idx_products_retailer ON products(retailer);
