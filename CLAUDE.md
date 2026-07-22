@@ -28,6 +28,7 @@ memradar/
 ├── backend/
 │   ├── lib/
 │   │   ├── keepa.js         # Keepa API client — price history source (self-test: node backend/lib/keepa.js)
+│   │   ├── marketStats.js   # Market Pulse stats computation (shared by cron + standalone script)
 │   │   ├── bestbuy.js       # Best Buy API client — DORMANT (access never approved)
 │   │   └── supabase.js      # Supabase client (uses service role key)
 │   ├── package.json
@@ -60,7 +61,12 @@ memradar/
 │   └── workflows/
 │       └── deploy-frontend.yml  # GitHub Actions — deploys frontend/ to GitHub Pages on push to main
 ├── scripts/
-│   ├── test-api.js              # Manual Best Buy API sanity check
+│   ├── test-api.js              # Manual Best Buy API sanity check (dormant)
+│   ├── test-priceapi.js         # PriceAPI schema evaluation (kept for reference)
+│   ├── build-catalog.js         # Amazon catalog harvest via PriceAPI (--reprocess for offline re-derive)
+│   ├── upsert-catalog.js        # Catalog preview -> products table (--confirm to write)
+│   ├── backfill-keepa.js        # One-time Keepa history backfill (--confirm to write)
+│   ├── compute-market-stats.js  # Manual Market Pulse stats recompute
 │   └── generate-favicons.js     # Regenerates all favicon PNGs + ICO from favicon-source.svg
 ├── vercel.json              # Vercel cron config
 ├── package.json
@@ -69,13 +75,14 @@ memradar/
 
 ## Database Schema (Supabase / Postgres)
 
-Three tables:
+Four tables:
 
 - **`products`** — one row per tracked product. Unique key: `sku`. Fields: `sku`, `name`, `category` (ram/ssd), `brand`, `model`, `image_url`, `product_url` (affiliate link), `retailer`.
 - **`price_history`** — one price snapshot per product per cron run. Fields: `product_id` (FK), `price`, `regular_price`, `in_stock`, `fetched_at`.
 - **`alerts`** — user email + target price per product. Fields: `product_id` (FK), `email`, `target_price`, `triggered`.
+- **`market_stats`** — one row per Market Pulse segment (`ddr5`/`ddr4`/`nvme_ssd`/`sata_ssd`), recomputed daily by the cron. Fields: `segment` (unique), `current_avg_price`, `baseline_avg_price`, `pct_change`, `product_count`, `computed_at`. Despite the column names, the values are **medians** (see Market Pulse Stats section).
 
-Row Level Security is enabled on all tables. `products` and `price_history` are public read. `alerts` is service-role only (contains user emails).
+Row Level Security is enabled on all tables. `products`, `price_history`, and `market_stats` are public read. `alerts` is service-role only (contains user emails).
 
 ## Environment Variables
 
@@ -111,6 +118,20 @@ The script can also run directly via `node api/fetch-prices.js` for manual testi
 
 **Best Buy client is DORMANT:** `backend/lib/bestbuy.js` is kept intact but unused (access never approved). If approval ever comes it can be revived as a second retailer source.
 
+## Market Pulse Stats (`market_stats`)
+
+Computed daily by the cron after price inserts (best-effort: a stats failure logs loudly but never fails the cron), shared logic in `backend/lib/marketStats.js`. Manual/immediate recompute: `node scripts/compute-market-stats.js` (auto-finds the latest cron batch, skipping backfill `T23:59` day-bucket timestamps).
+
+- **Segments** (case-insensitive on product name): ram + `DDR5` → `ddr5`; ram + `DDR4` → `ddr4`; ssd + `SATA` or `2.5` → `sata_ssd`, **else** `NVMe` or `M.2` → `nvme_ssd`. SATA is checked FIRST — "M.2 SATA" drives are SATA-protocol despite the M.2 form factor. Non-matching products are excluded (count logged).
+- **Median, not mean** — `current_avg_price`/`baseline_avg_price` hold MEDIANS of the segment. Single $1,900 outlier drives skew a mean at n=29–79; median is the honest "typical price" and resists catalog-composition drift.
+- **Baseline** = each product's price closest to 180 days ago (window 165–195d).
+- **Fairness rule**: `pct_change` compares medians over the SAME product subset — products that existed 180 days ago (row in the window) AND have a current price. New catalog entrants can't skew the comparison. `product_count` = subset size.
+- **Current prices** are pinned to the cron batch's exact `fetched_at` timestamp — never `ORDER BY fetched_at DESC`, which the backfill `T23:59` day-buckets can win incorrectly.
+
+## Frontend Data Access (anon key)
+
+`frontend/js/supabase-client.js` initializes supabase-js v2 (jsdelivr CDN, UMD) with the **publishable (anon) key — public by design and safe to ship in frontend code**. RLS restricts it to SELECT on public tables. Do NOT "fix" this by hiding the key; NEVER put the service role key (`sb_secret_...`) in frontend/. `frontend/js/market-pulse.js` renders live `market_stats` on the homepage: hardcoded HTML values are the loading/fallback state (on fetch failure they stay — never a broken section); color rule: <0% green (`pulse-down`), 0–10% orange (`pulse-neutral`), ≥10% red (`pulse-up`) — rising prices are bad for buyers.
+
 ## Keepa Client (`backend/lib/keepa.js`)
 
 Format rules the client absorbs (verified against Keepa's official `api_backend` library — callers never touch raw Keepa data):
@@ -135,7 +156,7 @@ One-time historical load of full Keepa price history into `price_history`:
 
 ## Frontend State
 
-The frontend is fully designed and built but the product cards show placeholder data — prices display as `$—`. A "coming soon" banner on the homepage communicates pre-launch status and includes a "Set an Alert" CTA. The Market Pulse section shows "Last updated: May 20, 2026" — replace this with a dynamic timestamp once real data is flowing. Search form submission is stubbed (`console.log` only).
+The frontend is fully designed and built but the product cards show placeholder data — prices display as `$—`. A "coming soon" banner on the homepage communicates pre-launch status and includes a "Set an Alert" CTA. The Market Pulse section is LIVE — `js/market-pulse.js` renders real `market_stats` data with a dynamic "Last updated" date (hardcoded HTML values remain as loading/fallback state). Search form submission is stubbed (`console.log` only).
 
 **Design system:** blue accent `#2563eb`, neutral grays, clean sans-serif. No CSS framework. Mobile responsive with breakpoints at 768px and 480px.
 

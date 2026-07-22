@@ -63,6 +63,26 @@ CREATE POLICY "Public read price_history" ON price_history
 CREATE POLICY "Service role write price_history" ON price_history
   FOR ALL USING (auth.role() = 'service_role');
 
+-- Market Pulse stats: one row per segment, recomputed daily by the cron
+-- (backend/lib/marketStats.js). Read by the frontend via the anon key.
+CREATE TABLE IF NOT EXISTS market_stats (
+  id BIGSERIAL PRIMARY KEY,
+  segment TEXT NOT NULL UNIQUE,        -- 'ddr5' | 'ddr4' | 'nvme_ssd' | 'sata_ssd'
+  current_avg_price NUMERIC(10,2),
+  baseline_avg_price NUMERIC(10,2),    -- avg ~180 days ago
+  pct_change NUMERIC(6,1),             -- e.g. 42.3 means +42.3%
+  product_count INTEGER,               -- products contributing to this segment
+  computed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE market_stats ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public read market_stats" ON market_stats
+  FOR SELECT USING (true);
+
+CREATE POLICY "Service role write market_stats" ON market_stats
+  FOR ALL USING (auth.role() = 'service_role');
+
 -- -----------------------------------------------
 -- INDEXES
 -- Run these in Supabase SQL Editor after data starts flowing.

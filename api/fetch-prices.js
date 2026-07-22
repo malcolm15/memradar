@@ -9,6 +9,7 @@ require('dotenv').config();
 
 const supabase = require('../backend/lib/supabase');
 const keepa = require('../backend/lib/keepa');
+const { computeMarketStats } = require('../backend/lib/marketStats');
 
 function log(msg) {
   console.log(`[${new Date().toISOString()}] ${msg}`);
@@ -72,6 +73,18 @@ async function run() {
     }
   }
 
+  // Market Pulse stats — best effort: price inserts are the critical path, a
+  // stats failure must log loudly but never fail the cron response.
+  let marketStats = null;
+  let statsError = null;
+  try {
+    const res = await computeMarketStats(supabase, fetchedAt, log);
+    marketStats = res.stats;
+  } catch (err) {
+    statsError = err.message;
+    logError('computeMarketStats FAILED (non-fatal, price inserts unaffected)', err);
+  }
+
   const duration_ms = Date.now() - startTime;
   const tokens = keepa.getTokenState();
 
@@ -87,6 +100,8 @@ async function run() {
     ram: counts.ram,
     ssd: counts.ssd,
     out_of_stock: outOfStock,
+    market_stats: marketStats,
+    ...(statsError ? { market_stats_error: statsError } : {}),
     errors,
     tokens_left: tokens.tokensLeft,
     duration_ms,
