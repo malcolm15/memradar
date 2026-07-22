@@ -6,3 +6,6 @@ node_modules/
 
 # macOS
 .DS_Store
+
+# Generated data artifacts (regenerable; source of truth is the DB after upsert)
+scripts/output/
