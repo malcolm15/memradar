@@ -325,7 +325,11 @@ Below the **768px** breakpoint the desktop `.nav-link`s hide (`nav .nav-link { d
 
 `style.css` is served with `Cache-Control: max-age=14400` (**4 hours** of browser caching). A Cloudflare purge clears the edge but **NOT** visitors' browser caches — so after a CSS change, returning devices can render new HTML against a stale 4-hour-cached stylesheet (this exact mismatch broke the mobile nav on first ship: new hamburger HTML + old CSS).
 
-**Fix / convention:** the stylesheet link carries a version query — `href=".../css/style.css?v=YYYYMMDD"` on every page. **Bump the `?v=` value whenever `style.css` changes** (a new URL forces every browser to refetch immediately, regardless of max-age). Current value: `20260722`. Update all pages together (they must match). The JS files (`product-listing.js`, `mobile-nav.js`, etc.) share the same long TTL and could get the same treatment if a stale-JS bug appears — not yet versioned.
+**Fix / convention:** a single shared version query is appended to **both `style.css` and every local JS include** on every page — `?v=YYYYMMDD` (current value: **`20260722`**). A new URL forces browsers to refetch immediately regardless of max-age.
+
+- **Bump the `?v=` value whenever any `style.css` OR local JS file changes**, and update ALL pages together (one shared stamp — they must all match). Bumping rebusts every asset; that's fine.
+- Applies to local assets only: `css/style.css` and `js/*.js` (main, theme, alert-modal, supabase-client, market-pulse, product-listing, mobile-nav). **External CDN scripts are NOT versioned** (jsdelivr supabase-js, cdnjs Chart.js, Cloudflare Turnstile, gtag) — they carry their own versioning.
+- When adding a new page or a new local script include, add `?v=<current>` to match.
 
 ## Safety Rules for Claude Code
 - NEVER run destructive database operations (DROP TABLE, DELETE, TRUNCATE) without explicit written confirmation from Malc first
