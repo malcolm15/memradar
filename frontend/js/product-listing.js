@@ -24,7 +24,20 @@
   if (emptyState) emptyState.remove();
   var countEl = document.querySelector('.listing-count');
 
-  var state = { products: [], filters: {}, sort: 'name-az' };
+  var state = { products: [], filters: {}, sort: 'name-az', query: null };
+
+  // ?q= search handoff (from the site-wide typeahead's "View all N results").
+  // Matching delegates to search.js (loaded before this file) so listing
+  // results always agree with the dropdown.
+  var urlQ = new URLSearchParams(window.location.search).get('q');
+  if (urlQ && urlQ.trim() && window.memradarSearch) state.query = urlQ.trim();
+  function clearSearch() {
+    state.query = null;
+    var url = new URL(window.location.href);
+    url.searchParams.delete('q');
+    history.replaceState(null, '', url.pathname + url.search);
+    applyAndRender();
+  }
 
   // ---------- formatting / escaping ----------
   function esc(s) {
@@ -125,6 +138,7 @@
     }
   }
   function matches(p) {
+    if (state.query && !window.memradarSearch.textMatches(state.query, p.name + ' ' + (p.brand || ''))) return false;
     for (var label in state.filters) {
       var value = state.filters[label];
       if (value != null && !passes(label, value, p)) return false;
@@ -204,7 +218,15 @@
     return new Array(9).join(one); // 8 skeleton cards
   }
   function updateCount(n) {
-    if (countEl) countEl.textContent = 'Showing ' + n + ' product' + (n === 1 ? '' : 's') + ' · Prices updated daily';
+    if (!countEl) return;
+    if (state.query) {
+      countEl.innerHTML = 'Showing ' + n + ' result' + (n === 1 ? '' : 's') + ' for “' + esc(state.query) + '” ' +
+        '<button type="button" class="listing-clear-search" aria-label="Clear search">× Clear search</button>';
+      var clearBtn = countEl.querySelector('.listing-clear-search');
+      if (clearBtn) clearBtn.addEventListener('click', clearSearch);
+    } else {
+      countEl.textContent = 'Showing ' + n + ' product' + (n === 1 ? '' : 's') + ' · Prices updated daily';
+    }
   }
   function clearFilters() {
     document.querySelectorAll('.filter-pills').forEach(function (group) {

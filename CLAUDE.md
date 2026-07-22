@@ -256,9 +256,19 @@ All queries paginate at PostgREST's 1000-row cap. At ~120 products/page this is 
 - Sitemap: regenerated on each run — static URLs preserved, product URLs replaced (priority 0.6, changefreq daily, lastmod = build date).
 - Listing cards link to PDPs (whole card + name link; the Amazon button stays a direct affiliate link via stopPropagation). `slug` is included in the listing page query.
 
-## What's Not Built Yet
+## Site-Wide Instant Search
 
-- Search results wired to Supabase (homepage/nav search still stubbed)
+One implementation (`frontend/js/search.js`) powers all search on the site. No server: it searches a static index client-side.
+
+- **Index:** `frontend/search-index.json` (~121KB, committed + served) — one lean entry per product (`sku, name, slug, category, brand, current_price, image_url, search`), emitted by `generate-product-pages.js` on every `--confirm` run. **Catalog changes require regenerating the index** (it's part of the normal regeneration workflow, never hand-edited). Fetched once on first focus of any search input, cached in memory for the session; the fetch URL carries the `?v=` stamp.
+- **Matching:** whitespace-tokenized, EVERY token must appear in the normalized searchable string (AND — "trident z5 32gb" and "32gb trident" both work). Normalization lowercases and strips punctuation on both sides, plus a compact (space-less) fallback, so "g.skill" / "g skill" / "gskill" all match. Query words that appear in no product name (e.g. "cheap") honestly yield zero results.
+- **Ranking:** exact brand match > name starts with the query > name starts with the first token > earlier token positions; shorter names win ties (shortest = canonical popular product). Display cap 8, then a "View all N results" row linking to the majority category's listing with `?q=`.
+- **Where it lives:** homepage hero input (Search button navigates to the top result, or the listing with `?q=` if none; the submit rate limiter in `main.js` remains, raised to 120/min — search is local, the limiter only guards pathological automation); every other page gets a header search icon (left of the theme toggle) opening an overlay panel — full-width sheet on mobile. The homepage "Try:" suggestions are clickable chips that populate + trigger search.
+- **Listing `?q=`:** `/ram/?q=…` and `/ssd/?q=…` filter the grid via `memradarSearch.textMatches` (same logic as the dropdown, loaded before `product-listing.js`), show "Showing N results for '…'" with a × Clear search button.
+- **UX/a11y:** 120ms debounce; ArrowUp/Down + Enter + Escape keyboard nav mirroring mouse hover; full ARIA combobox/listbox/option + aria-live result counts; dark mode styled; zero-result and index-loading states.
+- **Analytics:** GA4 `search` event (`search_term`, `result_count`) fires after a 1s typing pause, deduped. **Zero-result queries tell us which products to add to the catalog** — review them periodically in GA.
+
+## What's Not Built Yet
 - Alert signup flow (email collection → `alerts` table insert)
 - Alert trigger logic (compare current price to target, send email)
 - Amazon data source
@@ -340,7 +350,7 @@ Below the **768px** breakpoint the desktop `.nav-link`s hide (`nav .nav-link { d
 
 `style.css` is served with `Cache-Control: max-age=14400` (**4 hours** of browser caching). A Cloudflare purge clears the edge but **NOT** visitors' browser caches — so after a CSS change, returning devices can render new HTML against a stale 4-hour-cached stylesheet (this exact mismatch broke the mobile nav on first ship: new hamburger HTML + old CSS).
 
-**Fix / convention:** a single shared version query is appended to **both `style.css` and every local JS include** on every page — `?v=YYYYMMDD` (current value: **`20260724`**). A new URL forces browsers to refetch immediately regardless of max-age.
+**Fix / convention:** a single shared version query is appended to **both `style.css` and every local JS include** on every page — `?v=YYYYMMDD` (current value: **`20260725`**). A new URL forces browsers to refetch immediately regardless of max-age.
 
 - **Bump the `?v=` value whenever any `style.css` OR local JS file changes**, and update ALL pages together (one shared stamp — they must all match). Bumping rebusts every asset; that's fine.
 - Applies to local assets only: `css/style.css` and `js/*.js` (main, theme, alert-modal, supabase-client, market-pulse, product-listing, mobile-nav). **External CDN scripts are NOT versioned** (jsdelivr supabase-js, cdnjs Chart.js, Cloudflare Turnstile, gtag) — they carry their own versioning.
