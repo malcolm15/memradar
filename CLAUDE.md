@@ -60,6 +60,7 @@ memradar/
 │   ├── js/supabase-client.js        # Public anon-key Supabase client (RLS read-only)
 │   ├── js/market-pulse.js           # Homepage Market Pulse live stats
 │   ├── js/product-listing.js        # RAM/SSD listing pages: live data, filters, sorts
+│   ├── js/mobile-nav.js             # Mobile hamburger nav (all shared-header pages)
 │   └── js/filters.js                # UNUSED stub (superseded by product-listing.js)
 ├── .github/
 │   └── workflows/
@@ -310,6 +311,15 @@ Implemented across all pages via:
 - **Toggle button:** `.theme-toggle` button in every page's `<nav>` — moon icon in light mode, sun icon in dark mode, SVG injected by `js/theme.js`
 - **JS file:** `frontend/js/theme.js` — handles icon rendering and localStorage persistence
 - **Dark palette:** background `#0f1623`, surface `#1a2332`, text `#f1f5f9`, secondary text `#94a3b8`, borders `#2d3f55`, blue accent `#2563eb` unchanged
+
+## Mobile Navigation
+
+Below the **768px** breakpoint the desktop `.nav-link`s hide (`nav .nav-link { display:none }`) and a hamburger menu takes over. Owned by **`frontend/js/mobile-nav.js`** (shared file); CSS under the `/* Mobile Nav */` section in `style.css`.
+
+- **Markup** lives inside `<nav>` on every shared-header page: a `.mobile-nav-toggle` button (`#mobileNavToggle`, two SVGs — hamburger swaps to an X via `aria-expanded`) placed left of "Set an Alert", plus a `.mobile-nav-panel` (`#mobileNavPanel`) with the four nav links (48px tap targets). Both are `display:none` on desktop, enabled only in the ≤768px media query — **desktop is completely unaffected** (display:none elements aren't flex items, so no layout shift).
+- **Panel** is `position:absolute` under the sticky `.site-header` (full-width slide-down via max-height/opacity transition).
+- **Behavior:** toggle opens/closes; tapping a link navigates; outside-click and Escape close; `body.mobile-nav-open` locks scroll; resizing to desktop auto-closes.
+- **Applied to all 14 shared-header pages** (index, ram/ssd/faq/blog + article, about/contact/privacy/terms/affiliate, both 404s, ram/product-template). The markup + `mobile-nav.js` include are injected uniformly; the script path mirrors each page's `theme.js` prefix. If you add a new page with the shared header, include `mobile-nav.js` and the toggle/panel markup.
 
 ## Safety Rules for Claude Code
 - NEVER run destructive database operations (DROP TABLE, DELETE, TRUNCATE) without explicit written confirmation from Malc first

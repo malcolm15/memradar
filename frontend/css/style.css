@@ -1201,12 +1201,75 @@ html.dark .listing-card-retailer { color: #64748b; }
 html.dark .listing-card-alert-btn { color: #93c5fd; border-color: #2563eb; }
 html.dark .listing-card-alert-btn:hover { background: rgba(37,99,235,0.15); }
 
+/* ── Mobile Nav ── */
+/* Hamburger toggle + slide-down panel. Both are display:none on desktop and
+   only enabled in the ≤768px media query below, so desktop layout is untouched.
+   The panel is position:absolute against the sticky .site-header. */
+.mobile-nav-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #374151;
+  line-height: 0;
+}
+.mobile-nav-toggle .icon-close { display: none; }
+.mobile-nav-toggle[aria-expanded="true"] .icon-menu { display: none; }
+.mobile-nav-toggle[aria-expanded="true"] .icon-close { display: block; }
+html.dark .mobile-nav-toggle { color: #94a3b8; }
+
+.mobile-nav-panel {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: max-height 0.28s ease, opacity 0.2s ease, visibility 0.28s;
+}
+.mobile-nav-panel.open {
+  max-height: 320px;
+  opacity: 1;
+  visibility: visible;
+}
+.mobile-nav-link {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 24px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #111827;
+  border-top: 1px solid #f0f0f0;
+}
+.mobile-nav-link:first-child { border-top: none; }
+.mobile-nav-link:hover,
+.mobile-nav-link:active { background: #f5f7fa; color: #2563eb; }
+
+html.dark .mobile-nav-panel { background: #0f1623; border-bottom-color: #2d3f55; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); }
+html.dark .mobile-nav-link { color: #f1f5f9; border-top-color: #1f2b3d; }
+html.dark .mobile-nav-link:hover,
+html.dark .mobile-nav-link:active { background: #1a2332; color: #93c5fd; }
+
+body.mobile-nav-open { overflow: hidden; }
+
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .hero h1 { font-size: 1.8rem; }
   .pulse-grid { grid-template-columns: repeat(2, 1fr); }
   .products-grid { grid-template-columns: repeat(2, 1fr); }
   nav .nav-link { display: none; }
+  .mobile-nav-toggle { display: inline-flex; }
+  .mobile-nav-panel { display: block; }
   .filter-row { flex-direction: column; align-items: flex-start; gap: 10px; }
   .filter-row + .filter-row { padding-top: 12px; }
   .filter-group { flex-wrap: wrap; }

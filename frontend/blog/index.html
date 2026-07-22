@@ -169,8 +169,18 @@
         <a href="/ssd/" class="nav-link">SSDs</a>
         <a href="/faq/" class="nav-link">FAQ</a>
         <a href="/blog/" class="nav-link">Blog</a>
+        <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Menu" aria-expanded="false" aria-controls="mobileNavPanel">
+          <svg class="icon-menu" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          <svg class="icon-close" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+        </button>
         <a href="#" class="btn-alert">Set an Alert</a>
         <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode"></button>
+        <div class="mobile-nav-panel" id="mobileNavPanel">
+          <a href="/ram/" class="mobile-nav-link">RAM</a>
+          <a href="/ssd/" class="mobile-nav-link">SSDs</a>
+          <a href="/faq/" class="mobile-nav-link">FAQ</a>
+          <a href="/blog/" class="mobile-nav-link">Blog</a>
+        </div>
       </nav>
     </div>
   </header>
@@ -231,6 +241,7 @@
 
   <script src="/js/main.js"></script>
   <script src="/js/theme.js"></script>
+  <script src="/js/mobile-nav.js"></script>
   <script src="/js/alert-modal.js"></script>
 </body>
 </html>
