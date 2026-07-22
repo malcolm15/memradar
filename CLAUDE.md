@@ -321,6 +321,12 @@ Below the **768px** breakpoint the desktop `.nav-link`s hide (`nav .nav-link { d
 - **Behavior:** toggle opens/closes; tapping a link navigates; outside-click and Escape close; `body.mobile-nav-open` locks scroll; resizing to desktop auto-closes.
 - **Applied to all 14 shared-header pages** (index, ram/ssd/faq/blog + article, about/contact/privacy/terms/affiliate, both 404s, ram/product-template). The markup + `mobile-nav.js` include are injected uniformly; the script path mirrors each page's `theme.js` prefix. If you add a new page with the shared header, include `mobile-nav.js` and the toggle/panel markup.
 
+## Asset Caching / Cache-Busting
+
+`style.css` is served with `Cache-Control: max-age=14400` (**4 hours** of browser caching). A Cloudflare purge clears the edge but **NOT** visitors' browser caches — so after a CSS change, returning devices can render new HTML against a stale 4-hour-cached stylesheet (this exact mismatch broke the mobile nav on first ship: new hamburger HTML + old CSS).
+
+**Fix / convention:** the stylesheet link carries a version query — `href=".../css/style.css?v=YYYYMMDD"` on every page. **Bump the `?v=` value whenever `style.css` changes** (a new URL forces every browser to refetch immediately, regardless of max-age). Current value: `20260722`. Update all pages together (they must match). The JS files (`product-listing.js`, `mobile-nav.js`, etc.) share the same long TTL and could get the same treatment if a stale-JS bug appears — not yet versioned.
+
 ## Safety Rules for Claude Code
 - NEVER run destructive database operations (DROP TABLE, DELETE, TRUNCATE) without explicit written confirmation from Malc first
 - NEVER modify or delete .env files
