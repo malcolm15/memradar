@@ -158,11 +158,17 @@
     var img = p.image_url
       ? '<img src="' + esc(p.image_url) + '" alt="' + esc(p.name) + '" loading="lazy" class="listing-card-img-el">'
       : '';
-    return '<div class="listing-card" data-sku="' + esc(p.sku) + '">' +
+    // Card click navigates to the PDP (when a slug exists); the Amazon button
+    // stays a direct affiliate link via stopPropagation.
+    var pdpHref = p.slug ? '/' + category + '/' + p.slug + '/' : '';
+    var name = pdpHref
+      ? '<a href="' + esc(pdpHref) + '" class="listing-card-name-link">' + esc(p.name) + '</a>'
+      : esc(p.name);
+    return '<div class="listing-card' + (pdpHref ? ' listing-card--linked' : '') + '" data-sku="' + esc(p.sku) + '"' + (pdpHref ? ' data-href="' + esc(pdpHref) + '"' : '') + '>' +
       '<div class="listing-card-img">' + img + '</div>' +
       '<div class="listing-card-body">' +
         brand +
-        '<h3 class="listing-card-name">' + esc(p.name) + '</h3>' +
+        '<h3 class="listing-card-name">' + name + '</h3>' +
         '<div class="listing-card-pricing"><span class="listing-card-price">' + fmtPrice(p.price) + '</span>' + changeHtml(p) + '</div>' +
         '<span class="listing-card-retailer">Amazon</span>' +
       '</div>' +
@@ -174,6 +180,15 @@
   function attachImgFallback() {
     grid.querySelectorAll('.listing-card-img-el').forEach(function (img) {
       img.addEventListener('error', function () { img.style.display = 'none'; }); // leaves the gray placeholder box
+    });
+    grid.querySelectorAll('.listing-card[data-href]').forEach(function (card) {
+      card.addEventListener('click', function (e) {
+        if (e.target.closest('.listing-card-deal-btn') || e.target.closest('a')) return; // links handle themselves
+        window.location.href = card.getAttribute('data-href');
+      });
+    });
+    grid.querySelectorAll('.listing-card-deal-btn').forEach(function (btn) {
+      btn.addEventListener('click', function (e) { e.stopPropagation(); });
     });
   }
   function skeletonHtml() {
@@ -263,7 +278,7 @@
     if (!sb) { showFailure('supabase client not initialized'); return; }
     try {
       var products = await pagedSelect(function () {
-        return sb.from('products').select('id, sku, name, brand, image_url, product_url')
+        return sb.from('products').select('id, sku, name, brand, image_url, product_url, slug')
           .eq('category', category).eq('retailer', 'amazon');
       });
       if (!products.length) { showFailure('no products returned'); return; }

@@ -1093,6 +1093,21 @@ html.dark .modal-field-hint { color: #64748b; }
   object-fit: contain;
 }
 
+/* Cards that link to a PDP */
+.listing-card--linked { cursor: pointer; }
+.listing-card-name-link { color: inherit; }
+.listing-card-name-link:hover { color: #2563eb; }
+html.dark .listing-card-name-link:hover { color: #93c5fd; }
+
+/* PDP single product image (replaces the template's carousel placeholder) */
+.pdp-main-img {
+  max-width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}
+
 /* Count bar above the grid */
 .listing-count-bar { margin-bottom: 16px; }
 .listing-count {
