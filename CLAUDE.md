@@ -268,6 +268,36 @@ One implementation (`frontend/js/search.js`) powers all search on the site. No s
 - **UX/a11y:** 120ms debounce; ArrowUp/Down + Enter + Escape keyboard nav mirroring mouse hover; full ARIA combobox/listbox/option + aria-live result counts; dark mode styled; zero-result and index-loading states.
 - **Analytics:** GA4 `search` event (`search_term`, `result_count`) fires after a 1s typing pause, deduped. **Zero-result queries tell us which products to add to the catalog** — review them periodically in GA.
 
+## Alert Backend (double opt-in, security-first)
+
+Full email-alert flow. **PII (email addresses) — every decision errs toward protecting it.** Reuses the existing `validateAlert`, `rateLimiter`, `verifyTurnstile` utilities.
+
+**Endpoints** (Vercel functions; API lives on `memradar-three.vercel.app` since GitHub Pages can't serve APIs):
+- **`POST /api/alerts`** — create a pending alert. Fail-closed pipeline in strict order: (1) method→405, (2) size >2KB→413 before parse, (3) honeypot→neutral, (4) Turnstile→neutral, (5) IP rate limit 3/hr (x-forwarded-for first entry)→neutral, (6) `validateAlert` (the ONE branch that returns a real 400 with errors), (7) product exists by sku→neutral if not, (8) DB abuse checks→neutral, (9) upsert on `(email,product_id)` ignore-duplicates, (10) confirmation email, (11) respond. CORS: `Access-Control-Allow-Origin: https://memradar.com` (specific), OPTIONS→204.
+- **`GET /api/confirm?token=`** — atomic confirm by `confirm_token`, sets `confirmed=true`, `confirmed_at`, nulls the token (**single use** — re-clicks hit the invalid page). 302 → `/alert-confirmed/` or `/alert-invalid/`. Rate limit 30/hr/IP.
+- **`GET /api/unsubscribe?token=`** — DELETEs the alert row (data minimization). Idempotent/friendly: always 302 → `/alert-unsubscribed/`. In every email we send.
+
+**THE NEUTRAL RESPONSE:** identical `{success:true, message:"Check your email to confirm your alert."}` at 200 for EVERY outcome except validation errors — honeypot/turnstile/rate-limit/caps/breaker/dedupe/created all look the same to a prober. No artificial per-branch delays.
+
+**Abuse limits:** pending cap **3** unconfirmed/email/48h · active cap **10** confirmed-untriggered/email · circuit breaker **200** confirmation-sends/24h (over → insert row, DEFER email; log loudly) · IP rate limit **3**/hr (in-memory, resets on cold start — the DB caps are the durable limits) · confirm endpoint **30**/hr/IP.
+
+**Security rules (standing):**
+- **Every DB op uses parameterized Supabase client methods** — no SQL built from user input via concatenation/template literals. Audit with grep on any change to the alert endpoints.
+- **Tokens** are `crypto.randomBytes(32).toString('hex')` — never `Math.random`.
+- **Logs never contain full emails** — masked to `ma***@gmail.com` (logs are a leak surface).
+- **Email content:** user input appears NOWHERE in email bodies — recipient address is the only use of their input. All content (product name, prices, URLs) comes from OUR DB. Product names are HTML-escaped anyway (Amazon titles have `&`/`"`).
+- **RLS:** `alerts` and `email_send_log` are service-role only, no public access.
+
+**Emails** (`backend/lib/alertEmails.js`, Resend REST API via `fetch`, from `hello@memradar.com`): confirmation (product, target, confirm button, 48h expiry, unsubscribe) and price-drop (product, current vs target, all-time-low, **View on Amazon with `?tag=memradar-20`** — the revenue moment, PDP link, unsubscribe).
+
+**Cron alert step** (`backend/lib/alertCheck.js`, run from `api/fetch-prices.js` after price inserts, isolated try/catch): query `confirmed=true AND triggered=false`, match `current<=target` against the just-inserted prices, **send-then-mark** (send email → log → set `triggered=true`; **if send fails leave `triggered=false` so tomorrow retries**), plus DELETE unconfirmed alerts >48h old (makes the pending cap self-healing). Stats in the cron summary: `checked/matched/sent/failed/expired_cleaned`. `scripts/run-alert-check.js` runs this step standalone for testing (no Keepa fetch).
+
+**Result pages** (`frontend/alert-confirmed|alert-invalid|alert-unsubscribed/`): on-brand, `noindex`, excluded from sitemap.
+
+**Frontend:** `alert-modal.js` (nav "Set an Alert" — real product search via the search index, real POST, on-demand Turnstile, shared `window.memradarAlert` helper) and `pdp-alert.js` (PDP inline form) both POST to `/api/alerts` cross-origin; Turnstile token read from the widget; validation errors inline; network failure keeps typed input.
+
+**TODO (deferred, not built):** a mechanism to send deferred confirmation emails after the circuit breaker trips (rows are inserted but their confirmation email is skipped).
+
 ## What's Not Built Yet
 - Alert signup flow (email collection → `alerts` table insert)
 - Alert trigger logic (compare current price to target, send email)

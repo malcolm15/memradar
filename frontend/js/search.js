@@ -337,5 +337,8 @@ window.memradarSearch = (function () {
   }
   initHeaderSearch();
 
-  return { attach: attach, textMatches: textMatches, normalize: normalize, loadIndex: loadIndex };
+  // Ranked matches for a query (index must be loaded first via loadIndex).
+  function search(query) { return findMatches(query); }
+
+  return { attach: attach, textMatches: textMatches, normalize: normalize, loadIndex: loadIndex, search: search };
 })();

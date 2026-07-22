@@ -1,16 +1,50 @@
 (function () {
-  let currentStep = 1;
-  let selectedProduct = null;
+  // ---- Shared alert-submit helper (used by this modal AND pdp-alert.js) ----
+  // alert-modal.js is included on every page, so this is always available.
+  window.memradarAlert = {
+    ENDPOINT: 'https://memradar-three.vercel.app/api/alerts',
+    // Read the Turnstile token from the widget inside a scope element.
+    turnstileToken: function (scopeEl) {
+      var el = scopeEl && scopeEl.querySelector('[name="cf-turnstile-response"]');
+      return el ? el.value : '';
+    },
+    // Ensure the Turnstile API script is present (the modal lives on pages that
+    // may not include it in <head>).
+    ensureTurnstile: function () {
+      if (document.querySelector('script[src*="challenges.cloudflare.com/turnstile"]')) return;
+      var s = document.createElement('script');
+      s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+      s.async = true; s.defer = true;
+      document.head.appendChild(s);
+    },
+    submit: function (payload) {
+      return fetch(this.ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).then(function (res) {
+        return res.json().catch(function () { return {}; }).then(function (data) {
+          return { ok: res.ok, status: res.status, data: data };
+        });
+      });
+    }
+  };
 
-  const MOCK_PRODUCTS = [
-    { id: 1, name: 'G.Skill Trident Z5 RGB DDR5-6000 32GB (2×16GB)', brand: 'G.Skill', category: 'RAM', defaultPrice: 289 },
-    { id: 2, name: 'Samsung 990 Pro 2TB NVMe M.2 SSD', brand: 'Samsung', category: 'SSD', defaultPrice: 169 },
-    { id: 3, name: 'Crucial Pro DDR5-5600 32GB (2×16GB)', brand: 'Crucial', category: 'RAM', defaultPrice: 249 },
-    { id: 4, name: 'WD Black SN850X 1TB NVMe M.2 SSD', brand: 'WD', category: 'SSD', defaultPrice: 99 },
-  ];
+  var currentStep = 1;
+  var selectedProduct = null; // { sku, name, category, current_price }
+  var lastResults = [];
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function money(v) {
+    return v == null ? '$—' : Number(v).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+  }
 
   function buildModal() {
-    const el = document.createElement('div');
+    var el = document.createElement('div');
     el.className = 'modal-overlay';
     el.id = 'alertModal';
     el.setAttribute('role', 'dialog');
@@ -69,13 +103,14 @@
               <input type="email" class="modal-input" id="modalEmailInput"
                 placeholder="you@example.com" autocomplete="email">
               <span class="modal-field-error" id="emailError"></span>
-              <span class="modal-field-hint">We'll send you a one-time email when this price is hit. No spam, ever.</span>
+              <span class="modal-field-hint">We'll send a one-time confirmation email. No spam, ever.</span>
             </div>
             <div style="position:absolute;left:-9999px;opacity:0;" aria-hidden="true">
               <label for="modalHoneypot">Website (leave blank)</label>
               <input type="text" id="modalHoneypot" name="website" tabindex="-1" autocomplete="off">
             </div>
             <div class="cf-turnstile" data-sitekey="0x4AAAAAADTmp79GaQVF5cAu" data-theme="auto" style="margin-top:12px;"></div>
+            <span class="modal-field-error" id="submitError"></span>
             <div class="modal-footer-row">
               <button class="modal-btn-back" id="step3Back">← Back</button>
               <button class="modal-btn-primary" id="modalSetAlertBtn">Set Alert</button>
@@ -90,9 +125,9 @@
                   <path d="M9 16.5l5 5 9-10" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               </div>
-              <h2 class="modal-heading">You're on the radar.</h2>
+              <h2 class="modal-heading">Almost there.</h2>
               <p class="modal-success-text" id="modalSuccessText"></p>
-              <p class="modal-success-hint">Prices are checked daily. You'll only be emailed once when your target is hit.</p>
+              <p class="modal-success-hint">Once you confirm, we'll check the price daily and email you when your target is hit.</p>
             </div>
             <div class="modal-success-actions">
               <button class="modal-btn-secondary" id="modalTrackAnotherBtn">Track another product</button>
@@ -107,58 +142,76 @@
   }
 
   function goToStep(n) {
-    document.getElementById(`modalStep${currentStep}`).classList.remove('active');
+    document.getElementById('modalStep' + currentStep).classList.remove('active');
     currentStep = n;
-    document.getElementById(`modalStep${n}`).classList.add('active');
+    document.getElementById('modalStep' + n).classList.add('active');
     updateProgress();
-    setTimeout(() => {
-      const step = document.getElementById(`modalStep${n}`);
-      const first = step.querySelector('input, button');
+    setTimeout(function () {
+      var step = document.getElementById('modalStep' + n);
+      var first = step.querySelector('input, button');
       if (first) first.focus();
     }, 50);
   }
 
   function updateProgress() {
-    document.getElementById('modalStepLabel').textContent = `Step ${currentStep} of 4`;
-    document.querySelectorAll('.modal-dot').forEach((dot, i) => {
+    document.getElementById('modalStepLabel').textContent = 'Step ' + currentStep + ' of 4';
+    document.querySelectorAll('.modal-dot').forEach(function (dot, i) {
       dot.classList.toggle('active', i + 1 <= currentStep);
     });
   }
 
-  function renderResults() {
-    const container = document.getElementById('modalResults');
-    container.innerHTML = MOCK_PRODUCTS.map(p => `
-      <button class="modal-result-card" data-id="${p.id}" aria-label="Select ${p.name}">
-        <div class="modal-result-info">
-          <span class="modal-badge modal-badge--${p.category.toLowerCase()}">${p.category}</span>
-          <span class="modal-result-name">${p.name}</span>
-          <span class="modal-result-price">$—</span>
-        </div>
-        <svg class="modal-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
-    `).join('');
+  function doSearch() {
+    var query = document.getElementById('modalSearchInput').value.trim();
+    if (!query) { document.getElementById('modalSearchInput').focus(); return; }
+    if (!window.memradarSearch) return;
+    window.memradarSearch.loadIndex(function () {
+      lastResults = window.memradarSearch.search(query).slice(0, 6);
+      renderResults(query);
+      goToStep(2);
+    });
+  }
 
-    container.querySelectorAll('.modal-result-card').forEach(card => {
-      card.addEventListener('click', () => {
-        selectedProduct = MOCK_PRODUCTS.find(p => p.id === parseInt(card.dataset.id));
-        document.getElementById('modalSelectedProduct').innerHTML = `
-          <span class="modal-badge modal-badge--${selectedProduct.category.toLowerCase()}">${selectedProduct.category}</span>
-          <span class="modal-selected-name">${selectedProduct.name}</span>
-        `;
-        document.getElementById('modalPriceInput').value = selectedProduct.defaultPrice;
+  function renderResults(query) {
+    var container = document.getElementById('modalResults');
+    if (!lastResults.length) {
+      container.innerHTML = '<p class="modal-no-results">No products match “' + esc(query) + '”. Try another search.</p>';
+      return;
+    }
+    container.innerHTML = lastResults.map(function (p) {
+      var catLabel = p.category === 'ram' ? 'RAM' : 'SSD';
+      return '<button class="modal-result-card" data-sku="' + esc(p.sku) + '" aria-label="Select ' + esc(p.name) + '">' +
+        '<div class="modal-result-info">' +
+          '<span class="modal-badge modal-badge--' + esc(p.category) + '">' + catLabel + '</span>' +
+          '<span class="modal-result-name">' + esc(p.name) + '</span>' +
+          '<span class="modal-result-price">' + money(p.current_price) + '</span>' +
+        '</div>' +
+        '<svg class="modal-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">' +
+          '<path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
+        '</svg>' +
+      '</button>';
+    }).join('');
+
+    container.querySelectorAll('.modal-result-card').forEach(function (card) {
+      card.addEventListener('click', function () {
+        selectedProduct = lastResults.find(function (p) { return p.sku === card.dataset.sku; });
+        var catLabel = selectedProduct.category === 'ram' ? 'RAM' : 'SSD';
+        document.getElementById('modalSelectedProduct').innerHTML =
+          '<span class="modal-badge modal-badge--' + esc(selectedProduct.category) + '">' + catLabel + '</span>' +
+          '<span class="modal-selected-name">' + esc(selectedProduct.name) + '</span>';
+        var suggested = selectedProduct.current_price ? Math.max(1, Math.floor(selectedProduct.current_price * 0.9)) : '';
+        document.getElementById('modalPriceInput').value = suggested;
         document.getElementById('priceError').textContent = '';
         document.getElementById('emailError').textContent = '';
+        document.getElementById('submitError').textContent = '';
         goToStep(3);
       });
     });
   }
 
   function validate() {
-    let valid = true;
-    const price = parseFloat(document.getElementById('modalPriceInput').value);
-    const email = document.getElementById('modalEmailInput').value.trim();
+    var valid = true;
+    var price = parseFloat(document.getElementById('modalPriceInput').value);
+    var email = document.getElementById('modalEmailInput').value.trim();
     document.getElementById('priceError').textContent = '';
     document.getElementById('emailError').textContent = '';
     if (!price || price <= 0) {
@@ -173,7 +226,7 @@
   }
 
   function openModal() {
-    document.querySelectorAll('.modal-step').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.modal-step').forEach(function (s) { s.classList.remove('active'); });
     currentStep = 1;
     document.getElementById('modalStep1').classList.add('active');
     updateProgress();
@@ -181,9 +234,11 @@
     document.getElementById('modalEmailInput').value = '';
     document.getElementById('modalPriceInput').value = '';
     selectedProduct = null;
+    if (window.memradarSearch) window.memradarSearch.loadIndex(function () {});
+    window.memradarAlert.ensureTurnstile();
     document.getElementById('alertModal').classList.add('open');
     document.body.style.overflow = 'hidden';
-    setTimeout(() => document.getElementById('modalSearchInput').focus(), 100);
+    setTimeout(function () { document.getElementById('modalSearchInput').focus(); }, 100);
   }
 
   function closeModal() {
@@ -195,12 +250,12 @@
     if (!document.getElementById('alertModal').classList.contains('open')) return;
     if (e.key === 'Escape') { closeModal(); return; }
     if (e.key !== 'Tab') return;
-    const card = document.getElementById('modalCard');
-    const focusable = Array.from(card.querySelectorAll(
+    var card = document.getElementById('modalCard');
+    var focusable = Array.prototype.slice.call(card.querySelectorAll(
       'button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
     ));
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
+    var first = focusable[0];
+    var last = focusable[focusable.length - 1];
     if (e.shiftKey) {
       if (document.activeElement === first) { e.preventDefault(); last.focus(); }
     } else {
@@ -208,47 +263,68 @@
     }
   }
 
+  function submitAlert() {
+    if (!selectedProduct) return;
+    if (!validate()) return;
+    if (document.getElementById('modalHoneypot').value) return; // bot
+    var submitError = document.getElementById('submitError');
+    submitError.textContent = '';
+
+    var token = window.memradarAlert.turnstileToken(document.getElementById('modalStep3'));
+    if (!token) { submitError.textContent = 'Please complete the “I’m human” check.'; return; }
+
+    var price = parseFloat(document.getElementById('modalPriceInput').value);
+    var email = document.getElementById('modalEmailInput').value.trim();
+    var btn = document.getElementById('modalSetAlertBtn');
+    btn.disabled = true; btn.textContent = 'Setting…';
+
+    window.memradarAlert.submit({
+      email: email,
+      targetPrice: price,
+      productId: selectedProduct.sku,
+      website: '',
+      turnstileToken: token
+    }).then(function (r) {
+      btn.disabled = false; btn.textContent = 'Set Alert';
+      if (r.status === 400 && r.data && r.data.errors) {
+        submitError.textContent = r.data.errors.join(' ');
+        return;
+      }
+      if (r.ok && r.data && r.data.success) {
+        document.getElementById('modalSuccessText').innerHTML =
+          'Check your email at <strong>' + esc(email) + '</strong> to confirm your alert for <strong>' + esc(selectedProduct.name) + '</strong>.';
+        goToStep(4);
+        return;
+      }
+      submitError.textContent = 'Something went wrong. Please try again in a moment.';
+    }).catch(function () {
+      btn.disabled = false; btn.textContent = 'Set Alert';
+      submitError.textContent = 'Network error — your details are still here. Please try again.';
+    });
+  }
+
   function init() {
     buildModal();
 
-    document.querySelectorAll('.btn-alert').forEach(btn =>
-      btn.addEventListener('click', e => { e.preventDefault(); openModal(); })
-    );
+    document.querySelectorAll('.btn-alert').forEach(function (btn) {
+      btn.addEventListener('click', function (e) { e.preventDefault(); openModal(); });
+    });
 
     document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
-    document.getElementById('alertModal').addEventListener('click', e => {
+    document.getElementById('alertModal').addEventListener('click', function (e) {
       if (e.target === e.currentTarget) closeModal();
     });
 
-    document.getElementById('modalSearchBtn').addEventListener('click', () => {
-      if (!document.getElementById('modalSearchInput').value.trim()) {
-        document.getElementById('modalSearchInput').focus();
-        return;
-      }
-      renderResults();
-      goToStep(2);
-    });
-    document.getElementById('modalSearchInput').addEventListener('keydown', e => {
-      if (e.key === 'Enter') document.getElementById('modalSearchBtn').click();
+    document.getElementById('modalSearchBtn').addEventListener('click', doSearch);
+    document.getElementById('modalSearchInput').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') doSearch();
     });
 
-    document.getElementById('step2Back').addEventListener('click', () => goToStep(1));
-    document.getElementById('step3Back').addEventListener('click', () => goToStep(2));
+    document.getElementById('step2Back').addEventListener('click', function () { goToStep(1); });
+    document.getElementById('step3Back').addEventListener('click', function () { goToStep(2); });
+    document.getElementById('modalSetAlertBtn').addEventListener('click', submitAlert);
 
-    document.getElementById('modalSetAlertBtn').addEventListener('click', () => {
-      if (!validate()) return;
-      // Honeypot check — if website field has any value, silently reject (bot detected)
-      if (document.getElementById('modalHoneypot').value) return;
-      const price = parseFloat(document.getElementById('modalPriceInput').value);
-      const email = document.getElementById('modalEmailInput').value.trim();
-      // TODO: Add server-side rate limiting (max 3 submissions per IP per hour) before production launch
-      console.log('Alert queued for Supabase:', { product: selectedProduct, targetPrice: price, email });
-      document.getElementById('modalSuccessText').innerHTML =
-        `We'll email you at <strong>${email}</strong> when <strong>${selectedProduct.name}</strong> drops below $${price.toFixed(0)}.`;
-      goToStep(4);
-    });
-
-    document.getElementById('modalTrackAnotherBtn').addEventListener('click', () => {
+    document.getElementById('modalTrackAnotherBtn').addEventListener('click', function () {
       document.getElementById('modalSearchInput').value = '';
       document.getElementById('modalEmailInput').value = '';
       selectedProduct = null;
