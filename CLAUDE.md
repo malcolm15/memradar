@@ -16,7 +16,7 @@ MemRadar tracks RAM and SSD prices across retailers (Best Buy at launch, Amazon 
 | Hosting | GitHub Pages + Cloudflare (frontend) |
 | Backend | Node.js serverless functions on Vercel |
 | Database | Supabase (Postgres) |
-| Data source | Best Buy Open API (launch), Amazon (planned) |
+| Data source | Keepa API — Amazon price history (launch). Best Buy client dormant (never approved) |
 | Cron | Vercel cron — daily at 06:00 UTC (`0 6 * * *`) |
 
 ## Directory Structure
@@ -27,7 +27,8 @@ memradar/
 │   └── fetch-prices.js      # Vercel serverless function + cron handler
 ├── backend/
 │   ├── lib/
-│   │   ├── bestbuy.js       # Best Buy API client + data normalizers
+│   │   ├── keepa.js         # Keepa API client — price history source (self-test: node backend/lib/keepa.js)
+│   │   ├── bestbuy.js       # Best Buy API client — DORMANT (access never approved)
 │   │   └── supabase.js      # Supabase client (uses service role key)
 │   ├── package.json
 │   └── schema.sql           # Full DB schema — run in Supabase SQL Editor
@@ -97,15 +98,40 @@ Required in `.env` (local) and Vercel project settings (production):
 - The cron endpoint checks `Authorization: Bearer <CRON_SECRET>` and returns 401 otherwise.
 - The frontend only ever uses public/anon Supabase access (when that's wired up).
 
-## How the Price Fetch Works
+## How the Price Fetch Works (Keepa)
 
 1. Vercel cron hits `/api/fetch-prices` daily at 06:00 UTC
 2. Handler verifies `Authorization: Bearer <CRON_SECRET>`
-3. Fetches top-100 RAM (category `4606`) and top-100 SSD (category `3582`) from Best Buy API in parallel
-4. For each product: upserts into `products` (conflict on `sku`), then inserts a new row into `price_history`
-5. Logs saved/error counts per category
+3. Loads the Amazon catalog from `products` (retailer=`amazon`, `sku` = ASIN)
+4. Fetches current stats from Keepa in batches of ≤100 ASINs (`history=0&stats=90` — stats only, smaller payload, same token cost of 1/ASIN)
+5. For each product with a current price, appends ONE `price_history` row (`fetched_at` = now, `regular_price` = 90-day stats max). Out-of-stock products (no valid current price anywhere) get no row and are counted in the summary. Per-product errors are isolated — one failure never kills the run.
+6. Returns a JSON summary: `{success, source:'keepa', ram/ssd counts, out_of_stock, errors, tokens_left, duration_ms}`
 
 The script can also run directly via `node api/fetch-prices.js` for manual testing.
+
+**Best Buy client is DORMANT:** `backend/lib/bestbuy.js` is kept intact but unused (access never approved). If approval ever comes it can be revived as a second retailer source.
+
+## Keepa Client (`backend/lib/keepa.js`)
+
+Format rules the client absorbs (verified against Keepa's official `api_backend` library — callers never touch raw Keepa data):
+
+- **Keepa minutes:** timestamps are minutes since 2011-01-01 UTC: `unixMillis = (keepaMinute + 21564000) * 60000`. Helpers `keepaMinutesToDate()` / `dateToKeepaMinutes()` are covered by self-test assertions (`node backend/lib/keepa.js`).
+- **csv arrays:** `product.csv[i]` alternates `[keepaTime, value, ...]`. Index 0 = AMAZON, 1 = NEW (marketplace), 18 = BUY_BOX_SHIPPING (includes shipping — last resort only).
+- **Prices are integer cents** (41999 = $419.99); the `stats` object uses the same convention.
+- **-1 means no offer / out of stock** — never stored as a price. In parsed history it becomes a `price: null` gap marker.
+- **Series preference:** AMAZON first; AMAZON's `-1` gap intervals are filled from NEW; if AMAZON has no data at all, NEW is used outright.
+- **Outlier filter:** points > 5× the series median or < $5 are dropped (third-party garbage listings, e.g. $9,999 during stockouts). Dropped counts are logged per product.
+- **Tokens:** every response updates `tokensLeft`/`refillIn`/`refillRate`; 1 token per requested ASIN (20 tokens/min plan). The client waits for refill automatically between batches and retries on token-shortage errors.
+
+## Keepa Backfill (`scripts/backfill-keepa.js`)
+
+One-time historical load of full Keepa price history into `price_history`:
+
+- **Dry-run by default** — fetches from Keepa (consumes tokens) but writes nothing. `--confirm` writes.
+- **Downsampled to daily:** at most one row per product per UTC calendar day (last reading of the day). Gap days carry the last known price with `in_stock=false` (schema requires `price NOT NULL`); leading gaps are skipped.
+- `regular_price` = max stored price in the trailing 90 days (or null), applied per product.
+- **Full replace semantics:** with `--confirm`, each product's existing `price_history` rows are deleted before its new rows are inserted — re-runs are safe/idempotent. Inserts go in chunks of 500.
+- Per-product failures are isolated and reported in the final summary.
 
 ## Frontend State
 

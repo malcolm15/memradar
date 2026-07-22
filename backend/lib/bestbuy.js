@@ -1,3 +1,5 @@
+// DORMANT: Best Buy API access was never approved; Keepa is the live price
+// source (backend/lib/keepa.js). Kept intact in case approval ever comes.
 const API_KEY = process.env.BBY_API_KEY;
 const BASE = 'https://api.bestbuy.com/v1';
 const FETCH_TIMEOUT_MS = 10_000;
