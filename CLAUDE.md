@@ -84,6 +84,7 @@ Required in `.env` (local) and Vercel project settings (production):
 |---|---|
 | `BBY_API_KEY` | Best Buy Open API key |
 | `PRICE_API_KEY` | PriceAPI.com key for price data (trial, evaluating as Best Buy replacement) |
+| `KEEPA_API_KEY` | Keepa API key for Amazon price history (20 tokens/min plan) — must also be set in Vercel env vars |
 | `SUPABASE_URL` | Supabase project URL |
 | `SUPABASE_SECRET_KEY` | Supabase service role key (not the anon key) |
 | `CRON_SECRET` | Random secret — Vercel sends as Bearer token to protect `/api/fetch-prices` |
