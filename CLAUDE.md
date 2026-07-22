@@ -201,6 +201,7 @@ Findings from evaluating price-data providers as a Best Buy replacement (Best Bu
 - Purpose: Prevents Supabase free tier from pausing the project due to inactivity
 - Auth: Same `CRON_SECRET` Bearer token as `fetch-prices`
 - Can be removed once `fetch-prices` is running daily with real Best Buy data
+- 2026-07-22: Supabase paused despite this cron; investigation and fix in progress
 
 ## Seed Data
 `scripts/seed-database.js` was run once (2026-05-27), adding 3 seed products (`SEED-RAM-001`, `SEED-RAM-002`, `SEED-SSD-001`) + 3 seed price_history rows.
