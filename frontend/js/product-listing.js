@@ -1,0 +1,333 @@
+// Product listing pages (RAM + SSD) — shared. Detects category from
+// data-category on the grid, loads real products + prices from Supabase, and
+// wires the filter pills / sort entirely client-side over the fetched dataset.
+//
+// Data strategy — THREE queries total, all reduced client-side (no N+1):
+//   1. products for this category
+//   2. price_history in the last 48h  -> newest row per product (current price)
+//   3. price_history 25-35 days back   -> row closest to 30d (baseline for %chg)
+// At ~120 products/page with daily-granularity history this is a few hundred KB.
+// If the catalog ever grows past ~500 products, move steps 2-3 to a Postgres
+// RPC/view that returns latest + 30d-ago per product server-side.
+(function () {
+  var grid = document.querySelector('.listing-grid[data-category]');
+  if (!grid) return;
+  var category = grid.getAttribute('data-category'); // 'ram' | 'ssd'
+  var sb = window.memradarSupabase;
+
+  var AFFILIATE_TAG = 'memradar-20';
+  var PAGE = 1000; // PostgREST response cap — paginate above this
+  var DAY_MS = 86400000;
+
+  // The empty-state block is the JS-failure fallback: detach and hold it.
+  var emptyState = grid.querySelector('.listing-empty');
+  if (emptyState) emptyState.remove();
+  var countEl = document.querySelector('.listing-count');
+
+  var state = { products: [], filters: {}, sort: 'name-az' };
+
+  // ---------- formatting / escaping ----------
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function fmtPrice(v) {
+    return v == null ? '$—' : v.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+  }
+  function affiliateUrl(url) {
+    if (!url) return '#';
+    return url + (url.indexOf('?') >= 0 ? '&' : '?') + 'tag=' + AFFILIATE_TAG;
+  }
+
+  // ---------- name parsing (filters) ----------
+  function parseSpeed(name) {
+    var speeds = [], m;
+    var re = /(\d{4,5})\s*(?:mhz|mt\/s)/gi;
+    while ((m = re.exec(name))) speeds.push(+m[1]);
+    var re2 = /ddr[45]-(\d{4,5})/gi;
+    while ((m = re2.exec(name))) speeds.push(+m[1]);
+    speeds = speeds.filter(function (s) { return s >= 1800 && s <= 9000; }); // excludes PC5-48000 etc.
+    return speeds.length ? Math.max.apply(null, speeds) : null;
+  }
+  function speedBand(s) {
+    if (s == null) return null;
+    if (s >= 6000) return '6000MHz+';
+    if (s >= 5500) return '5600MHz';
+    if (s >= 5000) return '5200MHz';
+    return '4800MHz & below';
+  }
+  function capTokensGB(str) {
+    // Negative lookahead excludes non-capacity units: "400TBW" (endurance) and
+    // "6 Gb/s" (interface speed) must NOT be read as capacities.
+    var caps = [], m, re = /(\d+)\s*(gb|tb)(?![\w/])/gi;
+    while ((m = re.exec(str))) caps.push(/tb/i.test(m[2]) ? +m[1] * 1024 : +m[1]);
+    return caps;
+  }
+  // Total capacity: kit names read "32GB (2x16GB)" — the TOTAL appears before
+  // the "(". Use the pre-paren capacity if present, else the largest token
+  // (covers bracket notation "[2 x 16GB]" and single modules).
+  function totalCapacityGB(name) {
+    var pre = capTokensGB(name.split('(')[0]);
+    if (pre.length) return Math.max.apply(null, pre);
+    var all = capTokensGB(name);
+    return all.length ? Math.max.apply(null, all) : null;
+  }
+  function capPillGB(pill) {
+    var m = pill.match(/(\d+)\s*(gb|tb)/i);
+    if (!m) return null;
+    return /tb/i.test(m[2]) ? +m[1] * 1024 : +m[1];
+  }
+  // SSD type — SATA wins over NVMe/M.2 (M.2 SATA drives are SATA-protocol),
+  // matching backend/lib/marketStats.js.
+  function ssdType(name) {
+    if (/sata|2\.5/i.test(name)) return 'SATA';
+    if (/nvme|m\.2/i.test(name)) return 'NVMe';
+    return null;
+  }
+  // Brand pill -> brand column, with WD alias (column stores "Western Digital").
+  function brandMatch(brand, pill) {
+    if (!brand) return false;
+    var a = brand.toLowerCase(), b = pill.toLowerCase();
+    var aliases = { wd: 'western digital' };
+    if (aliases[b]) b = aliases[b];
+    return a === b;
+  }
+
+  // ---------- filter dispatch ----------
+  function passes(label, value, p) {
+    switch (label) {
+      case 'type':
+        return category === 'ssd' ? ssdType(p.name) === value : p.name.toLowerCase().indexOf(value.toLowerCase()) >= 0;
+      case 'capacity': {
+        var total = totalCapacityGB(p.name);
+        if (total == null) return false;
+        var gb = capPillGB(value);
+        return value.indexOf('+') >= 0 ? total >= gb : total === gb;
+      }
+      case 'speed':
+        return speedBand(parseSpeed(p.name)) === value;
+      case 'form factor':
+        return value.indexOf('M.2') >= 0 ? /m\.2/i.test(p.name) : /2\.5/.test(p.name);
+      case 'brand':
+        return brandMatch(p.brand, value);
+      default:
+        return true;
+    }
+  }
+  function matches(p) {
+    for (var label in state.filters) {
+      var value = state.filters[label];
+      if (value != null && !passes(label, value, p)) return false;
+    }
+    return true;
+  }
+
+  // ---------- sorting ----------
+  function dropRank(p) { return p.change30 == null ? Infinity : p.change30; }
+  function sortProducts(arr) {
+    var a = arr.slice();
+    switch (state.sort) {
+      case 'price-lh': a.sort(function (x, y) { return (x.price == null ? Infinity : x.price) - (y.price == null ? Infinity : y.price); }); break;
+      case 'price-hl': a.sort(function (x, y) { return (y.price == null ? -Infinity : y.price) - (x.price == null ? -Infinity : x.price); }); break;
+      case 'drop': a.sort(function (x, y) { return dropRank(x) - dropRank(y); }); break; // biggest drop first, no-baseline last
+      default: a.sort(function (x, y) { return x.name.localeCompare(y.name); }); // name-az
+    }
+    return a;
+  }
+
+  // ---------- rendering ----------
+  function changeHtml(p) {
+    if (p.change30 == null) return '';
+    var r = Math.round(p.change30);
+    if (r < 0) return '<span class="listing-card-change listing-card-change--down">▼ ' + Math.abs(r) + '%</span>';
+    if (r > 0) return '<span class="listing-card-change listing-card-change--up">▲ ' + r + '%</span>';
+    return '';
+  }
+  function cardHtml(p) {
+    var brand = p.brand ? '<span class="listing-card-brand">' + esc(p.brand) + '</span>' : '';
+    var img = p.image_url
+      ? '<img src="' + esc(p.image_url) + '" alt="' + esc(p.name) + '" loading="lazy" class="listing-card-img-el">'
+      : '';
+    return '<div class="listing-card" data-sku="' + esc(p.sku) + '">' +
+      '<div class="listing-card-img">' + img + '</div>' +
+      '<div class="listing-card-body">' +
+        brand +
+        '<h3 class="listing-card-name">' + esc(p.name) + '</h3>' +
+        '<div class="listing-card-pricing"><span class="listing-card-price">' + fmtPrice(p.price) + '</span>' + changeHtml(p) + '</div>' +
+        '<span class="listing-card-retailer">Amazon</span>' +
+      '</div>' +
+      '<div class="listing-card-actions">' +
+        '<a href="' + esc(affiliateUrl(p.product_url)) + '" class="listing-card-deal-btn" target="_blank" rel="nofollow sponsored noopener noreferrer">View on Amazon</a>' +
+      '</div>' +
+    '</div>';
+  }
+  function attachImgFallback() {
+    grid.querySelectorAll('.listing-card-img-el').forEach(function (img) {
+      img.addEventListener('error', function () { img.style.display = 'none'; }); // leaves the gray placeholder box
+    });
+  }
+  function skeletonHtml() {
+    var one = '<div class="listing-card listing-card--skeleton" aria-hidden="true">' +
+      '<div class="listing-card-img skeleton-box"></div>' +
+      '<div class="listing-card-body">' +
+        '<div class="skeleton-line skeleton-line--sm"></div>' +
+        '<div class="skeleton-line"></div>' +
+        '<div class="skeleton-line skeleton-line--price"></div>' +
+      '</div>' +
+      '<div class="listing-card-actions"><div class="skeleton-btn"></div></div>' +
+    '</div>';
+    return new Array(9).join(one); // 8 skeleton cards
+  }
+  function updateCount(n) {
+    if (countEl) countEl.textContent = 'Showing ' + n + ' product' + (n === 1 ? '' : 's') + ' · Prices updated daily';
+  }
+  function clearFilters() {
+    document.querySelectorAll('.filter-pills').forEach(function (group) {
+      group.querySelectorAll('.filter-pill').forEach(function (pill, i) {
+        pill.classList.toggle('active', i === 0); // first pill is "All"
+      });
+    });
+    state.filters = {};
+    applyAndRender();
+  }
+  function applyAndRender() {
+    var filtered = state.products.filter(matches);
+    var sorted = sortProducts(filtered);
+    if (!sorted.length) {
+      grid.innerHTML = '<div class="listing-empty listing-no-results">' +
+        '<h2>No products match these filters</h2>' +
+        '<p>Try removing a filter to see more results.</p>' +
+        '<button type="button" class="listing-clear-filters">Clear Filters</button>' +
+      '</div>';
+      var btn = grid.querySelector('.listing-clear-filters');
+      if (btn) btn.addEventListener('click', clearFilters);
+    } else {
+      grid.innerHTML = sorted.map(cardHtml).join('');
+      attachImgFallback();
+    }
+    updateCount(filtered.length);
+  }
+
+  // ---------- states ----------
+  function showSkeleton() {
+    grid.innerHTML = skeletonHtml();
+    if (countEl) countEl.textContent = 'Loading products…';
+  }
+  function showFailure(msg) {
+    console.error('Product listing failed to load:', msg);
+    grid.innerHTML = '';
+    if (emptyState) { emptyState.hidden = false; grid.appendChild(emptyState); }
+    if (countEl) countEl.textContent = '';
+  }
+
+  // ---------- data loading ----------
+  function reduceNewest(rows) {
+    var m = new Map();
+    rows.forEach(function (r) {
+      var prev = m.get(r.product_id);
+      if (!prev || r.fetched_at > prev.fetched_at) m.set(r.product_id, r);
+    });
+    return m;
+  }
+  function reduceClosest(rows, target) {
+    var m = new Map();
+    rows.forEach(function (r) {
+      var dist = Math.abs(new Date(r.fetched_at).getTime() - target);
+      var prev = m.get(r.product_id);
+      if (!prev || dist < prev._dist) m.set(r.product_id, { price: r.price, _dist: dist });
+    });
+    return m;
+  }
+  async function pagedSelect(build) {
+    var out = [];
+    for (var from = 0; ; from += PAGE) {
+      var res = await build().range(from, from + PAGE - 1);
+      if (res.error) throw res.error;
+      out = out.concat(res.data);
+      if (res.data.length < PAGE) break;
+    }
+    return out;
+  }
+  async function load() {
+    showSkeleton();
+    if (!sb) { showFailure('supabase client not initialized'); return; }
+    try {
+      var products = await pagedSelect(function () {
+        return sb.from('products').select('id, sku, name, brand, image_url, product_url')
+          .eq('category', category).eq('retailer', 'amazon');
+      });
+      if (!products.length) { showFailure('no products returned'); return; }
+      var ids = products.map(function (p) { return p.id; });
+
+      var now = Date.now();
+      var latestRows = await pagedSelect(function () {
+        return sb.from('price_history').select('product_id, price, fetched_at')
+          .in('product_id', ids).gte('fetched_at', new Date(now - 2 * DAY_MS).toISOString());
+      });
+      var baselineRows = await pagedSelect(function () {
+        return sb.from('price_history').select('product_id, price, fetched_at')
+          .in('product_id', ids)
+          .gte('fetched_at', new Date(now - 35 * DAY_MS).toISOString())
+          .lte('fetched_at', new Date(now - 25 * DAY_MS).toISOString());
+      });
+
+      var latest = reduceNewest(latestRows);
+      var baseline = reduceClosest(baselineRows, now - 30 * DAY_MS);
+      products.forEach(function (p) {
+        var cur = latest.get(p.id);
+        p.price = cur ? Number(cur.price) : null;
+        var base = baseline.get(p.id);
+        p.change30 = (p.price != null && base) ? ((p.price - Number(base.price)) / Number(base.price)) * 100 : null;
+      });
+
+      state.products = products;
+      applyAndRender();
+    } catch (err) {
+      showFailure(err.message);
+    }
+  }
+
+  // ---------- filter/sort wiring ----------
+  function wireControls() {
+    document.querySelectorAll('.filter-group').forEach(function (group) {
+      var labelEl = group.querySelector('.filter-label');
+      if (!labelEl) return;
+      var key = labelEl.textContent.replace(':', '').trim().toLowerCase();
+
+      var pills = group.querySelector('.filter-pills');
+      if (pills) {
+        pills.querySelectorAll('.filter-pill').forEach(function (pill) {
+          pill.addEventListener('click', function () {
+            pills.querySelectorAll('.filter-pill').forEach(function (p) { p.classList.remove('active'); });
+            pill.classList.add('active');
+            var val = pill.textContent.trim();
+            state.filters[key] = (val === 'All') ? null : val;
+            applyAndRender();
+          });
+        });
+      }
+
+      var select = group.querySelector('.filter-select');
+      if (select) {
+        var SORT_MAP = {
+          'Price: Low to High': 'price-lh',
+          'Price: High to Low': 'price-hl',
+          'Biggest Price Drop': 'drop',
+          'Name: A-Z': 'name-az'
+        };
+        // Default view = Name A-Z; keep the select consistent with it.
+        var nameOpt = Array.prototype.find.call(select.options, function (o) { return /name/i.test(o.textContent); });
+        if (nameOpt) select.value = nameOpt.value;
+        state.sort = 'name-az';
+        select.addEventListener('change', function () {
+          state.sort = SORT_MAP[select.value.trim()] || 'name-az';
+          applyAndRender();
+        });
+      }
+    });
+  }
+
+  wireControls();
+  load();
+})();

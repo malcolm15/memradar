@@ -42,7 +42,7 @@
         "name": "SSD Price Tracker",
         "description": "Track NVMe and SATA SSD prices across Best Buy, Amazon, and Newegg. Historical price charts, price drop alerts, and market intelligence for PC builders who want to know the best time to buy.",
         "url": "https://memradar.com/ssd/",
-        "numberOfItems": 0,
+        "numberOfItems": 116,
         "itemListElement": []
       },
       {
@@ -142,7 +142,7 @@
                 <option>Price: Low to High</option>
                 <option>Price: High to Low</option>
                 <option>Biggest Price Drop</option>
-                <option>Recently Updated</option>
+                <option>Name: A-Z</option>
               </select>
             </div>
           </div>
@@ -153,18 +153,19 @@
 
     <section class="listing-section">
       <div class="container">
-        <div class="listing-grid">
+        <div class="listing-count-bar"><span class="listing-count">Loading products…</span></div>
+        <div class="listing-grid" data-category="ssd">
 
-          <!-- Empty state — shown until live data flows -->
-          <div class="listing-empty">
+          <!-- JS-failure fallback: hidden by default, shown by product-listing.js only if the data fetch fails -->
+          <div class="listing-empty" hidden>
             <div class="radar-pulse">
               <div class="radar-pulse-ring"></div>
               <div class="radar-pulse-ring"></div>
               <div class="radar-pulse-ring"></div>
               <div class="radar-pulse-dot"></div>
             </div>
-            <h2>Prices incoming.</h2>
-            <p>We're setting up our price tracking pipeline. Products and live prices will appear here soon. Set an alert now and we'll notify you the moment we go live.</p>
+            <h2>Prices didn't load.</h2>
+            <p>Having trouble loading prices — try refreshing.</p>
             <a href="#" class="btn-alert">Set an Alert</a>
           </div>
 
@@ -271,6 +272,8 @@
   <script src="../js/main.js"></script>
   <script src="../js/theme.js"></script>
   <script src="../js/alert-modal.js"></script>
-  <script src="../js/filters.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/product-listing.js"></script>
 </body>
 </html>

@@ -56,7 +56,11 @@ memradar/
 │   ├── brand/                       # Brand assets — og-image.png, og-image.svg, memradar-x-header.png, memradar-x-profile.png
 │   ├── css/style.css                # All styles — no CSS framework
 │   ├── js/main.js                   # Search handler stub
-│   └── js/theme.js                  # Dark mode toggle + localStorage persistence
+│   ├── js/theme.js                  # Dark mode toggle + localStorage persistence
+│   ├── js/supabase-client.js        # Public anon-key Supabase client (RLS read-only)
+│   ├── js/market-pulse.js           # Homepage Market Pulse live stats
+│   ├── js/product-listing.js        # RAM/SSD listing pages: live data, filters, sorts
+│   └── js/filters.js                # UNUSED stub (superseded by product-listing.js)
 ├── .github/
 │   └── workflows/
 │       └── deploy-frontend.yml  # GitHub Actions — deploys frontend/ to GitHub Pages on push to main
@@ -200,30 +204,40 @@ The frontend is fully designed and built but the product cards show placeholder 
 
 ## Listing Pages
 
-`frontend/ram/index.html` and `frontend/ssd/index.html` are fully designed product listing pages. They use clean URLs (`/ram/` and `/ssd/`) via folder-based index files — GitHub Pages serves these automatically.
+`frontend/ram/index.html` and `frontend/ssd/index.html` are LIVE — wired to real Supabase data via `frontend/js/product-listing.js` (shared by both, category detected from `data-category` on `.listing-grid`). Clean URLs (`/ram/`, `/ssd/`) via folder-based index files.
 
-**What's built:**
-- Page hero (h1, subtitle, Set an Alert CTA)
-- Sticky filter bar with pill selectors (Type, Capacity, Speed/Form Factor, Brand, Sort by)
-- Filter interaction handled by `js/filters.js` — clicking pills toggles active state and `console.log`s the selection. No actual filtering yet.
-- Animated radar pulse empty state ("Prices incoming.") shown until live data flows
-- Product card component fully styled (`.listing-card`) — includes image slot, brand, name, current price, strikethrough previous price, price change indicator (up/down with %), sparkline placeholder, retailer, View Deal + Set Alert actions
-- 3 commented-out example product cards in each page's HTML — uncomment to see the populated grid
+**Data load — THREE queries, all reduced client-side (no N+1):**
+1. `products` for the category (retailer=`amazon`)
+2. `price_history` in the last 48h → reduce to newest row per product = current price
+3. `price_history` 25–35 days back → reduce to row closest to 30d = baseline for the 30-day change indicator (no indicator shown when a product has no baseline)
 
-**What's not wired up:**
-- No data from Supabase yet — waiting on Best Buy API key for first price fetch
-- Filters don't actually filter anything — purely visual for now
-- Sparkline chart areas are placeholder boxes — Chart.js integration comes later
-- View Deal links are `href="#"` — will become affiliate links once products are in DB
+All queries paginate at PostgREST's 1000-row cap. At ~120 products/page this is a few hundred KB. **If the catalog grows past ~500 products, move steps 2–3 to a Postgres RPC/view** returning latest + 30d-ago per product server-side.
+
+**Rendering (`.listing-card`):** product image (with gray-placeholder fallback on error), brand badge (omitted entirely when `brand` is null — never an empty/"null" badge), current price, 30-day change indicator (green ▼ for drops, red ▲ for rises, nothing if no baseline), and a "View on Amazon" affiliate button. Each card has `data-sku` for future PDP wiring. Default sort is Name A–Z; skeleton grid (8 pulsing cards) shows while loading; a live "Showing N products · Prices updated daily" count sits above the grid.
+
+**Affiliate links convention:** product URL + `?tag=memradar-20`, with `rel="nofollow sponsored noopener noreferrer"` and `target="_blank"` (SEO for paid links + external-link security).
+
+**Filters/sorts — all client-side over the fetched dataset (AND across groups, no re-queries):**
+- RAM: Type (name substring DDR5/DDR4), Capacity (**kit rule**: the total capacity that appears BEFORE the first "(" — "32GB (2x16GB)" matches 32GB — else the largest capacity token), Speed (parsed MHz/MT/s banded; excludes bandwidth codes like PC5-48000), Brand (exact match on `brand` column).
+- SSD: Type (**SATA-first** — SATA in name wins over M.2, matching `marketStats.js`), Form Factor (M.2 / 2.5"), Capacity (500GB/1TB/2TB/4TB+; capacity regex excludes `TBW` endurance and `Gb/s` interface-speed false positives), Brand.
+- Brand pills use an alias map (`WD` → `Western Digital` column value).
+- Sorts: Price L→H, Price H→L, Biggest Price Drop (no-baseline products sort last), Name A–Z.
+- Empty filter result → "No products match these filters" + Clear Filters button.
+
+**Fallback:** the `.listing-empty` radar-pulse block is now the JS-failure fallback only (hidden by default; shown with "Having trouble loading prices — try refreshing." on fetch error, logged to console).
+
+**JSON-LD:** `ItemList.numberOfItems` is set to the real counts (119 RAM / 116 SSD) statically. Full `itemListElement` population isn't possible in static HTML — it happens in the future static-generation phase.
 
 **Files:**
 - `frontend/ram/index.html` — DDR5/DDR4 RAM listing (serves at `/ram/`)
 - `frontend/ssd/index.html` — NVMe/SATA SSD listing (serves at `/ssd/`)
-- `frontend/js/filters.js` — filter pill toggle + console.log stub
+- `frontend/js/product-listing.js` — shared data load + render + filter/sort
+- `frontend/js/filters.js` — the old console.log stub, now UNUSED (superseded by product-listing.js; no longer included on the pages)
 
 ## What's Not Built Yet
 
-- Frontend → Supabase data connection (product cards, prices, search results)
+- Product detail pages (PDP) — cards carry `data-sku` ready for wiring
+- Search results wired to Supabase (homepage/nav search still stubbed)
 - Price history charts (Chart.js or similar planned)
 - Alert signup flow (email collection → `alerts` table insert)
 - Alert trigger logic (compare current price to target, send email)
