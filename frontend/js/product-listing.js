@@ -41,6 +41,15 @@
   }
 
   // ---------- name parsing (filters) ----------
+  // Products whose titles lack a parseable token stay reachable via All/Type/
+  // Capacity but won't match the specific filter below. As of 2026-07-22 these
+  // 9 SKUs are affected — the future static-generation / PDP phase must handle
+  // these nulls gracefully in spec tables:
+  //   No parseable SPEED (1 RAM):
+  //     B0BQWXTDWN (Trident Z5 RGB 32GB DDR5 — no MHz/MT in title)
+  //   No FORM-FACTOR token (8 SSD, all M.2 drives whose titles omit "M.2"/"2.5"):
+  //     B0B3RP4XCG, B0CK39YR9V, B0CK2RKPBL, B0DBBG7CG7, B0DBBJSGFQ,
+  //     B0CK2R8YLY, B0CTRV9CVP, B0DZ5ZK225
   function parseSpeed(name) {
     var speeds = [], m;
     var re = /(\d{4,5})\s*(?:mhz|mt\/s)/gi;

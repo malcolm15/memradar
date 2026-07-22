@@ -224,6 +224,10 @@ All queries paginate at PostgREST's 1000-row cap. At ~120 products/page this is 
 - Sorts: Price L→H, Price H→L, Biggest Price Drop (no-baseline products sort last), Name A–Z.
 - Empty filter result → "No products match these filters" + Clear Filters button.
 
+**Brand-pill rule (general):** brand filter pills must reflect brands actually present in the catalog with **at least 3 products** — otherwise a pill only ever yields the empty state. Revisit the pills whenever the catalog changes materially. Current pills: RAM = Corsair, G.Skill, Crucial, Kingston, TEAMGROUP; SSD = Samsung, WD, Crucial, Kingston, TEAMGROUP, Silicon Power.
+
+**Unfilterable products (graceful-null note for the static-gen/PDP phase):** 9 products (as of 2026-07-22) have titles missing a token, so they don't match one specific filter (still reachable via All/Type/Capacity): 1 RAM lacks a parseable speed (`B0BQWXTDWN`), and 8 SSDs lack an "M.2"/"2.5" form-factor token (all M.2 drives: `B0B3RP4XCG, B0CK39YR9V, B0CK2RKPBL, B0DBBG7CG7, B0DBBJSGFQ, B0CK2R8YLY, B0CTRV9CVP, B0DZ5ZK225`). The full list is also commented in `product-listing.js`. PDP spec tables must handle these nulls gracefully.
+
 **Fallback:** the `.listing-empty` radar-pulse block is now the JS-failure fallback only (hidden by default; shown with "Having trouble loading prices — try refreshing." on fetch error, logged to console).
 
 **JSON-LD:** `ItemList.numberOfItems` is set to the real counts (119 RAM / 116 SSD) statically. Full `itemListElement` population isn't possible in static HTML — it happens in the future static-generation phase.
