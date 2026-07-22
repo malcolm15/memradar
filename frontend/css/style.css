@@ -2093,6 +2093,8 @@ html.dark .pdp-related-per-gb { color: #64748b; }
   text-align: center;
 }
 .coming-soon-text strong { font-weight: 700; }
+.coming-soon-text a { font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+.coming-soon-text a:hover { opacity: 0.8; }
 
 html.dark .coming-soon-banner {
   background: rgba(37, 99, 235, 0.14);
