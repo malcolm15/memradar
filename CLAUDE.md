@@ -201,7 +201,7 @@ Findings from evaluating price-data providers as a Best Buy replacement (Best Bu
 - Purpose: Prevents Supabase free tier from pausing the project due to inactivity
 - Auth: Same `CRON_SECRET` Bearer token as `fetch-prices`
 - Can be removed once `fetch-prices` is running daily with real Best Buy data
-- 2026-07-22: Supabase paused despite this cron; investigation and fix in progress
+- 2026-07-22: Root cause was CRON_SECRET mismatch/absence in Vercel env (cron fired but 401ed before reaching Supabase, so no DB activity registered). Fixed by rotating CRON_SECRET across Vercel, .env, and 1Password, then redeploying. Verified 200 response with live product count. Keep-alive remains active until Keepa daily fetches are confirmed running for a week, then can be retired.
 
 ## Seed Data
 `scripts/seed-database.js` was run once (2026-05-27), adding 3 seed products (`SEED-RAM-001`, `SEED-RAM-002`, `SEED-SSD-001`) + 3 seed price_history rows.
