@@ -203,11 +203,17 @@ Findings from evaluating price-data providers as a Best Buy replacement (Best Bu
 - Can be removed once `fetch-prices` is running daily with real Best Buy data
 
 ## Seed Data
-`scripts/seed-database.js` has been run once (2026-05-27). The database currently contains:
-- 3 seed products (SKUs: `SEED-RAM-001`, `SEED-RAM-002`, `SEED-SSD-001`)
-- 3 seed price history rows
+`scripts/seed-database.js` was run once (2026-05-27), adding 3 seed products (`SEED-RAM-001`, `SEED-RAM-002`, `SEED-SSD-001`) + 3 seed price_history rows.
 
-When real Best Buy data starts flowing, the cron's upsert logic will add real products alongside these seed rows without conflict (different SKUs). The seed rows can be safely deleted from the Supabase dashboard once real data is confirmed flowing — they won't interfere with anything in the meantime.
+**Removed 2026-07-21.** The seed rows (and their price_history children) were deleted once the real Amazon catalog was upserted — see "Product Catalog" below. The `products` table now holds only real catalog data; `price_history` is empty pending Keepa.
+
+## Product Catalog
+Built 2026-07-21 via `scripts/build-catalog.js` (18 Amazon keyword searches through PriceAPI, ~18 credits) → reviewed preview → `scripts/upsert-catalog.js --confirm`.
+
+- **235 products** in `products` (119 ram / 116 ssd), retailer `amazon`, `sku` = ASIN, clean `/dp/{ASIN}/` URLs (no affiliate tag — appended at display time).
+- Brands resolved via a canonical known-brands map in `build-catalog.js` (`brand_name` is null on PriceAPI search_results); 183 matched, 52 null (off-brand makers left null rather than guessed).
+- `price_history` is intentionally **empty** — the catalog prices were point-in-time search snapshots and were NOT stored as history. Price history comes from Keepa in the next pipeline step.
+- The preview JSON lives at `scripts/output/` (gitignored — regenerable; DB is the source of truth). Re-derive brands/filters offline with `node scripts/build-catalog.js --reprocess` (no credits).
 
 ## Development Notes
 
