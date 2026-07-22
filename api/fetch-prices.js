@@ -10,6 +10,7 @@ require('dotenv').config();
 const supabase = require('../backend/lib/supabase');
 const keepa = require('../backend/lib/keepa');
 const { computeMarketStats } = require('../backend/lib/marketStats');
+const { checkAlerts } = require('../backend/lib/alertCheck');
 
 function log(msg) {
   console.log(`[${new Date().toISOString()}] ${msg}`);
@@ -49,6 +50,7 @@ async function run() {
   log(`Fetched ${keepaProducts.length} products from Keepa`);
 
   const fetchedAt = new Date().toISOString();
+  const currentPriceByProductId = new Map(); // for the alert-check step
   for (const kp of keepaProducts) {
     const product = byAsin.get(kp.asin);
     if (!product) continue;
@@ -66,6 +68,7 @@ async function run() {
         fetched_at: fetchedAt,
       });
       if (insErr) throw insErr;
+      currentPriceByProductId.set(product.id, price);
       if (counts[product.category]) counts[product.category].saved++;
     } catch (err) {
       errors.push({ sku: product.sku, error: err.message });
@@ -85,6 +88,16 @@ async function run() {
     logError('computeMarketStats FAILED (non-fatal, price inserts unaffected)', err);
   }
 
+  // Alert check — best effort: isolated so an alert failure never fails the
+  // cron (price inserts are the critical path).
+  let alertStats = null;
+  try {
+    alertStats = await checkAlerts(supabase, currentPriceByProductId, log, logError);
+    log(`Alerts: checked=${alertStats.checked} matched=${alertStats.matched} sent=${alertStats.sent} failed=${alertStats.failed} expired_cleaned=${alertStats.expired_cleaned}`);
+  } catch (err) {
+    logError('checkAlerts FAILED (non-fatal, price inserts unaffected)', err);
+  }
+
   const duration_ms = Date.now() - startTime;
   const tokens = keepa.getTokenState();
 
@@ -102,6 +115,7 @@ async function run() {
     out_of_stock: outOfStock,
     market_stats: marketStats,
     ...(statsError ? { market_stats_error: statsError } : {}),
+    alerts: alertStats,
     errors,
     tokens_left: tokens.tokensLeft,
     duration_ms,
