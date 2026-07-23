@@ -358,6 +358,17 @@ html.dark .header-search-input::placeholder { color: #64748b; }
   color: #111827;
   margin-bottom: 24px;
 }
+.section-sub {
+  font-size: 0.95rem;
+  color: #6b7280;
+  margin: -16px 0 24px;
+}
+html.dark .section-sub { color: #94a3b8; }
+
+/* Homepage "Biggest Price Drops" — 4 across, reusing .listing-card */
+#biggestDropsGrid { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 900px) { #biggestDropsGrid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { #biggestDropsGrid { grid-template-columns: 1fr; } }
 
 .products-grid {
   display: grid;

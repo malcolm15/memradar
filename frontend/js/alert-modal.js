@@ -234,11 +234,39 @@
     document.getElementById('modalEmailInput').value = '';
     document.getElementById('modalPriceInput').value = '';
     selectedProduct = null;
+    lastResults = [];
     if (window.memradarSearch) window.memradarSearch.loadIndex(function () {});
     window.memradarAlert.ensureTurnstile();
     document.getElementById('alertModal').classList.add('open');
     document.body.style.overflow = 'hidden';
     setTimeout(function () { document.getElementById('modalSearchInput').focus(); }, 100);
+  }
+
+  // Open pre-filled for a known product (e.g. a "Track Price" button), jumping
+  // straight to the target-price step. product: { sku, name, category, current_price }.
+  function openForProduct(product) {
+    if (!product || !product.sku) { openModal(); return; }
+    document.querySelectorAll('.modal-step').forEach(function (s) { s.classList.remove('active'); });
+    selectedProduct = product;
+    lastResults = [];
+    var catLabel = product.category === 'ram' ? 'RAM' : 'SSD';
+    document.getElementById('modalSelectedProduct').innerHTML =
+      '<span class="modal-badge modal-badge--' + esc(product.category) + '">' + catLabel + '</span>' +
+      '<span class="modal-selected-name">' + esc(product.name) + '</span>';
+    document.getElementById('modalPriceInput').value = product.current_price
+      ? Math.max(1, Math.floor(product.current_price * 0.9)) : '';
+    document.getElementById('modalEmailInput').value = '';
+    document.getElementById('priceError').textContent = '';
+    document.getElementById('emailError').textContent = '';
+    document.getElementById('submitError').textContent = '';
+    currentStep = 3;
+    document.getElementById('modalStep3').classList.add('active');
+    updateProgress();
+    if (window.memradarSearch) window.memradarSearch.loadIndex(function () {});
+    window.memradarAlert.ensureTurnstile();
+    document.getElementById('alertModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    setTimeout(function () { document.getElementById('modalEmailInput').focus(); }, 100);
   }
 
   function closeModal() {
@@ -321,7 +349,8 @@
     });
 
     document.getElementById('step2Back').addEventListener('click', function () { goToStep(1); });
-    document.getElementById('step3Back').addEventListener('click', function () { goToStep(2); });
+    // If we arrived at step 3 without a search (openForProduct), Back goes home.
+    document.getElementById('step3Back').addEventListener('click', function () { goToStep(lastResults.length ? 2 : 1); });
     document.getElementById('modalSetAlertBtn').addEventListener('click', submitAlert);
 
     document.getElementById('modalTrackAnotherBtn').addEventListener('click', function () {
@@ -334,6 +363,9 @@
 
     document.addEventListener('keydown', trapFocus);
   }
+
+  // Public API for other scripts (e.g. home-drops.js "Track Price").
+  window.memradarAlertModal = { open: openModal, openForProduct: openForProduct };
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

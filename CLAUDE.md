@@ -166,6 +166,10 @@ The frontend is fully designed and built but the product cards show placeholder 
 
 **Design system:** blue accent `#2563eb`, neutral grays, clean sans-serif. No CSS framework. Mobile responsive with breakpoints at 768px and 480px.
 
+**Homepage "Biggest Price Drops"** (`frontend/js/home-drops.js`): the 4 products with the largest live 30-day price DECREASE, as `.listing-card`s (image, brand badge, price, green ▼ drop %, "Amazon", card→PDP link, "View on Amazon" affiliate link, "Track Price" → alert modal pre-filled via `window.memradarAlertModal.openForProduct`). If fewer than 4 products have a negative 30-day change, remaining slots fill with products CLOSEST to their all-time low (using `all_time_low` from `search-index.json`), and the fill mode per slot is logged. Degrades by omission — the whole section hides on any fetch failure. `search-index.json` now includes `all_time_low` (added to the generator; regenerate to refresh).
+
+**Shared data layer:** `frontend/js/product-data.js` — `window.memradarProductData.load(sb, category?)` runs the three-query live-price pattern (products + latest-48h + 30d-baseline, client-reduced) and returns products with `.price`/`.change30`. Used by BOTH `product-listing.js` and `home-drops.js` (must be included before either). Move price joins to a Postgres RPC/view if the catalog exceeds ~500 products.
+
 ## Deployment Status
 
 - **GitHub Pages:** Live at [memradar.com](https://memradar.com). Deployed via GitHub Actions workflow (`.github/workflows/deploy-frontend.yml`) — triggers on any push to `main` that touches `frontend/`.
