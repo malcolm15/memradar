@@ -14,6 +14,52 @@
   function money(v) {
     return v.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
   }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  // Matches the generator's perGb() exactly.
+  function perGb(v) {
+    return '$' + (v >= 1 ? v.toFixed(2) : v.toFixed(3)) + '/GB';
+  }
+
+  var GOOD_ICON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+
+  // Recompute the good-time-to-buy verdict against the hydrated price, using the
+  // baked 90-day average and the thresholds from #pdpHydrateConfig (same values
+  // the generator used). The 90-day average itself stays baked.
+  function recomputeBuyIndicator(current, cfg) {
+    var ind = document.getElementById('pdpBuyIndicator');
+    if (!ind || cfg.avg90 == null) return;
+    var avg = cfg.avg90;
+    var pct = Math.round(Math.abs(((current - avg) / avg) * 100));
+    if (current <= avg * cfg.goodMaxRatio) {
+      var phrase = pct <= 1 ? 'in line with the ' + cfg.avgLabel : pct + '% below the ' + cfg.avgLabel;
+      ind.className = 'pdp-buy-indicator pdp-buy-indicator--good';
+      ind.innerHTML = '<div class="pdp-buy-indicator-icon" aria-hidden="true">' + GOOD_ICON + '</div>' +
+        '<div class="pdp-buy-indicator-body"><strong>Good time to buy</strong>' +
+        '<span>Current price is ' + esc(phrase) + '.</span></div>';
+    } else {
+      ind.className = 'pdp-buy-indicator pdp-buy-indicator--caution';
+      ind.innerHTML = '<div class="pdp-buy-indicator-icon" aria-hidden="true">⚠</div>' +
+        '<div class="pdp-buy-indicator-body"><strong>Price is elevated</strong>' +
+        '<span>Current price is ' + pct + '% above the ' + esc(cfg.avgLabel) + '. Consider waiting.</span></div>';
+    }
+  }
+
+  // Recompute the price-per-GB line (just division) when capacity was parseable.
+  function recomputeValueMetric(current, cfg) {
+    if (cfg.capGb == null || cfg.segMedian == null) return;
+    var mine = current / cfg.capGb;
+    var rel = mine / cfg.segMedian;
+    var wording = rel < cfg.valueLowRatio ? 'below the segment median — good value'
+      : rel > cfg.valueHighRatio ? 'above the segment median' : 'near the segment median';
+    var perGbEl = document.querySelector('#pdpValueMetric .pdp-value-per-gb');
+    var wordEl = document.querySelector('#pdpValueMetric .pdp-value-wording');
+    if (perGbEl) perGbEl.textContent = 'Price per GB: ' + perGb(mine);
+    if (wordEl) wordEl.textContent = '— ' + wording + ' for ' + cfg.segLabel;
+  }
   function relativeTime(iso) {
     var diff = Date.now() - new Date(iso).getTime();
     if (diff < 0) diff = 0; // guard against clock/timezone edge
@@ -44,6 +90,15 @@
       var price = Number(row.price);
       if (!isNaN(price)) {
         priceEls.forEach(function (el) { if (el) el.textContent = money(price); });
+        // Keep price-derived UI coherent with the hydrated price.
+        var cfgEl = document.getElementById('pdpHydrateConfig');
+        if (cfgEl) {
+          try {
+            var cfg = JSON.parse(cfgEl.textContent);
+            recomputeBuyIndicator(price, cfg);
+            recomputeValueMetric(price, cfg);
+          } catch (e) { /* leave baked verdict on bad config */ }
+        }
       }
       updatedEl.textContent = 'Updated ' + relativeTime(row.fetched_at);
     })
