@@ -1758,6 +1758,8 @@ html.dark .notice-btn--primary { color: #fff; }
   letter-spacing: -0.5px;
   color: #111827;
   line-height: 1.15;
+  display: block;
+  min-height: 1.15em; /* hydration swaps text in place; keep the box height stable */
 }
 .pdp-stat-note {
   font-size: 0.75rem;
@@ -1774,6 +1776,7 @@ html.dark .notice-btn--primary { color: #fff; }
   color: #6b7280;
   margin-bottom: 16px;
   line-height: 1.5;
+  min-height: 1.5em; /* hydration rewrites the wording; reserve one line */
 }
 .pdp-value-per-gb { color: #374151; }
 .pdp-value-avg { color: #9ca3af; }
@@ -1786,6 +1789,7 @@ html.dark .notice-btn--primary { color: #fff; }
   padding: 14px 18px;
   border-radius: 10px;
   font-size: 0.9rem;
+  min-height: 66px; /* verdict is re-rendered on hydration; reserve the two-line box */
 }
 .pdp-buy-indicator--good {
   background: #f0fdf4;
@@ -1868,6 +1872,12 @@ html.dark .notice-btn--primary { color: #fff; }
   position: relative;
   height: 300px;
   margin-bottom: 14px;
+}
+/* Pre-init the canvas fills the reserved container exactly, so Chart.js
+   (maintainAspectRatio: false) takes over the same box - no reflow on init. */
+.pdp-chart-container canvas {
+  width: 100%;
+  height: 100%;
 }
 .pdp-chart-disclaimer {
   font-size: 0.78rem;

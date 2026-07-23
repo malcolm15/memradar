@@ -60,6 +60,34 @@
     if (perGbEl) perGbEl.textContent = 'Price per GB: ' + perGb(mine);
     if (wordEl) wordEl.textContent = '· ' + wording + ' for ' + cfg.segLabel;
   }
+  // Next price-fetch boundary (06:00 / 18:00 UTC cron) - same computation as
+  // the generator's nextFetchIso(), so the JSON-LD validity window is always
+  // the next scheduled fetch regardless of when the page was baked.
+  function nextFetchIso() {
+    var d = new Date();
+    var h = d.getUTCHours();
+    return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), h < 6 ? 6 : h < 18 ? 18 : 30, 0, 0)).toISOString();
+  }
+
+  // Keep the Product JSON-LD coherent with the hydrated price: update
+  // offers.price and roll priceValidUntil forward. Rendering crawlers see the
+  // same numbers the visible page shows.
+  function updateJsonLd(price) {
+    var el = document.querySelector('script[type="application/ld+json"]');
+    if (!el) return;
+    try {
+      var data = JSON.parse(el.textContent);
+      var graph = data['@graph'] || [];
+      for (var i = 0; i < graph.length; i++) {
+        if (graph[i]['@type'] === 'Product' && graph[i].offers) {
+          graph[i].offers.price = price;
+          graph[i].offers.priceValidUntil = nextFetchIso();
+        }
+      }
+      el.textContent = JSON.stringify(data).replace(/<\//g, '<\\/');
+    } catch (e) { /* leave the baked JSON-LD on any parse issue */ }
+  }
+
   function relativeTime(iso) {
     var diff = Date.now() - new Date(iso).getTime();
     if (diff < 0) diff = 0; // guard against clock/timezone edge
@@ -99,6 +127,7 @@
             recomputeValueMetric(price, cfg);
           } catch (e) { /* leave baked verdict on bad config */ }
         }
+        updateJsonLd(price);
       }
       updatedEl.textContent = 'Updated ' + relativeTime(row.fetched_at);
     })
