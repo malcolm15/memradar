@@ -1279,7 +1279,7 @@ html.dark .listing-card-name-link:hover { color: #93c5fd; }
 /* PDP single product image (replaces the template's carousel placeholder) */
 .pdp-main-img {
   max-width: 100%;
-  max-height: 320px;
+  max-height: 100%;
   object-fit: contain;
   display: block;
   margin: 0 auto;
@@ -1536,7 +1536,7 @@ html.dark .notice-btn--primary { color: #fff; }
 /* ── Breadcrumb ── */
 .pdp-breadcrumb {
   border-bottom: 1px solid #e5e7eb;
-  padding: 12px 0;
+  padding: 9px 0;
 }
 .pdp-breadcrumb-list {
   display: flex;
@@ -1553,13 +1553,13 @@ html.dark .notice-btn--primary { color: #fff; }
 
 /* ── Product Header ── */
 .pdp-header-section {
-  padding: 32px 0 36px;
+  padding: 20px 0 22px;
   border-bottom: 1px solid #e5e7eb;
 }
 .pdp-header-inner {
   display: grid;
-  grid-template-columns: 440px 1fr;
-  gap: 48px;
+  grid-template-columns: 360px 1fr;
+  gap: 32px;
   align-items: start;
 }
 
@@ -1573,7 +1573,8 @@ html.dark .notice-btn--primary { color: #fff; }
 }
 .pdp-carousel-main {
   flex: 1;
-  aspect-ratio: 1;
+  height: 260px; /* fixed reservation (was aspect-ratio: 1, a mostly-empty square) */
+  padding: 12px;
   background: #f3f4f6;
   border-radius: 12px;
   border: 1px solid #e5e7eb;
@@ -1631,7 +1632,7 @@ html.dark .notice-btn--primary { color: #fff; }
 }
 
 /* ── Product Info Column ── */
-.pdp-info-col { display: flex; flex-direction: column; gap: 16px; padding-top: 4px; }
+.pdp-info-col { display: flex; flex-direction: column; gap: 12px; padding-top: 2px; }
 
 .pdp-badges { display: flex; gap: 8px; flex-wrap: wrap; }
 .pdp-badge {
@@ -1728,13 +1729,13 @@ html.dark .notice-btn--primary { color: #fff; }
 .pdp-stats-region {
   background: #f9fafb;
   border-bottom: 1px solid #e5e7eb;
-  padding: 28px 0;
+  padding: 18px 0;
 }
 .pdp-stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 .pdp-stat {
   background: #fff;
@@ -1774,7 +1775,7 @@ html.dark .notice-btn--primary { color: #fff; }
 .pdp-value-metric {
   font-size: 0.88rem;
   color: #6b7280;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
   line-height: 1.5;
   min-height: 1.5em; /* hydration rewrites the wording; reserve one line */
 }
@@ -1828,15 +1829,17 @@ html.dark .notice-btn--primary { color: #fff; }
 
 /* ── Sections ── */
 .pdp-section {
-  padding: 40px 0;
+  padding: 22px 0;
   border-bottom: 1px solid #e5e7eb;
 }
+/* the Buy Now section and the alert card are one decision moment: close the gap */
+.pdp-section:has(+ .pdp-alert-section) { padding-bottom: 16px; }
 .pdp-section-heading {
   font-size: 1.2rem;
   font-weight: 800;
   color: #111827;
   letter-spacing: -0.3px;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 /* ── Chart ── */
@@ -1847,7 +1850,7 @@ html.dark .notice-btn--primary { color: #fff; }
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 .pdp-chart-header .pdp-section-heading { margin-bottom: 0; }
 .pdp-range-btns {
@@ -1870,8 +1873,8 @@ html.dark .notice-btn--primary { color: #fff; }
 .pdp-range-btn.active { background: #2563eb; border-color: #2563eb; color: #fff; }
 .pdp-chart-container {
   position: relative;
-  height: 300px;
-  margin-bottom: 14px;
+  height: 300px; /* CLS reservation: do not change */
+  margin-bottom: 10px;
 }
 /* Pre-init the canvas fills the reserved container exactly, so Chart.js
    (maintainAspectRatio: false) takes over the same box - no reflow on init. */
@@ -1907,7 +1910,7 @@ html.dark .notice-btn--primary { color: #fff; }
   border-bottom: 1px solid #f3f4f6;
 }
 .pdp-retailers-table tbody td {
-  padding: 14px 16px;
+  padding: 11px 16px;
   font-size: 0.92rem;
   color: #374151;
   vertical-align: middle;
@@ -1962,17 +1965,17 @@ html.dark .pdp-amazon-disclaimer { color: #64748b; }
 
 /* ── Alert Section ── */
 .pdp-alert-section {
-  padding: 40px 0;
+  padding: 16px 0 22px; /* tight above: pairs with Buy Now as one decision moment */
   border-bottom: 1px solid #e5e7eb;
 }
 .pdp-alert-card {
   background: #eff6ff;
   border: 1px solid #bfdbfe;
   border-radius: 16px;
-  padding: 32px 36px;
+  padding: 24px 28px;
   display: grid;
   grid-template-columns: 1fr 1.4fr;
-  gap: 40px;
+  gap: 28px;
   align-items: center;
 }
 .pdp-alert-card-left h2 {
@@ -2130,7 +2133,7 @@ html.dark .pdp-amazon-disclaimer { color: #64748b; }
 }
 .pdp-spec-row dt,
 .pdp-spec-row dd {
-  padding: 12px 18px;
+  padding: 9px 16px;
   font-size: 0.9rem;
   border-bottom: 1px solid #e5e7eb;
 }
@@ -2146,13 +2149,16 @@ html.dark .pdp-amazon-disclaimer { color: #64748b; }
 
 /* ── Related Products ── */
 .pdp-related-section {
-  padding: 40px 0 60px;
+  padding: 22px 0 36px;
 }
 .pdp-related-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  gap: 14px;
 }
+/* PDP-scoped card tightening; listing pages keep their own scale */
+.pdp-related-grid .listing-card-img { height: 118px; }
+.pdp-related-grid .listing-card-body { padding: 12px 14px; }
 .pdp-related-per-gb {
   font-size: 0.75rem;
   color: #9ca3af;
@@ -2256,14 +2262,14 @@ html.dark .pdp-related-per-gb { color: #64748b; }
    PDP Responsive
    ══════════════════════════════════════════════════════════════ */
 @media (max-width: 1024px) {
-  .pdp-header-inner { grid-template-columns: 360px 1fr; gap: 36px; }
+  .pdp-header-inner { grid-template-columns: 320px 1fr; gap: 28px; }
 }
 
 @media (max-width: 900px) {
   .pdp-header-inner { grid-template-columns: 1fr; gap: 28px; }
-  .pdp-carousel-main { max-height: 380px; }
+  .pdp-carousel-main { height: 240px; }
   .pdp-product-title { font-size: 1.4rem; }
-  .pdp-alert-card { grid-template-columns: 1fr; gap: 24px; }
+  .pdp-alert-card { grid-template-columns: 1fr; gap: 16px; }
   .pdp-related-grid { grid-template-columns: repeat(3, 260px); overflow-x: auto; padding-bottom: 8px; }
 }
 
@@ -2274,20 +2280,22 @@ html.dark .pdp-related-per-gb { color: #64748b; }
   .pdp-specs-dl { grid-template-columns: 1fr; }
   .pdp-spec-row dt,
   .pdp-spec-row dd { border-right: none; }
-  .pdp-spec-row dt { border-bottom: none; padding-bottom: 4px; }
+  .pdp-spec-row dt { border-bottom: none; padding-bottom: 3px; }
+  .pdp-spec-row dd { padding-top: 2px; }
 }
 
 @media (max-width: 480px) {
   .pdp-breadcrumb-list { font-size: 0.75rem; }
   .pdp-product-title { font-size: 1.25rem; }
-  .pdp-header-section { padding: 20px 0 24px; }
+  .pdp-header-section { padding: 16px 0 18px; }
+  .pdp-stats-region { padding: 14px 0; }
   .pdp-stats-grid { gap: 10px; }
   .pdp-stat-value { font-size: 1.3rem; }
-  .pdp-chart-container { height: 220px; }
+  .pdp-chart-container { height: 220px; } /* CLS reservation: do not change */
   .pdp-range-btn { padding: 4px 9px; font-size: 0.75rem; }
   .pdp-alert-card { padding: 20px; }
-  .pdp-section { padding: 28px 0; }
-  .pdp-related-section { padding: 28px 0 44px; }
+  .pdp-section { padding: 20px 0; }
+  .pdp-related-section { padding: 20px 0 32px; }
 }
 
 /* ══════════════════════════════════════════════════════════════
