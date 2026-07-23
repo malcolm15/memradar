@@ -815,11 +815,22 @@ html.dark .content-page a { color: #93c5fd; }
   font-family: inherit;
 }
 .modal-btn-back:hover { color: #374151; }
+.modal-results-count {
+  font-size: 0.82rem;
+  color: #6b7280;
+  margin: -6px 0 10px;
+}
+html.dark .modal-results-count { color: #94a3b8; }
 .modal-results {
   display: flex;
   flex-direction: column;
   gap: 8px;
   margin-bottom: 16px;
+  /* own scroll region: long result lists scroll here while the Back button
+     stays visible below (the card itself also caps at 90vh) */
+  max-height: min(360px, 48vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 .modal-result-card {
   display: flex;

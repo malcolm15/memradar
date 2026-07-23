@@ -33,6 +33,10 @@
   var currentStep = 1;
   var selectedProduct = null; // { sku, name, category, current_price }
   var lastResults = [];
+  // Single scrollable list, ranked by the site-wide search module (no second
+  // ranking implementation, no pagination state to go stale). Beyond the cap
+  // we say so and ask the user to refine.
+  var MAX_RESULTS = 30;
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -81,6 +85,7 @@
 
           <div class="modal-step" id="modalStep2">
             <h2 class="modal-heading">Select a product</h2>
+            <p class="modal-results-count" id="modalResultsCount"></p>
             <div class="modal-results" id="modalResults"></div>
             <div class="modal-footer-row">
               <button class="modal-btn-back" id="step2Back">← Back</button>
@@ -165,18 +170,25 @@
     if (!query) { document.getElementById('modalSearchInput').focus(); return; }
     if (!window.memradarSearch) return;
     window.memradarSearch.loadIndex(function () {
-      lastResults = window.memradarSearch.search(query).slice(0, 6);
-      renderResults(query);
+      var all = window.memradarSearch.search(query);
+      lastResults = all.slice(0, MAX_RESULTS);
+      renderResults(query, all.length);
       goToStep(2);
     });
   }
 
-  function renderResults(query) {
+  function renderResults(query, totalMatches) {
     var container = document.getElementById('modalResults');
+    var countEl = document.getElementById('modalResultsCount');
+    container.scrollTop = 0; // fresh search always starts at the top of the list
     if (!lastResults.length) {
+      countEl.textContent = '';
       container.innerHTML = '<p class="modal-no-results">No products match “' + esc(query) + '”. Try another search.</p>';
       return;
     }
+    countEl.textContent = totalMatches > MAX_RESULTS
+      ? 'Showing the top ' + MAX_RESULTS + ' of ' + totalMatches + ' matches. Refine your search to narrow it down.'
+      : totalMatches + (totalMatches === 1 ? ' match' : ' matches');
     container.innerHTML = lastResults.map(function (p) {
       var catLabel = p.category === 'ram' ? 'RAM' : 'SSD';
       return '<button class="modal-result-card" data-sku="' + esc(p.sku) + '" aria-label="Select ' + esc(p.name) + '">' +
