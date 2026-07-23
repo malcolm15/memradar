@@ -1,8 +1,8 @@
-// Product listing pages (RAM + SSD) — shared. Detects category from
+// Product listing pages (RAM + SSD) - shared. Detects category from
 // data-category on the grid, loads real products + prices from Supabase, and
 // wires the filter pills / sort entirely client-side over the fetched dataset.
 //
-// Data strategy — THREE queries total, all reduced client-side (no N+1):
+// Data strategy - THREE queries total, all reduced client-side (no N+1):
 //   1. products for this category
 //   2. price_history in the last 48h  -> newest row per product (current price)
 //   3. price_history 25-35 days back   -> row closest to 30d (baseline for %chg)
@@ -44,7 +44,7 @@
     });
   }
   function fmtPrice(v) {
-    return v == null ? '$—' : v.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+    return v == null ? 'N/A' : v.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
   }
   function affiliateUrl(url) {
     if (!url) return '#';
@@ -54,10 +54,10 @@
   // ---------- name parsing (filters) ----------
   // Products whose titles lack a parseable token stay reachable via All/Type/
   // Capacity but won't match the specific filter below. As of 2026-07-22 these
-  // 9 SKUs are affected — the future static-generation / PDP phase must handle
+  // 9 SKUs are affected - the future static-generation / PDP phase must handle
   // these nulls gracefully in spec tables:
   //   No parseable SPEED (1 RAM):
-  //     B0BQWXTDWN (Trident Z5 RGB 32GB DDR5 — no MHz/MT in title)
+  //     B0BQWXTDWN (Trident Z5 RGB 32GB DDR5 - no MHz/MT in title)
   //   No FORM-FACTOR token (8 SSD, all M.2 drives whose titles omit "M.2"/"2.5"):
   //     B0B3RP4XCG, B0CK39YR9V, B0CK2RKPBL, B0DBBG7CG7, B0DBBJSGFQ,
   //     B0CK2R8YLY, B0CTRV9CVP, B0DZ5ZK225
@@ -84,7 +84,7 @@
     while ((m = re.exec(str))) caps.push(/tb/i.test(m[2]) ? +m[1] * 1024 : +m[1]);
     return caps;
   }
-  // Total capacity: kit names read "32GB (2x16GB)" — the TOTAL appears before
+  // Total capacity: kit names read "32GB (2x16GB)" - the TOTAL appears before
   // the "(". Use the pre-paren capacity if present, else the largest token
   // (covers bracket notation "[2 x 16GB]" and single modules).
   function totalCapacityGB(name) {
@@ -98,7 +98,7 @@
     if (!m) return null;
     return /tb/i.test(m[2]) ? +m[1] * 1024 : +m[1];
   }
-  // SSD type — SATA wins over NVMe/M.2 (M.2 SATA drives are SATA-protocol),
+  // SSD type - SATA wins over NVMe/M.2 (M.2 SATA drives are SATA-protocol),
   // matching backend/lib/marketStats.js.
   function ssdType(name) {
     if (/sata|2\.5/i.test(name)) return 'SATA';

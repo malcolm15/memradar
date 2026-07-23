@@ -2,7 +2,7 @@ const searchForm = document.getElementById('searchForm');
 const searchInput = document.getElementById('searchInput');
 
 // Client-side rate limiting on form submits. Search itself runs locally
-// against a static index (no server cost) — this only guards against
+// against a static index (no server cost) - this only guards against
 // pathological automation, so the ceiling is generous.
 const searchAttempts = [];
 const SEARCH_LIMIT = 120;
@@ -44,7 +44,7 @@ if (searchForm && searchInput) {
         searchForm.appendChild(el);
         return el;
       })();
-      hint.textContent = 'Too many searches — please wait a moment.';
+      hint.textContent = 'Too many searches. Please wait a moment.';
       setTimeout(() => { hint.textContent = ''; }, 3000);
       return;
     }
@@ -52,7 +52,7 @@ if (searchForm && searchInput) {
     if (api) api.submitQuery();
   });
 
-  // "Try:" suggestion chips — populate the input and search immediately.
+  // "Try:" suggestion chips - populate the input and search immediately.
   document.querySelectorAll('.search-try').forEach(chip => {
     chip.addEventListener('click', () => {
       searchInput.value = chip.dataset.q || chip.textContent.trim();

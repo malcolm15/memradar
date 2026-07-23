@@ -1,4 +1,4 @@
-/* MemRadar — Main Stylesheet */
+/* MemRadar - Main Stylesheet */
 
 /* ── Reset & Base ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -365,7 +365,7 @@ html.dark .header-search-input::placeholder { color: #64748b; }
 }
 html.dark .section-sub { color: #94a3b8; }
 
-/* Homepage "Biggest Price Drops" — 4 across, reusing .listing-card */
+/* Homepage "Biggest Price Drops" - 4 across, reusing .listing-card */
 #biggestDropsGrid { grid-template-columns: repeat(4, 1fr); }
 @media (max-width: 900px) { #biggestDropsGrid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 480px) { #biggestDropsGrid { grid-template-columns: 1fr; } }
@@ -1378,7 +1378,7 @@ html.dark .listing-about h2 { color: #94a3b8; }
 html.dark .listing-about p { color: #64748b; }
 html.dark .listing-about a { color: #93c5fd; }
 
-/* Dark mode — listing pages */
+/* Dark mode - listing pages */
 html.dark .listing-hero { border-bottom-color: #2d3f55; }
 html.dark .listing-hero h1 { color: #f1f5f9; }
 html.dark .listing-hero p { color: #64748b; }
@@ -2087,7 +2087,7 @@ html.dark .pdp-amazon-disclaimer { color: #64748b; }
   text-align: center;
   padding: 16px 0;
 }
-/* An explicit display: above defeats the [hidden] attribute — restore it so
+/* An explicit display: above defeats the [hidden] attribute - restore it so
    the success state only shows after a submit. */
 .pdp-alert-success[hidden] { display: none; }
 .pdp-alert-success-icon {
@@ -2340,7 +2340,7 @@ html.dark .coming-soon-dot::after { border-color: #3b82f6; }
   .coming-soon-text { font-size: 0.85rem; }
 }
 
-/* ── Market Pulse — last updated ── */
+/* ── Market Pulse - last updated ── */
 .pulse-updated {
   font-size: 0.75rem;
   color: #9ca3af;
@@ -2409,7 +2409,7 @@ html.dark .pulse-updated { color: #64748b; }
 }
 .faq-item.open .faq-chevron { transform: rotate(180deg); }
 
-/* max-height transition — no display:none so toggle is always reliable */
+/* max-height transition - no display:none so toggle is always reliable */
 .faq-answer {
   overflow: hidden;
   max-height: 0;

@@ -1,5 +1,5 @@
 // Market Pulse: replace the hardcoded homepage stats with live market_stats
-// rows. The hardcoded HTML values are the loading state — if the fetch fails
+// rows. The hardcoded HTML values are the loading state - if the fetch fails
 // or a segment has no data, they stay as-is (never show a broken section).
 (function () {
   var sb = window.memradarSupabase;

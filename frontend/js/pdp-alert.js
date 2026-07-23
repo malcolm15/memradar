@@ -60,7 +60,7 @@
     }).catch(function () {
       submitBtn.disabled = false;
       submitBtn.textContent = 'Set Alert';
-      showError('Network error — your details are still here. Please try again.');
+      showError('Network error. Your details are still here. Please try again.');
     });
   });
 })();

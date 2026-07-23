@@ -1,6 +1,6 @@
 // Mobile navigation dropdown (shared across all pages with the site header).
 // Owns the hamburger toggle injected into <nav> and the #mobileNavPanel.
-// Desktop (>768px) is unaffected — CSS hides both the toggle and the panel.
+// Desktop (>768px) is unaffected - CSS hides both the toggle and the panel.
 (function () {
   var toggle = document.getElementById('mobileNavToggle');
   var panel = document.getElementById('mobileNavPanel');
@@ -24,7 +24,7 @@
     isOpen() ? close() : open();
   });
 
-  // Tapping a link navigates away — no state to manage. Close on any tap
+  // Tapping a link navigates away - no state to manage. Close on any tap
   // outside the panel and toggle.
   document.addEventListener('click', function (e) {
     if (!isOpen()) return;

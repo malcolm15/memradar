@@ -2,7 +2,7 @@
 // hero input, the header search overlay on every other page, and the ?q=
 // filter handoff to listing pages.
 //
-// Index: /search-index.json (emitted by scripts/generate-product-pages.js —
+// Index: /search-index.json (emitted by scripts/generate-product-pages.js -
 // regenerate after catalog changes). Fetched once on first focus of any
 // search input, cached in memory for the session.
 //
@@ -48,7 +48,7 @@ window.memradarSearch = (function () {
       .then(function (data) {
         data.forEach(function (p) {
           p._n = normalize(p.search);          // normalized, spaced
-          p._nc = p._n.replace(/\s+/g, '');    // compact — catches "gskill"
+          p._nc = p._n.replace(/\s+/g, '');    // compact - catches "gskill"
           p._brand = normalize(p.brand || '');
           p._name = normalize(p.name);
         });
@@ -111,7 +111,7 @@ window.memradarSearch = (function () {
 
   // Bold each query token's first occurrence in the raw name (case-insensitive,
   // punctuation-stripped token). Tokens that only match via normalization
-  // simply aren't bolded — display stays correct.
+  // simply aren't bolded - display stays correct.
   function highlightName(name, query) {
     var ranges = [];
     tokenize(query).forEach(function (tok) {

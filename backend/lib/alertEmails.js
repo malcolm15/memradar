@@ -2,7 +2,7 @@
 //
 // SECURITY RULE: user-controlled input appears NOWHERE in email content. The
 // recipient address is the ONLY place the user's input is used. Everything
-// rendered in the body — product name, prices, URLs — comes from OUR database.
+// rendered in the body - product name, prices, URLs - comes from OUR database.
 // Product names originate from Amazon (not the user) but are still HTML-escaped
 // because they contain & and " characters.
 const FROM = 'MemRadar <hello@memradar.com>';
@@ -77,7 +77,7 @@ function confirmationEmail({ productName, targetPrice, confirmToken, unsubscribe
           <p style="margin:0 0 4px;font-size:15px;color:#111827;font-weight:600;line-height:1.4;">${name}</p>
           <p style="margin:0 0 20px;font-size:14px;color:#374151;">Target price: <strong>${price}</strong></p>
           <p style="margin:0 0 20px;">${button(confirmUrl, 'Confirm my alert')}</p>
-          <p style="margin:0 0 16px;font-size:13px;color:#6b7280;line-height:1.6;">This link expires in 48 hours. If you didn't request this, you can ignore this email — no alert will be set.</p>
+          <p style="margin:0 0 16px;font-size:13px;color:#6b7280;line-height:1.6;">This link expires in 48 hours. If you didn't request this, you can ignore this email. No alert will be set.</p>
         </td></tr>
         ${unsubLineHtml(unsubUrl)}`);
 
@@ -89,7 +89,7 @@ Target price: ${price}
 Confirm your alert (link expires in 48 hours):
 ${confirmUrl}
 
-If you didn't request this, ignore this email — no alert will be set.
+If you didn't request this, ignore this email. No alert will be set.
 
 Unsubscribe: ${unsubUrl}`;
 

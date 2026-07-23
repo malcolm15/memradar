@@ -1,4 +1,4 @@
-// Homepage "Biggest Price Drops" — the 4 products with the largest 30-day
+// Homepage "Biggest Price Drops" - the 4 products with the largest 30-day
 // price DECREASE right now, populated from live data (shared three-query
 // loader in product-data.js). If fewer than 4 have a negative 30-day change,
 // remaining slots are filled with products CLOSEST to their all-time low
@@ -19,7 +19,7 @@
     });
   }
   function money(v) {
-    return v == null ? '$—' : v.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+    return v == null ? 'N/A' : v.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
   }
   function affiliateUrl(url, sku) {
     var u = url || ('https://www.amazon.com/dp/' + sku + '/');
@@ -44,7 +44,7 @@
       ? '<img src="' + esc(p.image_url) + '" alt="' + esc(p.name) + '" loading="lazy" class="listing-card-img-el">'
       : '';
     // Only real 30-day drops show the green indicator; ATL-fallback cards don't
-    // (their change30 may be null or non-negative — never show a wrong badge).
+    // (their change30 may be null or non-negative - never show a wrong badge).
     var change = '';
     if (p.change30 != null && p.change30 < 0) {
       change = '<span class="listing-card-change listing-card-change--down">▼ ' + Math.abs(Math.round(p.change30)) + '%</span>';
@@ -92,7 +92,7 @@
   }
 
   // Fetch all_time_low map from the generated search index (only when the
-  // fallback is actually needed — the common case has >=4 real drops).
+  // fallback is actually needed - the common case has >=4 real drops).
   function fetchAtlMap() {
     var ver = (function () {
       var s = document.querySelector('script[src*="home-drops.js"]');

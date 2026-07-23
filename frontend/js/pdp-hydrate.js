@@ -1,5 +1,5 @@
 // PDP price hydration. PDPs bake current price + "Last updated" at generation
-// time, but prices now update twice daily WITHOUT regeneration — so on load we
+// time, but prices now update twice daily WITHOUT regeneration - so on load we
 // fetch the latest price_history row for this product and replace the baked
 // current-price displays and the "Last updated" line with a relative time.
 // Fails gracefully: on any error the baked values remain (never a broken UI).
@@ -53,12 +53,12 @@
     if (cfg.capGb == null || cfg.segMedian == null) return;
     var mine = current / cfg.capGb;
     var rel = mine / cfg.segMedian;
-    var wording = rel < cfg.valueLowRatio ? 'below the segment median — good value'
+    var wording = rel < cfg.valueLowRatio ? 'below the segment median, good value'
       : rel > cfg.valueHighRatio ? 'above the segment median' : 'near the segment median';
     var perGbEl = document.querySelector('#pdpValueMetric .pdp-value-per-gb');
     var wordEl = document.querySelector('#pdpValueMetric .pdp-value-wording');
     if (perGbEl) perGbEl.textContent = 'Price per GB: ' + perGb(mine);
-    if (wordEl) wordEl.textContent = '— ' + wording + ' for ' + cfg.segLabel;
+    if (wordEl) wordEl.textContent = '· ' + wording + ' for ' + cfg.segLabel;
   }
   function relativeTime(iso) {
     var diff = Date.now() - new Date(iso).getTime();

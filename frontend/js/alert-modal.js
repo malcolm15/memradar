@@ -40,7 +40,7 @@
     });
   }
   function money(v) {
-    return v == null ? '$—' : Number(v).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+    return v == null ? 'N/A' : Number(v).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
   }
 
   function buildModal() {
@@ -327,7 +327,7 @@
       submitError.textContent = 'Something went wrong. Please try again in a moment.';
     }).catch(function () {
       btn.disabled = false; btn.textContent = 'Set Alert';
-      submitError.textContent = 'Network error — your details are still here. Please try again.';
+      submitError.textContent = 'Network error. Your details are still here. Please try again.';
     });
   }
 
