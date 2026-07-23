@@ -298,12 +298,16 @@ Full email-alert flow. **PII (email addresses) — every decision errs toward pr
 
 **TODO (deferred, not built):** a mechanism to send deferred confirmation emails after the circuit breaker trips (rows are inserted but their confirmation email is skipped).
 
-## What's Not Built Yet
-- Alert signup flow (email collection → `alerts` table insert)
-- Alert trigger logic (compare current price to target, send email)
-- Amazon data source
-- User accounts (currently no auth; alerts use plain email)
-- Affiliate link tracking
+## Project Status
+
+**The original May roadmap is fully built and live as of 2026-07-22.** MemRadar has: the Keepa-backed daily price pipeline, 235 static product pages with decade-deep history, live Market Pulse + listing pages, site-wide instant search, and the complete double-opt-in **alert backend — deployed and verified end-to-end** (submit → confirmation email → confirm → daily cron match → price-drop email with affiliate link → unsubscribe). The site is functionally launched.
+
+**Not built (post-launch / future):**
+- User accounts (currently no auth; alerts use plain email + tokens)
+- Affiliate link tracking / analytics beyond GA events
+- Daily automated PDP regeneration (GitHub Action — see Product Detail Pages TODO)
+- Deferred-confirmation resend after the alert circuit breaker trips (see Alert Backend TODO)
+- Additional retailers (Best Buy client dormant; Walmart/Newegg never integrated)
 
 ## Data Source Evaluation Findings (July 2026)
 
