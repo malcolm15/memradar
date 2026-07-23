@@ -17,7 +17,7 @@ MemRadar tracks RAM and SSD prices across retailers (Best Buy at launch, Amazon 
 | Backend | Node.js serverless functions on Vercel |
 | Database | Supabase (Postgres) |
 | Data source | Keepa API — Amazon price history (launch). Best Buy client dormant (never approved) |
-| Cron | Vercel cron — daily at 06:00 UTC (`0 6 * * *`) |
+| Cron | Vercel cron — **twice daily**: 06:00 + 18:00 UTC (two entries, same `/api/fetch-prices`) |
 
 ## Directory Structure
 
@@ -113,7 +113,7 @@ Required in `.env` (local) and Vercel project settings (production):
 
 ## How the Price Fetch Works (Keepa)
 
-1. Vercel cron hits `/api/fetch-prices` daily at 06:00 UTC
+1. Vercel cron hits `/api/fetch-prices` **twice daily** at 06:00 and 18:00 UTC (two `vercel.json` cron entries pointing at the same path — Vercel Hobby runs each cron at most once/day, so two entries = twice/day; catches US-daytime repricing)
 2. Handler verifies `Authorization: Bearer <CRON_SECRET>`
 3. Loads the Amazon catalog from `products` (retailer=`amazon`, `sku` = ASIN)
 4. Fetches current stats from Keepa in batches of ≤100 ASINs (`history=0&stats=90` — stats only, smaller payload, same token cost of 1/ASIN)
@@ -121,6 +121,8 @@ Required in `.env` (local) and Vercel project settings (production):
 6. Returns a JSON summary: `{success, source:'keepa', ram/ssd counts, out_of_stock, errors, tokens_left, duration_ms}`
 
 The script can also run directly via `node api/fetch-prices.js` for manual testing.
+
+**Twice-daily is safe for every `price_history` consumer** (each appends one snapshot per run — two rows/product/day): market-stats uses the run's explicit batch timestamp; the 30-day-change / latest-price loaders reduce to newest-in-window and closest-to-30d; the chart downsampler keeps the *last* reading per UTC day; the alert check's send-then-mark (`triggered=true` only after a successful send) prevents double-emails while giving faster delivery. **Trade-off:** 2×/day was chosen (≈940 tokens/day vs a ~28,800 budget). More frequent updates are possible via an external cron service hitting `/api/fetch-prices` with the `CRON_SECRET` bearer (Vercel Hobby caps a single cron at once/day) — **TODO if intraday freshness ever needs to be tighter.**
 
 **Best Buy client is DORMANT:** `backend/lib/bestbuy.js` is kept intact but unused (access never approved). If approval ever comes it can be revived as a second retailer source.
 
@@ -255,6 +257,8 @@ All queries paginate at PostgREST's 1000-row cap. At ~120 products/page this is 
 - **Baked chart data:** full price history is inlined as `<script type="application/json" id="priceHistoryData">` `[["YYYY-MM-DD", price], …]` — daily within the last year, weekly 1–3yr back, monthly beyond (decade histories ≈432 points max). Range buttons (1M/3M/6M/1Y/All) filter the baked data client-side; no Supabase query for initial render. Chart.js from cdnjs.
 - **Honesty rules baked in:** no star ratings (no review data); specs table renders only confidently parsed rows; <30-day histories get a "Limited price history — tracking since {date}" note and the stats/indicator say "average since tracking began"; buy indicator (good/caution) uses real percentages; JSON-LD Product schema uses the canonical URL (never the affiliate link) and real availability.
 - Stats per page (computed from full history at build time): current, all-time low/high with month+year, 90-day average, 30-day change, price-per-GB vs segment median $/GB.
+- **Price hydration (`frontend/js/pdp-hydrate.js`):** prices update twice daily WITHOUT regeneration, so the baked current price would go stale. On load, the PDP fetches its latest `price_history` row from Supabase (embedded query on `products.sku`, filtered `fetched_at <= now` to skip backfill T23:59 buckets) and replaces the baked **current-price displays** (`#pdpCurrentPrice`, `#pdpBuyPrice`) and the **"Last updated"** line (`#pdpLastUpdated`) with a relative time ("Updated 3 hours ago"). Fails gracefully — baked values remain on any error. NOTE: the 90-day-average stat and the buy-indicator remain baked (generation-time); only the current price + timestamp hydrate. Requires `supabase-client.js` on PDPs (added to the generator's script list).
+- **Amazon staleness disclaimer:** a muted "Price may have changed on Amazon since our last check." line sits under the Buy Now button (`.pdp-amazon-disclaimer`).
 - Similar Products: 3 same-segment products nearest by current price, linking to their generated URLs.
 - **Regeneration workflow (manual for now):** `node scripts/generate-product-pages.js --confirm`, then commit + push (generated pages ARE committed — they're the deployed site), then purge Cloudflare. **TODO:** daily automated regeneration via a scheduled GitHub Action (not built yet).
 - Sitemap: regenerated on each run — static URLs preserved, product URLs replaced (priority 0.6, changefreq daily, lastmod = build date).

@@ -1932,12 +1932,19 @@ html.dark .notice-btn--primary { color: #fff; }
   float: right;
 }
 .pdp-buy-btn:hover { background: #1d4ed8; }
+.pdp-amazon-disclaimer {
+  font-size: 0.78rem;
+  color: #9ca3af;
+  margin: 10px 0 0;
+}
+html.dark .pdp-amazon-disclaimer { color: #64748b; }
 .pdp-retailers-meta {
   display: flex;
   flex-wrap: wrap;
   gap: 4px 16px;
   font-size: 0.78rem;
   color: #9ca3af;
+  margin-top: 8px;
 }
 .pdp-retailers-meta a { color: #6b7280; }
 .pdp-retailers-meta a:hover { color: #2563eb; text-decoration: underline; }
@@ -2080,6 +2087,9 @@ html.dark .notice-btn--primary { color: #fff; }
   text-align: center;
   padding: 16px 0;
 }
+/* An explicit display: above defeats the [hidden] attribute — restore it so
+   the success state only shows after a submit. */
+.pdp-alert-success[hidden] { display: none; }
 .pdp-alert-success-icon {
   width: 52px;
   height: 52px;
