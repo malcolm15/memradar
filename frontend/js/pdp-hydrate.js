@@ -72,7 +72,7 @@
   // Keep the Product JSON-LD coherent with the hydrated price: update
   // offers.price and roll priceValidUntil forward. Rendering crawlers see the
   // same numbers the visible page shows.
-  function updateJsonLd(price) {
+  function updateJsonLd(price, fetchedAt) {
     var el = document.querySelector('script[type="application/ld+json"]');
     if (!el) return;
     try {
@@ -81,6 +81,9 @@
       for (var i = 0; i < graph.length; i++) {
         if (graph[i]['@type'] === 'Product' && graph[i].offers) {
           graph[i].offers.price = price;
+          // validFrom = when this price was actually fetched; priceValidUntil
+          // = the next scheduled fetch (same clock as the generator).
+          if (fetchedAt) graph[i].offers.validFrom = new Date(fetchedAt).toISOString();
           graph[i].offers.priceValidUntil = nextFetchIso();
         }
       }
@@ -127,7 +130,7 @@
             recomputeValueMetric(price, cfg);
           } catch (e) { /* leave baked verdict on bad config */ }
         }
-        updateJsonLd(price);
+        updateJsonLd(price, row.fetched_at);
       }
       updatedEl.textContent = 'Updated ' + relativeTime(row.fetched_at);
     })
