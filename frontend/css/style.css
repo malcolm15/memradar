@@ -2476,6 +2476,43 @@ html.dark .pdp-related-per-gb { color: #64748b; }
   .pdp-related-section { padding: 20px 0 32px; }
 }
 
+/* ── Back to Top (listing pages; button created by back-to-top.js) ── */
+.back-to-top {
+  position: fixed;
+  right: 16px;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #374151;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14);
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px);
+  transition: opacity 0.25s, transform 0.25s, visibility 0.25s;
+  z-index: 90; /* above cards, below the filter sheet (900) + alert modal (1000) */
+}
+.back-to-top.visible { opacity: 1; visibility: visible; transform: translateY(0); }
+.back-to-top:hover { border-color: #2563eb; color: #2563eb; }
+.back-to-top:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
+html.dark .back-to-top {
+  background: #1a2332;
+  border-color: #2d3f55;
+  color: #94a3b8;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+html.dark .back-to-top:hover { border-color: #2563eb; color: #93c5fd; }
+@media (prefers-reduced-motion: reduce) {
+  .back-to-top { transform: none; transition: opacity 0.25s, visibility 0.25s; }
+  .back-to-top.visible { transform: none; }
+}
+
 /* ══════════════════════════════════════════════════════════════
    Coming Soon Banner
    ══════════════════════════════════════════════════════════════ */
