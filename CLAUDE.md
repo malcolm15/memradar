@@ -6,7 +6,7 @@ RAM & SSD price tracker for PC builders. Goal: ship a real product at **memradar
 
 ## Project Overview
 
-MemRadar tracks RAM and SSD prices across retailers (Best Buy at launch, Amazon planned), stores historical price data, and alerts users when prices drop to their target. Targeted at PC builders who know exactly what they want and are waiting for the right price.
+MemRadar tracks Amazon prices on RAM and SSDs via the Keepa API (licensed price-history data), stores historical price data, and alerts users when prices drop to their target. Targeted at PC builders who know exactly what they want and are waiting for the right price.
 
 ## Stack
 
@@ -96,8 +96,8 @@ Required in `.env` (local) and Vercel project settings (production):
 
 | Variable | Purpose |
 |---|---|
-| `BBY_API_KEY` | Best Buy Open API key |
-| `PRICE_API_KEY` | PriceAPI.com key for price data (trial, evaluating as Best Buy replacement) |
+| `BBY_API_KEY` | Best Buy Open API key — dormant (access never approved; the Best Buy client is unused) |
+| `PRICE_API_KEY` | PriceAPI.com key — evaluated July 2026 and ruled out (see Data Source Evaluation); used by the one-time catalog build, kept for reference |
 | `KEEPA_API_KEY` | Keepa API key for Amazon price history (20 tokens/min plan) — must also be set in Vercel env vars |
 | `SUPABASE_URL` | Supabase project URL |
 | `SUPABASE_SECRET_KEY` | Supabase service role key (not the anon key) |
@@ -177,8 +177,8 @@ The frontend is fully designed and built but the product cards show placeholder 
 - **GitHub Pages:** Live at [memradar.com](https://memradar.com). Deployed via GitHub Actions workflow (`.github/workflows/deploy-frontend.yml`) — triggers on any push to `main` that touches `frontend/`.
 - **Custom 404 page:** `frontend/404.html` is served automatically by GitHub Pages for any missing URL. A copy lives at `frontend/404/index.html` so `memradar.com/404/` works as a clean URL — both files are identical and use absolute asset paths so they work from either location. Note: a Cloudflare redirect from `memradar.com/404.html` → `memradar.com/404/` would be clean, but `404.html` must remain at root level for GitHub Pages' automatic 404 handling — it cannot be moved.
 - **Custom domain:** memradar.com — fully configured. Cloudflare DNS A records point to GitHub Pages IPs, SSL/TLS set to Full, CNAME file committed to `frontend/`. Custom domain set in GitHub Pages settings.
-- **Vercel:** Live. All env vars set in Vercel dashboard. `BBY_API_KEY` is set to `pending` — awaiting Best Buy API approval before the cron fetch will work.
-- **Best Buy API:** Access pending approval. Cron is configured but non-functional until approved.
+- **Vercel:** Live. All env vars set in Vercel dashboard. The twice-daily Keepa fetch is live and populating `price_history`. `BBY_API_KEY` is a vestigial `pending` placeholder — the Best Buy client is dormant and unused.
+- **Data pipeline:** Live via Keepa — the twice-daily cron fetches Amazon price stats and appends `price_history` rows. (Best Buy API access was never approved; that client is dormant — see the Keepa section and `bestbuy.js`.)
 - **Google Search Console:** memradar.com added as a property. Sitemap submitted at `https://memradar.com/sitemap.xml`.
 - **Google Analytics:** GA4 installed on all HTML pages. Measurement ID: `G-797Q89S8GG`. Snippet is in the `<head>` of every page.
 - **SEO:** Full SEO pass complete. All pages have unique titles, descriptions, Open Graph, Twitter cards, canonical tags, and JSON-LD structured data (WebSite schema on homepage, WebPage/ContactPage on inner pages). Keywords targeted: "RAM price tracker", "SSD price history", "DDR5 price drops", "PC memory deals", "best time to buy RAM", "SSD price alert".
@@ -330,14 +330,14 @@ Findings from evaluating price-data providers as a Best Buy replacement (Best Bu
 - **Amazon `search_results` schema notes:** ASIN arrives as `id`; prices are **strings** split into `min_price`/`max_price` (range across sellers); `brand_name` is **null** on search results; `review_rating` is a **0–100** scale, not 5-star; seller-level data requires a **second `offers` call keyed by ASIN**. **No price history on any topic** — all responses are point-in-time snapshots.
 - **Cost observed:** **1 credit** per search job returning 16 products (`max_pages=1`).
 
-**Strategic conclusion:** PriceAPI is **not worth the €99/month** post-trial for our needs (no Walmart/Newegg/Best Buy, no price history). **Keepa** (Amazon price-history API, ~€49/month) is the **leading candidate for launch data**, pending their reply about public-display terms. The `test-priceapi.js` script remains useful for schema reference and any future re-evaluation.
+**Strategic conclusion:** PriceAPI is **not worth the €99/month** post-trial for our needs (no Walmart/Newegg/Best Buy, no price history). **Keepa** (Amazon price-history API, ~€49/month) was chosen for launch and is now live — Keepa granted written permission to display Amazon price history via their API. The `test-priceapi.js` script remains useful for schema reference and any future re-evaluation.
 
 ## Keep-Alive Cron
 - Endpoint: `/api/keep-alive`
 - Schedule: Every 3 days at 12:00 UTC (`0 12 */3 * *`)
 - Purpose: Prevents Supabase free tier from pausing the project due to inactivity
 - Auth: Same `CRON_SECRET` Bearer token as `fetch-prices`
-- Can be removed once `fetch-prices` is running daily with real Best Buy data
+- Can be removed once `fetch-prices` has run reliably on live Keepa/Amazon data (it is now running twice daily; see the retirement condition in the dated note below)
 - 2026-07-22: Root cause was CRON_SECRET mismatch/absence in Vercel env (cron fired but 401ed before reaching Supabase, so no DB activity registered). Fixed by rotating CRON_SECRET across Vercel, .env, and 1Password, then redeploying. Verified 200 response with live product count. Keep-alive remains active until Keepa daily fetches are confirmed running for a week, then can be retired.
 - Daily Keepa fetch is now the primary DB activity; keep-alive can be retired after confirming 7 consecutive successful daily fetch runs (check Vercel cron logs or the fetch summary responses).
 
@@ -358,7 +358,7 @@ Built 2026-07-21 via `scripts/build-catalog.js` (18 Amazon keyword searches thro
 
 - **Node ≥ 18** required (native `fetch` used, no node-fetch)
 - **Dev dependencies:** `sharp` and `to-ico` installed for image generation scripts. Run `npm install` before running `generate-favicons.js` or any image conversion scripts.
-- Run `node scripts/test-api.js` to verify the Best Buy API key works before touching the cron logic
+- `scripts/test-api.js` is a dormant Best Buy API sanity check — the live cron uses Keepa (`backend/lib/keepa.js`, self-test `node backend/lib/keepa.js`)
 - Vercel Hobby plan limits cron to once per day — the `0 6 * * *` schedule reflects this
 - The `supabase.js` client uses the **service role key** intentionally — it runs server-side only and needs to bypass RLS for writes
 
@@ -366,10 +366,10 @@ Built 2026-07-21 via `scripts/build-catalog.js` (18 Amazon keyword searches thro
 
 - **Amazon Associates:** `memradar-20`
   - All Amazon product URLs must include the tag: `https://amazon.com/dp/PRODUCTID?tag=memradar-20`
-- **Best Buy:** pending API approval — update when confirmed
-  - Same principle applies: append affiliate tag to all Best Buy product URLs once confirmed
+- **Best Buy:** dormant — no Best Buy links are generated (client unused)
+  - If Best Buy is ever revived, append its affiliate tag to all Best Buy URLs the same way
 
-Never generate Amazon or Best Buy product links without the appropriate affiliate tag appended.
+Never generate Amazon product links without the `memradar-20` tag appended. (The same rule would apply to Best Buy if that client is ever revived.)
 
 ## Dark Mode
 
