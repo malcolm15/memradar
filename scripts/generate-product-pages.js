@@ -810,6 +810,7 @@ function buildScripts(ctx) {
   <script src="../../js/alert-modal.js?v=${ASSET_VER}"></script>
   <script src="../../js/pdp-alert.js?v=${ASSET_VER}"></script>
   <script src="../../js/search.js?v=${ASSET_VER}"></script>
+  <script src="../../js/back-to-top.js?v=${ASSET_VER}"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="../../js/supabase-client.js?v=${ASSET_VER}"></script>
   <script src="../../js/pdp-hydrate.js?v=${ASSET_VER}"></script>
