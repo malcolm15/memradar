@@ -164,7 +164,7 @@ One-time historical load of full Keepa price history into `price_history`:
 
 ## Frontend State
 
-The frontend is fully designed and built but the product cards show placeholder data — prices display as `$—`. A "coming soon" banner on the homepage communicates pre-launch status and includes a "Set an Alert" CTA. The Market Pulse section is LIVE — `js/market-pulse.js` renders real `market_stats` data with a dynamic "Last updated" date (hardcoded HTML values remain as loading/fallback state). Search form submission is stubbed (`console.log` only).
+The frontend is fully built and live. The listing pages (`/ram/`, `/ssd/`) and the homepage render live data from Supabase — Market Pulse, Biggest Price Drops, and the product grids all show real prices. The 235 product detail pages are statically generated with baked stats and hydrate the current price client-side (`pdp-hydrate.js`). Site-wide search is live against the static `search-index.json`. The homepage's old "coming soon" banner is gone, replaced by a live "Now tracking 235 RAM and SSD products" banner. The alert flow is fully wired to the backend (double opt-in, real POST) — not stubbed. Market Pulse and the grids keep their hardcoded HTML values only as loading/fallback state.
 
 **Design system:** blue accent `#2563eb`, neutral grays, clean sans-serif. No CSS framework. Mobile responsive with breakpoints at 768px and 480px.
 
@@ -359,7 +359,7 @@ Built 2026-07-21 via `scripts/build-catalog.js` (18 Amazon keyword searches thro
 - **Node ≥ 18** required (native `fetch` used, no node-fetch)
 - **Dev dependencies:** `sharp` and `to-ico` installed for image generation scripts. Run `npm install` before running `generate-favicons.js` or any image conversion scripts.
 - `scripts/test-api.js` is a dormant Best Buy API sanity check — the live cron uses Keepa (`backend/lib/keepa.js`, self-test `node backend/lib/keepa.js`)
-- Vercel Hobby plan limits cron to once per day — the `0 6 * * *` schedule reflects this
+- Vercel Hobby runs each cron at most once per day, so `vercel.json` has two entries (`0 6 * * *` and `0 18 * * *`) to fetch twice daily (06:00 + 18:00 UTC)
 - The `supabase.js` client uses the **service role key** intentionally — it runs server-side only and needs to bypass RLS for writes
 
 ## Affiliate Tags
