@@ -55,7 +55,7 @@ memradar/
 │   ├── og-image.svg                 # Editable OG image source
 │   ├── brand/                       # Brand assets — og-image.png, og-image.svg, memradar-x-header.png, memradar-x-profile.png
 │   ├── css/style.css                # All styles — no CSS framework
-│   ├── js/main.js                   # Search handler stub
+│   ├── js/main.js                   # Homepage hero search (navigates to top result) + submit rate limiter
 │   ├── js/theme.js                  # Dark mode toggle + localStorage persistence
 │   ├── js/supabase-client.js        # Public anon-key Supabase client (RLS read-only)
 │   ├── js/market-pulse.js           # Homepage Market Pulse live stats
@@ -221,7 +221,7 @@ The frontend is fully built and live. The listing pages (`/ram/`, `/ssd/`) and t
 
 All queries paginate at PostgREST's 1000-row cap. At ~120 products/page this is a few hundred KB. **If the catalog grows past ~500 products, move steps 2–3 to a Postgres RPC/view** returning latest + 30d-ago per product server-side.
 
-**Rendering (`.listing-card`):** product image (with gray-placeholder fallback on error), brand badge (omitted entirely when `brand` is null — never an empty/"null" badge), current price, 30-day change indicator (green ▼ for drops, red ▲ for rises, nothing if no baseline), and a "View on Amazon" affiliate button. Each card has `data-sku` for future PDP wiring. Default sort is Name A–Z; skeleton grid (8 pulsing cards) shows while loading; a live "Showing N products · Prices updated daily" count sits above the grid.
+**Rendering (`.listing-card`):** product image (with gray-placeholder fallback on error), brand badge (omitted entirely when `brand` is null — never an empty/"null" badge), current price, 30-day change indicator (green ▼ for drops, red ▲ for rises, nothing if no baseline), and a "View on Amazon" affiliate button. Each card carries `data-sku` (used by the "Track Price" alert flow) and links to its PDP. Default sort is Name A–Z; skeleton grid (8 pulsing cards) shows while loading; a live "Showing N products · Prices updated twice daily" count sits above the grid.
 
 **Affiliate links convention:** product URL + `?tag=memradar-20`, with `rel="nofollow sponsored noopener noreferrer"` and `target="_blank"` (SEO for paid links + external-link security).
 
@@ -301,7 +301,7 @@ Full email-alert flow. **PII (email addresses) — every decision errs toward pr
 
 **Emails** (`backend/lib/alertEmails.js`, Resend REST API via `fetch`, from `hello@memradar.com`): confirmation (product, target, confirm button, 48h expiry, unsubscribe) and price-drop (product, current vs target, all-time-low, **View on Amazon with `?tag=memradar-20`** — the revenue moment, PDP link, unsubscribe).
 
-**Cron alert step** (`backend/lib/alertCheck.js`, run from `api/fetch-prices.js` after price inserts, isolated try/catch): query `confirmed=true AND triggered=false`, match `current<=target` against the just-inserted prices, **send-then-mark** (send email → log → set `triggered=true`; **if send fails leave `triggered=false` so tomorrow retries**), plus DELETE unconfirmed alerts >48h old (makes the pending cap self-healing). Stats in the cron summary: `checked/matched/sent/failed/expired_cleaned`. `scripts/run-alert-check.js` runs this step standalone for testing (no Keepa fetch).
+**Cron alert step** (`backend/lib/alertCheck.js`, run from `api/fetch-prices.js` after price inserts, isolated try/catch): query `confirmed=true AND triggered=false`, match `current<=target` against the just-inserted prices, **send-then-mark** (send email → log → set `triggered=true`; **if send fails leave `triggered=false` so the next run retries**), plus DELETE unconfirmed alerts >48h old (makes the pending cap self-healing). Stats in the cron summary: `checked/matched/sent/failed/expired_cleaned`. `scripts/run-alert-check.js` runs this step standalone for testing (no Keepa fetch).
 
 **Result pages** (`frontend/alert-confirmed|alert-invalid|alert-unsubscribed/`): on-brand, `noindex`, excluded from sitemap.
 
@@ -344,7 +344,7 @@ Findings from evaluating price-data providers as a Best Buy replacement (Best Bu
 ## Seed Data
 `scripts/seed-database.js` was run once (2026-05-27), adding 3 seed products (`SEED-RAM-001`, `SEED-RAM-002`, `SEED-SSD-001`) + 3 seed price_history rows.
 
-**Removed 2026-07-21.** The seed rows (and their price_history children) were deleted once the real Amazon catalog was upserted — see "Product Catalog" below. The `products` table now holds only real catalog data; `price_history` is empty pending Keepa.
+**Removed 2026-07-21.** The seed rows (and their price_history children) were deleted once the real Amazon catalog was upserted — see "Product Catalog" below. The `products` table holds only real catalog data; `price_history` is populated by the Keepa backfill plus the ongoing twice-daily fetch.
 
 ## Product Catalog
 Built 2026-07-21 via `scripts/build-catalog.js` (18 Amazon keyword searches through PriceAPI, ~18 credits) → reviewed preview → `scripts/upsert-catalog.js --confirm`.
