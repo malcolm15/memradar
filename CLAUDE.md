@@ -238,6 +238,8 @@ All queries paginate at PostgREST's 1000-row cap. At ~120 products/page this is 
 
 **Fallback:** the `.listing-empty` radar-pulse block is now the JS-failure fallback only (hidden by default; shown with "Having trouble loading prices — try refreshing." on fetch error, logged to console).
 
+**Mobile filters — bottom sheet (`frontend/js/filter-sheet.js`, ≤768px only):** the visible filter stack consumed 35–42% of the mobile viewport, so at the mobile breakpoint the filter rows collapse into a bottom sheet. **DOM-move, not duplicate:** filter-sheet.js physically moves the existing `.filter-row` elements into the sheet (and the Sort group into a slim control bar) via a `matchMedia('(max-width:768px)')` listener, and moves them back at desktop width — so `product-listing.js` keeps its click handlers on the same elements and remains the single source of truth for filter/sort state (`?q=` search, count line, all logic unchanged). The only `product-listing.js` change is one additive line: `updateCount` dispatches a `memradar:listing-count` CustomEvent that feeds the sheet's live "Show N products" button and the "Filters · N" badge (N = non-All selections). Desktop ≥769px is pixel-identical to before (all new CSS is media-scoped or sheet-only). Sheet z-index 900 (above header/search 100/300, below the alert modal 1000). Scroll lock via `body.filter-sheet-open` (mirrors `mobile-nav-open`); only one overlay open at once — opening the sheet clicks the mobile-nav toggle closed. Close via X / backdrop / swipe-down on the header / Escape; focus moves into the sheet on open and back to the Filters button on close. Included after `product-listing.js` on both listing pages.
+
 **JSON-LD:** `ItemList.numberOfItems` is set to the real counts (119 RAM / 116 SSD) statically. Full `itemListElement` population isn't possible in static HTML — it happens in the future static-generation phase.
 
 **Files:**
@@ -393,10 +395,10 @@ Below the **768px** breakpoint the desktop `.nav-link`s hide (`nav .nav-link { d
 
 `style.css` is served with `Cache-Control: max-age=14400` (**4 hours** of browser caching). A Cloudflare purge clears the edge but **NOT** visitors' browser caches — so after a CSS change, returning devices can render new HTML against a stale 4-hour-cached stylesheet (this exact mismatch broke the mobile nav on first ship: new hamburger HTML + old CSS).
 
-**Fix / convention:** a single shared version query is appended to **both `style.css` and every local JS include** on every page — `?v=YYYYMMDD` (current value: **`20260807`**). A new URL forces browsers to refetch immediately regardless of max-age.
+**Fix / convention:** a single shared version query is appended to **both `style.css` and every local JS include** on every page — `?v=YYYYMMDD` (current value: **`20260808`**). A new URL forces browsers to refetch immediately regardless of max-age.
 
 - **Bump the `?v=` value whenever any `style.css` OR local JS file changes**, and update ALL pages together (one shared stamp — they must all match). Bumping rebusts every asset; that's fine.
-- Applies to local assets only: `css/style.css` and `js/*.js` (main, theme, alert-modal, supabase-client, market-pulse, product-listing, mobile-nav). **External CDN scripts are NOT versioned** (jsdelivr supabase-js, cdnjs Chart.js, Cloudflare Turnstile, gtag) — they carry their own versioning.
+- Applies to local assets only: `css/style.css` and `js/*.js` (main, theme, alert-modal, supabase-client, market-pulse, product-listing, mobile-nav, filter-sheet). **External CDN scripts are NOT versioned** (jsdelivr supabase-js, cdnjs Chart.js, Cloudflare Turnstile, gtag) — they carry their own versioning.
 - When adding a new page or a new local script include, add `?v=<current>` to match.
 
 ## Safety Rules for Claude Code

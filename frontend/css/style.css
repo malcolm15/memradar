@@ -1395,6 +1395,140 @@ html.dark .listing-hero { border-bottom-color: #2d3f55; }
 html.dark .listing-hero h1 { color: #f1f5f9; }
 html.dark .listing-hero p { color: #64748b; }
 html.dark .filter-bar-wrap { background: #0f1623; border-bottom-color: #2d3f55; }
+/* ── Mobile filter bottom sheet (elements created by filter-sheet.js) ── */
+.mobile-filter-bar { display: none; }
+.filter-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 900; /* above header/search (100/300), below the alert modal (1000) */
+  background: rgba(15, 22, 35, 0.5);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+.filter-sheet-overlay.open { opacity: 1; pointer-events: auto; }
+body.filter-sheet-open { overflow: hidden; }
+.filter-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 82vh;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.18);
+  transform: translateY(100%);
+  transition: transform 0.28s ease;
+}
+.filter-sheet-overlay.open .filter-sheet { transform: translateY(0); }
+.filter-sheet-header {
+  position: relative;
+  padding: 20px 20px 10px;
+  text-align: center;
+  touch-action: none; /* header is the swipe-to-close handle */
+}
+.filter-sheet-handle {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: #d1d5db;
+}
+.filter-sheet-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #111827;
+}
+.filter-sheet-close {
+  position: absolute;
+  top: 12px;
+  right: 10px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  color: #6b7280;
+  cursor: pointer;
+}
+.filter-sheet-body {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 20px 12px;
+}
+.filter-sheet-body .filter-row { display: block; padding: 0; }
+.filter-sheet-body .filter-row + .filter-row { border-top: none; }
+.filter-sheet-body .filter-group { display: block; padding: 12px 0; }
+.filter-sheet-body .filter-group + .filter-group,
+.filter-sheet-body .filter-row + .filter-row .filter-group:first-child { border-top: 1px solid #f3f4f6; }
+.filter-sheet-body .filter-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6b7280;
+}
+.filter-sheet-body .filter-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.filter-sheet-body .filter-pill {
+  min-height: 44px;
+  padding: 10px 18px;
+  font-size: 0.9rem;
+}
+.filter-sheet-footer {
+  display: flex;
+  gap: 10px;
+  padding: 12px 20px calc(14px + env(safe-area-inset-bottom));
+  border-top: 1px solid #e5e7eb;
+}
+.filter-sheet-clear {
+  flex: 0 0 auto;
+  min-height: 48px;
+  padding: 0 18px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  color: #374151;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+.filter-sheet-apply {
+  flex: 1;
+  min-height: 48px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.filter-sheet-apply:hover { background: #1d4ed8; }
+html.dark .mobile-filter-btn { background: #1a2332; border-color: #2d3f55; color: #94a3b8; }
+html.dark .filter-sheet { background: #1a2332; }
+html.dark .filter-sheet-title { color: #f1f5f9; }
+html.dark .filter-sheet-handle { background: #2d3f55; }
+html.dark .filter-sheet-close { color: #94a3b8; }
+html.dark .filter-sheet-body .filter-label { color: #64748b; }
+html.dark .filter-sheet-body .filter-group + .filter-group,
+html.dark .filter-sheet-body .filter-row + .filter-row .filter-group:first-child { border-top-color: #22304a; }
+html.dark .filter-sheet-footer { border-top-color: #2d3f55; }
+html.dark .filter-sheet-clear { background: #1a2332; border-color: #2d3f55; color: #94a3b8; }
+
 html.dark .filter-row + .filter-row { border-top-color: #2d3f55; }
 html.dark .filter-pill { background: #1a2332; border-color: #2d3f55; color: #94a3b8; }
 html.dark .filter-pill:hover { border-color: #2563eb; color: #93c5fd; }
@@ -1519,6 +1653,33 @@ html.dark .notice-btn--primary { color: #fff; }
   .mobile-nav-toggle { display: inline-flex; }
   .mobile-nav-panel { display: block; }
   .site-header nav { gap: 12px; }
+  /* Listing filters collapse into the bottom sheet (filter-sheet.js moves the
+     rows there); hiding them here also covers the pre-JS flash. */
+  .filter-bar-wrap .filter-row { display: none; }
+  .mobile-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+  }
+  .mobile-filter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 10px 16px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    background: #fff;
+    color: #374151;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .mobile-filter-sort-slot { flex: 1; display: flex; justify-content: flex-end; }
+  .mobile-filter-sort-slot .filter-label { display: none; }
+  .mobile-filter-sort-slot .filter-select { min-height: 44px; }
   /* Shorter label so the five header items fit one row on small phones.
      Scoped to the header only - the blog CTA keeps the full label. */
   .site-header .btn-alert { font-size: 0; padding: 8px 14px; }

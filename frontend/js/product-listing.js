@@ -216,6 +216,7 @@
     return new Array(9).join(one); // 8 skeleton cards
   }
   function updateCount(n) {
+    document.dispatchEvent(new CustomEvent('memradar:listing-count', { detail: { count: n } }));
     if (!countEl) return;
     if (state.query) {
       countEl.innerHTML = 'Showing ' + n + ' result' + (n === 1 ? '' : 's') + ' for “' + esc(state.query) + '” ' +
