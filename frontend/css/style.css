@@ -3,6 +3,16 @@
 /* ── Reset & Base ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+:root {
+  /* Sticky-header height = 16px top + 16px bottom padding + 38px tallest nav
+     item (the "Set Alert" button, which defines the height at every width) +
+     1px bottom border = 71px. Measured identical at desktop and mobile, so no
+     breakpoint override is needed. Both the header (min-height) and the filter
+     bar's sticky `top` reference this, so the offset can never drift from the
+     real header height again (this bug: `top` was a stale 57/65 magic number). */
+  --header-height: 71px;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: #ffffff;
@@ -22,6 +32,7 @@ a { color: inherit; text-decoration: none; }
 .site-header {
   border-bottom: 1px solid #e5e7eb;
   padding: 16px 0;
+  min-height: var(--header-height);
   position: sticky;
   top: 0;
   background: #fff;
@@ -1035,7 +1046,7 @@ html.dark .modal-field-hint { color: #64748b; }
 }
 .filter-bar-wrap {
   position: sticky;
-  top: 65px;
+  top: var(--header-height);
   z-index: 90;
   background: #fff;
   border-bottom: 1px solid #e5e7eb;
@@ -1703,7 +1714,6 @@ html.dark .notice-btn--primary { color: #fff; }
   .modal-footer-row .modal-btn-primary { flex: 1; min-width: 120px; }
   .listing-hero { padding: 32px 0 28px; }
   .listing-hero h1 { font-size: 1.5rem; }
-  .filter-bar-wrap { top: 57px; }
   .listing-grid { grid-template-columns: 1fr; }
 }
 
