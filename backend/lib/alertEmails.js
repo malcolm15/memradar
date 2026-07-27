@@ -42,7 +42,7 @@ function shell(innerHtml) {
     <tr><td align="center">
       <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
         <tr><td style="padding:24px 28px 8px;">
-          <span style="font-size:20px;font-weight:800;color:#111827;">Mem<span style="color:#2563eb;">Radar</span></span>
+          <span style="font-size:20px;font-weight:800;color:#111827;">Mem<span style="color:#3A5BC7;">Radar</span></span>
         </td></tr>
         ${innerHtml}
       </table>
@@ -52,7 +52,7 @@ function shell(innerHtml) {
 }
 
 function button(href, label) {
-  return `<a href="${href}" style="display:inline-block;background:#2563eb;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:12px 24px;border-radius:8px;">${label}</a>`;
+  return `<a href="${href}" style="display:inline-block;background:#3A5BC7;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:12px 24px;border-radius:8px;">${label}</a>`;
 }
 
 function unsubLineHtml(unsubUrl) {
@@ -116,7 +116,7 @@ function priceDropEmail({ productName, currentPrice, targetPrice, allTimeLow, pr
           <p style="margin:0 0 16px;font-size:13px;color:#6b7280;">Now at or below your target of ${target}.</p>
           ${atlLine}
           <p style="margin:0 0 12px;">${button(affiliate, 'View on Amazon →')}</p>
-          <p style="margin:0 0 16px;font-size:13px;"><a href="${pdpUrl}" style="color:#2563eb;">See full price history on MemRadar</a></p>
+          <p style="margin:0 0 16px;font-size:13px;"><a href="${pdpUrl}" style="color:#3A5BC7;">See full price history on MemRadar</a></p>
         </td></tr>
         ${unsubLineHtml(unsubUrl)}`);
 

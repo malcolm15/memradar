@@ -126,8 +126,8 @@
             <div class="modal-success">
               <div class="modal-success-icon">
                 <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                  <circle cx="16" cy="16" r="15" stroke="#2563eb" stroke-width="2"/>
-                  <path d="M9 16.5l5 5 9-10" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <circle cx="16" cy="16" r="15" stroke="#3A5BC7" stroke-width="2"/>
+                  <path d="M9 16.5l5 5 9-10" stroke="#3A5BC7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               </div>
               <h2 class="modal-heading">Almost there.</h2>

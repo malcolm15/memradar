@@ -166,7 +166,7 @@ One-time historical load of full Keepa price history into `price_history`:
 
 The frontend is fully built and live. The listing pages (`/ram/`, `/ssd/`) and the homepage render live data from Supabase — Market Pulse, Biggest Price Drops, and the product grids all show real prices. The 235 product detail pages are statically generated with baked stats and hydrate the current price client-side (`pdp-hydrate.js`). Site-wide search is live against the static `search-index.json`. The homepage's old "coming soon" banner is gone, replaced by a live "Now tracking 235 RAM and SSD products" banner. The alert flow is fully wired to the backend (double opt-in, real POST) — not stubbed. Market Pulse and the grids keep their hardcoded HTML values only as loading/fallback state.
 
-**Design system:** blue accent `#2563eb`, neutral grays, clean sans-serif. No CSS framework. Mobile responsive with breakpoints at 768px and 480px.
+**Design system:** brand cobalt `#3A5BC7` (via `--brand-primary`/`--brand-hover`/`--brand-tint`/`--brand-light` CSS vars in `:root`), neutral grays, clean sans-serif. No CSS framework. Mobile responsive with breakpoints at 768px and 480px.
 
 **Homepage "Biggest Price Drops"** (`frontend/js/home-drops.js`): the 4 products with the largest live 30-day price DECREASE, as `.listing-card`s (image, brand badge, price, green ▼ drop %, "Amazon", card→PDP link, "View on Amazon" affiliate link, "Track Price" → alert modal pre-filled via `window.memradarAlertModal.openForProduct`). If fewer than 4 products have a negative 30-day change, remaining slots fill with products CLOSEST to their all-time low (using `all_time_low` from `search-index.json`), and the fill mode per slot is logged. Degrades by omission — the whole section hides on any fetch failure. `search-index.json` now includes `all_time_low` (added to the generator; regenerate to refresh).
 
@@ -382,7 +382,7 @@ Implemented across all pages via:
 - **System preference:** on first visit (no saved preference), respects `prefers-color-scheme: dark`
 - **Toggle button:** `.theme-toggle` button in every page's `<nav>` — moon icon in light mode, sun icon in dark mode, SVG injected by `js/theme.js`
 - **JS file:** `frontend/js/theme.js` — handles icon rendering and localStorage persistence
-- **Dark palette:** background `#0f1623`, surface `#1a2332`, text `#f1f5f9`, secondary text `#94a3b8`, borders `#2d3f55`, blue accent `#2563eb` unchanged
+- **Dark palette:** background `#0f1623`, surface `#1a2332`, text `#f1f5f9`, secondary text `#94a3b8`, borders `#2d3f55`, brand cobalt `#3A5BC7` unchanged (dark-mode accent text uses `--brand-light: #a4c0ec`)
 
 ## Mobile Navigation
 
@@ -397,7 +397,7 @@ Below the **768px** breakpoint the desktop `.nav-link`s hide (`nav .nav-link { d
 
 `style.css` is served with `Cache-Control: max-age=14400` (**4 hours** of browser caching). A Cloudflare purge clears the edge but **NOT** visitors' browser caches — so after a CSS change, returning devices can render new HTML against a stale 4-hour-cached stylesheet (this exact mismatch broke the mobile nav on first ship: new hamburger HTML + old CSS).
 
-**Fix / convention:** a single shared version query is appended to **both `style.css` and every local JS include** on every page — `?v=YYYYMMDD` (current value: **`20260813`**). A new URL forces browsers to refetch immediately regardless of max-age.
+**Fix / convention:** a single shared version query is appended to **both `style.css` and every local JS include** on every page — `?v=YYYYMMDD` (current value: **`20260814`**). A new URL forces browsers to refetch immediately regardless of max-age.
 
 - **Bump the `?v=` value whenever any `style.css` OR local JS file changes**, and update ALL pages together (one shared stamp — they must all match). Bumping rebusts every asset; that's fine.
 - Applies to local assets only: `css/style.css` and `js/*.js` (main, theme, alert-modal, supabase-client, market-pulse, product-listing, mobile-nav, filter-sheet, back-to-top). **External CDN scripts are NOT versioned** (jsdelivr supabase-js, cdnjs Chart.js, Cloudflare Turnstile, gtag) — they carry their own versioning.

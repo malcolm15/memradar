@@ -6,10 +6,10 @@
   <circle cx="256" cy="256" r="33" fill="none" stroke="#ffffff" stroke-width="8" opacity="1"/>
   <line x1="256" y1="56" x2="256" y2="456" stroke="#ffffff" stroke-width="4" opacity="0.4"/>
   <line x1="56" y1="256" x2="456" y2="256" stroke="#ffffff" stroke-width="4" opacity="0.4"/>
-  <path d="M256 256 L456 256 A200 200 0 0 0 256 56 Z" fill="#2563eb" opacity="0.25"/>
-  <path d="M256 256 L456 256 A200 200 0 0 0 256 56 Z" fill="none" stroke="#2563eb" stroke-width="6" opacity="1"/>
-  <circle cx="398" cy="114" r="14" fill="#2563eb" opacity="1"/>
-  <circle cx="398" cy="114" r="28" fill="none" stroke="#2563eb" stroke-width="5" opacity="0.7"/>
-  <circle cx="398" cy="114" r="44" fill="none" stroke="#2563eb" stroke-width="3" opacity="0.4"/>
+  <path d="M256 256 L456 256 A200 200 0 0 0 256 56 Z" fill="#3A5BC7" opacity="0.25"/>
+  <path d="M256 256 L456 256 A200 200 0 0 0 256 56 Z" fill="none" stroke="#3A5BC7" stroke-width="6" opacity="1"/>
+  <circle cx="398" cy="114" r="14" fill="#3A5BC7" opacity="1"/>
+  <circle cx="398" cy="114" r="28" fill="none" stroke="#3A5BC7" stroke-width="5" opacity="0.7"/>
+  <circle cx="398" cy="114" r="44" fill="none" stroke="#3A5BC7" stroke-width="3" opacity="0.4"/>
   <circle cx="256" cy="256" r="8" fill="#ffffff" opacity="0.7"/>
 </svg>
