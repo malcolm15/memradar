@@ -61,7 +61,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
   <meta name="theme-color" content="#0f1623">
-  <link rel="stylesheet" href="../../css/style.css?v=20260814">
+  <link rel="stylesheet" href="../../css/style.css?v=20260815">
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
@@ -480,11 +480,11 @@
     </div>
   </footer>
 
-  <script src="../../js/main.js?v=20260814"></script>
-  <script src="../../js/theme.js?v=20260814"></script>
-  <script src="../../js/mobile-nav.js?v=20260814"></script>
-  <script src="../../js/search.js?v=20260814"></script>
-  <script src="../../js/alert-modal.js?v=20260814"></script>
+  <script src="../../js/main.js?v=20260815"></script>
+  <script src="../../js/theme.js?v=20260815"></script>
+  <script src="../../js/mobile-nav.js?v=20260815"></script>
+  <script src="../../js/search.js?v=20260815"></script>
+  <script src="../../js/alert-modal.js?v=20260815"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script>
   (function () {
@@ -561,6 +561,8 @@
       if (!canvas || typeof Chart === 'undefined') return;
 
       var dark = isDark();
+      var lineColor = dark ? '#5a80d7' : '#3A5BC7';
+      var lineRgb = dark ? '90,128,215' : '58,91,199';
       var gridColor  = dark ? 'rgba(45,63,85,0.8)'   : 'rgba(229,231,235,0.8)';
       var tickColor  = dark ? '#94a3b8'               : '#6b7280';
       var tooltipBg  = dark ? '#0f1623'               : '#1f2937';
@@ -576,22 +578,22 @@
           labels: range.labels,
           datasets: [{
             data: range.data,
-            borderColor: '#3A5BC7',
+            borderColor: lineColor,
             borderWidth: 2,
             backgroundColor: function (context) {
               var chart = context.chart;
               var _a = chart.chartArea;
-              if (!_a) return 'rgba(58,91,199,0.1)';
+              if (!_a) return 'rgba(' + lineRgb + ',0.1)';
               var gradient = chart.ctx.createLinearGradient(0, _a.top, 0, _a.bottom);
-              gradient.addColorStop(0, 'rgba(58,91,199,0.28)');
-              gradient.addColorStop(1, 'rgba(58,91,199,0.0)');
+              gradient.addColorStop(0, 'rgba(' + lineRgb + ',0.28)');
+              gradient.addColorStop(1, 'rgba(' + lineRgb + ',0.0)');
               return gradient;
             },
             fill: true,
             tension: 0.35,
             pointRadius: 3,
             pointHoverRadius: 6,
-            pointBackgroundColor: '#3A5BC7',
+            pointBackgroundColor: lineColor,
             pointBorderColor: dark ? '#1a2332' : '#ffffff',
             pointBorderWidth: 2
           }]
