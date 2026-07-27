@@ -2164,6 +2164,53 @@ html.dark .pdp-amazon-disclaimer { color: #64748b; }
 .pdp-retailers-meta a:hover { color: var(--brand-primary); text-decoration: underline; }
 .pdp-retailers-updated { font-weight: 500; }
 
+/* Buy Now on mobile: the desktop table overflows horizontally and hides the
+   affiliate button off-screen. At <=768px each retailer row becomes a stacked
+   card (no horizontal scroll) — name + stock on one line, big price, full-width
+   button. Each tbody row is its own card, so a second retailer stacks cleanly. */
+@media (max-width: 768px) {
+  .pdp-retailers-wrap { overflow-x: visible; margin-bottom: 0; }
+  .pdp-retailers-table { min-width: 0; display: block; }
+  .pdp-retailers-table thead { display: none; }               /* no headers in card mode */
+  .pdp-retailers-table tbody { display: block; }
+  .pdp-retailers-table tbody tr {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "name  stock"
+      "price price"
+      "action action";
+    align-items: center;
+    gap: 6px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .pdp-retailers-table tbody tr + tr { margin-top: 12px; }     /* second retailer = second card */
+  .pdp-retailers-table tbody td { display: block; padding: 0; border: none; }
+  .pdp-retailers-table tbody tr:not(:last-child) td { border-bottom: none; }
+  /* prefixed with `.pdp-retailers-table tbody` so font-size beats the base
+     `.pdp-retailers-table tbody td` (0,1,2) rule, which is otherwise more specific. */
+  .pdp-retailers-table tbody .pdp-retailer-name { grid-area: name; font-size: 1.05rem; }
+  .pdp-retailers-table tbody .pdp-retailer-stock { grid-area: stock; justify-self: end; }
+  .pdp-retailers-table tbody .pdp-retailer-price {
+    grid-area: price;
+    font-size: 1.6rem;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+  .pdp-retailers-table tbody .pdp-retailer-action { grid-area: action; margin-top: 4px; }
+  .pdp-buy-btn {
+    float: none;
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: 13px 16px;      /* >=44px tap target */
+    font-size: 0.95rem;
+  }
+  html.dark .pdp-retailers-table tbody tr { border-color: #2d3f55; }
+}
+
 /* ── Alert Section ── */
 .pdp-alert-section {
   padding: 16px 0 22px; /* tight above: pairs with Buy Now as one decision moment */
