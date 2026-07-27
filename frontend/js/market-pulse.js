@@ -66,7 +66,7 @@
             month: 'long',
             day: 'numeric'
           });
-          updatedEl.textContent = 'Last updated: ' + formatted + ' · Prices update daily';
+          updatedEl.textContent = 'Last updated: ' + formatted + ' · Prices updated twice daily';
         }
       }
     });
