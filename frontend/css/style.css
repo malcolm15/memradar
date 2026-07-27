@@ -1424,7 +1424,10 @@ body.filter-sheet-open { overflow: hidden; }
   left: 0;
   right: 0;
   bottom: 0;
-  max-height: 82vh;
+  /* content-driven height: shrink-wraps to the filter groups today, and the
+     body re-engages its own scroll only if content grows past this ceiling.
+     Cap accounts for the bottom safe-area so it never runs under the home bar. */
+  max-height: calc(85vh - env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
   background: #fff;
@@ -1439,6 +1442,7 @@ body.filter-sheet-open { overflow: hidden; }
   padding: 20px 20px 10px;
   text-align: center;
   touch-action: none; /* header is the swipe-to-close handle */
+  flex-shrink: 0;
 }
 .filter-sheet-handle {
   position: absolute;
@@ -1471,19 +1475,19 @@ body.filter-sheet-open { overflow: hidden; }
   cursor: pointer;
 }
 .filter-sheet-body {
-  flex: 1;
+  flex: 0 1 auto; /* size to content; shrink + scroll only past the max-height cap */
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 0 20px 12px;
+  padding: 0 20px 10px;
 }
 .filter-sheet-body .filter-row { display: block; padding: 0; }
 .filter-sheet-body .filter-row + .filter-row { border-top: none; }
-.filter-sheet-body .filter-group { display: block; padding: 12px 0; }
+.filter-sheet-body .filter-group { display: block; padding: 10px 0; }
 .filter-sheet-body .filter-group + .filter-group,
 .filter-sheet-body .filter-row + .filter-row .filter-group:first-child { border-top: 1px solid #f3f4f6; }
 .filter-sheet-body .filter-label {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   font-size: 0.78rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -1501,6 +1505,7 @@ body.filter-sheet-open { overflow: hidden; }
   gap: 10px;
   padding: 12px 20px calc(14px + env(safe-area-inset-bottom));
   border-top: 1px solid #e5e7eb;
+  flex-shrink: 0;
 }
 .filter-sheet-clear {
   flex: 0 0 auto;
