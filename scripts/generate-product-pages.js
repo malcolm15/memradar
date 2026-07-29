@@ -140,52 +140,12 @@ const median = (xs) => {
 };
 
 // ------------------------------------------------------------- name parsing
-// Same conventions as frontend/js/product-listing.js (kit-total capacity,
-// TBW/Gb-s exclusion, SATA-first) — duplicated here because that file is
-// browser-side; keep the two in sync when rules change.
-function capTokensGB(str) {
-  const caps = []; let m; const re = /(\d+)\s*(gb|tb)(?![\w/])/gi;
-  while ((m = re.exec(str))) caps.push(/tb/i.test(m[2]) ? +m[1] * 1024 : +m[1]);
-  return caps;
-}
-function totalCapacityGB(name) {
-  const pre = capTokensGB(name.split('(')[0]);
-  if (pre.length) return Math.max(...pre);
-  const all = capTokensGB(name);
-  return all.length ? Math.max(...all) : null;
-}
-function capacityLabel(gb) {
-  if (gb == null) return null;
-  return gb >= 1024 && gb % 1024 === 0 ? (gb / 1024) + 'TB' : gb + 'GB';
-}
-function parseSpeed(name) {
-  const s = []; let m;
-  const re = /(\d{4,5})\s*(?:mhz|mt\/s)/gi;
-  while ((m = re.exec(name))) s.push(+m[1]);
-  const re2 = /ddr[45]-(\d{4,5})/gi;
-  while ((m = re2.exec(name))) s.push(+m[1]);
-  const ok = s.filter((x) => x >= 1800 && x <= 9000);
-  return ok.length ? Math.max(...ok) : null;
-}
-function ramType(name) {
-  if (/ddr5/i.test(name)) return 'DDR5';
-  if (/ddr4/i.test(name)) return 'DDR4';
-  return null;
-}
-function ssdType(name) {
-  if (/sata|2\.5/i.test(name)) return 'SATA';
-  if (/nvme|m\.2/i.test(name)) return 'NVMe';
-  return null;
-}
-function formFactor(name) {
-  if (/m\.2/i.test(name)) return 'M.2';
-  if (/2\.5/.test(name)) return '2.5"';
-  return null;
-}
-function latency(name) {
-  const m = name.match(/\bCL\s?(\d{2})\b/i);
-  return m ? 'CL' + m[1] : null;
-}
+// Single source: backend/lib/productParsers.js (extracted from here; the
+// family-clustering scripts require the same module). The browser-side
+// duplicate in frontend/js/product-listing.js must stay in sync by hand.
+const {
+  totalCapacityGB, capacityLabel, parseSpeed, ramType, ssdType, formFactor, latency,
+} = require('../backend/lib/productParsers');
 
 // ------------------------------------------------------------------- slugs
 // Short display name: brand + the meaningful prefix of the title (up to the
@@ -1238,8 +1198,7 @@ async function run() {
   // (Run meta on the FULL set first so collision tokens are stable, then narrow.)
   computePageMeta(generable);
   if (IS_SAMPLE) {
-    generable = generable.filter((p) => SAMPLE_SLUGS.includes(p.finalSlug));
-    log(`SAMPLE mode: generating ${generable.length}/${SAMPLE_SLUGS.length} matched slugs, no delete/sitemap/manifest writes`);
+    log(`SAMPLE mode: writing only [${SAMPLE_SLUGS.join(', ')}]; full pool kept for related-product computation; no delete/sitemap/manifest writes`);
   }
 
   // ---------------- dry run report ----------------
@@ -1312,6 +1271,7 @@ async function run() {
   const manifest = {};
   const lastmodByUrl = new Map();
   for (const p of generable) {
+    if (IS_SAMPLE && !SAMPLE_SLUGS.includes(p.finalSlug)) continue;
     try {
       const url = `${SITE}/${p.category}/${p.finalSlug}/`;
       const related = generable
