@@ -1,6 +1,6 @@
 // Floating "back to top" button for the long listing pages (/ram/, /ssd/).
 // Self-contained: it creates its own button element, so including this script
-// is all a page needs — no markup to add.
+// is all a page needs, no markup to add.
 //
 // Visibility is driven by a requestAnimationFrame-throttled scroll read
 // (window.scrollY > 1.5 viewports), chosen over an IntersectionObserver

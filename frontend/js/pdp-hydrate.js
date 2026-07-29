@@ -26,16 +26,25 @@
 
   var GOOD_ICON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
 
+  // SINGLE predicate behind both the buy-indicator and the Price-Analysis verdict,
+  // so they can never disagree. Mirrors the generator's buyState() exactly.
+  // Returns 'good' | 'typical' | 'elevated' | null.
+  function buyState(current, cfg) {
+    if (cfg.avg90 == null) return null;
+    var pct = Math.round(Math.abs(((current - cfg.avg90) / cfg.avg90) * 100));
+    if (current <= cfg.avg90 * cfg.goodMaxRatio) return pct <= 1 ? 'typical' : 'good';
+    return 'elevated';
+  }
+
   // Recompute the good-time-to-buy verdict against the hydrated price, using the
   // baked 90-day average and the thresholds from #pdpHydrateConfig (same values
   // the generator used). The 90-day average itself stays baked.
   function recomputeBuyIndicator(current, cfg) {
     var ind = document.getElementById('pdpBuyIndicator');
     if (!ind || cfg.avg90 == null) return;
-    var avg = cfg.avg90;
-    var pct = Math.round(Math.abs(((current - avg) / avg) * 100));
-    if (current <= avg * cfg.goodMaxRatio) {
-      var phrase = pct <= 1 ? 'in line with the ' + cfg.avgLabel : pct + '% below the ' + cfg.avgLabel;
+    var pct = Math.round(Math.abs(((current - cfg.avg90) / cfg.avg90) * 100));
+    if (buyState(current, cfg) !== 'elevated') {
+      var phrase = buyState(current, cfg) === 'typical' ? 'in line with the ' + cfg.avgLabel : pct + '% below the ' + cfg.avgLabel;
       ind.className = 'pdp-buy-indicator pdp-buy-indicator--good';
       ind.innerHTML = '<div class="pdp-buy-indicator-icon" aria-hidden="true">' + GOOD_ICON + '</div>' +
         '<div class="pdp-buy-indicator-body"><strong>Good time to buy</strong>' +
@@ -59,6 +68,53 @@
     var wordEl = document.querySelector('#pdpValueMetric .pdp-value-wording');
     if (perGbEl) perGbEl.textContent = 'Price per GB: ' + perGb(mine);
     if (wordEl) wordEl.textContent = '· ' + wording + ' for ' + cfg.segLabel;
+  }
+
+  // Price-Analysis verdict sentence (S4). Mirrors the generator's
+  // verdictSentence() exactly, and uses buyState() so it can never disagree
+  // with the buy-indicator above it.
+  function verdictText(current, cfg) {
+    var state = buyState(current, cfg);
+    if (state == null) return '';
+    var segNoun = (cfg.segWord ? cfg.segWord + ' ' : '') + cfg.noun;
+    if (state !== 'elevated' && cfg.atl != null && current >= cfg.atl * cfg.inflationRatio) {
+      return "It's near its recent low, though still well above where it traded a year or two ago, a reflection of the broader " + cfg.market + ' market.';
+    }
+    if (state === 'good') return 'For a ' + segNoun + ', this is a strong price relative to its own history, a reasonable time to buy.';
+    if (state === 'elevated') return 'Historically this sits on the expensive side, so if you can wait, it may be worth watching for a drop.';
+    return 'This is a fairly typical price for this ' + cfg.noun + ' based on its recent history.';
+  }
+
+  // Rebuild the current-assessment span of the Price Analysis paragraph from the
+  // live price (position vs low/high, $/GB, verdict). Mirrors the generator's
+  // currentAssessment(). textContent throughout, so nothing needs escaping. The
+  // historical span (.pdp-analysis-history) is baked and left untouched.
+  function recomputeAnalysis(current, cfg) {
+    var el = document.getElementById('pdpAnalysisCurrent');
+    if (!el) return;
+    var parts = [];
+    if (cfg.atl != null) {
+      if (current <= cfg.atl) {
+        parts.push('Currently at ' + money(current) + ", this is the lowest price we've recorded.");
+      } else if (current <= cfg.atl * 1.02) {
+        parts.push('Currently at ' + money(current) + ", it's within " + money(current - cfg.atl) + ' of its all-time low.');
+      } else {
+        var sent = 'Currently at ' + money(current) + ', it sits ' + Math.round(((current - cfg.atl) / cfg.atl) * 100) + '% above that low';
+        if (cfg.ath != null && cfg.ath > current) {
+          sent += ' and ' + Math.round(((cfg.ath - current) / cfg.ath) * 100) + '% below that high';
+        }
+        parts.push(sent + '.');
+      }
+    }
+    if (cfg.capGb != null && cfg.segMedian != null) {
+      var mine = current / cfg.capGb;
+      var rel = mine / cfg.segMedian;
+      var word = rel < cfg.valueLowRatio ? 'below' : rel > cfg.valueHighRatio ? 'above' : 'in line with';
+      parts.push('At ' + perGb(mine) + ', it runs ' + word + ' the current ' + cfg.segLabel + ' average of ' + perGb(cfg.segMedian) + '.');
+    }
+    var v = verdictText(current, cfg);
+    if (v) parts.push(v);
+    el.textContent = parts.join(' ');
   }
   // Next price-fetch boundary (06:00 / 18:00 UTC cron) - same computation as
   // the generator's nextFetchIso(), so the JSON-LD validity window is always
@@ -128,6 +184,7 @@
             var cfg = JSON.parse(cfgEl.textContent);
             recomputeBuyIndicator(price, cfg);
             recomputeValueMetric(price, cfg);
+            recomputeAnalysis(price, cfg);
           } catch (e) { /* leave baked verdict on bad config */ }
         }
         updateJsonLd(price, row.fetched_at);

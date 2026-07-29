@@ -1983,6 +1983,29 @@ html.dark .notice-btn--primary { color: #fff; }
 .pdp-value-per-gb { color: #374151; }
 .pdp-value-avg { color: #9ca3af; }
 
+/* ── Price Analysis (prose explanation of the stats) ── */
+.pdp-analysis {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+.pdp-analysis-heading {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6b7280;
+  margin-bottom: 6px;
+}
+.pdp-analysis-text {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: #374151;
+}
+html.dark .pdp-analysis { border-top-color: #2d3f55; }
+html.dark .pdp-analysis-heading { color: #64748b; }
+html.dark .pdp-analysis-text { color: #94a3b8; }
+
 /* ── Buy Indicator ── */
 .pdp-buy-indicator {
   display: flex;
@@ -2166,7 +2189,7 @@ html.dark .pdp-amazon-disclaimer { color: #64748b; }
 
 /* Buy Now on mobile: the desktop table overflows horizontally and hides the
    affiliate button off-screen. At <=768px each retailer row becomes a stacked
-   card (no horizontal scroll) — name + stock on one line, big price, full-width
+   card (no horizontal scroll): name + stock on one line, big price, full-width
    button. Each tbody row is its own card, so a second retailer stacks cleanly. */
 @media (max-width: 768px) {
   .pdp-retailers-wrap { overflow-x: visible; margin-bottom: 0; }
