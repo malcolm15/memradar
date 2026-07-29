@@ -147,6 +147,54 @@
     } catch (e) { /* leave the baked JSON-LD on any parse issue */ }
   }
 
+  // Capacity-family chips: refresh sibling prices (one .in() query) and move the
+  // best-$/GB tag. `currentPrice` is the just-hydrated price for the viewing
+  // chip. Graceful: on any failure the baked chip prices + tag remain.
+  function recomputeCapacityFamily(cfg, currentPrice) {
+    var row = document.getElementById('pdpCapacityFamily');
+    if (!row || !cfg.famChips || cfg.famChips.length < 2) return;
+    var siblings = cfg.famChips.filter(function (c) { return !c.viewing && c.sku; });
+    var skus = siblings.map(function (c) { return c.sku; });
+    if (!skus.length) { applyBest(row, cfg, currentPrice, {}); return; }
+    var since = new Date(Date.now() - 3 * 86400000).toISOString();
+    sb.from('price_history')
+      .select('price, fetched_at, products!inner(sku)')
+      .in('products.sku', skus)
+      .gte('fetched_at', since)
+      .lte('fetched_at', new Date().toISOString())
+      .order('fetched_at', { ascending: false })
+      .then(function (res) {
+        var live = {};
+        if (!res.error && res.data) {
+          res.data.forEach(function (r) {
+            var sku = r.products && r.products.sku;
+            if (sku && !(sku in live)) live[sku] = Number(r.price); // first = latest
+          });
+        }
+        siblings.forEach(function (c) {
+          if (isNaN(live[c.sku])) return;
+          var chip = row.querySelector('.pdp-cap-chip[data-sku="' + c.sku + '"] .pdp-cap-price');
+          if (chip) chip.textContent = money(live[c.sku]);
+        });
+        applyBest(row, cfg, currentPrice, live);
+      })
+      .catch(function () { applyBest(row, cfg, currentPrice, {}); });
+  }
+  // Recompute which capacity has the lowest live $/GB and move the --best class.
+  function applyBest(row, cfg, currentPrice, live) {
+    var bestCap = null, bestPerGb = Infinity;
+    cfg.famChips.forEach(function (c) {
+      var price = c.viewing ? currentPrice : (isNaN(live[c.sku]) ? c.price : live[c.sku]);
+      if (price == null || !(c.cap > 0)) return;
+      var pg = price / c.cap;
+      if (pg < bestPerGb) { bestPerGb = pg; bestCap = c.cap; }
+    });
+    if (bestCap == null) return;
+    row.querySelectorAll('.pdp-cap-chip').forEach(function (chip) {
+      chip.classList.toggle('pdp-cap-chip--best', String(bestCap) === chip.getAttribute('data-cap'));
+    });
+  }
+
   function relativeTime(iso) {
     var diff = Date.now() - new Date(iso).getTime();
     if (diff < 0) diff = 0; // guard against clock/timezone edge
@@ -185,6 +233,7 @@
             recomputeBuyIndicator(price, cfg);
             recomputeValueMetric(price, cfg);
             recomputeAnalysis(price, cfg);
+            recomputeCapacityFamily(cfg, price);
           } catch (e) { /* leave baked verdict on bad config */ }
         }
         updateJsonLd(price, row.fetched_at);

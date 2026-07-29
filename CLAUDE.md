@@ -30,7 +30,8 @@ memradar/
 │   │   ├── keepa.js         # Keepa API client — price history source (self-test: node backend/lib/keepa.js)
 │   │   ├── marketStats.js   # Market Pulse stats computation (shared by cron + standalone script)
 │   │   ├── bestbuy.js       # Best Buy API client — DORMANT (access never approved)
-│   │   └── supabase.js      # Supabase client (uses service role key)
+│   │   ├── supabase.js      # Supabase client (uses service role key)
+│   │   └── productParsers.js # Single-source name parsers (capacity/speed/type/CL); required by the generator + build-families.js
 │   ├── package.json
 │   └── schema.sql           # Full DB schema — run in Supabase SQL Editor
 ├── frontend/
@@ -73,7 +74,9 @@ memradar/
 │   ├── upsert-catalog.js        # Catalog preview -> products table (--confirm to write)
 │   ├── backfill-keepa.js        # One-time Keepa history backfill (--confirm to write)
 │   ├── compute-market-stats.js  # Manual Market Pulse stats recompute
-│   └── generate-favicons.js     # Regenerates all favicon PNGs + ICO from favicon-source.svg
+│   ├── generate-favicons.js     # Regenerates all favicon PNGs + ICO from favicon-source.svg
+│   ├── fetch-parent-asins.js    # Keepa parentAsin -> products.parent_asin (tier-1 family source)
+│   └── build-families.js        # Two-tier capacity-family clustering -> products.family_id/capacity_gb
 ├── vercel.json              # Vercel cron config
 ├── package.json
 └── .env                     # Local secrets — NEVER commit this file
@@ -83,7 +86,7 @@ memradar/
 
 Four tables:
 
-- **`products`** — one row per tracked product. Unique key: `sku`. Fields: `sku`, `name`, `category` (ram/ssd), `brand`, `model`, `image_url`, `product_url` (affiliate link), `retailer`.
+- **`products`** — one row per tracked product. Unique key: `sku`. Fields: `sku`, `name`, `category` (ram/ssd), `brand`, `model`, `image_url`, `product_url` (affiliate link), `retailer`, `parent_asin` (Amazon variation parent, from Keepa), `family_id` (capacity-family id: tier-1 `p:{parent}` / tier-2 `k:{key}`), `capacity_gb` (parsed total capacity). Index on `family_id` (partial, `WHERE family_id IS NOT NULL`).
 - **`price_history`** — one price snapshot per product per cron run. Fields: `product_id` (FK), `price`, `regular_price`, `in_stock`, `fetched_at`.
 - **`alerts`** — user email + target price per product. Fields: `product_id` (FK), `email`, `target_price`, `triggered`.
 - **`market_stats`** — one row per Market Pulse segment (`ddr5`/`ddr4`/`nvme_ssd`/`sata_ssd`), recomputed daily by the cron. Fields: `segment` (unique), `current_avg_price`, `baseline_avg_price`, `pct_change`, `product_count`, `computed_at`. Despite the column names, the values are **medians** (see Market Pulse Stats section).
@@ -260,6 +263,14 @@ All queries paginate at PostgREST's 1000-row cap. At ~120 products/page this is 
 - **Idempotent regeneration:** every generated page contains a marker comment; regeneration deletes ONLY directories whose `index.html` carries the marker, then recreates. `/ram/index.html`, `/ssd/index.html`, and the template are untouchable by design.
 - **Baked chart data:** full price history is inlined as `<script type="application/json" id="priceHistoryData">` `[["YYYY-MM-DD", price], …]` — daily within the last year, weekly 1–3yr back, monthly beyond (decade histories ≈432 points max). Range buttons (1M/3M/6M/1Y/All) filter the baked data client-side; no Supabase query for initial render. Chart.js from cdnjs.
 - **Honesty rules baked in:** no star ratings (no review data); specs table renders only confidently parsed rows; <30-day histories get a "Limited price history — tracking since {date}" note and the stats/indicator say "average since tracking began"; buy indicator (good/caution) uses real percentages; JSON-LD Product schema uses the canonical URL (never the affiliate link) and real availability.
+- **Capacity families (variant chips):** PDPs in a family render a capacity-chip selector in the product header (`Available capacities:` + `[1TB $92.99] [2TB viewing] [4TB $399.99]`), with a subtle `best $/GB here` badge on the family member with the lowest current price-per-GB. Chips ascending by capacity; the current product's chip highlighted + non-link; siblings link to sibling PDP slugs. Singletons render nothing.
+  - **Two-tier grouping** (`scripts/build-families.js`). TIER 1 (authoritative) = products sharing Amazon's own parent ASIN (`products.parent_asin`, fetched by `scripts/fetch-parent-asins.js` from Keepa's `parentAsin`); `family_id = "p:{parentAsin}"`. We mirror Amazon's grouping even where it mixes speeds/CL/heatsink (its variation set is what shoppers see as "the same product's options"; the chip axis is capacity and each landing PDP fully discloses its own specs). TIER 2 (heuristic, conservative) = for products with no shared parent, a name-derived line signature (name minus brand/capacity/kit-config/speed/CL/throughput/generic-filler) plus hard invariants that MUST match: RAM = DDR gen + speed + CL + module form (SODIMM vs DIMM); SSD = protocol (SATA-first) + form factor + PCIe gen + heatsink presence. Unknown is never a wildcard (no-CL only groups with no-CL). `family_id = "k:{slug}"`. Refuses to merge products carrying different non-null parent ASINs.
+  - **Determinism / stability covenant:** family ids derive only from parentAsin or the normalized key, so re-runs produce identical ids (same covenant as slugs). **Once shipped, families must not reshuffle** - changing the tokenizer/invariants can change ids and break cross-links, so treat such changes like slug changes.
+  - **Canonical rule:** within a family, same-capacity duplicates resolve to the CANONICAL member = deepest price history, tiebreak lexicographic ASIN. The capacity chip links to the canonical; a non-canonical dup still gets its own PDP where its own capacity chip is the highlighted "viewing" one and the OTHER capacities link to canonicals. The generator recomputes canonical from `stats.days` (monotonic with the raw row count build-families uses, so same result).
+  - **Minimum family size: 2 DISTINCT capacities.** `capacity_gb` comes from `productParsers.js` (single source); unparseable-capacity products are excluded (no capacity axis).
+  - **Chip hydration** (`pdp-hydrate.js` `recomputeCapacityFamily`): sibling chip prices + best-$/GB refresh live via ONE `.in('products.sku', [siblingSkus])` price_history query (window + reduce to latest-per-sku), alongside the existing single-product hydration. Sibling skus/caps/baked-prices live in `#pdpHydrateConfig.famChips` (omitted entirely for chip-less pages so their config stays byte-identical). Graceful fallback to baked values on failure. The `best $/GB here` badge uses `display:none` (removed from the a11y tree), and hydration toggles the `--best` class.
+  - **CATALOG-CHANGE RULE:** adding/removing catalog products requires re-running `fetch-parent-asins.js --confirm` then `build-families.js --confirm` BEFORE regenerating PDPs, or new products won't get chips and existing families may be stale.
+
 - **Structured-data policy (standing):** We don't assert third-party merchant policies (returns, shipping) in structured data; we are not the merchant, and per Google's merchant-listing eligibility rules, link-out pages aren't eligible for those experiences regardless. The two Search Console warnings for these fields (`hasMerchantReturnPolicy`, `shippingDetails`) are accepted permanently. The `aggregateRating` and `review` warnings are likewise accepted permanently — we hold no review data and will never emit fabricated rating schema. Total accepted Search Console structured-data warnings: 4 (`hasMerchantReturnPolicy`, `shippingDetails`, `aggregateRating`, `review`), all deliberate.
 - Stats per page (computed from full history at build time): current, all-time low/high with month+year, 90-day average, 30-day change, price-per-GB vs segment median $/GB.
 - **Price hydration (`frontend/js/pdp-hydrate.js`):** prices update twice daily WITHOUT regeneration, so the baked current price would go stale. On load, the PDP fetches its latest `price_history` row from Supabase (embedded query on `products.sku`, filtered `fetched_at <= now` to skip backfill T23:59 buckets) and replaces the baked **current-price displays** (`#pdpCurrentPrice`, `#pdpBuyPrice`) and the **"Last updated"** line (`#pdpLastUpdated`) with a relative time ("Updated 3 hours ago"). It also **recomputes the price-derived UI for coherence**: the good-time-to-buy verdict (vs the baked 90-day average) and the price-per-GB line, using thresholds baked into `#pdpHydrateConfig` — **single source**: the constants `BUY_GOOD_MAX_RATIO`/`VALUE_LOW_RATIO`/`VALUE_HIGH_RATIO` live in the generator, drive the baked HTML, and are baked into the config so the browser reuses identical values (no magic numbers in `pdp-hydrate.js`). The **90-day average itself stays baked** (moves slowly; recomputing would need the full history). Fails gracefully — baked values remain on any error. Requires `supabase-client.js` on PDPs (added to the generator's script list).
@@ -398,7 +409,7 @@ Below the **768px** breakpoint the desktop `.nav-link`s hide (`nav .nav-link { d
 
 `style.css` is served with `Cache-Control: max-age=14400` (**4 hours** of browser caching). A Cloudflare purge clears the edge but **NOT** visitors' browser caches — so after a CSS change, returning devices can render new HTML against a stale 4-hour-cached stylesheet (this exact mismatch broke the mobile nav on first ship: new hamburger HTML + old CSS).
 
-**Fix / convention:** a single shared version query is appended to **both `style.css` and every local JS include** on every page — `?v=YYYYMMDD` (current value: **`20260818`**). A new URL forces browsers to refetch immediately regardless of max-age.
+**Fix / convention:** a single shared version query is appended to **both `style.css` and every local JS include** on every page — `?v=YYYYMMDD` (current value: **`20260819`**). A new URL forces browsers to refetch immediately regardless of max-age.
 
 - **Bump the `?v=` value whenever any `style.css` OR local JS file changes**, and update ALL pages together (one shared stamp — they must all match). Bumping rebusts every asset; that's fine.
 - Applies to local assets only: `css/style.css` and `js/*.js` (main, theme, alert-modal, supabase-client, market-pulse, product-listing, mobile-nav, filter-sheet, back-to-top). **External CDN scripts are NOT versioned** (jsdelivr supabase-js, cdnjs Chart.js, Cloudflare Turnstile, gtag) — they carry their own versioning.

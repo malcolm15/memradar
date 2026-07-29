@@ -1983,6 +1983,76 @@ html.dark .notice-btn--primary { color: #fff; }
 .pdp-value-per-gb { color: #374151; }
 .pdp-value-avg { color: #9ca3af; }
 
+/* ── Capacity family selector (variant chips in the product header) ── */
+.pdp-capacity-family {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  margin: 2px 0 2px;
+}
+.pdp-capacity-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+.pdp-capacity-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.pdp-cap-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+  color: #374151;
+  font-size: 0.86rem;
+  line-height: 1.2;
+  text-decoration: none;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+a.pdp-cap-chip:hover { border-color: var(--brand-primary); color: var(--brand-primary); }
+.pdp-cap-size { font-weight: 700; }
+.pdp-cap-price { color: #6b7280; font-variant-numeric: tabular-nums; }
+.pdp-cap-state { color: var(--brand-primary); font-weight: 600; }
+.pdp-cap-chip--viewing {
+  border-color: var(--brand-primary);
+  background: var(--brand-tint);
+  color: #111827;
+  cursor: default;
+}
+/* best $/GB tag: present in every chip, shown only on the winner */
+.pdp-cap-best {
+  display: none;
+  position: absolute;
+  top: -9px;
+  right: 8px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--brand-primary);
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.pdp-cap-chip--best { border-color: var(--brand-primary); }
+.pdp-cap-chip--best .pdp-cap-best { display: inline-block; }
+html.dark .pdp-capacity-label { color: #94a3b8; }
+html.dark .pdp-cap-chip { background: #1a2332; border-color: #2d3f55; color: #94a3b8; }
+html.dark a.pdp-cap-chip:hover { border-color: var(--brand-primary); color: var(--brand-light); }
+html.dark .pdp-cap-price { color: #64748b; }
+html.dark .pdp-cap-state { color: var(--brand-light); }
+html.dark .pdp-cap-chip--viewing { background: rgba(var(--brand-rgb), 0.16); border-color: var(--brand-primary); color: #f1f5f9; }
+html.dark .pdp-cap-chip--best { border-color: var(--brand-light); }
+html.dark .pdp-cap-best { background: var(--brand-light); color: #0f1623; }
+@media (max-width: 480px) {
+  .pdp-cap-chip { min-height: 44px; padding: 9px 14px; }  /* 44px tap target */
+}
+
 /* ── Price Analysis (prose explanation of the stats) ── */
 .pdp-analysis {
   margin-top: 16px;
