@@ -26,6 +26,7 @@ const path = require('path');
 const crypto = require('crypto');
 const supabase = require('../backend/lib/supabase');
 const { classifySegment } = require('../backend/lib/marketStats');
+const { neweggDeepLink } = require('../backend/lib/rakutenLink');
 
 const CONFIRM = process.argv.includes('--confirm');
 // Review-only preview: `--sample=slug1,slug2` regenerates ONLY those PDPs in
@@ -112,20 +113,7 @@ function jsonldImage(u) {
 // trailing token preceded by a short all-caps word (e.g. "MZ 77E1T0BW", a
 // part number severed by a space in the source title) is skipped rather
 // than emitted as a fragment.
-const MPN_SPEC_TOKEN = /^(?:\d+X\d+(?:GB|TB)|DDR[45][-\d]*|PC[34][-\d]+|CL\d[\d-]*|\d+(?:GB|TB|MHZ|MTS?)|\d+MT\/S|XMP[\d.]*|EXPO|AMD|INTEL|RGB|NVME|SATA(?:\s?III)?|SSD|M\.2|2280|2242|PCIE[\d.X]*|GEN[\d.X]+|U-?DIMM|SO-?DIMM|RDIMM|QLC|TLC|NAND|\d+V|1\.\d+V|PS5|PC)$/;
-function mpnCandidate(t) {
-  return /^[A-Z0-9][A-Z0-9\-\/\.]{5,}$/.test(t) && /[A-Z]/.test(t) &&
-    ((t.match(/\d/g) || []).length >= 3) && !MPN_SPEC_TOKEN.test(t);
-}
-function parseMpn(name) {
-  const parens = [...name.matchAll(/\(([^)]+)\)/g)].map((m) => m[1].trim());
-  for (let i = parens.length - 1; i >= 0; i--) if (mpnCandidate(parens[i])) return parens[i];
-  const words = name.replace(/[(),]/g, ' ').trim().split(/\s+/);
-  const last = words[words.length - 1];
-  const prev = words[words.length - 2] || '';
-  if (mpnCandidate(last) && !/^[A-Z]{1,3}$/.test(prev)) return last;
-  return null;
-}
+// parseMpn moved to backend/lib/productParsers.js (shared with match-newegg.js).
 
 // Label for the "average" the buy-indicator compares against — shared by the
 // baked HTML and the hydrate config so both read identically.
@@ -144,7 +132,7 @@ const median = (xs) => {
 // family-clustering scripts require the same module). The browser-side
 // duplicate in frontend/js/product-listing.js must stay in sync by hand.
 const {
-  totalCapacityGB, capacityLabel, parseSpeed, ramType, ssdType, formFactor, latency,
+  totalCapacityGB, capacityLabel, parseSpeed, ramType, ssdType, formFactor, latency, parseMpn,
 } = require('../backend/lib/productParsers');
 
 // ------------------------------------------------------------------- slugs
@@ -646,6 +634,53 @@ function buildHead(templateHead, ctx) {
   return head;
 }
 
+// ------------------------------------------------- Buy Now retailer rows
+// Amazon always; Newegg when a retailer_offers row exists (current-price
+// comparison ONLY - history/charts/analysis/alerts stay Amazon/Keepa).
+// Order: cheapest in-stock offer first (in-stock beats OOS, then price asc,
+// Amazon wins ties for stability). Newegg links wrap the CLEAN stored URL in
+// the Rakuten deep link at render time (never stored wrapped).
+function buildRetailerRows(ctx, affUrl) {
+  const rows = [{
+    retailer: 'Amazon',
+    price: ctx.stats.current,
+    priceId: ' id="pdpBuyPrice"',
+    stockId: '',
+    inStock: !!ctx.inStock,
+    href: affUrl,
+    btn: 'View on Amazon →',
+    order: 0,
+  }];
+  if (ctx.neweggOffer) {
+    const o = ctx.neweggOffer;
+    rows.push({
+      retailer: 'Newegg',
+      price: o.price != null ? Number(o.price) : null,
+      priceId: ' id="pdpNeweggPrice"',
+      stockId: ' id="pdpNeweggStock"',
+      inStock: o.in_stock, // true | false | null (unknown -> no badge, no claim)
+      href: neweggDeepLink(o.product_url),
+      btn: 'View on Newegg →',
+      order: 1,
+    });
+  }
+  const stockBadge = (r) => {
+    if (r.inStock === true) return `<span${r.stockId} class="pdp-stock pdp-stock--in">In Stock</span>`;
+    if (r.inStock === false) return `<span${r.stockId} class="pdp-stock pdp-stock--out">Out of Stock</span>`;
+    return `<span${r.stockId} class="pdp-stock"></span>`; // unknown: no claim
+  };
+  rows.sort((a, b) =>
+    ((b.inStock === true ? 1 : 0) - (a.inStock === true ? 1 : 0)) ||
+    ((a.price == null ? Infinity : a.price) - (b.price == null ? Infinity : b.price)) ||
+    (a.order - b.order));
+  return rows.map((r) => `              <tr>
+                <td class="pdp-retailer-name">${r.retailer}</td>
+                <td class="pdp-retailer-price"${r.priceId}>${money(r.price)}</td>
+                <td class="pdp-retailer-stock">${stockBadge(r)}</td>
+                <td class="pdp-retailer-action"><a href="${esc(r.href)}" class="pdp-buy-btn" target="_blank" rel="nofollow sponsored noopener noreferrer">${r.btn}</a></td>
+              </tr>`).join('\n');
+}
+
 function buildMain(ctx) {
   const { p, stats, short } = ctx;
   const s = stats;
@@ -851,16 +886,11 @@ function buildMain(ctx) {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td class="pdp-retailer-name">Amazon</td>
-                <td class="pdp-retailer-price" id="pdpBuyPrice">${money(s.current)}</td>
-                <td class="pdp-retailer-stock"><span class="pdp-stock ${ctx.inStock ? 'pdp-stock--in">In Stock' : 'pdp-stock--out">Out of Stock'}</span></td>
-                <td class="pdp-retailer-action"><a href="${esc(affUrl)}" class="pdp-buy-btn" target="_blank" rel="nofollow sponsored noopener noreferrer">View on Amazon →</a></td>
-              </tr>
+${buildRetailerRows(ctx, affUrl)}
             </tbody>
           </table>
         </div>
-        <p class="pdp-amazon-disclaimer">Price may have changed on Amazon since our last check.</p>
+        <p class="pdp-amazon-disclaimer">${ctx.neweggOffer ? 'Prices may have changed at the retailers since our last check.' : 'Price may have changed on Amazon since our last check.'}</p>
         <div class="pdp-retailers-meta">
           <span class="pdp-retailers-updated" id="pdpLastUpdated">Last updated: ${ctx.buildDateLong}</span>
           <span>Prices update twice daily. <a href="/affiliate.html">Affiliate links</a> support MemRadar at no extra cost to you.</span>
@@ -963,6 +993,9 @@ function buildScripts(ctx) {
   // baked prices/capacities so hydration can refresh chip prices + best-$/GB.
   // Only added when the product actually has a chip row, so a chip-less
   // (singleton) page's config stays byte-identical and its lastmod holds.
+  if (ctx.neweggOffer) {
+    hydrateCfg.newegg = true; // pdp-hydrate refreshes #pdpNeweggPrice/#pdpNeweggStock
+  }
   if (ctx.familyChips && ctx.familyChips.length >= 2) {
     hydrateCfg.famChips = ctx.familyChips.map((c) => ({
       cap: c.cap, viewing: c.viewing, sku: c.sku, price: c.price,
@@ -1281,6 +1314,29 @@ async function run() {
   // (Run meta on the FULL set first so collision tokens are stable, then narrow.)
   computePageMeta(generable);
   const familyMap = buildFamilyMap(generable);
+  // Newegg comparison offers (current price only). Probe-guarded: before the
+  // retailer_offers DDL exists this resolves to an empty map and every page
+  // renders the single Amazon row exactly as today. TEST HOOK: setting
+  // MEMRADAR_TEST_OFFERS to a JSON path ({sku: {price, in_stock, product_url,
+  // retailer_sku}}) substitutes local offers for LOCAL sample renders only -
+  // it logs loudly and must never be set for a real regeneration.
+  let neweggBySku = new Map();
+  if (process.env.MEMRADAR_TEST_OFFERS) {
+    const test = JSON.parse(fs.readFileSync(process.env.MEMRADAR_TEST_OFFERS, 'utf8'));
+    neweggBySku = new Map(Object.entries(test));
+    log(`⚠ TEST OFFERS ACTIVE (${neweggBySku.size} synthetic Newegg offers from ${process.env.MEMRADAR_TEST_OFFERS}) - local preview only`);
+  } else {
+    const probe = await supabase.from('retailer_offers').select('product_id').limit(1);
+    if (!probe.error) {
+      const offers = await pagedSelect(() => supabase.from('retailer_offers')
+        .select('product_id, retailer_sku, product_url, price, in_stock, products!inner(sku)')
+        .eq('retailer', 'newegg').order('id'));
+      neweggBySku = new Map(offers.map((o) => [o.products.sku, o]));
+      log(`Newegg offers loaded: ${neweggBySku.size}`);
+    } else {
+      log('retailer_offers not available (DDL pending) - single-retailer pages');
+    }
+  }
   log(`Capacity families: ${familyMap.size} with a capacity axis (${generable.filter((p) => p.family_id && familyMap.has(p.family_id)).length} products)`);
   if (IS_SAMPLE) {
     log(`SAMPLE mode: writing only [${SAMPLE_SLUGS.join(', ')}]; full pool kept for related-product computation; no delete/sitemap/manifest writes`);
@@ -1370,6 +1426,7 @@ async function run() {
         segment: p.segment,
         segMedianPerGb: segPerGb[p.segment] || null,
         familyChips: familyChips(p, familyMap),
+        neweggOffer: neweggBySku.get(p.sku) || null,
         short: shortName(p),
         url,
         catLabel: p.category === 'ram' ? 'RAM' : 'SSD',

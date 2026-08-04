@@ -195,6 +195,32 @@
     });
   }
 
+  // Newegg comparison row (present when cfg.newegg): refresh price + stock
+  // from retailer_offers. One query; graceful fallback to baked values. The
+  // row ORDER stays as baked (no DOM re-sorting on hydration).
+  function recomputeNeweggOffer(cfg) {
+    if (!cfg.newegg) return;
+    var priceEl = document.getElementById('pdpNeweggPrice');
+    var stockEl = document.getElementById('pdpNeweggStock');
+    if (!priceEl && !stockEl) return;
+    sb.from('retailer_offers')
+      .select('price, in_stock, products!inner(sku)')
+      .eq('retailer', 'newegg')
+      .eq('products.sku', sku)
+      .limit(1)
+      .then(function (res) {
+        if (res.error || !res.data || !res.data.length) return; // keep baked
+        var o = res.data[0];
+        var p = Number(o.price);
+        if (priceEl && !isNaN(p)) priceEl.textContent = money(p);
+        if (stockEl && o.in_stock != null) {
+          stockEl.className = 'pdp-stock ' + (o.in_stock ? 'pdp-stock--in' : 'pdp-stock--out');
+          stockEl.textContent = o.in_stock ? 'In Stock' : 'Out of Stock';
+        }
+      })
+      .catch(function () { /* keep baked values */ });
+  }
+
   function relativeTime(iso) {
     var diff = Date.now() - new Date(iso).getTime();
     if (diff < 0) diff = 0; // guard against clock/timezone edge

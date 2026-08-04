@@ -366,4 +366,10 @@ async function run() {
   }
 }
 
-run().catch((err) => { console.error('FATAL:', err.message); process.exit(1); });
+// Reusable exports for match-newegg.js (same tokenization/signature - never a
+// third parser). The require.main guard keeps `require()` from running the
+// clustering; only direct `node scripts/build-families.js` executes it.
+module.exports = { tokenize, lineSignature, invariants, tier2Key, slugify };
+if (require.main === module) {
+  run().catch((err) => { console.error('FATAL:', err.message); process.exit(1); });
+}

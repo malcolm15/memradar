@@ -58,7 +58,23 @@ function latency(name) {
   return m ? 'CL' + m[1] : null;
 }
 
+const MPN_SPEC_TOKEN = /^(?:\d+X\d+(?:GB|TB)|DDR[45][-\d]*|PC[34][-\d]+|CL\d[\d-]*|\d+(?:GB|TB|MHZ|MTS?)|\d+MT\/S|XMP[\d.]*|EXPO|AMD|INTEL|RGB|NVME|SATA(?:\s?III)?|SSD|M\.2|2280|2242|PCIE[\d.X]*|GEN[\d.X]+|U-?DIMM|SO-?DIMM|RDIMM|QLC|TLC|NAND|\d+V|1\.\d+V|PS5|PC)$/;
+function mpnCandidate(t) {
+  return /^[A-Z0-9][A-Z0-9\-\/\.]{5,}$/.test(t) && /[A-Z]/.test(t) &&
+    ((t.match(/\d/g) || []).length >= 3) && !MPN_SPEC_TOKEN.test(t);
+}
+function parseMpn(name) {
+  const parens = [...name.matchAll(/\(([^)]+)\)/g)].map((m) => m[1].trim());
+  for (let i = parens.length - 1; i >= 0; i--) if (mpnCandidate(parens[i])) return parens[i];
+  const words = name.replace(/[(),]/g, ' ').trim().split(/\s+/);
+  const last = words[words.length - 1];
+  const prev = words[words.length - 2] || '';
+  if (mpnCandidate(last) && !/^[A-Z]{1,3}$/.test(prev)) return last;
+  return null;
+}
+
 module.exports = {
+  parseMpn,
   capTokensGB,
   totalCapacityGB,
   capacityLabel,

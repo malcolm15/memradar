@@ -31,7 +31,8 @@ memradar/
 │   │   ├── marketStats.js   # Market Pulse stats computation (shared by cron + standalone script)
 │   │   ├── bestbuy.js       # Best Buy API client — DORMANT (access never approved)
 │   │   ├── supabase.js      # Supabase client (uses service role key)
-│   │   └── productParsers.js # Single-source name parsers (capacity/speed/type/CL); required by the generator + build-families.js
+│   │   ├── productParsers.js # Single-source name parsers (capacity/speed/type/CL/MPN); required by the generator + build-families + match-newegg
+│   │   └── rakutenLink.js   # Rakuten deep-link wrapper for Newegg affiliate URLs (render-time; self-test: node backend/lib/rakutenLink.js)
 │   ├── package.json
 │   └── schema.sql           # Full DB schema — run in Supabase SQL Editor
 ├── frontend/
@@ -76,7 +77,8 @@ memradar/
 │   ├── compute-market-stats.js  # Manual Market Pulse stats recompute
 │   ├── generate-favicons.js     # Regenerates all favicon PNGs + ICO from favicon-source.svg
 │   ├── fetch-parent-asins.js    # Keepa parentAsin -> products.parent_asin (tier-1 family source)
-│   └── build-families.js        # Two-tier capacity-family clustering -> products.family_id/capacity_gb
+│   ├── build-families.js        # Two-tier capacity-family clustering -> products.family_id/capacity_gb (also exports the normalization for match-newegg)
+│   └── match-newegg.js          # Newegg feed matcher -> retailer_offers (tier-1 MPN auto + tier-2 proposals, Gate-reviewed)
 ├── vercel.json              # Vercel cron config
 ├── package.json
 └── .env                     # Local secrets — NEVER commit this file
@@ -107,6 +109,7 @@ Required in `.env` (local) and Vercel project settings (production):
 | `CRON_SECRET` | Random secret — Vercel sends as Bearer token to protect `/api/fetch-prices` |
 | `RESEND_API_KEY` | Resend email sending API key — production key from resend.com |
 | `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile secret key — from dash.cloudflare.com. Site key (public, already in frontend): `0x4AAAAAADTmp79GaQVF5cAu` |
+| `RAKUTEN_AFFILIATE_ID` | Rakuten Advertising encrypted publisher id (11 chars, case-sensitive) for Newegg deep links — NOT the Publisher SID. Public once rendered; required by the generator whenever a Newegg offer exists |
 
 **Security notes:**
 - `.env` must never be committed — it is (and must stay) in `.gitignore`
@@ -332,7 +335,8 @@ Full email-alert flow. **PII (email addresses) — every decision errs toward pr
 - Affiliate link tracking / analytics beyond GA events
 - Daily automated PDP regeneration (GitHub Action — see Product Detail Pages TODO)
 - Deferred-confirmation resend after the alert circuit breaker trips (see Alert Backend TODO)
-- Additional retailers (Best Buy client dormant; Walmart/Newegg never integrated)
+- **Newegg Phase 2 — feed cron (design only, NOT built):** Newegg approval is live via Rakuten (Publisher SID 4705448, Newegg MID 44583). Phase 1 scaffolding is built: `retailer_offers` table (current-price comparison rows; clean URLs stored, Rakuten deep-link wrapping at render time via `backend/lib/rakutenLink.js`), `scripts/match-newegg.js` (tier-1 normalized-MPN auto-match + tier-2 conservative name proposals reusing the family-clustering normalization; human review gate before any write), and generator/hydration support for a second Buy Now row (cheapest in-stock first; no-op while `retailer_offers` is empty). Intended cron shape once the Rakuten feed delivery mechanism (file/FTP/API) is confirmed: fetch feed → refresh `retailer_offers` price/in_stock/fetched_at where retailer='newegg' (matched rows only, never re-match automatically) → PDPs hydrate from it. SCOPE GUARDRAIL: price history, charts, Price Analysis, buy verdict, and alerts remain Amazon/Keepa-only; Newegg is a current-price comparison row.
+- Additional retailers beyond Newegg (Best Buy client dormant; Walmart never integrated)
 
 ## Data Source Evaluation Findings (July 2026)
 
