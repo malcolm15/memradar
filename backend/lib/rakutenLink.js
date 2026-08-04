@@ -29,7 +29,11 @@ function neweggDeepLink(cleanUrl, affiliateId = process.env.RAKUTEN_AFFILIATE_ID
   if (!affiliateId) {
     throw new Error('neweggDeepLink: RAKUTEN_AFFILIATE_ID is not set (the 11-char encrypted id from the Rakuten dashboard, not the SID)');
   }
-  return `${BASE}?id=${encodeURIComponent(affiliateId)}&mid=${NEWEGG_MID}&murl=${encodeURIComponent(cleanUrl)}`;
+  // The id is emitted RAW, exactly as Rakuten's own Deep Links tool does -
+  // real ids contain '/' and '*' (e.g. xc/Oes*5*PA), which are legal unencoded
+  // in a query value; percent-encoding them would deviate from Rakuten's
+  // canonical link form.
+  return `${BASE}?id=${affiliateId}&mid=${NEWEGG_MID}&murl=${encodeURIComponent(cleanUrl)}`;
 }
 
 module.exports = { neweggDeepLink, NEWEGG_MID };
