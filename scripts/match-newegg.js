@@ -330,6 +330,22 @@ async function run() {
     });
   }
 
+  // Carry over explicit accepts from the prior review file - the documented
+  // tier-2 flow is: review, set "accepted": true in newegg-matches.json,
+  // re-run with --confirm. Keyed on our sku AND the Newegg sku so an accept
+  // never transfers to a different feed row than the one reviewed.
+  if (fs.existsSync(JSON_OUT)) {
+    try {
+      const prior = JSON.parse(fs.readFileSync(JSON_OUT, 'utf8'));
+      const ok = new Set(prior.filter((m) => m.method !== 'mpn' && m.accepted === true).map((m) => `${m.sku}::${m.neweggSku}`));
+      let carried = 0;
+      for (const m of matches) {
+        if (m.method !== 'mpn' && ok.has(`${m.sku}::${m.neweggSku}`)) { m.accepted = true; carried++; }
+      }
+      if (carried) log(`Carried over ${carried} accepted tier-2 rulings from prior newegg-matches.json`);
+    } catch { /* unreadable prior file: proposals stay unaccepted */ }
+  }
+
   fs.mkdirSync(OUT_DIR, { recursive: true });
   fs.writeFileSync(JSON_OUT, JSON.stringify(matches, null, 1));
 
