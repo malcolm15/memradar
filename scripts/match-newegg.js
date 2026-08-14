@@ -50,7 +50,7 @@ require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 const supabase = require('../backend/lib/supabase');
-const { parseMpn, totalCapacityGB } = require('../backend/lib/productParsers');
+const { parseMpn, totalCapacityGB, parseKitConfig } = require('../backend/lib/productParsers');
 const { tokenize, lineSignature, invariants } = require('./build-families');
 
 const CONFIRM = process.argv.includes('--confirm');
@@ -301,15 +301,21 @@ async function run() {
     const sig = lineSignature(p);
     if (!sig.length) { unmatched.push({ sku: p.sku, reason: 'empty line signature' }); continue; }
     const ourBrand = (p.brand || '').toLowerCase();
-    const ourInv = invariants(p).join('|');
+    // Kit configuration (2x8 vs 1x16) is a tier-2 MATCHING invariant only -
+    // it is deliberately NOT added to build-families' invariants(), which
+    // would reshuffle shipped family ids. Unknown-vs-known mismatches
+    // (conservative, same as the CL 'nocl' rule).
+    const ourInv = invariants(p).join('|') + '|' + (parseKitConfig(p.name) || 'nokit');
     const cands = tier2Pool.filter((f) => {
       if (ourBrand && !(f.brand || f.name).toLowerCase().includes(ourBrand.split(' ')[0])) return false;
       if (totalCapacityGB(f.name) !== ourCap) return false;
-      // hard invariants must match too (RAM speed/CL/gen/form; SSD proto/form/
-      // gen/heatsink) - brand+capacity+signature alone would propose a 6000
-      // CL30 kit against a 5200 CL40 feed row. Unknown-vs-unknown still only
-      // pairs with unknown (build-families semantics).
-      if (invariants({ name: f.name, category: p.category }).join('|') !== ourInv) return false;
+      // hard invariants must match too (RAM speed/CL/gen/form + kit config;
+      // SSD proto/form/gen/heatsink) - brand+capacity+signature alone would
+      // propose a 6000 CL30 kit against a 5200 CL40 feed row, or a 1x16
+      // module against a 2x8 kit. Unknown-vs-unknown still only pairs with
+      // unknown (build-families semantics).
+      const fInv = invariants({ name: f.name, category: p.category }).join('|') + '|' + (parseKitConfig(f.name) || 'nokit');
+      if (fInv !== ourInv) return false;
       const feedToks = new Set(tokenize(f.name).map((t) => t.toLowerCase()));
       return sig.every((t) => feedToks.has(t));
     });

@@ -58,6 +58,21 @@ function latency(name) {
   return m ? 'CL' + m[1] : null;
 }
 
+// Kit configuration: "32GB Kit (2x16GB)" → '2x16', "1X16GB" → '1x16' (module
+// size GB-normalized). "Single Module"/"Single Stick" counts as 1x{total}
+// when total capacity is known. Null when the name states no configuration -
+// a 2x8 kit and a 1x16 module are different products to a PC builder even
+// though the totals match. Rank markings (1Rx8/2Rx8) never match the pattern.
+function parseKitConfig(name) {
+  const m = name.match(/\b(\d{1,2})\s*[x×]\s*(\d{1,4})\s*(gb|tb)\b/i);
+  if (m) return `${+m[1]}x${/tb/i.test(m[3]) ? +m[2] * 1024 : +m[2]}`;
+  if (/\bsingle\s+(module|stick)\b/i.test(name)) {
+    const total = totalCapacityGB(name);
+    if (total != null) return `1x${total}`;
+  }
+  return null;
+}
+
 const MPN_SPEC_TOKEN = /^(?:\d+X\d+(?:GB|TB)|DDR[45][-\d]*|PC[34][-\d]+|CL\d[\d-]*|\d+(?:GB|TB|MHZ|MTS?)|\d+MT\/S|XMP[\d.]*|EXPO|AMD|INTEL|RGB|NVME|SATA(?:\s?III)?|SSD|M\.2|2280|2242|PCIE[\d.X]*|GEN[\d.X]+|U-?DIMM|SO-?DIMM|RDIMM|QLC|TLC|NAND|\d+V|1\.\d+V|PS5|PC)$/;
 function mpnCandidate(t) {
   return /^[A-Z0-9][A-Z0-9\-\/\.]{5,}$/.test(t) && /[A-Z]/.test(t) &&
@@ -79,6 +94,7 @@ module.exports = {
   totalCapacityGB,
   capacityLabel,
   parseSpeed,
+  parseKitConfig,
   ramType,
   ssdType,
   formFactor,
