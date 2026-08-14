@@ -19,12 +19,21 @@
 //   then in-stock over not, then lowest price. Competing rows are logged.
 //
 // FEED: path passed as the first positional argument. Format-tolerant:
-//   - CSV/TSV/pipe (delimiter sniffed from the header line, RFC4180 quoting)
+//   - Rakuten merchandiser complete feed (real Newegg feed): pipe-delimited,
+//     38 positional columns, NO header row - first line HDR|mid|advertiser|ts,
+//     last line TRL|rowcount. Detected by the HDR| prefix and STREAMED line by
+//     line (the full file is ~1.4 GB, beyond Node's max string length).
+//     Products are loaded first so streaming keeps only rows we can use:
+//     rows whose MPN is one of ours, plus tier-2 candidates (brand + capacity
+//     prefilter - the same first two conditions the tier-2 filter applies).
+//     Seller is derived from the item number: 9S... = marketplace,
+//     anything else (N82E...) = sold by Newegg.
+//   - CSV/TSV/pipe with a header line (delimiter sniffed, RFC4180 quoting)
 //   - XML (any <product>/<item> record tag; child tags read as fields)
 //   Header/field names are looked up case/space-insensitively against a
 //   synonym table; if required fields can't be mapped the script fails LOUDLY
-//   listing every header it saw, so adapting to the real Rakuten feed is a
-//   one-line synonym addition.
+//   listing every header it saw, so adapting to a new feed is a one-line
+//   synonym addition.
 //
 // OUTPUT: scripts/output/newegg-matches.json (machine) + newegg-review.txt
 // (human, "OUR: ... <-> NEWEGG: ..." grouped by method) + the same report on
@@ -122,6 +131,69 @@ function parseXml(text) {
   return { headers, rows, format: `xml(<${recordTag}>)` };
 }
 
+// ---- Rakuten merchandiser complete feed (positional, streamed) ----
+// 0-based indexes into the 38-column layout, verified against the live Newegg
+// feed (col 20 1-based = MPN, col 13 = sale price, col 14 = retail, col 23 =
+// availability, col 26 = currency; every row in the complete feed is in-stock).
+const RAKUTEN_COLS = { name: 1, sku: 2, url: 5, salePrice: 12, retailPrice: 13, brand: 16, mpn: 19, manufacturer: 20, availability: 22, currency: 25 };
+
+// Feed URLs are pre-built linksynergy click links; we store CLEAN urls and
+// wrap at render time (backend/lib/rakutenLink.js). Extract the embedded murl
+// and drop its query (the ?item= param just repeats the /p/{sku} path).
+function cleanFeedUrl(raw) {
+  try {
+    let u = new URL(raw);
+    if (u.hostname === 'click.linksynergy.com') {
+      const murl = u.searchParams.get('murl');
+      if (murl) u = new URL(murl);
+    }
+    return u.origin + u.pathname;
+  } catch { return raw; }
+}
+
+const parseStock = (v) => /^(y|yes|true|1|in[-\s]?stock|available)$/i.test(v) ? true
+  : /^(n|no|false|0|out[-\s]?of[-\s]?stock|unavailable|backorder(ed)?|discontinued)$/i.test(v) ? false : null;
+
+function isRakutenFeed(feedPath) {
+  const buf = Buffer.alloc(4);
+  const fd = fs.openSync(feedPath, 'r');
+  fs.readSync(fd, buf, 0, 4, 0);
+  fs.closeSync(fd);
+  return buf.toString('utf8') === 'HDR|';
+}
+
+async function streamRakutenFeed(feedPath, onItem) {
+  const rl = require('readline').createInterface({
+    input: fs.createReadStream(feedPath), crlfDelay: Infinity,
+  });
+  const C = RAKUTEN_COLS;
+  let total = 0, withMpn = 0;
+  for await (const line of rl) {
+    if (!line || line.startsWith('HDR|') || line.startsWith('TRL|')) continue;
+    const f = line.split('|');
+    const name = (f[C.name] || '').trim();
+    const url = (f[C.url] || '').trim();
+    if (!name || !url) continue;
+    total++;
+    const mpn = (f[C.mpn] || '').trim();
+    if (mpn) withMpn++;
+    const sku = (f[C.sku] || '').trim();
+    onItem({
+      name,
+      mpn,
+      sku,
+      brand: (f[C.brand] || f[C.manufacturer] || '').trim(),
+      price: parseFloat(f[C.salePrice]) || parseFloat(f[C.retailPrice]) || null,
+      url: cleanFeedUrl(url),
+      // 9S... item numbers are marketplace listings; N82E... (and other
+      // non-9S) are sold by Newegg - feeds pickBest's first-party preference.
+      seller: /^9S/i.test(sku) ? 'marketplace' : 'newegg',
+      inStock: parseStock((f[C.availability] || '').trim()),
+    });
+  }
+  return { total, withMpn };
+}
+
 function loadFeed(feedPath) {
   const text = fs.readFileSync(feedPath, 'utf8').replace(/^﻿/, '');
   const parsed = text.trimStart().startsWith('<') ? parseXml(text) : parseDelimited(text);
@@ -170,18 +242,41 @@ async function run() {
   if (!fs.existsSync(FEED_PATH)) throw new Error('Feed file not found: ' + FEED_PATH);
   log(`Newegg matching started${CONFIRM ? '' : ' (DRY RUN - review report only)'}`);
 
-  const feed = loadFeed(FEED_PATH);
-  const byMpn = new Map();
-  for (const f of feed) {
-    const k = normMpn(f.mpn);
-    if (!k) continue;
-    (byMpn.get(k) || byMpn.set(k, []).get(k)).push(f);
-  }
-  log(`Feed rows with an MPN: ${feed.filter((f) => f.mpn).length} (${byMpn.size} distinct)`);
-
   const { data: products, error } = await supabase
     .from('products').select('id, sku, name, brand, category').eq('retailer', 'amazon').order('id');
   if (error) throw new Error(error.message);
+  log(`Products loaded: ${products.length}`);
+
+  const byMpn = new Map();
+  let tier2Pool;
+  if (isRakutenFeed(FEED_PATH)) {
+    // Stream the ~1M-row feed keeping only rows we can use: our-MPN hits for
+    // tier 1, and brand+capacity prefiltered rows for tier 2 (the same first
+    // two conditions the tier-2 filter applies, so no candidate is lost).
+    const ourMpnSet = new Set(products.map((p) => normMpn(parseMpn(p.name))).filter(Boolean));
+    const ourCapSet = new Set(products.map((p) => totalCapacityGB(p.name)).filter((v) => v != null));
+    const brandWords = [...new Set(products.map((p) => (p.brand || '').toLowerCase().split(' ')[0]).filter(Boolean))];
+    const everyProductHasBrand = products.every((p) => p.brand);
+    tier2Pool = [];
+    const stats = await streamRakutenFeed(FEED_PATH, (item) => {
+      const k = normMpn(item.mpn);
+      if (k && ourMpnSet.has(k)) (byMpn.get(k) || byMpn.set(k, []).get(k)).push(item);
+      const hay = (item.brand + ' ' + item.name).toLowerCase();
+      if (!everyProductHasBrand || brandWords.some((w) => hay.includes(w))) {
+        if (ourCapSet.has(totalCapacityGB(item.name))) tier2Pool.push(item);
+      }
+    });
+    log(`Rakuten feed streamed: ${stats.total} rows (${stats.withMpn} with MPN); rows matching our MPNs: ${[...byMpn.values()].reduce((n, a) => n + a.length, 0)} across ${byMpn.size} MPNs; tier-2 candidate pool: ${tier2Pool.length}`);
+  } else {
+    const feed = loadFeed(FEED_PATH);
+    for (const f of feed) {
+      const k = normMpn(f.mpn);
+      if (!k) continue;
+      (byMpn.get(k) || byMpn.set(k, []).get(k)).push(f);
+    }
+    tier2Pool = feed;
+    log(`Feed rows with an MPN: ${feed.filter((f) => f.mpn).length} (${byMpn.size} distinct)`);
+  }
 
   const matches = [];
   const unmatched = [];
@@ -207,7 +302,7 @@ async function run() {
     if (!sig.length) { unmatched.push({ sku: p.sku, reason: 'empty line signature' }); continue; }
     const ourBrand = (p.brand || '').toLowerCase();
     const ourInv = invariants(p).join('|');
-    const cands = feed.filter((f) => {
+    const cands = tier2Pool.filter((f) => {
       if (ourBrand && !(f.brand || f.name).toLowerCase().includes(ourBrand.split(' ')[0])) return false;
       if (totalCapacityGB(f.name) !== ourCap) return false;
       // hard invariants must match too (RAM speed/CL/gen/form; SSD proto/form/
