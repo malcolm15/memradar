@@ -125,22 +125,45 @@
     return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), h < 6 ? 6 : h < 18 ? 18 : 30, 0, 0)).toISOString();
   }
 
-  // Keep the Product JSON-LD coherent with the hydrated price: update
-  // offers.price and roll priceValidUntil forward. Rendering crawlers see the
-  // same numbers the visible page shows.
-  function updateJsonLd(price, fetchedAt) {
+  // Keep the Product JSON-LD coherent with the hydrated prices. Rendering
+  // crawlers see the same numbers the visible page shows. Two shapes:
+  // - single Offer (Amazon-only pages): update price + validity window.
+  // - AggregateOffer (two-retailer pages): update the named seller's nested
+  //   offer, then re-derive lowPrice/highPrice from the nested prices so the
+  //   aggregate NEVER advertises a bound no nested offer actually carries -
+  //   whichever order the Amazon and Newegg refreshes land in.
+  function updateJsonLd(seller, price, fetchedAt, inStock) {
     var el = document.querySelector('script[type="application/ld+json"]');
     if (!el) return;
     try {
       var data = JSON.parse(el.textContent);
       var graph = data['@graph'] || [];
       for (var i = 0; i < graph.length; i++) {
-        if (graph[i]['@type'] === 'Product' && graph[i].offers) {
-          graph[i].offers.price = price;
-          // validFrom = when this price was actually fetched; priceValidUntil
-          // = the next scheduled fetch (same clock as the generator).
-          if (fetchedAt) graph[i].offers.validFrom = new Date(fetchedAt).toISOString();
-          graph[i].offers.priceValidUntil = nextFetchIso();
+        if (graph[i]['@type'] !== 'Product' || !graph[i].offers) continue;
+        var offers = graph[i].offers;
+        if (offers['@type'] === 'AggregateOffer') {
+          var list = offers.offers || [];
+          var prices = [];
+          for (var j = 0; j < list.length; j++) {
+            if (list[j].seller && list[j].seller.name === seller) {
+              list[j].price = price;
+              // validFrom = when this price was actually fetched;
+              // priceValidUntil = the next scheduled fetch (generator clock).
+              if (fetchedAt) list[j].validFrom = new Date(fetchedAt).toISOString();
+              list[j].priceValidUntil = nextFetchIso();
+              if (inStock === true) list[j].availability = 'https://schema.org/InStock';
+              if (inStock === false) list[j].availability = 'https://schema.org/OutOfStock';
+            }
+            if (typeof list[j].price === 'number') prices.push(list[j].price);
+          }
+          if (prices.length) {
+            offers.lowPrice = Math.min.apply(null, prices);
+            offers.highPrice = Math.max.apply(null, prices);
+          }
+        } else if (seller === 'Amazon') {
+          offers.price = price;
+          if (fetchedAt) offers.validFrom = new Date(fetchedAt).toISOString();
+          offers.priceValidUntil = nextFetchIso();
         }
       }
       el.textContent = JSON.stringify(data).replace(/<\//g, '<\\/');
@@ -204,7 +227,7 @@
     var stockEl = document.getElementById('pdpNeweggStock');
     if (!priceEl && !stockEl) return;
     sb.from('retailer_offers')
-      .select('price, in_stock, products!inner(sku)')
+      .select('price, in_stock, fetched_at, products!inner(sku)')
       .eq('retailer', 'newegg')
       .eq('products.sku', sku)
       .limit(1)
@@ -217,6 +240,7 @@
           stockEl.className = 'pdp-stock ' + (o.in_stock ? 'pdp-stock--in' : 'pdp-stock--out');
           stockEl.textContent = o.in_stock ? 'In Stock' : 'Out of Stock';
         }
+        if (!isNaN(p)) updateJsonLd('Newegg', p, o.fetched_at, o.in_stock);
       })
       .catch(function () { /* keep baked values */ });
   }
@@ -262,7 +286,7 @@
             recomputeCapacityFamily(cfg, price);
           } catch (e) { /* leave baked verdict on bad config */ }
         }
-        updateJsonLd(price, row.fetched_at);
+        updateJsonLd('Amazon', price, row.fetched_at, null);
       }
       updatedEl.textContent = 'Updated ' + relativeTime(row.fetched_at);
     })

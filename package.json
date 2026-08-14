@@ -10,6 +10,7 @@
     "dotenv": "^16.0.0"
   },
   "devDependencies": {
+    "puppeteer": "^25.7.0",
     "sharp": "^0.34.5",
     "ssh2-sftp-client": "^12.1.1",
     "to-ico": "^1.1.5"
