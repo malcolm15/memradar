@@ -78,7 +78,8 @@ memradar/
 │   ├── generate-favicons.js     # Regenerates all favicon PNGs + ICO from favicon-source.svg
 │   ├── fetch-parent-asins.js    # Keepa parentAsin -> products.parent_asin (tier-1 family source)
 │   ├── build-families.js        # Two-tier capacity-family clustering -> products.family_id/capacity_gb (also exports the normalization for match-newegg)
-│   └── match-newegg.js          # Newegg feed matcher -> retailer_offers (tier-1 MPN auto + tier-2 proposals, Gate-reviewed)
+│   ├── match-newegg.js          # Newegg feed matcher -> retailer_offers (tier-1 MPN auto + tier-2 proposals, Gate-reviewed)
+│   └── fetch-newegg-feed.js     # Rakuten SFTP feed pull (lists dir first; single connection; binary-safe SFTP)
 ├── vercel.json              # Vercel cron config
 ├── package.json
 └── .env                     # Local secrets — NEVER commit this file
@@ -110,6 +111,9 @@ Required in `.env` (local) and Vercel project settings (production):
 | `RESEND_API_KEY` | Resend email sending API key — production key from resend.com |
 | `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile secret key — from dash.cloudflare.com. Site key (public, already in frontend): `0x4AAAAAADTmp79GaQVF5cAu` |
 | `RAKUTEN_AFFILIATE_ID` | Rakuten Advertising encrypted publisher id (11 chars, case-sensitive) for Newegg deep links — NOT the Publisher SID. Public once rendered; required by the generator whenever a Newegg offer exists |
+| `RAKUTEN_SFTP_HOST` | Rakuten product-catalog SFTP host (`aftp.linksynergy.com`) for the Newegg feed |
+| `RAKUTEN_SFTP_USER` | Rakuten SFTP username (`rkp_4705448`) |
+| `RAKUTEN_SFTP_PASS` | Rakuten SFTP password — secret, from the Rakuten dashboard |
 
 **Security notes:**
 - `.env` must never be committed — it is (and must stay) in `.gitignore`
