@@ -34,6 +34,7 @@ const feed = require('../backend/lib/neweggFeed');
 
 const CONFIRM = process.argv.includes('--confirm');
 const FULL = process.argv.includes('--full');
+const LOCAL_FILE = (process.argv.find((a) => a.startsWith('--file=')) || '').replace('--file=', '');
 const OUT_DIR = path.join(__dirname, 'output');
 const STALE_DAYS = 9;
 const DELTA_TIMEOUT_MS = 120_000; // ~1.6MB file
@@ -53,21 +54,39 @@ async function run() {
     .select('id, product_id, retailer_sku, price, in_stock, fetched_at')
     .eq('retailer', 'newegg');
   if (error) throw new Error('offers load failed: ' + error.message);
-  const bySku = new Map(offers.map((o) => [o.retailer_sku, o]));
-  log(`Existing offers: ${offers.length}`);
-
-  // ---- download ----
-  fs.mkdirSync(OUT_DIR, { recursive: true });
-  const remote = '/' + (FULL ? feed.COMPLETE_FILE : feed.DELTA_FILE);
-  const local = path.join(OUT_DIR, FULL ? feed.COMPLETE_FILE : feed.DELTA_FILE);
-  const sftp = await feed.connect(log);
-  let dl;
-  try {
-    dl = await feed.downloadGz(sftp, remote, local, FULL ? FULL_TIMEOUT_MS : DELTA_TIMEOUT_MS, log);
-  } finally {
-    await feed.endConnection(sftp, log);
+  // sku -> offer[] (NOT a 1:1 map): several of our products legitimately
+  // share one Newegg listing (e.g. two Amazon entries for the same 990 PRO),
+  // an approved matching outcome. Keying 1:1 would refresh only one of each
+  // pair and let the staleness net wrongly flip its twin out of stock.
+  const bySku = new Map();
+  for (const o of offers) {
+    if (!bySku.has(o.retailer_sku)) bySku.set(o.retailer_sku, []);
+    bySku.get(o.retailer_sku).push(o);
   }
-  log(`Downloaded ${(dl.bytes / 1048576).toFixed(1)} MB${dl.viaWatchdog ? ' (completed via watchdog + gzip integrity check)' : ''}`);
+  const shared = [...bySku.values()].filter((a) => a.length > 1).length;
+  log(`Existing offers: ${offers.length} across ${bySku.size} distinct Newegg SKUs${shared ? ` (${shared} SKUs shared by multiple products)` : ''}`);
+
+  // ---- obtain the feed ----
+  // --file=<path> skips the download and applies an already-fetched feed:
+  // for offline testing and for re-applying after a partial failure without
+  // pulling 150MB again.
+  fs.mkdirSync(OUT_DIR, { recursive: true });
+  const local = LOCAL_FILE || path.join(OUT_DIR, FULL ? feed.COMPLETE_FILE : feed.DELTA_FILE);
+  let dl = { bytes: 0, viaWatchdog: false };
+  if (LOCAL_FILE) {
+    if (!fs.existsSync(LOCAL_FILE)) throw new Error('--file not found: ' + LOCAL_FILE);
+    dl.bytes = fs.statSync(LOCAL_FILE).size;
+    log(`Using local feed file ${LOCAL_FILE} (${(dl.bytes / 1048576).toFixed(1)} MB) - no download`);
+  } else {
+    const remote = '/' + (FULL ? feed.COMPLETE_FILE : feed.DELTA_FILE);
+    const sftp = await feed.connect(log);
+    try {
+      dl = await feed.downloadGz(sftp, remote, local, FULL ? FULL_TIMEOUT_MS : DELTA_TIMEOUT_MS, log);
+    } finally {
+      await feed.endConnection(sftp, log);
+    }
+    log(`Downloaded ${(dl.bytes / 1048576).toFixed(1)} MB${dl.viaWatchdog ? ' (completed via watchdog + gzip integrity check)' : ''}`);
+  }
 
   // ---- collect changes ----
   const now = new Date().toISOString();
@@ -77,15 +96,17 @@ async function run() {
   };
   const seen = new Set();
   const stats = await feed.streamRakutenFeed(local, (item) => {
-    const offer = bySku.get(item.sku);
-    if (!offer) return;
+    const matched = bySku.get(item.sku);
+    if (!matched) return;
     seen.add(item.sku);
-    if (FULL || item.change === 'I' || item.change === 'U') {
-      if (item.price == null) return; // never store a null price
-      put(offer, { price: item.price, in_stock: true, product_url: item.url, fetched_at: now },
-        `${item.change || 'present'} $${offer.price} -> $${item.price}${offer.in_stock === false ? ' (back in stock)' : ''}`);
-    } else if (item.change === 'D') {
-      put(offer, { in_stock: false, fetched_at: now }, `D (left feed) - was $${offer.price}`);
+    for (const offer of matched) { // every product sharing this listing
+      if (FULL || item.change === 'I' || item.change === 'U') {
+        if (item.price == null) continue; // never store a null price
+        put(offer, { price: item.price, in_stock: true, product_url: item.url, fetched_at: now },
+          `${item.change || 'present'} $${offer.price} -> $${item.price}${offer.in_stock === false ? ' (back in stock)' : ''}`);
+      } else if (item.change === 'D') {
+        put(offer, { in_stock: false, fetched_at: now }, `D (left feed) - was $${offer.price}`);
+      }
     }
   });
   log(`Feed rows: ${stats.total}; rows matching our SKUs: ${seen.size}`);
