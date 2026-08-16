@@ -73,6 +73,15 @@ function parseKitConfig(name) {
   return null;
 }
 
+// Canonical barcode form: digits only, leading zeros stripped. UPC-A (12) /
+// EAN-13 / GTIN-14 encodings of the same barcode differ only by leading-zero
+// padding, so they all collapse to one comparable value. Used by the UPC
+// fetch (Keepa upcList/eanList/gtinList) and the tier-1.5 Newegg matcher.
+const normBarcode = (s) => String(s || '').replace(/\D/g, '').replace(/^0+/, '');
+// A value that LOOKS like a barcode (Newegg's feed sometimes puts UPCs in
+// the MPN column): 10-14 digits, nothing else.
+const looksLikeBarcode = (s) => /^\d{10,14}$/.test(String(s || '').trim());
+
 const MPN_SPEC_TOKEN = /^(?:\d+X\d+(?:GB|TB)|DDR[45][-\d]*|PC[34][-\d]+|CL\d[\d-]*|\d+(?:GB|TB|MHZ|MTS?)|\d+MT\/S|XMP[\d.]*|EXPO|AMD|INTEL|RGB|NVME|SATA(?:\s?III)?|SSD|M\.2|2280|2242|PCIE[\d.X]*|GEN[\d.X]+|U-?DIMM|SO-?DIMM|RDIMM|QLC|TLC|NAND|\d+V|1\.\d+V|PS5|PC)$/;
 function mpnCandidate(t) {
   return /^[A-Z0-9][A-Z0-9\-\/\.]{5,}$/.test(t) && /[A-Z]/.test(t) &&
@@ -95,6 +104,8 @@ module.exports = {
   capacityLabel,
   parseSpeed,
   parseKitConfig,
+  normBarcode,
+  looksLikeBarcode,
   ramType,
   ssdType,
   formFactor,

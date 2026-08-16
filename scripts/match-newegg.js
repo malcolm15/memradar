@@ -9,6 +9,12 @@
 //     Our MPN comes from parseMpn(name) (backend/lib/productParsers.js - the
 //     same extraction the PDP structured data uses). Normalization both sides:
 //     uppercase, strip every non-alphanumeric.
+//   TIER 1.5 (NEVER auto-accepted): UPC/EAN/GTIN join. Our side comes from
+//     products.upc (Keepa upcList/eanList/gtinList via scripts/fetch-upcs.js,
+//     comma-joined, leading zeros stripped). Feed side: the column-24 GTIN
+//     plus barcode-looking values in the MPN column (Newegg pollutes it).
+//     Bundles/multipacks can share a barcode, so proposals go through the
+//     same human gate as tier 2 (method 'upc' in the review file).
 //   TIER 2 (NEVER auto-accepted): brand + capacity + line-signature containment
 //     (reuses build-families' lineSignature - no third parser). Written to the
 //     review file as proposals with both names side by side. To accept one,
@@ -50,7 +56,7 @@ require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 const supabase = require('../backend/lib/supabase');
-const { parseMpn, totalCapacityGB, parseKitConfig } = require('../backend/lib/productParsers');
+const { parseMpn, totalCapacityGB, parseKitConfig, normBarcode, looksLikeBarcode } = require('../backend/lib/productParsers');
 const { tokenize, lineSignature, invariants } = require('./build-families');
 
 const CONFIRM = process.argv.includes('--confirm');
@@ -135,7 +141,7 @@ function parseXml(text) {
 // 0-based indexes into the 38-column layout, verified against the live Newegg
 // feed (col 20 1-based = MPN, col 13 = sale price, col 14 = retail, col 23 =
 // availability, col 26 = currency; every row in the complete feed is in-stock).
-const RAKUTEN_COLS = { name: 1, sku: 2, url: 5, salePrice: 12, retailPrice: 13, brand: 16, mpn: 19, manufacturer: 20, availability: 22, currency: 25 };
+const RAKUTEN_COLS = { name: 1, sku: 2, url: 5, salePrice: 12, retailPrice: 13, brand: 16, mpn: 19, manufacturer: 20, availability: 22, upc: 23, currency: 25 };
 
 // Feed URLs are pre-built linksynergy click links; we store CLEAN urls and
 // wrap at render time (backend/lib/rakutenLink.js). Extract the embedded murl
@@ -189,6 +195,9 @@ async function streamRakutenFeed(feedPath, onItem) {
       // non-9S) are sold by Newegg - feeds pickBest's first-party preference.
       seller: /^9S/i.test(sku) ? 'marketplace' : 'newegg',
       inStock: parseStock((f[C.availability] || '').trim()),
+      // Column 24 carries a zero-padded GTIN on ~99% of rows (verified
+      // against the live delta). Kept raw here; normalized at match time.
+      upc: (f[C.upc] || '').trim(),
     });
   }
   return { total, withMpn };
@@ -242,18 +251,29 @@ async function run() {
   if (!fs.existsSync(FEED_PATH)) throw new Error('Feed file not found: ' + FEED_PATH);
   log(`Newegg matching started${CONFIRM ? '' : ' (DRY RUN - review report only)'}`);
 
-  const { data: products, error } = await supabase
-    .from('products').select('id, sku, name, brand, category').eq('retailer', 'amazon').order('id');
+  // upc is probe-guarded (same convention as the retailer_offers probe): if
+  // the column doesn't exist yet the matcher runs without tier 1.5 rather
+  // than failing.
+  let { data: products, error } = await supabase
+    .from('products').select('id, sku, name, brand, category, upc').eq('retailer', 'amazon').order('id');
+  if (error && /upc/.test(error.message)) {
+    log('products.upc column missing - tier 1.5 disabled this run');
+    ({ data: products, error } = await supabase
+      .from('products').select('id, sku, name, brand, category').eq('retailer', 'amazon').order('id'));
+  }
   if (error) throw new Error(error.message);
-  log(`Products loaded: ${products.length}`);
+  log(`Products loaded: ${products.length} (${products.filter((p) => p.upc).length} with stored UPCs)`);
 
   const byMpn = new Map();
+  const byUpc = new Map(); // normalized barcode -> feed rows (tier 1.5)
   let tier2Pool;
   if (isRakutenFeed(FEED_PATH)) {
     // Stream the ~1M-row feed keeping only rows we can use: our-MPN hits for
-    // tier 1, and brand+capacity prefiltered rows for tier 2 (the same first
-    // two conditions the tier-2 filter applies, so no candidate is lost).
+    // tier 1, our-barcode hits for tier 1.5, and brand+capacity prefiltered
+    // rows for tier 2 (the same first two conditions the tier-2 filter
+    // applies, so no candidate is lost).
     const ourMpnSet = new Set(products.map((p) => normMpn(parseMpn(p.name))).filter(Boolean));
+    const ourUpcSet = new Set(products.flatMap((p) => (p.upc || '').split(',').filter(Boolean)));
     const ourCapSet = new Set(products.map((p) => totalCapacityGB(p.name)).filter((v) => v != null));
     const brandWords = [...new Set(products.map((p) => (p.brand || '').toLowerCase().split(' ')[0]).filter(Boolean))];
     const everyProductHasBrand = products.every((p) => p.brand);
@@ -261,12 +281,21 @@ async function run() {
     const stats = await streamRakutenFeed(FEED_PATH, (item) => {
       const k = normMpn(item.mpn);
       if (k && ourMpnSet.has(k)) (byMpn.get(k) || byMpn.set(k, []).get(k)).push(item);
+      // Tier 1.5 candidates: the dedicated GTIN column, plus the MPN column
+      // when Newegg polluted it with a barcode (the FURY Beast case).
+      if (ourUpcSet.size) {
+        const codes = [normBarcode(item.upc)];
+        if (looksLikeBarcode(item.mpn)) codes.push(normBarcode(item.mpn));
+        for (const c of codes) {
+          if (c && ourUpcSet.has(c)) { (byUpc.get(c) || byUpc.set(c, []).get(c)).push(item); break; }
+        }
+      }
       const hay = (item.brand + ' ' + item.name).toLowerCase();
       if (!everyProductHasBrand || brandWords.some((w) => hay.includes(w))) {
         if (ourCapSet.has(totalCapacityGB(item.name))) tier2Pool.push(item);
       }
     });
-    log(`Rakuten feed streamed: ${stats.total} rows (${stats.withMpn} with MPN); rows matching our MPNs: ${[...byMpn.values()].reduce((n, a) => n + a.length, 0)} across ${byMpn.size} MPNs; tier-2 candidate pool: ${tier2Pool.length}`);
+    log(`Rakuten feed streamed: ${stats.total} rows (${stats.withMpn} with MPN); rows matching our MPNs: ${[...byMpn.values()].reduce((n, a) => n + a.length, 0)} across ${byMpn.size} MPNs; barcode hits: ${[...byUpc.values()].reduce((n, a) => n + a.length, 0)} across ${byUpc.size} barcodes; tier-2 candidate pool: ${tier2Pool.length}`);
   } else {
     const feed = loadFeed(FEED_PATH);
     for (const f of feed) {
@@ -295,6 +324,32 @@ async function run() {
         competing: cands.length > 1 ? cands.filter((c) => c !== best).map((c) => `${c.sku || '?'} $${c.price} ${c.seller || ''}`.trim()) : [],
       });
       continue;
+    }
+    // TIER 1.5: UPC/EAN/GTIN join (proposal only, NEVER auto-accepted).
+    // Rescues products whose MPN the feed lacks or polluted with a barcode.
+    // Bundles/multipacks can share a barcode, so every pair goes through the
+    // same human gate as tier 2.
+    if (p.upc) {
+      const cands = [];
+      const seen = new Set();
+      let matchedBarcode = null;
+      for (const code of p.upc.split(',').filter(Boolean)) {
+        for (const f of byUpc.get(code) || []) {
+          if (!seen.has(f)) { seen.add(f); cands.push(f); }
+        }
+        if (!matchedBarcode && byUpc.has(code)) matchedBarcode = code;
+      }
+      if (cands.length) {
+        const best = pickBest(cands, ourMpn);
+        matches.push({
+          sku: p.sku, product_id: p.id, method: 'upc', accepted: false, // NEVER auto-accepted
+          ourName: p.name, ourMpn: ourMpn || null, barcode: matchedBarcode,
+          neweggSku: best.sku || null, neweggName: best.name, price: best.price,
+          inStock: best.inStock, url: best.url,
+          competing: cands.length > 1 ? cands.filter((c) => c !== best).map((c) => `${c.sku || '?'} $${c.price} ${(c.name || '').slice(0, 60)}`) : [],
+        });
+        continue;
+      }
     }
     // TIER 2: brand + capacity + line-signature containment (proposal only)
     if (ourCap == null) { unmatched.push({ sku: p.sku, reason: 'no capacity axis' }); continue; }
@@ -353,13 +408,19 @@ async function run() {
   const lines = [];
   const P = (l) => { lines.push(l); };
   P('════════════════ NEWEGG MATCH REVIEW (Gate 1) ════════════════');
-  for (const method of ['mpn', 'name']) {
+  const HEADERS = {
+    mpn: (n) => `TIER 1 - MPN matches (auto-accept on --confirm): ${n}`,
+    upc: (n) => `TIER 1.5 - UPC/barcode proposals (accept by setting "accepted": true in newegg-matches.json): ${n}`,
+    name: (n) => `TIER 2 - name proposals (accept by setting "accepted": true in newegg-matches.json): ${n}`,
+  };
+  for (const method of ['mpn', 'upc', 'name']) {
     const group = matches.filter((m) => m.method === method);
-    P(`\n── ${method === 'mpn' ? `TIER 1 - MPN matches (auto-accept on --confirm): ${group.length}` : `TIER 2 - name proposals (accept by setting "accepted": true in newegg-matches.json): ${group.length}`}`);
+    if (method === 'upc' && !group.length) continue;
+    P(`\n── ${HEADERS[method](group.length)}`);
     for (const m of group) {
       P(`  OUR:    [${m.sku}] ${m.ourName.slice(0, 95)}`);
       P(`  NEWEGG: [${m.neweggSku || '?'}] ${m.neweggName.slice(0, 95)}`);
-      P(`          ($${m.price ?? '?'}, ${m.inStock === false ? 'OOS' : m.inStock ? 'in stock' : 'stock?'}, method=${m.method}${m.ourMpn ? ', mpn=' + m.ourMpn : ''})`);
+      P(`          ($${m.price ?? '?'}, ${m.inStock === false ? 'OOS' : m.inStock ? 'in stock' : 'stock?'}, method=${m.method}${m.ourMpn ? ', mpn=' + m.ourMpn : ''}${m.barcode ? ', barcode=' + m.barcode : ''})`);
       if (m.competing.length) P(`          competing: ${m.competing.join(' | ')}`);
       P('');
     }
