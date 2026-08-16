@@ -73,6 +73,16 @@ async function connect(log = () => {}) {
 async function downloadGz(sftp, remotePath, localPath, timeoutMs, log = () => {}) {
   const st = await sftp.stat(remotePath); // throws if absent
   log(`Downloading ${remotePath} (${(st.size / 1048576).toFixed(1)} MB, server mtime ${new Date(st.modifyTime).toISOString()})...`);
+  // Progress ticks: without these a slow download and a wedged one look
+  // identical in a CI log for up to 15 minutes.
+  const startedAt = Date.now();
+  const progress = setInterval(() => {
+    let got = 0;
+    try { got = fs.statSync(localPath).size; } catch { /* not created yet */ }
+    const pct = st.size ? ((got / st.size) * 100).toFixed(1) : '?';
+    log(`  ...${(got / 1048576).toFixed(1)}/${(st.size / 1048576).toFixed(1)} MB (${pct}%) after ${Math.round((Date.now() - startedAt) / 1000)}s`);
+  }, 30_000);
+  progress.unref?.();
   let timer;
   const watchdog = new Promise((resolve, reject) => {
     timer = setTimeout(() => {
@@ -92,6 +102,7 @@ async function downloadGz(sftp, remotePath, localPath, timeoutMs, log = () => {}
     return { bytes: fs.statSync(localPath).size, viaWatchdog: result.viaWatchdog };
   } finally {
     clearTimeout(timer);
+    clearInterval(progress);
   }
 }
 
@@ -103,7 +114,12 @@ async function endConnection(sftp, log = () => {}) {
     sftp.end().catch(() => {}),
     new Promise((r) => setTimeout(r, 5000)),
   ]);
-  log('Connection closed (or abandoned after 5s - harmless post-download)');
+  // A watchdog-rescued transfer can leave the ssh2 socket open, which keeps
+  // Node's event loop alive and would turn a SUCCESSFUL run into a job
+  // timeout. Destroy the underlying client so the process can exit normally
+  // (letting stdout flush, unlike a forced process.exit).
+  try { sftp.client?.destroy?.(); } catch { /* already gone */ }
+  log('Connection closed (socket destroyed if the transfer left it open)');
 }
 
 // Stream a Rakuten merchandiser file (plain or .gz) line by line, calling
