@@ -138,69 +138,17 @@ function parseXml(text) {
 }
 
 // ---- Rakuten merchandiser complete feed (positional, streamed) ----
-// 0-based indexes into the 38-column layout, verified against the live Newegg
-// feed (col 20 1-based = MPN, col 13 = sale price, col 14 = retail, col 23 =
-// availability, col 26 = currency; every row in the complete feed is in-stock).
-const RAKUTEN_COLS = { name: 1, sku: 2, url: 5, salePrice: 12, retailPrice: 13, brand: 16, mpn: 19, manufacturer: 20, availability: 22, upc: 23, currency: 25 };
-
-// Feed URLs are pre-built linksynergy click links; we store CLEAN urls and
-// wrap at render time (backend/lib/rakutenLink.js). Extract the embedded murl
-// and drop its query (the ?item= param just repeats the /p/{sku} path).
-function cleanFeedUrl(raw) {
-  try {
-    let u = new URL(raw);
-    if (u.hostname === 'click.linksynergy.com') {
-      const murl = u.searchParams.get('murl');
-      if (murl) u = new URL(murl);
-    }
-    return u.origin + u.pathname;
-  } catch { return raw; }
-}
-
-const parseStock = (v) => /^(y|yes|true|1|in[-\s]?stock|available)$/i.test(v) ? true
-  : /^(n|no|false|0|out[-\s]?of[-\s]?stock|unavailable|backorder(ed)?|discontinued)$/i.test(v) ? false : null;
+// Column map, URL cleaning, and the streaming parser live in the shared
+// module (backend/lib/neweggFeed.js) - also used by the refresh cron.
+const { streamRakutenFeed } = require('../backend/lib/neweggFeed');
 
 function isRakutenFeed(feedPath) {
   const buf = Buffer.alloc(4);
   const fd = fs.openSync(feedPath, 'r');
   fs.readSync(fd, buf, 0, 4, 0);
   fs.closeSync(fd);
-  return buf.toString('utf8') === 'HDR|';
-}
-
-async function streamRakutenFeed(feedPath, onItem) {
-  const rl = require('readline').createInterface({
-    input: fs.createReadStream(feedPath), crlfDelay: Infinity,
-  });
-  const C = RAKUTEN_COLS;
-  let total = 0, withMpn = 0;
-  for await (const line of rl) {
-    if (!line || line.startsWith('HDR|') || line.startsWith('TRL|')) continue;
-    const f = line.split('|');
-    const name = (f[C.name] || '').trim();
-    const url = (f[C.url] || '').trim();
-    if (!name || !url) continue;
-    total++;
-    const mpn = (f[C.mpn] || '').trim();
-    if (mpn) withMpn++;
-    const sku = (f[C.sku] || '').trim();
-    onItem({
-      name,
-      mpn,
-      sku,
-      brand: (f[C.brand] || f[C.manufacturer] || '').trim(),
-      price: parseFloat(f[C.salePrice]) || parseFloat(f[C.retailPrice]) || null,
-      url: cleanFeedUrl(url),
-      // 9S... item numbers are marketplace listings; N82E... (and other
-      // non-9S) are sold by Newegg - feeds pickBest's first-party preference.
-      seller: /^9S/i.test(sku) ? 'marketplace' : 'newegg',
-      inStock: parseStock((f[C.availability] || '').trim()),
-      // Column 24 carries a zero-padded GTIN on ~99% of rows (verified
-      // against the live delta). Kept raw here; normalized at match time.
-      upc: (f[C.upc] || '').trim(),
-    });
-  }
-  return { total, withMpn };
+  // gzip magic bytes also count: the shared streamer decompresses .gz itself.
+  return buf.toString('utf8') === 'HDR|' || (buf[0] === 0x1f && buf[1] === 0x8b);
 }
 
 function loadFeed(feedPath) {

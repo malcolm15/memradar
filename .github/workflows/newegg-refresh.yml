@@ -1,0 +1,59 @@
+# Newegg offer refresh (Phase 2 cron).
+# Daily at 06:00 UTC - safely after Rakuten's observed feed-generation window
+# (typically 03:39-03:50 UTC, occasionally later; a late file simply means
+# today's run applies yesterday's delta and tomorrow's catches up).
+# Sundays pull the complete file for authoritative reconciliation instead.
+#
+# Runs on GitHub Actions rather than Vercel: the Sunday complete file is
+# ~158MB and takes minutes to download + stream, beyond Hobby function
+# limits, and ssh2's long-lived TCP connection is a poor serverless fit.
+#
+# Failure surfacing: any error exits nonzero -> red run + GitHub's failure
+# notification email. A failed run changes nothing (stale beats wrong); the
+# staleness net in the script keeps stock claims honest through outages.
+#
+# Structured for a future second job: the daily PDP regeneration TODO
+# (CLAUDE.md) can land here as `regenerate-pages`, keeping one scheduled
+# runner for all daily work.
+name: newegg-refresh
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'delta or full (empty = delta, or full automatically on Sundays)'
+        required: false
+        default: ''
+
+jobs:
+  refresh-offers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      # --omit=dev skips puppeteer/sharp (render tooling); ssh2-sftp-client
+      # is a production dependency for exactly this reason.
+      - run: npm ci --omit=dev
+      - name: Refresh Newegg offers
+        env:
+          RAKUTEN_SFTP_HOST: ${{ secrets.RAKUTEN_SFTP_HOST }}
+          RAKUTEN_SFTP_USER: ${{ secrets.RAKUTEN_SFTP_USER }}
+          RAKUTEN_SFTP_PASS: ${{ secrets.RAKUTEN_SFTP_PASS }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: |
+          MODE="${{ inputs.mode }}"
+          if [ -z "$MODE" ] && [ "$(date -u +%u)" = "7" ]; then MODE=full; fi
+          echo "mode: ${MODE:-delta}"
+          node scripts/refresh-newegg-offers.js --confirm ${MODE:+--$MODE}
+
+  # Future second job (see CLAUDE.md "Not built" TODO):
+  # regenerate-pages:
+  #   needs: refresh-offers
+  #   ... daily PDP regeneration + commit + Cloudflare purge ...
