@@ -7,7 +7,9 @@
   var sb = window.memradarSupabase;
   var form = document.getElementById('pdpAlertForm');
   var sku = form && form.dataset.sku;
-  var priceEls = [document.getElementById('pdpCurrentPrice'), document.getElementById('pdpBuyPrice')];
+  // Amazon price surfaces: hero stat, Buy Now row, and the header strip
+  // button (all three are baked from the same value, so they hydrate together).
+  var priceEls = [document.getElementById('pdpCurrentPrice'), document.getElementById('pdpBuyPrice'), document.getElementById('pdpStripAmazonPrice')];
   var updatedEl = document.getElementById('pdpLastUpdated');
   if (!sb || !sku || !updatedEl) return;
 
@@ -245,6 +247,9 @@
         var o = res.data[0];
         var p = Number(o.price);
         if (priceEl && !isNaN(p)) priceEl.textContent = money(p);
+        // Header strip mirrors the same offer (same source list at bake time).
+        var stripEl = document.getElementById('pdpStripNeweggPrice');
+        if (stripEl && !isNaN(p)) stripEl.textContent = money(p);
         if (stockEl && o.in_stock != null) {
           stockEl.className = 'pdp-stock ' + (o.in_stock ? 'pdp-stock--in' : 'pdp-stock--out');
           stockEl.textContent = o.in_stock ? 'In Stock' : 'Out of Stock';

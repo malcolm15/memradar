@@ -1984,6 +1984,93 @@ html.dark .notice-btn--primary { color: #fff; }
 .pdp-value-avg { color: #9ca3af; }
 
 /* ── Capacity family selector (variant chips in the product header) ── */
+/* ── PDP retailer strip (header purchase affordance) ──
+   Retailer-SEMANTIC colors, deliberately NOT general-palette additions: they
+   exist only to identify a retailer button and must never be reused as
+   accents. The cobalt --brand-* system stays the site's only accent palette.
+   Values are each retailer's own brand color; every pairing below was
+   contrast-checked against WCAG AA (see CLAUDE.md design-system notes).
+   Amazon's brand orange (#FF9900) and Newegg's (#FF9600) are visually
+   identical (1.02:1), so Amazon uses its other primary brand color, the
+   "squid ink" navy, to keep the two buttons distinguishable. */
+:root {
+  --retailer-amazon: #232F3E;        /* Amazon squid-ink navy */
+  --retailer-amazon-text: #ffffff;   /* 13.57:1 on the navy */
+  --retailer-amazon-border: #232F3E; /* 13.57:1 vs white page */
+  --retailer-newegg: #FF9600;        /* Newegg brand orange */
+  --retailer-newegg-text: #0F1623;   /* 8.29:1 on the orange */
+  --retailer-newegg-border: #C97400; /* 3.51:1 vs white page (1.4.11 boundary) */
+}
+html.dark {
+  /* Squid-ink navy is only 1.33:1 against the dark page, so the dark theme
+     uses a lightened navy from the same family: 3.34:1 vs page, 5.42:1 text. */
+  --retailer-amazon: #546C88;
+  --retailer-amazon-border: #546C88;
+  --retailer-newegg-border: #FF9600; /* orange is already 8.29:1 vs dark page */
+}
+.pdp-rstrip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 12px 0 2px;
+  /* CLS: hydration only rewrites the price text inside a button, never the
+     button box, and this min-height reserves the row before that happens. */
+  min-height: 44px;
+}
+.pdp-rstrip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;              /* tap target */
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1.5px solid transparent;
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  transition: filter 0.15s, transform 0.05s;
+}
+.pdp-rstrip-btn:hover { filter: brightness(1.08); }
+.pdp-rstrip-btn:active { transform: translateY(1px); }
+.pdp-rstrip-btn:focus-visible { outline: 3px solid var(--brand-primary); outline-offset: 2px; }
+.pdp-rstrip-btn--amazon {
+  background: var(--retailer-amazon);
+  border-color: var(--retailer-amazon-border);
+  color: var(--retailer-amazon-text);
+}
+.pdp-rstrip-btn--newegg {
+  background: var(--retailer-newegg);
+  border-color: var(--retailer-newegg-border);
+  color: var(--retailer-newegg-text);
+}
+.pdp-rstrip-price { font-variant-numeric: tabular-nums; font-weight: 700; }
+.pdp-rstrip-sep { opacity: 0.55; }
+/* Out of stock: still shown (omitting it would read as "never checked"), but
+   visually receded and explicitly labelled so the muting is never the only
+   signal. Sorted last by the shared retailerList() sort. */
+.pdp-rstrip-btn--oos {
+  background: transparent;
+  color: #64748b;
+  border-color: #cbd5e1;
+  font-weight: 500;
+}
+.pdp-rstrip-btn--oos .pdp-rstrip-price { font-weight: 600; text-decoration: line-through; }
+.pdp-rstrip-oos {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  opacity: 0.9;
+}
+html.dark .pdp-rstrip-btn--oos { color: #94a3b8; border-color: #334155; }
+@media (max-width: 480px) {
+  /* At 360px two buttons cannot hold 44px targets side by side without
+     truncating the price, so they stack full-width. */
+  .pdp-rstrip { gap: 8px; }
+  .pdp-rstrip-btn { flex: 1 1 100%; justify-content: center; }
+}
+
 .pdp-capacity-family {
   display: flex;
   flex-wrap: wrap;
