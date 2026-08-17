@@ -17,7 +17,7 @@ MemRadar tracks Amazon prices on RAM and SSDs via the Keepa API (licensed price-
 | Backend | Node.js serverless functions on Vercel |
 | Database | Supabase (Postgres) |
 | Data source | Keepa API — Amazon price history (launch). Best Buy client dormant (never approved) |
-| Cron | Vercel cron — **twice daily**: 06:00 + 18:00 UTC (two entries, same `/api/fetch-prices`) |
+| Cron | Vercel cron — **twice daily**: 08:00 + 20:00 UTC (two entries, same `/api/fetch-prices`) |
 
 ## Directory Structure
 
@@ -126,7 +126,7 @@ Required in `.env` (local) and Vercel project settings (production):
 
 ## How the Price Fetch Works (Keepa)
 
-1. Vercel cron hits `/api/fetch-prices` **twice daily** at 06:00 and 18:00 UTC (two `vercel.json` cron entries pointing at the same path — Vercel Hobby runs each cron at most once/day, so two entries = twice/day; catches US-daytime repricing)
+1. Vercel cron hits `/api/fetch-prices` **twice daily** at 08:00 and 20:00 UTC (two `vercel.json` cron entries pointing at the same path — Vercel Hobby runs each cron at most once/day, so two entries = twice/day; catches US-daytime repricing)
 2. Handler verifies `Authorization: Bearer <CRON_SECRET>`
 3. Loads the Amazon catalog from `products` (retailer=`amazon`, `sku` = ASIN)
 4. Fetches current stats from Keepa in batches of ≤100 ASINs (`history=0&stats=90` — stats only, smaller payload, same token cost of 1/ASIN)
@@ -389,7 +389,9 @@ Built 2026-07-21 via `scripts/build-catalog.js` (18 Amazon keyword searches thro
 - **Node ≥ 18** required (native `fetch` used, no node-fetch)
 - **Dev dependencies:** `sharp` and `to-ico` installed for image generation scripts. Run `npm install` before running `generate-favicons.js` or any image conversion scripts.
 - `scripts/test-api.js` is a dormant Best Buy API sanity check — the live cron uses Keepa (`backend/lib/keepa.js`, self-test `node backend/lib/keepa.js`)
-- Vercel Hobby runs each cron at most once per day, so `vercel.json` has two entries (`0 6 * * *` and `0 18 * * *`) to fetch twice daily (06:00 + 18:00 UTC)
+- Vercel Hobby runs each cron at most once per day, so `vercel.json` has two entries (`0 8 * * *` and `0 20 * * *`) to fetch twice daily (08:00 + 20:00 UTC)
+- **Why 08/20 and not 06/18 (moved 2026-08-17):** deployment-collision avoidance. Vercel crons bind to the current production deployment, and an invocation scheduled during a deploy handover is dropped; Hobby's ±59 min scheduling precision widens that exposure to a full hour. Forensics on the two missing runs (Aug 14 06:00 and Aug 16 18:00 UTC) found ZERO rows and no partial writes, and every miss coincided with pushes inside the window (06:11/06:32/06:37 and 18:03/18:23/18:30 UTC) while every deploy-free window fired, including the Aug 15 control with both runs intact. 08:00/20:00 UTC (01:00/13:00 Pacific) are far less likely to collide with active pushing.
+- **Changing the hours means changing three places together:** `vercel.json` crons (source of truth), `FETCH_HOURS_UTC` in `scripts/generate-product-pages.js`, and the deliberate browser-side duplicate `FETCH_HOURS_UTC` in `frontend/js/pdp-hydrate.js` (same duplication convention as productParsers/product-listing). They drive `priceValidUntil`/`validFrom` in the PDP JSON-LD. The alert-check and market-stats steps ride the fetch cron and use relative durations only (48h expiry, 165/195-day baselines), so they shift automatically with no independent schedule assumptions.
 - The `supabase.js` client uses the **service role key** intentionally — it runs server-side only and needs to bypass RLS for writes
 
 ## Affiliate Tags
@@ -425,7 +427,7 @@ Below the **768px** breakpoint the desktop `.nav-link`s hide (`nav .nav-link { d
 
 `style.css` is served with `Cache-Control: max-age=14400` (**4 hours** of browser caching). A Cloudflare purge clears the edge but **NOT** visitors' browser caches — so after a CSS change, returning devices can render new HTML against a stale 4-hour-cached stylesheet (this exact mismatch broke the mobile nav on first ship: new hamburger HTML + old CSS).
 
-**Fix / convention:** a single shared version query is appended to **both `style.css` and every local JS include** on every page — `?v=YYYYMMDD` (current value: **`20260820`**). A new URL forces browsers to refetch immediately regardless of max-age.
+**Fix / convention:** a single shared version query is appended to **both `style.css` and every local JS include** on every page — `?v=YYYYMMDD` (current value: **`20260821`**). A new URL forces browsers to refetch immediately regardless of max-age.
 
 - **Bump the `?v=` value whenever any `style.css` OR local JS file changes**, and update ALL pages together (one shared stamp — they must all match). Bumping rebusts every asset; that's fine.
 - Applies to local assets only: `css/style.css` and `js/*.js` (main, theme, alert-modal, supabase-client, market-pulse, product-listing, mobile-nav, filter-sheet, back-to-top). **External CDN scripts are NOT versioned** (jsdelivr supabase-js, cdnjs Chart.js, Cloudflare Turnstile, gtag) — they carry their own versioning.

@@ -116,13 +116,22 @@
     if (v) parts.push(v);
     el.textContent = parts.join(' ');
   }
-  // Next price-fetch boundary (06:00 / 18:00 UTC cron) - same computation as
-  // the generator's nextFetchIso(), so the JSON-LD validity window is always
-  // the next scheduled fetch regardless of when the page was baked.
+  // Price-fetch schedule, UTC hours. Deliberate duplicate of the generator's
+  // FETCH_HOURS_UTC (this file runs in the browser and cannot require it);
+  // vercel.json's crons are the source of truth. Change all three together.
+  var FETCH_HOURS_UTC = [8, 20];
+  // Next price-fetch boundary - same computation as the generator's
+  // nextFetchIso(), so the JSON-LD validity window is always the next
+  // scheduled fetch regardless of when the page was baked. Past the last
+  // slot, roll to tomorrow's first via hour + 24 (Date.UTC normalizes).
   function nextFetchIso() {
     var d = new Date();
     var h = d.getUTCHours();
-    return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), h < 6 ? 6 : h < 18 ? 18 : 30, 0, 0)).toISOString();
+    var hour = FETCH_HOURS_UTC[0] + 24;
+    for (var i = 0; i < FETCH_HOURS_UTC.length; i++) {
+      if (h < FETCH_HOURS_UTC[i]) { hour = FETCH_HOURS_UTC[i]; break; }
+    }
+    return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), hour, 0, 0)).toISOString();
   }
 
   // Keep the Product JSON-LD coherent with the hydrated prices. Rendering
