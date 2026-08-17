@@ -359,14 +359,17 @@ Findings from evaluating price-data providers as a Best Buy replacement (Best Bu
 
 **Strategic conclusion:** PriceAPI is **not worth the €99/month** post-trial for our needs (no Walmart/Newegg/Best Buy, no price history). **Keepa** (Amazon price-history API, ~€49/month) was chosen for launch and is now live — Keepa granted written permission to display Amazon price history via their API. The `test-priceapi.js` script remains useful for schema reference and any future re-evaluation.
 
-## Keep-Alive Cron
-- Endpoint: `/api/keep-alive`
-- Schedule: Every 3 days at 12:00 UTC (`0 12 */3 * *`)
-- Purpose: Prevents Supabase free tier from pausing the project due to inactivity
-- Auth: Same `CRON_SECRET` Bearer token as `fetch-prices`
-- Can be removed once `fetch-prices` has run reliably on live Keepa/Amazon data (it is now running twice daily; see the retirement condition in the dated note below)
-- 2026-07-22: Root cause was CRON_SECRET mismatch/absence in Vercel env (cron fired but 401ed before reaching Supabase, so no DB activity registered). Fixed by rotating CRON_SECRET across Vercel, .env, and 1Password, then redeploying. Verified 200 response with live product count. Keep-alive remains active until Keepa daily fetches are confirmed running for a week, then can be retired.
-- Daily Keepa fetch is now the primary DB activity; keep-alive can be retired after confirming 7 consecutive successful daily fetch runs (check Vercel cron logs or the fetch summary responses).
+## Keep-Alive Cron (RETIRED 2026-08-17)
+Removed: the `/api/keep-alive` endpoint (`api/keep-alive.js`) and its `vercel.json` cron entry (`0 12 */3 * *`). It existed only to stop the Supabase free tier pausing the project during inactivity.
+
+**Why retirement was safe.** Its documented condition ("7 consecutive successful daily fetch runs") was met weeks earlier and then some: `fetch-prices` writes ~230 `price_history` rows on the twice-daily Keepa schedule, and since Aug 2026 the nightly Newegg refresh (GitHub Actions, 06:00 UTC) writes to `retailer_offers` as well. Real DB activity now happens at least twice a day from two independent systems, so a synthetic ping adds nothing.
+
+**Health verified at retirement (2026-08-17), NOT retired because it was broken:**
+- `/api/keep-alive` returned **200** with `products_count: 235` when called with the real `CRON_SECRET`, so the function was working.
+- That same 200 proves the **July 2026 CRON_SECRET incident is resolved**: the secret in Vercel's env matches `.env`. (2026-07-22 root cause, kept for the record: a CRON_SECRET mismatch/absence in Vercel meant the cron fired but 401ed before reaching Supabase, registering no DB activity. Fixed by rotating the secret across Vercel, `.env`, and 1Password, then redeploying.)
+- Recurring workflow-failure emails around this time were traced to a **different repo** (`malcolm15/pillsignal`), not MemRadar.
+
+**If Supabase inactivity pausing ever becomes a concern again**, prefer verifying the two real writers are running over reinstating a synthetic ping.
 
 ## Seed Data
 `scripts/seed-database.js` was run once (2026-05-27), adding 3 seed products (`SEED-RAM-001`, `SEED-RAM-002`, `SEED-SSD-001`) + 3 seed price_history rows.
