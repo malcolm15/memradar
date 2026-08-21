@@ -44,6 +44,17 @@
 
   var GOOD_ICON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
 
+  // Hero stat label follows availability: "Current Price" is wrong for a dead
+  // listing, where the figure is a last sighting. Reached via the value's
+  // previous sibling rather than an id, so in-stock pages keep byte-identical
+  // markup. Text-only swap: same element, same styling, same box - no CLS.
+  function applyPriceLabel() {
+    var valueEl = document.getElementById('pdpCurrentPrice');
+    var labelEl = valueEl && valueEl.previousElementSibling;
+    if (!labelEl || labelEl.className.indexOf('pdp-stat-label') === -1) return;
+    labelEl.textContent = amazonOos ? 'Last Seen Price' : 'Current Price';
+  }
+
   // SINGLE predicate behind both the buy-indicator and the Price-Analysis verdict,
   // so they can never disagree. Mirrors the generator's buyState() exactly.
   // Returns 'good' | 'typical' | 'elevated' | null.
@@ -322,9 +333,12 @@
             amazonOos = o.in_stock === false;
             // Availability drives the verdict and the analysis sentence, so a
             // change discovered here must re-run them against the live price.
-            if (wasOos !== amazonOos && lastPrice != null) {
-              recomputeBuyIndicator(lastPrice, cfg);
-              recomputeAnalysis(lastPrice, cfg);
+            if (wasOos !== amazonOos) {
+              applyPriceLabel(); // both directions: restock restores "Current Price"
+              if (lastPrice != null) {
+                recomputeBuyIndicator(lastPrice, cfg);
+                recomputeAnalysis(lastPrice, cfg);
+              }
             }
           }
         });
