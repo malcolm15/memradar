@@ -2340,6 +2340,43 @@ html.dark .pdp-analysis-text { color: #94a3b8; }
   float: right;
 }
 .pdp-buy-btn:hover { background: var(--brand-hover); }
+/* Buy Now buttons carry the SAME retailer-semantic colors as the header strip.
+   Revisited 2026-08-21: the earlier strip-primary / table-cobalt hierarchy is
+   superseded by site-wide per-retailer colour consistency (see CLAUDE.md).
+   Zero new colours - these reuse the strip's --retailer-* variables, whose
+   contrast pairings are already verified for both themes. */
+.pdp-buy-btn--amazon {
+  background: var(--retailer-amazon);
+  border: 1.5px solid var(--retailer-amazon-border);
+  color: var(--retailer-amazon-text);
+}
+.pdp-buy-btn--amazon:hover { background: var(--retailer-amazon); filter: brightness(1.12); }
+.pdp-buy-btn--newegg {
+  background: var(--retailer-newegg);
+  border: 1.5px solid var(--retailer-newegg-border);
+  color: var(--retailer-newegg-text);
+}
+.pdp-buy-btn--newegg:hover { background: var(--retailer-newegg); filter: brightness(1.08); }
+/* Out of stock overrides the retailer colour in BOTH surfaces, so an
+   unavailable retailer never wears its brand colour as if it were buyable. */
+.pdp-buy-btn--oos,
+.pdp-buy-btn--oos:hover {
+  background: transparent;
+  border-color: #cbd5e1;
+  color: #64748b;
+  filter: none;
+}
+html.dark .pdp-buy-btn--oos,
+html.dark .pdp-buy-btn--oos:hover { color: #94a3b8; border-color: #334155; }
+
+/* Footer copyright: muted to match the surrounding footer text. Deliberately
+   no "All rights reserved" - legally vestigial and off-brand. */
+.footer-copyright {
+  margin-top: 10px;
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+html.dark .footer-copyright { color: #64748b; }
 .pdp-amazon-disclaimer {
   font-size: 0.78rem;
   color: #9ca3af;
