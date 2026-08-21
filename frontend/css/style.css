@@ -1984,6 +1984,20 @@ html.dark .notice-btn--primary { color: #fff; }
 .pdp-value-avg { color: #9ca3af; }
 
 /* ── Capacity family selector (variant chips in the product header) ── */
+/* Buy indicator, unavailable variant: neither "good" green nor "caution"
+   amber - an unbuyable item is a statement of fact, not a recommendation. */
+.pdp-buy-indicator--neutral {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+}
+.pdp-buy-indicator--neutral .pdp-buy-indicator-icon { color: #64748b; }
+html.dark .pdp-buy-indicator--neutral {
+  background: #1a2332;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
 /* ── PDP retailer strip (header purchase affordance) ──
    Retailer-SEMANTIC colors, deliberately NOT general-palette additions: they
    exist only to identify a retailer button and must never be reused as

@@ -92,6 +92,8 @@ memradar/
 
 Four tables:
 
+**DATA MODEL RULE (load vs state — do not blur these):** `price_history` is an **observation log**: one append-only row per real price sighting, never edited, never carrying synthetic values. `retailer_offers` is **current per-retailer state**: exactly one row per (product, retailer), upserted in place. Availability is state, so it lives in `retailer_offers` for BOTH retailers — never inferred from the newest log row, which structurally cannot express "we looked and there was no offer" (that bug shipped Amazon PDPs claiming In Stock for up to a month; see the Amazon stock section). Corollary: never write state into the log (no carried-forward prices to mark a gap — that would distort ATL/ATH/averages, which do not filter `in_stock`), and never treat the state table as history.
+
 - **`products`** — one row per tracked product. Unique key: `sku`. Fields: `sku`, `name`, `category` (ram/ssd), `brand`, `model`, `image_url`, `product_url` (affiliate link), `retailer`, `parent_asin` (Amazon variation parent, from Keepa), `family_id` (capacity-family id: tier-1 `p:{parent}` / tier-2 `k:{key}`), `capacity_gb` (parsed total capacity), `upc` (comma-joined leading-zero-stripped barcode identifiers from Keepa, for tier-1.5 Newegg matching). Index on `family_id` (partial, `WHERE family_id IS NOT NULL`).
 - **`price_history`** — one price snapshot per product per cron run. Fields: `product_id` (FK), `price`, `regular_price`, `in_stock`, `fetched_at`.
 - **`alerts`** — user email + target price per product. Fields: `product_id` (FK), `email`, `target_price`, `triggered`.
@@ -164,6 +166,16 @@ Format rules the client absorbs (verified against Keepa's official `api_backend`
 - **Series preference:** AMAZON first; AMAZON's `-1` gap intervals are filled from NEW; if AMAZON has no data at all, NEW is used outright.
 - **Outlier filter:** points > 5× the series median or < $5 are dropped (third-party garbage listings, e.g. $9,999 during stockouts). Dropped counts are logged per product.
 - **Tokens:** every response updates `tokensLeft`/`refillIn`/`refillRate`; 1 token per requested ASIN (20 tokens/min plan). The client waits for refill automatically between batches and retries on token-shortage errors.
+
+## Amazon Stock State (`backend/lib/amazonOffers.js`)
+
+Amazon availability is current state in `retailer_offers` (`retailer='amazon'`, `retailer_sku`=ASIN, `match_method='direct'`), upserted every `fetch-prices` run and seeded once by `scripts/seed-amazon-offers.js` (live Keepa read, writes ONLY `retailer_offers`).
+
+- **Stock semantics:** `in_stock` reflects availability of **the offer whose price we display**, i.e. `in_stock = (keepa.currentPrice(kp) !== null)`. It is NOT "Amazon sells it first-party". Measured Aug 2026: of 235 products, **69 priced from the AMAZON series and 159 from NEW (marketplace)** — defining stock as first-party availability would have marked 68% of a plainly buyable catalog unavailable.
+- **Both directions:** going out of stock upserts `in_stock=false` **keeping the last known price** (so the UI can show "last seen $X" struck through); a reappearing offer upserts the new price with `in_stock=true`. Rows are never deleted and never carry a null price.
+- **Why it exists:** `api/fetch-prices.js` previously did `if (price === null) { outOfStock++; continue; }` — it derived the out-of-stock fact correctly and then discarded it, writing no row. The last in-stock `price_history` row survived indefinitely and the generator baked `In Stock` from it. Seven products were affected, one stale for nearly a month.
+- **Alerts are unaffected and already correct:** out-of-stock products never enter `currentPriceByProductId`, so no alert can fire on an unbuyable item.
+- **UI treatment (both retailers, identical):** link stays **clickable** (deliberate — users can verify, restocks happen, marketplace may still have it), muted outline, struck price, explicit "Out of stock" text label (never colour alone), sorted last. The buy indicator drops to `--neutral` ("Currently unavailable") and the Price Analysis current-sentence becomes "Last seen at $X, currently unavailable at Amazon" — recommending a purchase on an unbuyable item reads absurd. `pdp-hydrate.js` mirrors all of this, so baked and hydrated states cannot disagree mid-session, and a restock un-mutes on the next load.
 
 ## Keepa Backfill (`scripts/backfill-keepa.js`)
 
@@ -435,7 +447,7 @@ Below the **768px** breakpoint the desktop `.nav-link`s hide (`nav .nav-link { d
 
 `style.css` is served with `Cache-Control: max-age=14400` (**4 hours** of browser caching). A Cloudflare purge clears the edge but **NOT** visitors' browser caches — so after a CSS change, returning devices can render new HTML against a stale 4-hour-cached stylesheet (this exact mismatch broke the mobile nav on first ship: new hamburger HTML + old CSS).
 
-**Fix / convention:** a single shared version query is appended to **both `style.css` and every local JS include** on every page — `?v=YYYYMMDD` (current value: **`20260822`**). A new URL forces browsers to refetch immediately regardless of max-age.
+**Fix / convention:** a single shared version query is appended to **both `style.css` and every local JS include** on every page — `?v=YYYYMMDD` (current value: **`20260823`**). A new URL forces browsers to refetch immediately regardless of max-age.
 
 - **Bump the `?v=` value whenever any `style.css` OR local JS file changes**, and update ALL pages together (one shared stamp — they must all match). Bumping rebusts every asset; that's fine.
 - Applies to local assets only: `css/style.css` and `js/*.js` (main, theme, alert-modal, supabase-client, market-pulse, product-listing, mobile-nav, filter-sheet, back-to-top). **External CDN scripts are NOT versioned** (jsdelivr supabase-js, cdnjs Chart.js, Cloudflare Turnstile, gtag) — they carry their own versioning.

@@ -26,6 +26,22 @@
     return '$' + (v >= 1 ? v.toFixed(2) : v.toFixed(3)) + '/GB';
   }
 
+  // Current Amazon availability. Seeded from the baked config (cfg.amzOos is
+  // present ONLY on out-of-stock pages, so in-stock configs stay byte-identical)
+  // and refreshed by the retailer-offers query below, so a restock un-mutes on
+  // the next page load. Every price-derived recompute consults this, which is
+  // what keeps the baked and hydrated states from disagreeing mid-session.
+  var amazonOos = false;
+  var lastPrice = null;
+  var hydrateCfg = {};
+  try {
+    var cfgNode = document.getElementById('pdpHydrateConfig');
+    if (cfgNode) hydrateCfg = JSON.parse(cfgNode.textContent) || {};
+  } catch (e) { hydrateCfg = {}; }
+  // cfg.amzOos is baked ONLY on out-of-stock pages, so in-stock configs stay
+  // byte-identical to before this feature.
+  amazonOos = hydrateCfg.amzOos === true;
+
   var GOOD_ICON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
 
   // SINGLE predicate behind both the buy-indicator and the Price-Analysis verdict,
@@ -43,7 +59,15 @@
   // the generator used). The 90-day average itself stays baked.
   function recomputeBuyIndicator(current, cfg) {
     var ind = document.getElementById('pdpBuyIndicator');
-    if (!ind || cfg.avg90 == null) return;
+    if (!ind) return;
+    if (amazonOos) { // mirrors the generator's out-of-stock indicator exactly
+      ind.className = 'pdp-buy-indicator pdp-buy-indicator--neutral';
+      ind.innerHTML = '<div class="pdp-buy-indicator-icon" aria-hidden="true">○</div>' +
+        '<div class="pdp-buy-indicator-body"><strong>Currently unavailable</strong>' +
+        '<span>Amazon has no offer right now. Last seen at ' + money(current) + '.</span></div>';
+      return;
+    }
+    if (cfg.avg90 == null) return;
     var pct = Math.round(Math.abs(((current - cfg.avg90) / cfg.avg90) * 100));
     if (buyState(current, cfg) !== 'elevated') {
       var phrase = buyState(current, cfg) === 'typical' ? 'in line with the ' + cfg.avgLabel : pct + '% below the ' + cfg.avgLabel;
@@ -94,6 +118,10 @@
   function recomputeAnalysis(current, cfg) {
     var el = document.getElementById('pdpAnalysisCurrent');
     if (!el) return;
+    if (amazonOos) { // mirrors the generator's currentAssessment() OOS branch
+      el.textContent = 'Last seen at ' + money(current) + ', currently unavailable at Amazon.';
+      return;
+    }
     var parts = [];
     if (cfg.atl != null) {
       if (current <= cfg.atl) {
@@ -232,29 +260,74 @@
   // Newegg comparison row (present when cfg.newegg): refresh price + stock
   // from retailer_offers. One query; graceful fallback to baked values. The
   // row ORDER stays as baked (no DOM re-sorting on hydration).
-  function recomputeNeweggOffer(cfg) {
-    if (!cfg.newegg) return;
-    var priceEl = document.getElementById('pdpNeweggPrice');
-    var stockEl = document.getElementById('pdpNeweggStock');
-    if (!priceEl && !stockEl) return;
+  // Apply one retailer's current state to BOTH surfaces (header strip button
+  // and Buy Now row) so they can never disagree. Mirrors the generator's
+  // rendering exactly: out of stock keeps the link clickable (users can check
+  // for themselves, and restocks happen), mutes the button, strikes the price
+  // as a last sighting, and labels it in words - never colour alone.
+  var SURFACES = {
+    amazon: { strip: 'pdpStripAmazonPrice', rowPrice: 'pdpBuyPrice', rowStock: 'pdpAmazonStock' },
+    newegg: { strip: 'pdpStripNeweggPrice', rowPrice: 'pdpNeweggPrice', rowStock: 'pdpNeweggStock' }
+  };
+  function applyRetailerState(key, price, inStock) {
+    var ids = SURFACES[key];
+    if (!ids) return;
+    var stripEl = document.getElementById(ids.strip);
+    var rowPriceEl = document.getElementById(ids.rowPrice);
+    var rowStockEl = document.getElementById(ids.rowStock);
+    if (!isNaN(price)) {
+      if (stripEl) stripEl.textContent = money(price);
+      if (rowPriceEl) rowPriceEl.textContent = money(price);
+    }
+    if (inStock == null) return; // unknown: make no claim either way
+    if (rowStockEl) {
+      rowStockEl.className = 'pdp-stock ' + (inStock ? 'pdp-stock--in' : 'pdp-stock--out');
+      rowStockEl.textContent = inStock ? 'In Stock' : 'Out of Stock';
+    }
+    var btn = stripEl && stripEl.closest ? stripEl.closest('.pdp-rstrip-btn') : null;
+    if (!btn) return;
+    var label = btn.querySelector('.pdp-rstrip-oos');
+    if (inStock) {
+      btn.classList.remove('pdp-rstrip-btn--oos');
+      if (label) label.parentNode.removeChild(label);
+    } else {
+      btn.classList.add('pdp-rstrip-btn--oos');
+      if (!label) {
+        label = document.createElement('span');
+        label.className = 'pdp-rstrip-oos';
+        label.textContent = 'Out of stock';
+        btn.appendChild(label);
+      }
+    }
+  }
+
+  // One query covering BOTH retailers: Amazon's current state lives in
+  // retailer_offers alongside Newegg's (price_history is an observation log
+  // and cannot express "we looked and there was no offer"). A restock
+  // therefore un-mutes on the next page load.
+  function recomputeRetailerOffers(cfg) {
     sb.from('retailer_offers')
-      .select('price, in_stock, fetched_at, products!inner(sku)')
-      .eq('retailer', 'newegg')
+      .select('retailer, price, in_stock, fetched_at, products!inner(sku)')
       .eq('products.sku', sku)
-      .limit(1)
       .then(function (res) {
         if (res.error || !res.data || !res.data.length) return; // keep baked
-        var o = res.data[0];
-        var p = Number(o.price);
-        if (priceEl && !isNaN(p)) priceEl.textContent = money(p);
-        // Header strip mirrors the same offer (same source list at bake time).
-        var stripEl = document.getElementById('pdpStripNeweggPrice');
-        if (stripEl && !isNaN(p)) stripEl.textContent = money(p);
-        if (stockEl && o.in_stock != null) {
-          stockEl.className = 'pdp-stock ' + (o.in_stock ? 'pdp-stock--in' : 'pdp-stock--out');
-          stockEl.textContent = o.in_stock ? 'In Stock' : 'Out of Stock';
-        }
-        if (!isNaN(p)) updateJsonLd('Newegg', p, o.fetched_at, o.in_stock);
+        res.data.forEach(function (o) {
+          var p = Number(o.price);
+          applyRetailerState(o.retailer, p, o.in_stock);
+          if (!isNaN(p)) {
+            updateJsonLd(o.retailer === 'amazon' ? 'Amazon' : 'Newegg', p, o.fetched_at, o.in_stock);
+          }
+          if (o.retailer === 'amazon') {
+            var wasOos = amazonOos;
+            amazonOos = o.in_stock === false;
+            // Availability drives the verdict and the analysis sentence, so a
+            // change discovered here must re-run them against the live price.
+            if (wasOos !== amazonOos && lastPrice != null) {
+              recomputeBuyIndicator(lastPrice, cfg);
+              recomputeAnalysis(lastPrice, cfg);
+            }
+          }
+        });
       })
       .catch(function () { /* keep baked values */ });
   }
@@ -274,6 +347,10 @@
   // Latest price for THIS product. Filter fetched_at <= now to skip any
   // backfill day-bucket rows stamped at T23:59 (future-dated for the current
   // day) so the relative timestamp reflects a real fetch. One embedded query.
+  // Availability first and independently: an out-of-stock product's newest
+  // price_history row is an old sighting, so stock must not ride on it.
+  recomputeRetailerOffers(hydrateCfg);
+
   sb.from('price_history')
     .select('price, fetched_at, products!inner(sku)')
     .eq('products.sku', sku)
@@ -288,18 +365,15 @@
       var row = res.data[0];
       var price = Number(row.price);
       if (!isNaN(price)) {
+        lastPrice = price;
         priceEls.forEach(function (el) { if (el) el.textContent = money(price); });
-        // Keep price-derived UI coherent with the hydrated price.
-        var cfgEl = document.getElementById('pdpHydrateConfig');
-        if (cfgEl) {
-          try {
-            var cfg = JSON.parse(cfgEl.textContent);
-            recomputeBuyIndicator(price, cfg);
-            recomputeValueMetric(price, cfg);
-            recomputeAnalysis(price, cfg);
-            recomputeCapacityFamily(cfg, price);
-          } catch (e) { /* leave baked verdict on bad config */ }
-        }
+        // Keep price-derived UI coherent with the hydrated price. All of these
+        // consult amazonOos, so an out-of-stock page never regains a
+        // "good time to buy" verdict from a price refresh.
+        recomputeBuyIndicator(price, hydrateCfg);
+        recomputeValueMetric(price, hydrateCfg);
+        recomputeAnalysis(price, hydrateCfg);
+        recomputeCapacityFamily(hydrateCfg, price);
         updateJsonLd('Amazon', price, row.fetched_at, null);
       }
       updatedEl.textContent = 'Updated ' + relativeTime(row.fetched_at);
