@@ -19,6 +19,13 @@ function isDayBucket(ts) {
   return new Date(ts).toISOString().endsWith('T23:59:00.000Z');
 }
 
+// Newest real cron batch timestamp in the last 36h.
+//
+// The .limit(1000) is SAFE and deliberate - do NOT "fix" it into pagination.
+// The query is ordered fetched_at DESCENDING, so the cap can only discard the
+// OLDEST rows of the window, never the newest, and we take [0]. At the 6x
+// cadence 36h holds ~2,100 rows, so truncation does happen; it is harmless by
+// construction. Pagination here would fetch 2,100 rows to use exactly one.
 async function latestCronBatch() {
   const since = new Date(Date.now() - 36 * 3600 * 1000).toISOString();
   const { data, error } = await supabase
@@ -30,7 +37,7 @@ async function latestCronBatch() {
   if (error) throw error;
   const cronTs = data.map((r) => r.fetched_at).filter((ts) => !isDayBucket(ts));
   if (cronTs.length === 0) {
-    throw new Error('no cron batch found in the last 36h — has /api/fetch-prices run?');
+    throw new Error('no cron batch found in the last 36h — has the price fetch run?');
   }
   return cronTs[0]; // newest first
 }

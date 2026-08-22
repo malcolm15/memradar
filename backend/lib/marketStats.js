@@ -90,31 +90,27 @@ async function computeMarketStats(supabase, batchTimestamp, log = () => {}) {
   );
   const currentByProduct = new Map(currentRows.map((r) => [r.product_id, Number(r.price)]));
 
-  // Baseline rows for ALL periods in ONE query: fetch the widest window once
-  // (oldest period's max), then bucket per period in memory. Four separate
-  // range queries would re-scan overlapping history for no benefit.
+  // Baseline rows PER PERIOD. The four windows are DISJOINT (25-35, 80-100,
+  // 165-195, 350-380 days), so a single widened 25-380d query would fetch 355
+  // days of history to use 90 - roughly 500k rows at the 6x cadence versus
+  // 127k for four narrow queries. Four queries it is; there is nothing to
+  // de-duplicate between them.
   const now = Date.now();
-  const widestDays = Math.max(...PERIODS.map((p) => p.max));
-  const narrowestDays = Math.min(...PERIODS.map((p) => p.min));
-  const windowRows = await selectPaged(() =>
-    supabase
-      .from('price_history')
-      .select('product_id, price, fetched_at')
-      .gte('fetched_at', new Date(now - widestDays * DAY_MS).toISOString())
-      .lte('fetched_at', new Date(now - narrowestDays * DAY_MS).toISOString())
-  );
 
   const stats = [];
   for (const period of PERIODS) {
     // Closest row to this period's target, within its own window.
-    const from = now - period.max * DAY_MS;
-    const to = now - period.min * DAY_MS;
     const target = now - period.target * DAY_MS;
+    const windowRows = await selectPaged(() =>
+      supabase
+        .from('price_history')
+        .select('product_id, price, fetched_at')
+        .gte('fetched_at', new Date(now - period.max * DAY_MS).toISOString())
+        .lte('fetched_at', new Date(now - period.min * DAY_MS).toISOString())
+    );
     const baselineByProduct = new Map(); // product_id -> {price, dist}
     for (const r of windowRows) {
-      const t = new Date(r.fetched_at).getTime();
-      if (t < from || t > to) continue;
-      const dist = Math.abs(t - target);
+      const dist = Math.abs(new Date(r.fetched_at).getTime() - target);
       const prev = baselineByProduct.get(r.product_id);
       if (!prev || dist < prev.dist) baselineByProduct.set(r.product_id, { price: Number(r.price), dist });
     }

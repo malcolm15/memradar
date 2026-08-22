@@ -1,12 +1,1 @@
-{
-  "crons": [
-    {
-      "path": "/api/fetch-prices",
-      "schedule": "0 8 * * *"
-    },
-    {
-      "path": "/api/fetch-prices",
-      "schedule": "0 20 * * *"
-    }
-  ]
-}
+{}

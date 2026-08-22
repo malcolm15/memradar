@@ -1,27 +1,44 @@
-// Daily price fetch — Keepa is the price data source (Best Buy access never
-// came through; backend/lib/bestbuy.js is kept dormant pending approval).
+// Amazon price fetch (Keepa) - the core job, shared by the scheduled runner
+// (scripts/run-price-fetch.js, invoked by .github/workflows/price-fetch.yml).
 //
-// Flow: load the Amazon catalog from Supabase, fetch current stats from Keepa
-// (batched, 1 token per ASIN), append ONE price_history row per in-stock
-// product with fetched_at = now. History granularity stays daily: the backfill
-// (scripts/backfill-keepa.js) loaded the past; this cron appends the present.
+// Flow: load the Amazon catalog, fetch current stats from Keepa (batched, 1
+// token per ASIN), append ONE price_history row per in-stock product with
+// fetched_at = now, upsert Amazon current state into retailer_offers, then
+// (conditionally) recompute market stats and run the alert check.
+//
+// CADENCE: every 4 hours at 00/04/08/12/16/20 UTC (6x/day, ~1,410 Keepa
+// tokens/day against a ~28,800 budget). Moved off Vercel cron in Aug 2026:
+// Vercel crons bind to the production deployment and an invocation during a
+// deploy handover is dropped (forensically proven - two missed runs, each
+// coinciding with pushes inside the window). Six entries would have meant six
+// daily collision windows.
+//
+// MARKET STATS ARE DAILY, NOT PER-RUN. Segment medians are a daily statistic;
+// recomputing them six times a day tells nobody anything new and costs ~127
+// paginated round-trips each time. The runner passes withMarketStats=true only
+// on the 08:00 UTC slot. scripts/compute-market-stats.js still recomputes on
+// demand at any hour, independently of this flag.
 require('dotenv').config();
 
-const supabase = require('../backend/lib/supabase');
-const keepa = require('../backend/lib/keepa');
-const { computeMarketStats } = require('../backend/lib/marketStats');
-const { checkAlerts } = require('../backend/lib/alertCheck');
-const { upsertAmazonOffers, lastKnownPrices } = require('../backend/lib/amazonOffers');
+const supabase = require('./supabase');
+const keepa = require('./keepa');
+const { computeMarketStats } = require('./marketStats');
+const { checkAlerts } = require('./alertCheck');
+const { upsertAmazonOffers, lastKnownPrices } = require('./amazonOffers');
 
-function log(msg) {
-  console.log(`[${new Date().toISOString()}] ${msg}`);
-}
+const defaultLog = (msg) => console.log(`[${new Date().toISOString()}] ${msg}`);
+const defaultLogError = (msg, err) => console.error(`[${new Date().toISOString()}] ERROR ${msg}:`, err.message);
 
-function logError(msg, err) {
-  console.error(`[${new Date().toISOString()}] ERROR ${msg}:`, err.message);
-}
+// The UTC hour whose run also recomputes market stats (one slot per day).
+const MARKET_STATS_HOUR_UTC = 8;
 
-async function run() {
+async function runPriceFetch(opts = {}) {
+  const log = opts.log || defaultLog;
+  const logError = opts.logError || defaultLogError;
+  // Default: recompute market stats only on the designated daily slot.
+  const withMarketStats = opts.withMarketStats !== undefined
+    ? opts.withMarketStats
+    : new Date().getUTCHours() === MARKET_STATS_HOUR_UTC;
   const startTime = Date.now();
   log('Job started (source=keepa)');
 
@@ -110,12 +127,18 @@ async function run() {
   // stats failure must log loudly but never fail the cron response.
   let marketStats = null;
   let statsError = null;
-  try {
-    const res = await computeMarketStats(supabase, fetchedAt, log);
-    marketStats = res.stats;
-  } catch (err) {
-    statsError = err.message;
-    logError('computeMarketStats FAILED (non-fatal, price inserts unaffected)', err);
+  let marketStatsSkipped = false;
+  if (!withMarketStats) {
+    marketStatsSkipped = true;
+    log(`Market stats skipped (recomputed once daily on the ${String(MARKET_STATS_HOUR_UTC).padStart(2, '0')}:00 UTC run)`);
+  } else {
+    try {
+      const res = await computeMarketStats(supabase, fetchedAt, log);
+      marketStats = res.stats;
+    } catch (err) {
+      statsError = err.message;
+      logError('computeMarketStats FAILED (non-fatal, price inserts unaffected)', err);
+    }
   }
 
   // Alert check — best effort: isolated so an alert failure never fails the
@@ -145,6 +168,7 @@ async function run() {
     out_of_stock: outOfStock,
     amazon_offers: amazonOffers,
     market_stats: marketStats,
+    market_stats_skipped: marketStatsSkipped,
     ...(statsError ? { market_stats_error: statsError } : {}),
     alerts: alertStats,
     errors,
@@ -153,19 +177,4 @@ async function run() {
   };
 }
 
-module.exports = async (req, res) => {
-  if (req.headers['authorization'] !== `Bearer ${process.env.CRON_SECRET}`) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-  try {
-    const summary = await run();
-    res.status(200).json(summary);
-  } catch (err) {
-    logError('Unhandled exception in run()', err);
-    res.status(500).json({ error: err.message });
-  }
-};
-
-if (require.main === module) {
-  run().then(summary => console.log('\nSummary:', JSON.stringify(summary, null, 2)));
-}
+module.exports = { runPriceFetch, MARKET_STATS_HOUR_UTC };

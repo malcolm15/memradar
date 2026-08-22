@@ -1,0 +1,45 @@
+# Amazon price fetch (Keepa) - every 4 hours.
+#
+# Moved off Vercel cron deliberately: Vercel crons bind to the current
+# production deployment and an invocation during a deploy handover is dropped
+# (forensically proven, Aug 2026 - two missed runs, both coinciding with
+# pushes inside the window). Six daily entries would mean six daily collision
+# windows. GitHub Actions has been 100% reliable for newegg-refresh.
+#
+# Separate workflow from newegg-refresh on purpose: different cadence, and
+# Newegg's feed regenerates once nightly so extra pulls would re-read the same
+# file.
+#
+# Failure surfacing matches newegg-refresh: any error exits nonzero -> red run
+# + GitHub's failure email. A failed run writes nothing further; the next run
+# is at most 4 hours away.
+name: price-fetch
+
+on:
+  schedule:
+    - cron: '0 */4 * * *'   # 00/04/08/12/16/20 UTC
+  workflow_dispatch:
+    inputs:
+      skip_market_stats:
+        description: 'Skip the market-stats recompute (it is daily-only by default)'
+        required: false
+        default: ''
+
+jobs:
+  fetch-prices:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --omit=dev
+      - name: Fetch prices
+        env:
+          KEEPA_API_KEY: ${{ secrets.KEEPA_API_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: node scripts/run-price-fetch.js --confirm
