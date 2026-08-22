@@ -2,14 +2,23 @@
 // (api/fetch-prices.js) and the standalone runner (scripts/compute-market-stats.js).
 //
 // Segments products by name, then compares the current cron batch's prices
-// against each product's price ~180 days ago (window 165-195d, closest to the
-// 180d mark). FAIRNESS RULE: pct_change is computed over the subset of
-// products that existed 180 days ago (had a row in the window) AND have a
-// current price — both averages use that same subset, so new products entering
-// the catalog can't skew the comparison. product_count = subset size.
-const BASELINE_WINDOW_MIN_DAYS = 165;
-const BASELINE_WINDOW_MAX_DAYS = 195;
-const BASELINE_TARGET_DAYS = 180;
+// against each product's price N days ago, for FOUR windows (1m/3m/6m/1y) so
+// the homepage can switch time ranges without client-side math or extra
+// queries. 4 segments x 4 periods = 16 upserted rows per run.
+//
+// FAIRNESS RULE, applied INDEPENDENTLY PER PERIOD: a period's pct_change is
+// computed over the subset of products that had a baseline row in THAT
+// period's window AND have a current price — both medians use that same
+// subset, so new products entering the catalog can't skew the comparison.
+// product_count = that period's subset size, which is why counts legitimately
+// differ between periods (a 1y window can only include products we were
+// already tracking a year ago).
+const PERIODS = [
+  { key: '1m', target: 30, min: 25, max: 35 },
+  { key: '3m', target: 90, min: 80, max: 100 },
+  { key: '6m', target: 180, min: 165, max: 195 }, // unchanged from the original
+  { key: '1y', target: 365, min: 350, max: 380 },
+];
 const DAY_MS = 24 * 60 * 60 * 1000;
 const PAGE = 1000; // PostgREST caps responses at 1000 rows — paginate
 
@@ -81,65 +90,76 @@ async function computeMarketStats(supabase, batchTimestamp, log = () => {}) {
   );
   const currentByProduct = new Map(currentRows.map((r) => [r.product_id, Number(r.price)]));
 
-  // Baseline: each product's row closest to the 180-day mark within 165-195d.
+  // Baseline rows for ALL periods in ONE query: fetch the widest window once
+  // (oldest period's max), then bucket per period in memory. Four separate
+  // range queries would re-scan overlapping history for no benefit.
   const now = Date.now();
-  const winFrom = new Date(now - BASELINE_WINDOW_MAX_DAYS * DAY_MS).toISOString();
-  const winTo = new Date(now - BASELINE_WINDOW_MIN_DAYS * DAY_MS).toISOString();
-  const target = now - BASELINE_TARGET_DAYS * DAY_MS;
+  const widestDays = Math.max(...PERIODS.map((p) => p.max));
+  const narrowestDays = Math.min(...PERIODS.map((p) => p.min));
   const windowRows = await selectPaged(() =>
     supabase
       .from('price_history')
       .select('product_id, price, fetched_at')
-      .gte('fetched_at', winFrom)
-      .lte('fetched_at', winTo)
+      .gte('fetched_at', new Date(now - widestDays * DAY_MS).toISOString())
+      .lte('fetched_at', new Date(now - narrowestDays * DAY_MS).toISOString())
   );
-  const baselineByProduct = new Map(); // product_id -> {price, dist}
-  for (const r of windowRows) {
-    const dist = Math.abs(new Date(r.fetched_at).getTime() - target);
-    const prev = baselineByProduct.get(r.product_id);
-    if (!prev || dist < prev.dist) baselineByProduct.set(r.product_id, { price: Number(r.price), dist });
-  }
 
   const stats = [];
-  for (const segment of SEGMENTS) {
-    const matchedCurrent = [];
-    const matchedBaseline = [];
-    for (const [productId, seg] of segmentByProduct) {
-      if (seg !== segment) continue;
-      const cur = currentByProduct.get(productId);
-      const base = baselineByProduct.get(productId);
-      if (cur === undefined || base === undefined) continue; // fairness: need both
-      matchedCurrent.push(cur);
-      matchedBaseline.push(base.price);
+  for (const period of PERIODS) {
+    // Closest row to this period's target, within its own window.
+    const from = now - period.max * DAY_MS;
+    const to = now - period.min * DAY_MS;
+    const target = now - period.target * DAY_MS;
+    const baselineByProduct = new Map(); // product_id -> {price, dist}
+    for (const r of windowRows) {
+      const t = new Date(r.fetched_at).getTime();
+      if (t < from || t > to) continue;
+      const dist = Math.abs(t - target);
+      const prev = baselineByProduct.get(r.product_id);
+      if (!prev || dist < prev.dist) baselineByProduct.set(r.product_id, { price: Number(r.price), dist });
     }
 
-    if (matchedCurrent.length === 0) {
-      stats.push({ segment, current_avg_price: null, baseline_avg_price: null, pct_change: null, product_count: 0 });
-      continue;
-    }
+    for (const segment of SEGMENTS) {
+      const matchedCurrent = [];
+      const matchedBaseline = [];
+      for (const [productId, seg] of segmentByProduct) {
+        if (seg !== segment) continue;
+        const cur = currentByProduct.get(productId);
+        const base = baselineByProduct.get(productId);
+        if (cur === undefined || base === undefined) continue; // fairness: need both
+        matchedCurrent.push(cur);
+        matchedBaseline.push(base.price);
+      }
 
-    const currentAvg = median(matchedCurrent);
-    const baselineAvg = median(matchedBaseline);
-    stats.push({
-      segment,
-      current_avg_price: round2(currentAvg),
-      baseline_avg_price: round2(baselineAvg),
-      pct_change: round1(((currentAvg - baselineAvg) / baselineAvg) * 100),
-      product_count: matchedCurrent.length,
-    });
+      if (matchedCurrent.length === 0) {
+        stats.push({ segment, period: period.key, current_avg_price: null, baseline_avg_price: null, pct_change: null, product_count: 0 });
+        continue;
+      }
+
+      const currentAvg = median(matchedCurrent);
+      const baselineAvg = median(matchedBaseline);
+      stats.push({
+        segment,
+        period: period.key,
+        current_avg_price: round2(currentAvg),
+        baseline_avg_price: round2(baselineAvg),
+        pct_change: round1(((currentAvg - baselineAvg) / baselineAvg) * 100),
+        product_count: matchedCurrent.length,
+      });
+    }
   }
 
   const computedAt = new Date().toISOString();
   const { error: upsertErr } = await supabase
     .from('market_stats')
-    .upsert(stats.map((s) => ({ ...s, computed_at: computedAt })), { onConflict: 'segment' });
+    .upsert(stats.map((s) => ({ ...s, computed_at: computedAt })), { onConflict: 'segment,period' });
   if (upsertErr) throw upsertErr;
 
   for (const s of stats) {
-    log(`Market stats ${s.segment}: current=$${s.current_avg_price} baseline=$${s.baseline_avg_price} change=${s.pct_change}% (n=${s.product_count})`);
+    log(`Market stats ${s.segment} [${s.period}]: current=$${s.current_avg_price} baseline=$${s.baseline_avg_price} change=${s.pct_change}% (n=${s.product_count})`);
   }
 
   return { stats, excluded, computedAt };
 }
 
-module.exports = { computeMarketStats, classifySegment, SEGMENTS };
+module.exports = { computeMarketStats, classifySegment, SEGMENTS, PERIODS };

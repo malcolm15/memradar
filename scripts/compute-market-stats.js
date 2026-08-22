@@ -46,14 +46,17 @@ async function run() {
   console.log(`Computed at: ${computedAt}`);
   console.log(`Excluded from segments: ram=${excluded.ram}, ssd=${excluded.ssd}`);
   console.log('');
-  console.log('segment    | current avg | baseline avg | change  | products');
-  console.log('-----------+-------------+--------------+---------+---------');
+  console.log('period | segment    | current med | baseline med | change  | products');
+  console.log('-------+------------+-------------+--------------+---------+---------');
+  let lastPeriod = null;
   for (const s of stats) {
+    if (lastPeriod && s.period !== lastPeriod) console.log('-------+------------+-------------+--------------+---------+---------');
+    lastPeriod = s.period;
     console.log(
-      `${s.segment.padEnd(10)} | $${String(s.current_avg_price ?? '—').padStart(9)} | $${String(s.baseline_avg_price ?? '—').padStart(10)} | ${String(s.pct_change === null ? '—' : (s.pct_change >= 0 ? '+' : '') + s.pct_change + '%').padStart(7)} | ${s.product_count}`
+      `${String(s.period).padEnd(6)} | ${s.segment.padEnd(10)} | $${String(s.current_avg_price ?? '—').padStart(9)} | $${String(s.baseline_avg_price ?? '—').padStart(10)} | ${String(s.pct_change === null ? '—' : (s.pct_change >= 0 ? '+' : '') + s.pct_change + '%').padStart(7)} | ${s.product_count}`
     );
   }
-  console.log('\nRows upserted into market_stats (conflict on segment).');
+  console.log(`\n${stats.length} rows upserted into market_stats (conflict on segment,period).`);
 }
 
 run().catch((err) => {

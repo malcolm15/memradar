@@ -2266,6 +2266,31 @@ html.dark .pdp-analysis-text { color: #94a3b8; }
 }
 .pdp-range-btn:hover { border-color: var(--brand-primary); color: var(--brand-primary); }
 .pdp-range-btn.active { background: var(--brand-primary); border-color: var(--brand-primary); color: #fff; }
+/* Market Pulse window switcher: reuses .pdp-range-btn so the interaction
+   vocabulary matches the PDP chart's range buttons exactly (same shape, same
+   active treatment, same dark-mode rules) - only layout differs here. */
+.pulse-windows {
+  display: flex;
+  gap: 4px;
+  margin: 0 0 14px;
+  flex-wrap: wrap;
+}
+.pulse-window-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.pulse-window-btn:disabled:hover { border-color: #e5e7eb; color: #6b7280; }
+html.dark .pulse-window-btn:disabled:hover { border-color: #2d3f55; color: #94a3b8; }
+/* Sample-size note: only rendered when a window's matched subset differs
+   meaningfully from the default window's, so it stays rare and meaningful. */
+.pulse-count-note {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.72rem;
+  color: #9ca3af;
+}
+html.dark .pulse-count-note { color: #64748b; }
+
 .pdp-chart-container {
   position: relative;
   height: 300px; /* CLS reservation: do not change */
