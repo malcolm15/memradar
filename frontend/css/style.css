@@ -2266,6 +2266,25 @@ html.dark .pdp-analysis-text { color: #94a3b8; }
 }
 .pdp-range-btn:hover { border-color: var(--brand-primary); color: var(--brand-primary); }
 .pdp-range-btn.active { background: var(--brand-primary); border-color: var(--brand-primary); color: #fff; }
+@media (max-width: 768px) {
+  /* Touch tap targets. These buttons are the chart range control on every PDP
+     AND the homepage Market Pulse switcher - the two most-tapped controls on
+     the site - and rendered ~25-27px tall, well under the 44px minimum held
+     everywhere else (retailer strip, capacity chips, filter sheet, nav).
+     Sized with min-height/min-width rather than padding so the narrower
+     padding set by the 480px block below still applies: widening the buttons
+     horizontally would wrap the Market Pulse heading row at 360px for no
+     tap-target gain, since min-width already guarantees 44px of horizontal
+     target. min-height on an inline-block would leave the label off-centre,
+     hence the centring flex box. */
+  .pdp-range-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
 /* Market Pulse window switcher: reuses .pdp-range-btn so the interaction
    vocabulary matches the PDP chart's range buttons exactly (same shape, same
    active treatment, same dark-mode rules) - only layout differs here. */
@@ -2309,6 +2328,14 @@ html.dark .pulse-window-btn:disabled:hover { border-color: #2d3f55; color: #94a3
   color: #9ca3af;
 }
 html.dark .pulse-count-note { color: #64748b; }
+@media (max-width: 768px) {
+  /* MUST track the 44px tap-target height set on .pdp-range-btn above, or the
+     hydration CLS fixed in 94f282d3 returns (market-pulse.js injects these
+     buttons into an otherwise empty container). This override MUST live after
+     the base .pulse-windows rule: a media query adds no specificity, so the
+     later declaration wins regardless of the query. */
+  .pulse-windows { min-height: 44px; }
+}
 
 .pdp-chart-container {
   position: relative;
