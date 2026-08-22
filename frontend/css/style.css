@@ -2269,11 +2269,30 @@ html.dark .pdp-analysis-text { color: #94a3b8; }
 /* Market Pulse window switcher: reuses .pdp-range-btn so the interaction
    vocabulary matches the PDP chart's range buttons exactly (same shape, same
    active treatment, same dark-mode rules) - only layout differs here. */
+/* Heading + window buttons share one line, mirroring .pdp-chart-header
+   (same flex/space-between/wrap/gap recipe) so the two controls read as the
+   same component in both places. Wrapping is the deliberate narrow-screen
+   fallback: the buttons drop below the heading at full size rather than
+   shrinking tap targets or truncating labels. */
+.pulse-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.pulse-header .section-label { margin-bottom: 0; }
 .pulse-windows {
   display: flex;
   gap: 4px;
-  margin: 0 0 14px;
+  margin: 0;
   flex-wrap: wrap;
+  /* CLS: the buttons are injected by market-pulse.js, so the empty container
+     must already occupy their height or the cards below jump on hydration
+     (measured 7-9px before this). Same reservation convention as
+     .pdp-rstrip / .pdp-buy-indicator. 27px = the tallest rendered button. */
+  min-height: 27px;
 }
 .pulse-window-btn:disabled {
   opacity: 0.45;
