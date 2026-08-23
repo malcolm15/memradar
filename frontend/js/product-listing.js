@@ -224,7 +224,7 @@
       var clearBtn = countEl.querySelector('.listing-clear-search');
       if (clearBtn) clearBtn.addEventListener('click', clearSearch);
     } else {
-      countEl.textContent = 'Showing ' + n + ' product' + (n === 1 ? '' : 's') + ' · Prices updated twice daily';
+      countEl.textContent = 'Showing ' + n + ' product' + (n === 1 ? '' : 's') + ' · Prices updated every few hours';
     }
   }
   function clearFilters() {

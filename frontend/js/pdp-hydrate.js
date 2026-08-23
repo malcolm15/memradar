@@ -1,5 +1,5 @@
 // PDP price hydration. PDPs bake current price + "Last updated" at generation
-// time, but prices now update twice daily WITHOUT regeneration - so on load we
+// time, but prices now update every few hours WITHOUT regeneration - so on load we
 // fetch the latest price_history row for this product and replace the baked
 // current-price displays and the "Last updated" line with a relative time.
 // Fails gracefully: on any error the baked values remain (never a broken UI).
@@ -159,12 +159,19 @@
   }
   // Price-fetch schedule, UTC hours. Deliberate duplicate of the generator's
   // FETCH_HOURS_UTC (this file runs in the browser and cannot require it);
-  // vercel.json's crons are the source of truth. Change all three together.
-  var FETCH_HOURS_UTC = [8, 20];
-  // Next price-fetch boundary - same computation as the generator's
-  // nextFetchIso(), so the JSON-LD validity window is always the next
-  // scheduled fetch regardless of when the page was baked. Past the last
-  // slot, roll to tomorrow's first via hour + 24 (Date.UTC normalizes).
+  // .github/workflows/price-fetch.yml's cron is the source of truth. Change
+  // all three together.
+  var FETCH_HOURS_UTC = [0, 4, 8, 12, 16, 20];
+  // GitHub's scheduled runs are best-effort: observed delays of 16-60 minutes
+  // over the first full day at this cadence. priceValidUntil promises the
+  // price holds until the next fetch, so it must not expire before a delayed
+  // run lands - pad past the worst observed delay.
+  var FETCH_DELAY_PAD_MIN = 90;
+  // Next price-fetch boundary plus the pad - same computation as the
+  // generator's nextFetchIso(), so the JSON-LD validity window is always the
+  // next scheduled fetch regardless of when the page was baked. Past the last
+  // slot, roll to tomorrow's first via hour + 24 (Date.UTC normalizes, and
+  // minutes > 59 roll into the hour the same way).
   function nextFetchIso() {
     var d = new Date();
     var h = d.getUTCHours();
@@ -172,7 +179,7 @@
     for (var i = 0; i < FETCH_HOURS_UTC.length; i++) {
       if (h < FETCH_HOURS_UTC[i]) { hour = FETCH_HOURS_UTC[i]; break; }
     }
-    return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), hour, 0, 0)).toISOString();
+    return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), hour, FETCH_DELAY_PAD_MIN, 0)).toISOString();
   }
 
   // Keep the Product JSON-LD coherent with the hydrated prices. Rendering

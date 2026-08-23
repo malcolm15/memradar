@@ -17,7 +17,7 @@ MemRadar tracks Amazon prices on RAM and SSDs via the Keepa API (licensed price-
 | Backend | Node.js serverless functions on Vercel |
 | Database | Supabase (Postgres) |
 | Data source | Keepa API — Amazon price history (launch). Best Buy client dormant (never approved) |
-| Cron | Vercel cron — **twice daily**: 08:00 + 20:00 UTC (two entries, same `/api/fetch-prices`) |
+| Cron | GitHub Actions — **every 4 hours**: 00/04/08/12/16/20 UTC (`.github/workflows/price-fetch.yml`) |
 
 ## Directory Structure
 
@@ -115,7 +115,7 @@ Required in `.env` (local) and Vercel project settings (production):
 |---|---|
 | `BBY_API_KEY` | Best Buy Open API key — dormant (access never approved; the Best Buy client is unused) |
 | `PRICE_API_KEY` | PriceAPI.com key — evaluated July 2026 and ruled out (see Data Source Evaluation); used by the one-time catalog build, kept for reference |
-| `KEEPA_API_KEY` | Keepa API key for Amazon price history (20 tokens/min plan) — must also be set in Vercel env vars |
+| `KEEPA_API_KEY` | Keepa API key for Amazon price history (20 tokens/min plan) — **now a GitHub Actions secret**; no longer set in Vercel |
 | `SUPABASE_URL` | Supabase project URL |
 | `SUPABASE_SECRET_KEY` | Supabase service role key (not the anon key) |
 | `CRON_SECRET` | Random secret — Vercel sends as Bearer token to protect `/api/fetch-prices` |
@@ -143,7 +143,9 @@ Required in `.env` (local) and Vercel project settings (production):
 
 The script can also run directly via `node api/fetch-prices.js` for manual testing.
 
-**Twice-daily is safe for every `price_history` consumer** (each appends one snapshot per run — two rows/product/day): market-stats uses the run's explicit batch timestamp; the 30-day-change / latest-price loaders reduce to newest-in-window and closest-to-30d; the chart downsampler keeps the *last* reading per UTC day; the alert check's send-then-mark (`triggered=true` only after a successful send) prevents double-emails while giving faster delivery. **Trade-off:** 2×/day was chosen (≈940 tokens/day vs a ~28,800 budget). More frequent updates are possible via an external cron service hitting `/api/fetch-prices` with the `CRON_SECRET` bearer (Vercel Hobby caps a single cron at once/day) — **TODO if intraday freshness ever needs to be tighter.**
+**6x/day is safe for every `price_history` consumer** (each run appends one snapshot per in-stock product — six rows/product/day, ~1,410 Keepa tokens/day against a ~28,800 budget). Audited Aug 2026 against the PostgREST 1000-row response cap: `product-data.js` (listing + homepage) paginates both price queries, so nothing truncates; its windows were narrowed to match the cadence (latest 48h→12h, baseline 25-35d→28-32d — the narrow windows hold MORE sightings than the old wide ones did at 2x, so gap tolerance improved while row cost dropped ~3x). `marketStats` paginates and queries its four DISJOINT windows separately (one widened 25-380d query fetched 355 days of history to use 90); it recomputes on the **08:00 slot only**, since segment medians are a daily statistic. `latestCronBatch`'s `.limit(1000)` is safe by ordering (DESC, we take `[0]`) — see its comment, do not "fix" it into pagination. The chart downsampler keeps the last reading per UTC day, so six rows collapse to one point. The alert check's send-then-mark prevents double-emails; running 6x cuts delivery latency from 12h to 4h.
+- **GitHub's scheduled runs are best-effort**: observed delays of 16, 16, 22, 27, 28, 31 and 60 minutes over the first full day (on-the-hour slots are the most contended). Nothing depends on exact timing, but `priceValidUntil` is padded by `FETCH_DELAY_PAD_MIN = 90` minutes past the next slot so the validity promise cannot expire before a delayed run lands. **Do not remove the pad** without re-checking observed delays.
+- **TODO (not built): intraday downsampling.** At 6x the table grows ~515K rows/year (vs ~172K at 2x). Nothing is strained today (~73.5K rows), but the eventual mitigation is collapsing rows older than ~90 days to last-of-day, which restores the pre-migration growth rate while preserving every rendered chart point (the downsampler already shows last-of-day beyond a year).
 
 **Best Buy client is DORMANT:** `backend/lib/bestbuy.js` is kept intact but unused (access never approved). If approval ever comes it can be revived as a second retailer source.
 
@@ -337,6 +339,8 @@ One implementation (`frontend/js/search.js`) powers all search on the site. No s
 
 ## Alert Backend (double opt-in, security-first)
 
+**REAL SUBSCRIBERS AS OF 2026-08-22.** The alert list is no longer test-only: six confirmed alerts, four of them from third parties (two arrived 2026-08-22, completing double opt-in unprompted). Any change to alert semantics — trigger conditions, send-then-mark ordering, expiry, email content — now lands in strangers' inboxes. Test against a scratch address and re-read the duplicate-send trade-off (send-then-mark leaves `triggered=false` on a send failure, so a *mark* failure re-sends within 4h at the current cadence) before touching that path.
+
 Full email-alert flow. **PII (email addresses) — every decision errs toward protecting it.** Reuses the existing `validateAlert`, `rateLimiter`, `verifyTurnstile` utilities.
 
 **Endpoints** (Vercel functions; API lives on `memradar-three.vercel.app` since GitHub Pages can't serve APIs):
@@ -390,6 +394,15 @@ Findings from evaluating price-data providers as a Best Buy replacement (Best Bu
 - **Cost observed:** **1 credit** per search job returning 16 products (`max_pages=1`).
 
 **Strategic conclusion:** PriceAPI is **not worth the €99/month** post-trial for our needs (no Walmart/Newegg/Best Buy, no price history). **Keepa** (Amazon price-history API, ~€49/month) was chosen for launch and is now live — Keepa granted written permission to display Amazon price history via their API. The `test-priceapi.js` script remains useful for schema reference and any future re-evaluation.
+
+## Price-Fetch Endpoint (RETIRED 2026-08-22)
+`api/fetch-prices.js` and both `vercel.json` cron entries are gone; the fetch runs on GitHub Actions (`.github/workflows/price-fetch.yml` → `scripts/run-price-fetch.js` → `backend/lib/priceFetch.js`).
+
+**Why:** Vercel crons bind to the current production deployment, and an invocation during a deploy handover is dropped — forensically proven Aug 2026 (two missed runs, each coinciding with pushes inside the window). Six daily entries would have meant six daily collision windows. That failure class is now extinct. Keeping a public, token-spending, email-sending endpoint with no scheduled caller was also pure attack surface.
+
+**`CRON_SECRET` is vestigial.** It was referenced only by that endpoint; nothing in the codebase reads it now (verify with grep before reintroducing). It can be deleted from Vercel's env vars. The local `.env` copy is harmless and was deliberately left alone.
+
+**Still on Vercel:** `api/alerts.js`, `api/confirm.js`, `api/unsubscribe.js` (user-facing, request-driven), unaffected.
 
 ## Keep-Alive Cron (RETIRED 2026-08-17)
 Removed: the `/api/keep-alive` endpoint (`api/keep-alive.js`) and its `vercel.json` cron entry (`0 12 */3 * *`). It existed only to stop the Supabase free tier pausing the project during inactivity.
@@ -459,7 +472,7 @@ Below the **768px** breakpoint the desktop `.nav-link`s hide (`nav .nav-link { d
 
 `style.css` is served with `Cache-Control: max-age=14400` (**4 hours** of browser caching). A Cloudflare purge clears the edge but **NOT** visitors' browser caches — so after a CSS change, returning devices can render new HTML against a stale 4-hour-cached stylesheet (this exact mismatch broke the mobile nav on first ship: new hamburger HTML + old CSS).
 
-**Fix / convention:** a single shared version query is appended to **both `style.css` and every local JS include** on every page — `?v=YYYYMMDD` (current value: **`20260828`**). A new URL forces browsers to refetch immediately regardless of max-age.
+**Fix / convention:** a single shared version query is appended to **both `style.css` and every local JS include** on every page — `?v=YYYYMMDD` (current value: **`20260829`**). A new URL forces browsers to refetch immediately regardless of max-age.
 
 - **Bump the `?v=` value whenever any `style.css` OR local JS file changes**, and update ALL pages together (one shared stamp — they must all match). Bumping rebusts every asset; that's fine.
 - Applies to local assets only: `css/style.css` and `js/*.js` (main, theme, alert-modal, supabase-client, market-pulse, product-listing, mobile-nav, filter-sheet, back-to-top). **External CDN scripts are NOT versioned** (jsdelivr supabase-js, cdnjs Chart.js, Cloudflare Turnstile, gtag) — they carry their own versioning.

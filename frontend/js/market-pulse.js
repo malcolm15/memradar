@@ -154,7 +154,7 @@
             month: 'long',
             day: 'numeric'
           });
-          updatedEl.textContent = 'Last updated: ' + formatted + ' · Prices updated twice daily';
+          updatedEl.textContent = 'Last updated: ' + formatted + ' · Prices updated every few hours';
         }
       }
     });

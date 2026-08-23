@@ -3,15 +3,26 @@
 // Drops" section (home-drops.js).
 //
 // load(sb, category?) fetches products (optionally scoped to a category), their
-// latest price (48h window -> newest per product) and a 30-day-ago baseline
-// (25-35d window -> closest per product), all client-reduced (no N+1). Returns
+// latest price (12h window -> newest per product) and a 30-day-ago baseline
+// (28-32d window -> closest per product), all client-reduced (no N+1). Returns
 // each product with .price (number|null) and .change30 (percent|null).
+//
+// WINDOW SIZES TRACK THE FETCH CADENCE (every 4 hours, 6x/day). They were 48h
+// and 25-35d at the old 2x cadence; at 6x those same spans would pull 3x the
+// rows (the homepage baseline alone went to ~14,100 rows / 15 paginated
+// requests) to derive exactly one row per product. The narrowed windows hold
+// MORE sightings than the old wide ones did: 12h covers 3 runs (vs 4 in 48h at
+// 2x) and 28-32d covers ~24 (vs 20 in 25-35d at 2x), so gap tolerance improved
+// while cost dropped. Widen them again if the cadence ever slows.
 //
 // If the catalog grows past ~500 products, move the price joins to a Postgres
 // RPC/view (same note as the listing pages).
 window.memradarProductData = (function () {
   var PAGE = 1000;
   var DAY_MS = 86400000;
+  var LATEST_WINDOW_H = 12;  // covers 3 runs at the 4-hourly cadence
+  var BASELINE_MIN_D = 28;   // 30-day baseline, +/- 2 days of tolerance
+  var BASELINE_MAX_D = 32;
 
   async function pagedSelect(build) {
     var out = [];
@@ -54,13 +65,13 @@ window.memradarProductData = (function () {
     var now = Date.now();
     var latestRows = await pagedSelect(function () {
       return sb.from('price_history').select('product_id, price, fetched_at')
-        .in('product_id', ids).gte('fetched_at', new Date(now - 2 * DAY_MS).toISOString());
+        .in('product_id', ids).gte('fetched_at', new Date(now - LATEST_WINDOW_H * 3600000).toISOString());
     });
     var baselineRows = await pagedSelect(function () {
       return sb.from('price_history').select('product_id, price, fetched_at')
         .in('product_id', ids)
-        .gte('fetched_at', new Date(now - 35 * DAY_MS).toISOString())
-        .lte('fetched_at', new Date(now - 25 * DAY_MS).toISOString());
+        .gte('fetched_at', new Date(now - BASELINE_MAX_D * DAY_MS).toISOString())
+        .lte('fetched_at', new Date(now - BASELINE_MIN_D * DAY_MS).toISOString());
     });
 
     var latest = reduceNewest(latestRows);
