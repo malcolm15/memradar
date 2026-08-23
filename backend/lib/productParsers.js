@@ -82,6 +82,25 @@ const normBarcode = (s) => String(s || '').replace(/\D/g, '').replace(/^0+/, '')
 // the MPN column): 10-14 digits, nothing else.
 const looksLikeBarcode = (s) => /^\d{10,14}$/.test(String(s || '').trim());
 
+
+// Short display name: brand + the meaningful prefix of the title (up to the
+// first "(" or comma), trimmed at a word boundary. Drives slugs, <title>, and
+// the X bot's tweet copy - keep those consumers on THIS function so a naming
+// tweak can never make the tweet disagree with the page it links.
+function shortName(p) {
+  let base = p.name.split('(')[0].split(',')[0].trim();
+  if (p.brand && !base.toLowerCase().startsWith(p.brand.toLowerCase().slice(0, 4))) {
+    base = p.brand + ' ' + base;
+  }
+  const words = base.split(/\s+/).slice(0, 8).join(' ');
+  let out = words;
+  if (out.length > 42) {
+    out = out.slice(0, 42);
+    out = out.slice(0, out.lastIndexOf(' ')); // word boundary
+  }
+  return out;
+}
+
 const MPN_SPEC_TOKEN = /^(?:\d+X\d+(?:GB|TB)|DDR[45][-\d]*|PC[34][-\d]+|CL\d[\d-]*|\d+(?:GB|TB|MHZ|MTS?)|\d+MT\/S|XMP[\d.]*|EXPO|AMD|INTEL|RGB|NVME|SATA(?:\s?III)?|SSD|M\.2|2280|2242|PCIE[\d.X]*|GEN[\d.X]+|U-?DIMM|SO-?DIMM|RDIMM|QLC|TLC|NAND|\d+V|1\.\d+V|PS5|PC)$/;
 function mpnCandidate(t) {
   return /^[A-Z0-9][A-Z0-9\-\/\.]{5,}$/.test(t) && /[A-Z]/.test(t) &&
@@ -99,6 +118,7 @@ function parseMpn(name) {
 
 module.exports = {
   parseMpn,
+  shortName,
   capTokensGB,
   totalCapacityGB,
   capacityLabel,

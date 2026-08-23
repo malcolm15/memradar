@@ -1,0 +1,94 @@
+# @memradar X/Twitter posting.
+#
+#   daily  17:00 UTC       biggest 24h Amazon price drop (the 16:00 price
+#                          fetch lands <=1h earlier, so the tweet reads fresh
+#                          data during US morning browsing)
+#   weekly Sunday 18:00    market_stats summary, after Sunday's Newegg full
+#                          reconciliation and the 08:00 stats recompute
+#
+# DESIGN RULE: silent rather than wrong or trivial. Every guardrail in
+# backend/lib/tweetCompose.js skips with a logged reason and exits 0 posting
+# nothing. Only real failures exit nonzero -> red run + GitHub failure email.
+#
+# DEDUP STATE lives in this workflow's own run logs, not a repo variable or a
+# committed file. Repo variables need a classic-`repo`-scope PAT (the
+# automatic GITHUB_TOKEN cannot write them), and a committed state file means
+# ~30 bot commits a month, each a push with side effects. Reading the previous
+# run's TWEETED_SKU marker needs only `actions: read`, which is already
+# granted, and log retention (90 days) far exceeds the one-day dedup window.
+name: x-posts
+
+on:
+  schedule:
+    - cron: '0 17 * * *'    # daily drop
+    - cron: '0 18 * * 0'    # weekly pulse (Sunday)
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'daily or weekly'
+        required: false
+        default: 'daily'
+      dry_run:
+        description: 'Compose and log without posting (default true - a manual run must never post by accident)'
+        required: false
+        default: 'true'
+
+permissions:
+  actions: read      # read the previous run's log for the dedup marker
+  contents: read
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --omit=dev
+
+      - name: Resolve mode and dry-run
+        id: cfg
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            if [ "${{ github.event.schedule }}" = "0 18 * * 0" ]; then MODE=weekly; else MODE=daily; fi
+            DRY=false
+          else
+            MODE="${{ inputs.mode }}"
+            DRY="${{ inputs.dry_run }}"
+          fi
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
+          echo "dry=$DRY" >> "$GITHUB_OUTPUT"
+          echo "mode=$MODE dry_run=$DRY"
+
+      - name: Read last tweeted SKU (dedup state)
+        id: state
+        if: steps.cfg.outputs.mode == 'daily'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Most recent successful run of THIS workflow that actually posted.
+          LAST=""
+          for id in $(gh run list --workflow=x-posts.yml --status=success --limit 10 \
+                        --json databaseId --jq '.[].databaseId'); do
+            SKU=$(gh run view "$id" --log 2>/dev/null | grep -o 'TWEETED_SKU=[A-Z0-9]*' | tail -1 | cut -d= -f2)
+            if [ -n "$SKU" ]; then LAST="$SKU"; break; fi
+          done
+          echo "last_sku=$LAST" >> "$GITHUB_OUTPUT"
+          echo "dedup excludes: ${LAST:-(nothing yet)}"
+
+      - name: Post
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+        run: |
+          FLAGS="--mode=${{ steps.cfg.outputs.mode }}"
+          if [ "${{ steps.cfg.outputs.dry }}" = "true" ]; then FLAGS="$FLAGS --dry-run"; else FLAGS="$FLAGS --confirm"; fi
+          if [ -n "${{ steps.state.outputs.last_sku }}" ]; then FLAGS="$FLAGS --last-sku=${{ steps.state.outputs.last_sku }}"; fi
+          node scripts/run-x-post.js $FLAGS

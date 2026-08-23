@@ -148,25 +148,10 @@ const median = (xs) => {
 // family-clustering scripts require the same module). The browser-side
 // duplicate in frontend/js/product-listing.js must stay in sync by hand.
 const {
-  totalCapacityGB, capacityLabel, parseSpeed, ramType, ssdType, formFactor, latency, parseMpn,
+  totalCapacityGB, capacityLabel, parseSpeed, ramType, ssdType, formFactor, latency, parseMpn, shortName,
 } = require('../backend/lib/productParsers');
 
 // ------------------------------------------------------------------- slugs
-// Short display name: brand + the meaningful prefix of the title (up to the
-// first "(" or comma), trimmed at a word boundary. Used for slugs and <title>.
-function shortName(p) {
-  let base = p.name.split('(')[0].split(',')[0].trim();
-  if (p.brand && !base.toLowerCase().startsWith(p.brand.toLowerCase().slice(0, 4))) {
-    base = p.brand + ' ' + base;
-  }
-  const words = base.split(/\s+/).slice(0, 8).join(' ');
-  let out = words;
-  if (out.length > 42) {
-    out = out.slice(0, 42);
-    out = out.slice(0, out.lastIndexOf(' ')); // word boundary
-  }
-  return out;
-}
 function computeSlug(p) {
   let src = shortName(p);
   const cap = capacityLabel(totalCapacityGB(p.name));

@@ -458,6 +458,27 @@ Generated flagship page at `/price-index/` (template `frontend/price-index/templ
 
 Other conventions on this page: the 4x4 table stays a real matrix at every width (it scrolls horizontally below 560px with a visible hint and a focusable region) because the matrix shape is what makes it screenshot-able; flagship cross-links use clean names plus capacity, NOT `_titleName` (its collision suffix leaks ASIN fragments like "DDR4 QR0C", which reads as a typo); Dataset JSON-LD carries `creditText` matching the visible citation block verbatim. Footer nav only, plus a contextual "Full price index" link under the homepage Market Pulse.
 
+## X/Twitter Bot (`@memradar`)
+
+Automated posting on GitHub Actions (`.github/workflows/x-posts.yml` → `scripts/run-x-post.js`; composition in `backend/lib/tweetCompose.js`, signing in `backend/lib/xClient.js`). Daily 17:00 UTC biggest-drop tweet, weekly Sunday 18:00 UTC market summary. ~35 posts/month against the free tier's ~500.
+
+**THE BOT MUST BE SILENT RATHER THAN WRONG OR TRIVIAL.** A missing tweet is invisible; a wrong tweet is a screenshot. Every guardrail returns a logged skip reason and exits 0 having posted nothing; only genuine failures exit nonzero (red run + failure email). Gates, all in `tweetCompose.js`:
+
+- **Silence threshold:** no daily tweet below a 3.0% drop. Not news.
+- **Glitch ceiling:** skip drops over 60% (an outlier that slipped filtering).
+- **Sanity:** skip non-positive prices and products out of stock at Amazon.
+- **Price-data staleness (6h):** "biggest drop today" computed on stale data is **a wrong tweet wearing a right format**. If the newest price batch is over 6h old the fetch pipeline is broken; skip.
+- **market_stats staleness (36h):** never tweet old index numbers.
+- **Dedup with FALL-THROUGH:** never tweet the same product two runs running, but do not go silent if a runner-up qualifies. Fall through to the next-biggest eligible drop with every gate still applying, and change the copy from "Biggest drop today" to **"Big drop today"** so the claim stays true. Log which branch fired.
+
+**Dedup state lives in this workflow's own run logs** (`TWEETED_SKU=` marker, read back with `actions: read`). Repo Actions variables were the first choice but need a classic-`repo`-scope PAT — the automatic `GITHUB_TOKEN` cannot write them — and a committed state file would mean ~30 bot commits a month, each a push with side effects. Log retention (90 days) far exceeds the one-day dedup window. The committed-file fallback stays sanctioned if log reading ever proves unreliable.
+
+**Copy rules.** ATL context is mandatory on every daily tweet: it is the honesty signature, and it branches like the PDP Price Analysis (at/below → "That's a new all-time low."; within 5% → "within N% of its all-time low."; else → "Still N% above its all-time low."). Zero renders as **"flat"**, tested against the *rounded display value* (a raw +0.04% shown as "+0%" reads like a bug exactly as true zero does). "at Amazon" is permanent and correct: daily drops are an Amazon-history feature because `price_history` is Amazon/Keepa-only, and naming the retailer matters precisely because the site shows two. No em dashes, no hashtags. Length is checked with URLs counted at t.co's 23 characters, never their real length.
+
+**Names** come from the shared `shortName()` in `productParsers.js` (extracted 2026-08-23, proven identical across all 235 products), so a tweet can never disagree with the page it links. `tweetCompose.displayName()` adds composer-layer-only polish (brand prefix, trailing " - fragment" strip) and **must never change the shared builder**, whose output is baked into slugs and titles.
+
+**RULE: tweet copy changes get a dry-run review before shipping.** `workflow_dispatch` defaults `dry_run` to **true** so a manual run composes and logs but never posts. Rollout for any copy change: dry-run dispatch reviewed by Malcolm, then one watched real dispatch, then the schedule.
+
 ## Retailer & Affiliate Program Status
 
 Current queue (as of 2026-08-23):
