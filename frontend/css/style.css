@@ -1998,6 +1998,84 @@ html.dark .pdp-buy-indicator--neutral {
   color: #cbd5e1;
 }
 
+.pulse-indexlink { margin: 10px 0 0; font-size: 0.85rem; }
+.pulse-indexlink a { color: var(--brand-primary); font-weight: 600; }
+html.dark .pulse-indexlink a { color: var(--brand-light); }
+
+/* ── Memory Price Index (/price-index/) ──
+   A citable reference page: the table is the artifact people screenshot, so
+   it stays a real 4x4 matrix at every width rather than restacking into
+   cards (a stacked layout loses the shape that makes it quotable). Below
+   480px it scrolls horizontally inside its own container with a visible
+   affordance and a keyboard-focusable region, per the data-table pattern. */
+.pi-lede { font-size: 1.02rem; color: #374151; max-width: 62ch; }
+.pi-asof { font-size: 0.85rem; color: #9ca3af; margin-top: 4px; }
+.pi-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 20px 0 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
+.pi-table-wrap:focus-visible { outline: 3px solid var(--brand-primary); outline-offset: 2px; }
+.pi-table {
+  width: 100%;
+  min-width: 460px;          /* below this the cells would crush; scroll instead */
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.pi-table th, .pi-table td { padding: 13px 14px; text-align: right; white-space: nowrap; }
+.pi-table thead th {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #9ca3af;
+  border-bottom: 1px solid #e5e7eb;
+}
+.pi-table tbody th {
+  text-align: left;
+  font-weight: 700;
+  color: #111827;
+  font-size: 0.95rem;
+}
+.pi-table tbody tr + tr th, .pi-table tbody tr + tr td { border-top: 1px solid #f1f5f9; }
+.pi-cell { font-weight: 700; font-size: 1.02rem; }
+.pi-up { color: #dc2626; }
+.pi-neutral { color: #ea580c; }
+.pi-down { color: #16a34a; }
+.pi-na { color: #9ca3af; font-weight: 500; }
+.pi-tablenote { font-size: 0.8rem; color: #9ca3af; margin: 0 0 26px; }
+.pi-notables { margin: 0 0 26px; padding-left: 20px; }
+.pi-notables li { margin-bottom: 9px; line-height: 1.55; }
+.pi-citation {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.86rem;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-left: 3px solid var(--brand-primary);
+  border-radius: 6px;
+  padding: 12px 14px;
+  overflow-x: auto;
+}
+.pi-links { padding-left: 20px; }
+.pi-links li { margin-bottom: 6px; }
+.pi-scrollhint { display: none; font-size: 0.76rem; color: #9ca3af; margin: 0 0 18px; }
+@media (max-width: 560px) {
+  .pi-scrollhint { display: block; }   /* only shown when the table can scroll */
+  .pi-table th, .pi-table td { padding: 11px 10px; }
+}
+html.dark .pi-lede { color: #cbd5e1; }
+html.dark .pi-table-wrap { border-color: #2d3f55; }
+html.dark .pi-table thead th { border-bottom-color: #2d3f55; color: #64748b; }
+html.dark .pi-table tbody th { color: #f1f5f9; }
+html.dark .pi-table tbody tr + tr th, html.dark .pi-table tbody tr + tr td { border-top-color: #1e293b; }
+html.dark .pi-up { color: #f87171; }
+html.dark .pi-neutral { color: #fb923c; }
+html.dark .pi-down { color: #4ade80; }
+html.dark .pi-citation { background: #1a2332; border-color: #2d3f55; }
+
+
 /* ── PDP retailer strip (header purchase affordance) ──
    Retailer-SEMANTIC colors, deliberately NOT general-palette additions: they
    exist only to identify a retailer button and must never be reused as

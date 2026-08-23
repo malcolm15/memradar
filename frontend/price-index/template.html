@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-797Q89S8GG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-797Q89S8GG');
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>(function(){var t=localStorage.getItem('memradar-theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark');}})();</script>
+  <title>RAM &amp; SSD Price Index: Memory Price Trends Tracker | MemRadar</title>
+  <meta name="description" content="<!--META_DESC-->">
+  <link rel="canonical" href="https://memradar.com/price-index/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="MemRadar">
+  <meta property="og:url" content="https://memradar.com/price-index/">
+  <meta property="og:title" content="The MemRadar Memory Price Index">
+  <meta property="og:description" content="<!--META_DESC-->">
+  <meta property="og:image" content="https://memradar.com/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="The MemRadar Memory Price Index">
+  <meta name="twitter:description" content="<!--META_DESC-->">
+  <meta name="twitter:image" content="https://memradar.com/og-image.png">
+  <!--JSONLD-->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#0f1623">
+  <link rel="stylesheet" href="../css/style.css?v=20260830">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container">
+      <a href="/" class="logo">
+        <span class="logo-mem">Mem</span><span class="logo-radar">Radar</span>
+      </a>
+      <nav>
+        <a href="/ram/" class="nav-link">RAM</a>
+        <a href="/ssd/" class="nav-link">SSDs</a>
+        <a href="/faq/" class="nav-link">FAQ</a>
+        <a href="/blog/" class="nav-link">Blog</a>
+        <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Menu" aria-expanded="false" aria-controls="mobileNavPanel">
+          <svg class="icon-menu" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          <svg class="icon-close" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+        </button>
+        <a href="#" class="btn-alert">Set an Alert</a>
+        <button class="header-search-toggle" id="headerSearchToggle" aria-label="Search products" aria-expanded="false" aria-controls="headerSearchPanel">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </button>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode"></button>
+        <div class="mobile-nav-panel" id="mobileNavPanel">
+          <a href="/ram/" class="mobile-nav-link">RAM</a>
+          <a href="/ssd/" class="mobile-nav-link">SSDs</a>
+          <a href="/faq/" class="mobile-nav-link">FAQ</a>
+          <a href="/blog/" class="mobile-nav-link">Blog</a>
+        </div>
+        <div class="header-search-panel" id="headerSearchPanel" hidden>
+          <input type="text" class="header-search-input" placeholder="Search RAM &amp; SSDs…" aria-label="Search products" autocomplete="off">
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="content-page pi-page">
+      <div class="page-header">
+        <h1>The MemRadar Memory Price Index</h1>
+        <p class="pi-lede">Median price changes across <!--PRODUCT_COUNT--> tracked RAM and SSD products, computed from live price history and updated daily.</p>
+        <p class="pi-asof" id="piAsOf">Last computed <!--COMPUTED_DATE--></p>
+      </div>
+
+      <div class="pi-table-wrap" tabindex="0" role="region" aria-label="Memory price index table, scrollable">
+        <table class="pi-table" id="piTable">
+          <thead>
+            <tr><th scope="col">Segment</th><th scope="col">1 month</th><th scope="col">3 months</th><th scope="col">6 months</th><th scope="col">1 year</th></tr>
+          </thead>
+          <tbody>
+<!--INDEX_ROWS-->
+          </tbody>
+        </table>
+      </div>
+      <p class="pi-scrollhint">Scroll the table sideways to see every period.</p>
+      <p class="pi-tablenote">Last computed <span id="piComputedNote"><!--COMPUTED_DATE--></span> · median-based · per-period fairness subsets</p>
+
+      <h2>Notable numbers</h2>
+      <ul class="pi-notables">
+<!--NOTABLES-->
+      </ul>
+
+      <h2>Methodology</h2>
+      <p>Every figure is a <strong>median</strong>, not an average. A single mispriced listing at $1,900 drags a mean badly in a segment of thirty products; the median reports the typical price and stays stable as the catalog changes.</p>
+      <p>Each period compares <strong>the same set of products in both timeframes</strong>. A product only counts toward a period if we have both a current price and a price from that period's baseline window, and both medians are computed over that same subset. Products added recently cannot distort a one-year figure by appearing on only one side of it. Subset sizes differ between periods for this reason, and that is the honest result rather than a flaw.</p>
+      <p>Amazon price history is licensed from <strong>Keepa</strong>; Newegg pricing comes from an official <strong>Rakuten Advertising</strong> product feed. Prices refresh every few hours and the index is recomputed daily. The catalog holds <!--PRODUCT_COUNT--> products, <!--RAM_COUNT--> memory and <!--SSD_COUNT--> storage, with the deepest price history running back to <!--OLDEST_YEAR-->.</p>
+
+      <h2>Citing this data</h2>
+      <p>This data may be referenced and quoted with attribution. Suggested attribution line:</p>
+      <p class="pi-citation">Source: MemRadar Memory Price Index, memradar.com/price-index/</p>
+      <p>For questions about methodology or figures, email <a href="mailto:hello@memradar.com">hello@memradar.com</a>.</p>
+
+      <h2>Explore the data</h2>
+      <p>Browse every tracked product on the <a href="../ram/">RAM price tracker</a> and the <a href="../ssd/">SSD price tracker</a>, or look at individual histories:</p>
+      <ul class="pi-links">
+<!--FLAGSHIP_LINKS-->
+      </ul>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-inner">
+        <p class="footer-brand"><strong>MemRadar</strong> · RAM &amp; SSD price tracking for PC builders.</p>
+        <nav class="footer-nav">
+          <a href="../about.html">About</a>
+          <a href="../contact.html">Contact</a>
+          <a href="../privacy.html">Privacy Policy</a>
+          <a href="../terms.html">Terms of Service</a>
+          <a href="../affiliate.html">Affiliate Disclosure</a>
+          <a href="/price-index/">Price Index</a>
+          <a href="/faq/">FAQ</a>
+          <a href="/blog/">Blog</a>
+        </nav>
+        <div class="footer-social">
+          <a href="https://x.com/memradar" target="_blank" rel="noopener noreferrer" class="footer-social-link" aria-label="MemRadar on X">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.259 5.63L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"/></svg>
+          </a>
+        </div>
+        <p class="footer-legal">MemRadar participates in the Amazon Associates Program and in Newegg's affiliate program via Rakuten Advertising. Links to products may be affiliate links. If you purchase through them, we may earn a small commission at no extra cost to you.</p>
+        <p class="footer-copyright">© <span class="footer-year">2026</span> MemRadar</p>
+        <script>document.querySelectorAll(".footer-year").forEach(function(e){e.textContent=new Date().getFullYear();});</script>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../js/main.js?v=20260830"></script>
+  <script src="../js/theme.js?v=20260830"></script>
+  <script src="../js/mobile-nav.js?v=20260830"></script>
+  <script src="../js/supabase-client.js?v=20260830"></script>
+  <script src="../js/price-index.js?v=20260830"></script>
+  <script src="../js/search.js?v=20260830"></script>
+</body>
+</html>
