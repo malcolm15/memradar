@@ -443,10 +443,35 @@ Built 2026-07-21 via `scripts/build-catalog.js` (18 Amazon keyword searches thro
 
 - **Amazon Associates:** `memradar-20`
   - All Amazon product URLs must include the tag: `https://amazon.com/dp/PRODUCTID?tag=memradar-20`
-- **Best Buy:** dormant — no Best Buy links are generated (client unused)
+- **Best Buy:** dormant — no Best Buy links are generated (client unused; outreach considered closed 2026-08-21, see Retailer & Affiliate Program Status)
   - If Best Buy is ever revived, append its affiliate tag to all Best Buy URLs the same way
 
 Never generate Amazon product links without the `memradar-20` tag appended. (The same rule would apply to Best Buy if that client is ever revived.)
+
+## Retailer & Affiliate Program Status
+
+Current queue (as of 2026-08-23):
+
+| Retailer | Network | Status |
+|---|---|---|
+| **Amazon** | Associates (`memradar-20`) | **Live**, earning-ready |
+| **Newegg** | Rakuten Advertising (SID 4705448, MID 44583) | **Live**, feed-automated (see the Newegg integration section) |
+| **B&H Photo** | Impact | **Applied 2026-08-22**, decision expected ~2 weeks |
+| **Walmart** | — | Nudged June + follow-up, still silent |
+| **Best Buy** | — | Final follow-up email + public tweet sent 2026-08-21; **considered closed** pending any response |
+
+### B&H Photo (applied 2026-08-22)
+
+Applied **directly via B&H's own affiliate program page** (linked from the bhphotovideo.com footer), which runs on Impact.
+
+**Impact Marketplace status is a red herring, do not re-litigate it.** The Marketplace application has been **Declined since July** (the pre-launch site did not meet their directory bar). This does **NOT** block direct brand partnerships: the Impact account is valid and domain-verified, and a B&H approval lands in the Impact dashboard regardless of Marketplace status. Reapplying to Marketplace is not a prerequisite.
+
+**Integration policy, decided in advance of any answer: approved-relationship-first, data-path-second.**
+
+1. **If approved AND a legitimate data path exists** (check Impact's product-feed catalog for B&H once approved), revisit using the same architecture that served Newegg: `retailer_offers` rows plus a gated matcher, current-price comparison only.
+2. **If the only available data path would be scraping, we decline the data on provenance grounds.** RamRadar scrapes (stated on their own About page); MemRadar's data story is **licensed and verifiable** (Keepa written permission, Rakuten feed contract) and stays that way. A scraped price would be the only unattributable number on the site.
+3. An **unpriced "also at B&H" link row** is a possible future design question if (1) fails but the affiliate relationship exists. **Explicitly not built, not designed, and not to be built unbidden.**
+
 
 ## Dark Mode
 
