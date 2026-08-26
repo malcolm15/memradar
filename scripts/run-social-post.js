@@ -1,4 +1,13 @@
-// X/Twitter posting runner, invoked by .github/workflows/x-posts.yml.
+// Social posting runner. PLATFORM-AGNOSTIC: composition and every guardrail
+// live in backend/lib/tweetCompose.js and are shared by all targets; a
+// platform client is only a publish call receiving the finished string.
+//
+//   --platform bluesky   (default) app-password auth, no tiers
+//   --platform x         DORMANT: X requires the Basic tier at $200/month for
+//                        write access (the free tier's 402 'credits depleted'
+//                        was telling us exactly that). Code and proven OAuth
+//                        1.0a signing are kept for a future where the spend is
+//                        justified; see CLAUDE.md.
 //   --mode daily    biggest 24h Amazon price drop (17:00 UTC)
 //   --mode weekly   market_stats summary (Sunday 18:00 UTC)
 //   --dry-run       compose and LOG, never post (workflow_dispatch default)
@@ -11,6 +20,7 @@ require('dotenv').config();
 const supabase = require('../backend/lib/supabase');
 const { composeDaily, composeWeekly } = require('../backend/lib/tweetCompose');
 const { postTweet, tweetLength } = require('../backend/lib/xClient');
+const bluesky = require('../backend/lib/blueskyClient');
 const { getState, setState } = require('../backend/lib/botState');
 
 const arg = (name) => {
@@ -18,6 +28,7 @@ const arg = (name) => {
   return hit ? hit.split('=').slice(1).join('=') : null;
 };
 const MODE = arg('mode') || 'daily';
+const PLATFORM = (arg('platform') || 'bluesky').toLowerCase();
 const DRY = process.argv.includes('--dry-run') || !process.argv.includes('--confirm');
 const log = (m) => console.log(`[${new Date().toISOString()}] ${m}`);
 
@@ -86,10 +97,14 @@ async function dailyCandidates() {
   return { candidates, priceDataAgeH };
 }
 
-const STATE_KEY = 'x_daily_last_post'; // namespaced: bot_state stays general-purpose
+// Per-platform dedup key: if X is ever revived alongside Bluesky, one
+// platform's post must not suppress the other's. bot_state was empty when
+// this was renamed, so there was nothing to migrate.
+const STATE_KEY = `${PLATFORM}_daily_last_post`;
 
 async function run() {
-  log(`X post runner: mode=${MODE}${DRY ? ' (DRY RUN - nothing will be posted)' : ''}`);
+  log(`Social post runner: platform=${PLATFORM} mode=${MODE}${DRY ? ' (DRY RUN - nothing will be posted)' : ''}`);
+  if (!['bluesky', 'x'].includes(PLATFORM)) throw new Error(`unknown platform: ${PLATFORM}`);
   // Dedup state in Supabase (backend/lib/botState.js). A read error THROWS,
   // so a broken state store fails the run loudly rather than silently
   // disabling dedup and letting the bot repeat itself.
@@ -120,20 +135,44 @@ async function run() {
     return;
   }
 
-  log(`Composed (${tweetLength(result.text)}/280, branch=${result.branch}):`);
-  console.log('\n----- TWEET -----\n' + result.text + '\n-----------------\n');
+  const size = PLATFORM === 'bluesky'
+    ? `${bluesky.graphemeCount(result.text)}/${bluesky.POST_MAX_GRAPHEMES} graphemes`
+    : `${tweetLength(result.text)}/280 chars`;
+  log(`Composed (${size}, branch=${result.branch}):`);
+  console.log('\n----- POST -----\n' + result.text + '\n----------------\n');
+
+  // Bluesky does not auto-link URLs: the record carries richtext facets whose
+  // offsets are UTF-8 BYTE offsets, not JS string indices. Our posts open with
+  // an emoji, so those two disagree - print the computed ranges and prove the
+  // sliced bytes decode back to the URL before anything is published.
+  let facets = null;
+  if (PLATFORM === 'bluesky') {
+    facets = bluesky.describeFacets(result.text, bluesky.linkFacets(result.text));
+    facets.forEach((f) => log(`  facet: bytes [${f.byteStart}, ${f.byteEnd}) -> "${f.slicedBytesDecodeTo}" | matches URL: ${f.matches}`));
+    if (facets.some((f) => !f.matches)) throw new Error('facet byte range does not span its URL - refusing to post');
+    if (!facets.length) log('  facet: none (no URL in text)');
+  }
 
   if (DRY) {
     log('DRY RUN: not posting.');
-    console.log('SUMMARY ' + JSON.stringify({ mode: MODE, posted: false, dry_run: true, branch: result.branch, chars: tweetLength(result.text), sku: result.sku || null, text: result.text }));
+    console.log('SUMMARY ' + JSON.stringify({ platform: PLATFORM, mode: MODE, posted: false, dry_run: true, branch: result.branch, size, facets, sku: result.sku || null, text: result.text }));
     return;
   }
-  const posted = await postTweet(result.text);
-  log(`Posted: id=${posted.id || '(unknown)'}`);
-  console.log('SUMMARY ' + JSON.stringify({ mode: MODE, posted: true, dry_run: false, branch: result.branch, chars: tweetLength(result.text), sku: result.sku || null, tweet_id: posted.id || null }));
+
+  let posted, postUri = null, postUrl = null;
+  if (PLATFORM === 'bluesky') {
+    posted = await bluesky.postSkeet(result.text);
+    postUri = posted.uri; postUrl = posted.url;
+    log(`Posted to Bluesky: ${posted.url || posted.uri}`);
+  } else {
+    posted = await postTweet(result.text);
+    postUri = posted.id || null;
+    log(`Posted to X: id=${posted.id || '(unknown)'}`);
+  }
+  console.log('SUMMARY ' + JSON.stringify({ platform: PLATFORM, mode: MODE, posted: true, dry_run: false, branch: result.branch, size, sku: result.sku || null, uri: postUri, url: postUrl }));
   // Record what we posted so tomorrow's run can exclude it.
   if (result.sku) {
-    await setState(STATE_KEY, { sku: result.sku, date: new Date().toISOString().slice(0, 10), tweet_id: posted.id || null });
+    await setState(STATE_KEY, { sku: result.sku, date: new Date().toISOString().slice(0, 10), uri: postUri });
     log(`Dedup state updated: ${result.sku}`);
   }
 }

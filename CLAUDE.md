@@ -458,9 +458,17 @@ Generated flagship page at `/price-index/` (template `frontend/price-index/templ
 
 Other conventions on this page: the 4x4 table stays a real matrix at every width (it scrolls horizontally below 560px with a visible hint and a focusable region) because the matrix shape is what makes it screenshot-able; flagship cross-links use clean names plus capacity, NOT `_titleName` (its collision suffix leaks ASIN fragments like "DDR4 QR0C", which reads as a typo); Dataset JSON-LD carries `creditText` matching the visible citation block verbatim. Footer nav only, plus a contextual "Full price index" link under the homepage Market Pulse.
 
-## X/Twitter Bot (`@memradar`)
+## Social Bot (`@memradar`)
 
-Automated posting on GitHub Actions (`.github/workflows/x-posts.yml` → `scripts/run-x-post.js`; composition in `backend/lib/tweetCompose.js`, signing in `backend/lib/xClient.js`). Daily 17:00 UTC biggest-drop tweet, weekly Sunday 18:00 UTC market summary. ~35 posts/month against the free tier's ~500.
+Automated posting on GitHub Actions. **Bluesky is the primary and only live target** (`.github/workflows/bluesky-posts.yml` → `scripts/run-social-post.js --platform=bluesky`, client `backend/lib/blueskyClient.js`). Daily 17:00 UTC biggest-drop post, weekly Sunday 18:00 UTC market summary, ~35 posts/month.
+
+**Composition and every guardrail are PLATFORM-AGNOSTIC** and live in `backend/lib/tweetCompose.js`. A platform client is only a publish call receiving the finished string. **Do not fork the composer per platform.**
+
+**X is DORMANT, and not because anything is broken.** X requires the **Basic tier at $200/month** for write access; the free tier cannot `POST /2/tweets`, which is what its `402 credits depleted` meant. Not worth it at current audience size (decided 2026-08-26). The code, the four `X_*` secrets and `.github/workflows/x-posts.yml` are kept intact with the schedule commented out and `workflow_dispatch` still active. **The OAuth 1.0a signing in `backend/lib/xClient.js` is PROVEN against the live API**: the 402 was an entitlement refusal *after* successful authentication (a bad signature returns 401). To revive: uncomment the schedule block. Do not re-litigate the tier question from scratch; revisit only if traffic justifies the spend.
+
+**Bluesky specifics.** Auth is an app password (`BLUESKY_IDENTIFIER`, `BLUESKY_APP_PASSWORD` — Settings > Privacy and Security > App Passwords, never the account password); no OAuth, no developer application, no tiers. Raw `fetch`, no `@atproto/api`: the flow is two JSON POSTs (`com.atproto.server.createSession` for an access JWT, then `com.atproto.repo.createRecord`) and we build one record type with one facet type. **CRITICAL — Bluesky does not auto-link URLs.** The record carries `app.bsky.richtext.facet#link` facets whose `byteStart`/`byteEnd` are **UTF-8 byte offsets, not JS string indices**. Our posts open with 📉 (4 UTF-8 bytes, 2 UTF-16 code units), so an `indexOf()`-derived offset is wrong by exactly 2 and would slice the link. Offsets are computed with `Buffer.byteLength` of the prefix, the client's self-test asserts the two disagree, and every run prints the ranges plus proof that the sliced bytes decode back to the URL, refusing to post if they do not. Length is checked in **graphemes against 300** (Bluesky's unit), not characters.
+
+**Dedup state** keys are per-platform (`bluesky_daily_last_post`, `x_daily_last_post`) so a revived X could never suppress a Bluesky post.
 
 **THE BOT MUST BE SILENT RATHER THAN WRONG OR TRIVIAL.** A missing tweet is invisible; a wrong tweet is a screenshot. Every guardrail returns a logged skip reason and exits 0 having posted nothing; only genuine failures exit nonzero (red run + failure email). Gates, all in `tweetCompose.js`:
 

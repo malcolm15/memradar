@@ -17,12 +17,23 @@
 # "nothing found", so dedup would fail OPEN. The Supabase store needs no extra
 # credential, has no retention limit, and throws on error so the run fails
 # loudly.
-name: x-posts
+name: x-posts (DORMANT)
 
+# DORMANT since 2026-08-26. X requires the Basic tier at $200/month for write
+# access; the free tier cannot POST /2/tweets, which is what its 402 "credits
+# depleted" meant. Not worth it at current audience size.
+#
+# NOTHING HERE IS BROKEN. OAuth 1.0a signing in backend/lib/xClient.js is
+# PROVEN against the live API: the 402 was an entitlement refusal AFTER
+# successful authentication (a bad signature returns 401). Composition,
+# guardrails and dedup are shared with Bluesky and exercised daily there.
+#
+# TO REVIVE: uncomment the schedule block below. The four X_* secrets and the
+# code are already in place. Bluesky's schedule is in bluesky-posts.yml.
 on:
-  schedule:
-    - cron: '0 17 * * *'    # daily drop
-    - cron: '0 18 * * 0'    # weekly pulse (Sunday)
+  # schedule:
+  #   - cron: '0 17 * * *'    # daily drop
+  #   - cron: '0 18 * * 0'    # weekly pulse (Sunday)
   workflow_dispatch:
     inputs:
       mode:
@@ -74,4 +85,4 @@ jobs:
         run: |
           FLAGS="--mode=${{ steps.cfg.outputs.mode }}"
           if [ "${{ steps.cfg.outputs.dry }}" = "true" ]; then FLAGS="$FLAGS --dry-run"; else FLAGS="$FLAGS --confirm"; fi
-          node scripts/run-x-post.js $FLAGS
+          node scripts/run-social-post.js --platform=x $FLAGS
