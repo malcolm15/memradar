@@ -92,6 +92,23 @@ memradar/
 
 Four tables:
 
+**COHORT SENSITIVITY: figures are not equally robust, and the difference is large.** The per-period fairness rule compares each window over its own matched subset (products with both a current price and a baseline in THAT window). A consequence, measured 2026-08-26: **the same table can hold a figure that is rock solid and one that moves 30 points depending on cohort choice.** Recomputing each period over only the products present in EVERY period gives:
+
+| Figure | Full cohort | Stable cohort | Swing |
+|---|---|---|---|
+| DDR5 1Y | +360.9% | +360.9% | **0.0pp** |
+| DDR5 3M | +9.1% | +9.2% | 0.1pp |
+| SATA 1Y | +190.6% | +190.6% | **0.0pp** |
+| DDR4 1Y | +191.5% | +159.3% | **32.2pp** |
+| NVMe 1Y | +138.6% | +164.0% | **25.4pp** |
+| NVMe 3M | +14.5% | +10.4% | 4.1pp |
+
+The mechanism is medians, not averages: **one product entering a window can shift which product sits at the median and move the whole figure.** NVMe 3M was traced to exactly one product (the SanDisk Optimus 5100 falling $176.63 to $99.99) dragging the baseline median from $307 to $296. Sample size is a WEAK proxy for this - SATA 1Y has n=26 and swings 0.0pp while DDR4 1Y has n=26 and swings 32.2pp - so do not assume small n means unstable or large n means safe.
+
+This is **not a bug**: the fairness rule is doing exactly what it should, and the alternative (comparing different product sets on each side) would be worse. It is a statement about how precisely any single figure deserves to be quoted.
+
+**THE RULE THIS GENERATED: prose makes claims that survive cohort choice; tables show the current computed figure.** A table cell is explicitly a snapshot, dated and methodology-linked, so it can carry a decimal. A sentence in a guide or a social post is quoted, screenshotted and re-read months later, so it must state a magnitude that stays true ("over 300%", "well over 150%") rather than a decimal that may not. See the guides section and the Price Index's tens-floor for the same principle applied.
+
 **Market Pulse windows (`market_stats`).** One row per (segment, `period`) where period is `'1m'|'3m'|'6m'|'1y'` — 16 rows per cron run, all four windows pre-computed so the homepage switcher needs no client-side math and no per-click queries (one fetch of all 16 on load). Baselines: 1M targets 30d (window 25-35), 3M 90d (80-100), 6M 180d (165-195, the original), 1Y 365d (350-380). NOTE: `period` is spelled that way because **`window` is a reserved keyword in PostgreSQL** and would need quoting forever.
 
 - **Current medians legitimately DIFFER between periods — this is not a bug.** The fairness rule applies independently per window: each period's figures are computed over its own matched subset (products with a baseline row in THAT window AND a current price), so a segment can show a different "current" median at 1M than at 6M (e.g. DDR4 $157.26 at 1M/3M vs $144.99 at 6M on 2026-08-21). Both medians within a row always come from the same subset, which is what makes the percentage honest. The UI shows **only `pct_change`** by design, so this never surfaces to readers — but anyone reading the table raw should not file it as an inconsistency.
