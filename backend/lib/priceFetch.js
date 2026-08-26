@@ -128,6 +128,7 @@ async function runPriceFetch(opts = {}) {
   let marketStats = null;
   let statsError = null;
   let marketStatsSkipped = false;
+  let unstableFigures = null;
   if (!withMarketStats) {
     marketStatsSkipped = true;
     log(`Market stats skipped (recomputed once daily on the ${String(MARKET_STATS_HOUR_UTC).padStart(2, '0')}:00 UTC run)`);
@@ -135,6 +136,14 @@ async function runPriceFetch(opts = {}) {
     try {
       const res = await computeMarketStats(supabase, fetchedAt, log);
       marketStats = res.stats;
+      // Tripwire result rides the summary JSON so a cohort-sensitive figure
+      // announces itself in the run that produced it, rather than waiting to
+      // be looked up before someone quotes it.
+      const shape = (u) => ({ segment: u.segment, period: u.period, pct_change: u.pct_change, moves_pp: u.stability_delta_pp });
+      unstableFigures = {
+        severe: (res.severe || []).map(shape),
+        moderate: (res.unstable || []).filter((u) => !(res.severe || []).includes(u)).map(shape),
+      };
     } catch (err) {
       statsError = err.message;
       logError('computeMarketStats FAILED (non-fatal, price inserts unaffected)', err);
@@ -169,6 +178,7 @@ async function runPriceFetch(opts = {}) {
     amazon_offers: amazonOffers,
     market_stats: marketStats,
     market_stats_skipped: marketStatsSkipped,
+    unstable_figures: unstableFigures,
     ...(statsError ? { market_stats_error: statsError } : {}),
     alerts: alertStats,
     errors,

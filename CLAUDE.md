@@ -107,6 +107,19 @@ The mechanism is medians, not averages: **one product entering a window can shif
 
 This is **not a bug**: the fairness rule is doing exactly what it should, and the alternative (comparing different product sets on each side) would be worse. It is a statement about how precisely any single figure deserves to be quoted.
 
+**DECISION: the Price Index does NOT annotate volatile cells, and this has a stated reversal condition.** Options considered were a per-cell stability marker, showing the stable-cohort figure alongside, or a methodology paragraph. Annotation was rejected because only 2 of 16 cells are severely volatile, so marking them makes the other 14 read as "the ones without warnings" and invites "so which of these do you actually stand behind?" - worse than a clean table plus honest methodology, and it costs the screenshot-ability the page was built for. The scenario annotation would defend against (an outsider recomputing our medians over a different cohort) is also near-impossible, since reproducing it needs our exact catalog and full history. The realistic exposure is our OWN figure moving between snapshots, which annotation does not fix and the prose-versus-table rule does. What shipped instead: one methodology sentence on the page ("Figures over longer windows rest on smaller, older product sets...") plus the internal tripwire below.
+
+**REVERSAL CONDITION (verbatim, recorded because a decision with a stated reversal condition is worth more than one without):** *if a published figure is ever publicly disputed, per-cell transparency becomes defensive value rather than self-inflicted doubt, and this decision gets revisited.*
+
+**THE TRIPWIRE (`stability_delta_pp` in `market_stats`, computed every stats run, never displayed).** Each figure is recomputed over the stable cohort and the absolute difference stored. **Tiered on purpose:** at the 5pp flag line, 7 of 16 figures flag on live data, and a warning firing on nearly half the table is one people learn to scroll past, so >= 15pp is reported as SEVERE ("do not quote this to a decimal") while 5-15pp is logged as context. Both ride the price-fetch summary JSON under `unstable_figures`, so a cohort-sensitive figure announces itself in the run that produced it instead of waiting to be looked up. **Before quoting any figure in prose, a guide or a social post, check it.** Query:
+
+```sql
+SELECT segment, period, pct_change, stability_delta_pp, product_count
+FROM market_stats WHERE stability_delta_pp >= 15 ORDER BY stability_delta_pp DESC;
+```
+
+Or run `node scripts/compute-market-stats.js`, which prints the same tiers. The write is probe-guarded: if the column does not exist the run logs and writes everything else rather than failing.
+
 **THE RULE THIS GENERATED: prose makes claims that survive cohort choice; tables show the current computed figure.** A table cell is explicitly a snapshot, dated and methodology-linked, so it can carry a decimal. A sentence in a guide or a social post is quoted, screenshotted and re-read months later, so it must state a magnitude that stays true ("over 300%", "well over 150%") rather than a decimal that may not. See the guides section and the Price Index's tens-floor for the same principle applied.
 
 **Market Pulse windows (`market_stats`).** One row per (segment, `period`) where period is `'1m'|'3m'|'6m'|'1y'` — 16 rows per cron run, all four windows pre-computed so the homepage switcher needs no client-side math and no per-click queries (one fetch of all 16 on load). Baselines: 1M targets 30d (window 25-35), 3M 90d (80-100), 6M 180d (165-195, the original), 1Y 365d (350-380). NOTE: `period` is spelled that way because **`window` is a reserved keyword in PostgreSQL** and would need quoting forever.

@@ -24,6 +24,27 @@ const PAGE = 1000; // PostgREST caps responses at 1000 rows — paginate
 
 const SEGMENTS = ['ddr5', 'ddr4', 'nvme_ssd', 'sata_ssd'];
 
+// STABILITY TRIPWIRE. The per-period fairness rule means figures are not
+// equally robust: recomputing a period over only the products present in
+// EVERY period can move it by tens of points (measured: DDR4 1y +191.5% ->
+// +159.3%, a 32.2pp swing, while DDR5 1y does not move at all). Medians are
+// why - one product entering a window shifts which product sits at the
+// median. We compute that delta per figure and STORE it, but never display
+// it: annotating cells would undercut the Price Index's citability for a
+// nuance no outsider can reproduce (see CLAUDE.md for the full decision and
+// its stated reversal condition).
+//
+// The point is to catch the next DDR4 case BEFORE it goes into prose, so
+// anything at or above this threshold is flagged loudly in the run summary
+// rather than waiting to be looked up.
+const STABILITY_FLAG_PP = 5.0;
+// ...but at 5pp, 7 of 16 figures flag on live data, and a warning that fires
+// on nearly half the table is one people learn to scroll past. So the output
+// is TIERED: anything at or above the severe line is the "do not quote this"
+// case (DDR4 1y at 32.2pp, NVMe 1y at 25.4pp), while 5-15pp is reported as
+// context rather than alarm. Both are in the summary; only severe shouts.
+const STABILITY_SEVERE_PP = 15.0;
+
 // Segment derivation rules (case-insensitive on product name):
 //   ram + 'DDR5' -> ddr5; ram + 'DDR4' -> ddr4
 //   ssd + 'SATA' or '2.5' -> sata_ssd, else 'NVMe' or 'M.2' -> nvme_ssd
@@ -97,9 +118,10 @@ async function computeMarketStats(supabase, batchTimestamp, log = () => {}) {
   // de-duplicate between them.
   const now = Date.now();
 
-  const stats = [];
+  // Baselines for every period first, so the stable cohort (products present
+  // in ALL periods) can be derived before any figure is computed.
+  const baselines = new Map(); // period key -> Map(product_id -> {price})
   for (const period of PERIODS) {
-    // Closest row to this period's target, within its own window.
     const target = now - period.target * DAY_MS;
     const windowRows = await selectPaged(() =>
       supabase
@@ -108,12 +130,22 @@ async function computeMarketStats(supabase, batchTimestamp, log = () => {}) {
         .gte('fetched_at', new Date(now - period.max * DAY_MS).toISOString())
         .lte('fetched_at', new Date(now - period.min * DAY_MS).toISOString())
     );
-    const baselineByProduct = new Map(); // product_id -> {price, dist}
+    const m = new Map();
     for (const r of windowRows) {
       const dist = Math.abs(new Date(r.fetched_at).getTime() - target);
-      const prev = baselineByProduct.get(r.product_id);
-      if (!prev || dist < prev.dist) baselineByProduct.set(r.product_id, { price: Number(r.price), dist });
+      const prev = m.get(r.product_id);
+      if (!prev || dist < prev.dist) m.set(r.product_id, { price: Number(r.price), dist });
     }
+    baselines.set(period.key, m);
+  }
+  // Products priced now AND present in every period's window.
+  const stableIds = new Set(
+    [...currentByProduct.keys()].filter((id) => PERIODS.every((p) => baselines.get(p.key).has(id)))
+  );
+
+  const stats = [];
+  for (const period of PERIODS) {
+    const baselineByProduct = baselines.get(period.key);
 
     for (const segment of SEGMENTS) {
       const matchedCurrent = [];
@@ -134,28 +166,77 @@ async function computeMarketStats(supabase, batchTimestamp, log = () => {}) {
 
       const currentAvg = median(matchedCurrent);
       const baselineAvg = median(matchedBaseline);
+      const pct = ((currentAvg - baselineAvg) / baselineAvg) * 100;
+
+      // Same figure over the stable cohort. The DELTA is the tripwire: how
+      // much this number depends on which products happen to qualify.
+      const stCur = [], stBase = [];
+      for (const [productId, seg] of segmentByProduct) {
+        if (seg !== segment || !stableIds.has(productId)) continue;
+        stCur.push(currentByProduct.get(productId));
+        stBase.push(baselineByProduct.get(productId).price);
+      }
+      let stabilityDelta = null;
+      if (stCur.length) {
+        const sPct = ((median(stCur) - median(stBase)) / median(stBase)) * 100;
+        stabilityDelta = round1(Math.abs(pct - sPct));
+      }
+
       stats.push({
         segment,
         period: period.key,
         current_avg_price: round2(currentAvg),
         baseline_avg_price: round2(baselineAvg),
-        pct_change: round1(((currentAvg - baselineAvg) / baselineAvg) * 100),
+        pct_change: round1(pct),
         product_count: matchedCurrent.length,
+        stability_delta_pp: stabilityDelta,
+        stable_count: stCur.length,
       });
     }
   }
 
   const computedAt = new Date().toISOString();
-  const { error: upsertErr } = await supabase
+  // stable_count is derived context, not a stored column; strip before write.
+  const toRow = (s, withStability) => {
+    const { stable_count, stability_delta_pp, ...rest } = s;
+    return withStability
+      ? { ...rest, stability_delta_pp, computed_at: computedAt }
+      : { ...rest, computed_at: computedAt };
+  };
+  let { error: upsertErr } = await supabase
     .from('market_stats')
-    .upsert(stats.map((s) => ({ ...s, computed_at: computedAt })), { onConflict: 'segment,period' });
+    .upsert(stats.map((s) => toRow(s, true)), { onConflict: 'segment,period' });
+  if (upsertErr && /stability_delta_pp/.test(upsertErr.message)) {
+    // Column not added yet: write everything else rather than failing the run.
+    log('market_stats.stability_delta_pp column missing - writing without it (run the ALTER TABLE to enable the tripwire)');
+    ({ error: upsertErr } = await supabase
+      .from('market_stats')
+      .upsert(stats.map((s) => toRow(s, false)), { onConflict: 'segment,period' }));
+  }
   if (upsertErr) throw upsertErr;
 
   for (const s of stats) {
-    log(`Market stats ${s.segment} [${s.period}]: current=$${s.current_avg_price} baseline=$${s.baseline_avg_price} change=${s.pct_change}% (n=${s.product_count})`);
+    log(`Market stats ${s.segment} [${s.period}]: current=$${s.current_avg_price} baseline=$${s.baseline_avg_price} change=${s.pct_change}% (n=${s.product_count}, stability ${s.stability_delta_pp == null ? 'n/a' : s.stability_delta_pp + 'pp'})`);
   }
 
-  return { stats, excluded, computedAt };
+  // THE TRIPWIRE ANNOUNCES ITSELF. A figure this cohort-sensitive must not be
+  // quoted to a decimal in prose, a guide or a social post; state a magnitude
+  // that survives the swing instead.
+  const unstable = stats
+    .filter((s) => s.stability_delta_pp != null && s.stability_delta_pp >= STABILITY_FLAG_PP)
+    .sort((a, b) => b.stability_delta_pp - a.stability_delta_pp);
+  const severe = unstable.filter((s) => s.stability_delta_pp >= STABILITY_SEVERE_PP);
+  const moderate = unstable.filter((s) => s.stability_delta_pp < STABILITY_SEVERE_PP);
+  if (severe.length) {
+    log(`⚠ STABILITY FLAG (SEVERE): ${severe.length} figure(s) move >= ${STABILITY_SEVERE_PP}pp on cohort choice - do NOT quote these to a decimal in prose, a guide or a post:`);
+    severe.forEach((s) => log(`    ${s.segment} [${s.period}] ${s.pct_change}% moves ${s.stability_delta_pp}pp (n=${s.product_count}, stable n=${s.stable_count})`));
+  }
+  if (moderate.length) {
+    log(`Stability (moderate, context only): ${moderate.map((s) => `${s.segment}/${s.period} ${s.stability_delta_pp}pp`).join(', ')}`);
+  }
+  if (!unstable.length) log(`Stability: every figure moves < ${STABILITY_FLAG_PP}pp on cohort choice`);
+
+  return { stats, excluded, computedAt, unstable, severe };
 }
 
-module.exports = { computeMarketStats, classifySegment, SEGMENTS, PERIODS };
+module.exports = { computeMarketStats, classifySegment, SEGMENTS, PERIODS, STABILITY_FLAG_PP, STABILITY_SEVERE_PP };
