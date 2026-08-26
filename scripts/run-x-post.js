@@ -86,7 +86,7 @@ async function dailyCandidates() {
   return { candidates, priceDataAgeH };
 }
 
-const STATE_KEY = 'x_daily_last_tweet';
+const STATE_KEY = 'x_daily_last_post'; // namespaced: bot_state stays general-purpose
 
 async function run() {
   log(`X post runner: mode=${MODE}${DRY ? ' (DRY RUN - nothing will be posted)' : ''}`);

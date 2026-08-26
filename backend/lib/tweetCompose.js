@@ -27,7 +27,11 @@ const NEAR_ATL_PCT = 5.0;        // "within N% of its all-time low"
 const ATL_DOOM_PCT = 50.0;
 // ...but only if THAT comparator says something. A drop that lands barely
 // under a falling average ("5% below its 90-day average" on an 18.5% drop)
-// undersells the news, and the bot's principle is silence over triviality.
+// undersells the news. When it is that weak we OMIT the clause and tweet the
+// drop plainly: the drop percentage is itself the news, so a weak trailing
+// stat adds nothing but does not warrant silence on a big move. We never
+// fall through to a smaller drop for this reason - that would make the
+// "Biggest drop today" superlative false.
 const MIN_BELOW_AVG_PCT = 5.0;
 
 const pct1 = (v) => (Math.round(v * 10) / 10).toFixed(1).replace(/\.0$/, '');
@@ -45,19 +49,20 @@ function segmentFigure(pctChange) {
 
 // All-time-low context is MANDATORY on every daily tweet: it is the honesty
 // signature. Branches mirror the PDP Price Analysis logic.
-// Returns the context clause, or null when no honest, useful one exists (the
-// caller then skips the candidate rather than tweeting a bare price).
+// Returns the context clause, or '' when no strong, honest one exists - in
+// which case the tweet carries the drop alone. The rule: a strong clause when
+// we have one, no clause when we do not, never a misleading one.
 function atlClause(current, atl, avg90) {
-  if (atl == null || !(atl > 0)) return null;
+  if (atl == null || !(atl > 0)) return '';
   if (current <= atl) return "That's a new all-time low.";
   const above = ((current - atl) / atl) * 100;
   if (above <= NEAR_ATL_PCT) return `That's within ${pct1(above)}% of its all-time low.`;
   if (above <= ATL_DOOM_PCT) return `Still ${pct1(above)}% above its all-time low.`;
   // Doom territory: use the 90-day average instead, the same statistic the
   // PDP Price Analysis reasons with, so tweet and page agree by construction.
-  if (avg90 == null || !(avg90 > 0)) return null;
+  if (avg90 == null || !(avg90 > 0)) return '';
   const below = ((avg90 - current) / avg90) * 100;
-  if (below < MIN_BELOW_AVG_PCT) return null; // not meaningfully cheap: stay silent
+  if (below < MIN_BELOW_AVG_PCT) return ''; // too weak to be worth saying
   return `That's ${pct1(below)}% below its 90-day average.`;
 }
 
@@ -103,13 +108,14 @@ function composeDaily({ candidates, lastTweetedSku, priceDataAgeH }) {
     if (c.inStock === false) { rejected.push(`${c.product.sku}: out of stock at Amazon`); isTop = false; continue; }
     if (lastTweetedSku && c.product.sku === lastTweetedSku) { rejected.push(`${c.product.sku}: tweeted in the previous run (dedup)`); isTop = false; continue; }
 
-    const atl = atlClause(c.current, c.atl, c.avg90);
-    if (!atl) { rejected.push(`${c.product.sku}: no useful price context (far above ATL and under ${MIN_BELOW_AVG_PCT}% below its 90-day average)`); isTop = false; continue; }
-
+    // A weak or absent context clause is NOT a reason to skip: the drop
+    // itself is the news, and skipping would hand the superlative to a
+    // smaller drop, making "Biggest drop today" false.
+    const clause = atlClause(c.current, c.atl, c.avg90);
     const url = `${SITE}/${c.product.category}/${c.product.slug}/`;
     const lead = isTop ? 'Biggest drop today' : 'Big drop today';
-    const text = `📉 ${lead}: ${displayName(c.product)} down ${pct1(drop)}% to ${money(c.current)} at Amazon. ${atl} ${url}`;
-    return { text, sku: c.product.sku, branch: isTop ? 'top' : 'runner-up', rejected };
+    const text = `📉 ${lead}: ${displayName(c.product)} down ${pct1(drop)}% to ${money(c.current)} at Amazon.${clause ? ' ' + clause : ''} ${url}`;
+    return { text, sku: c.product.sku, branch: (isTop ? 'top' : 'runner-up') + (clause ? '' : '+no-clause'), rejected };
   }
   return { skip: `no eligible drop cleared the gates`, rejected };
 }
