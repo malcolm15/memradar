@@ -20,33 +20,45 @@
   </url>
   <url>
     <loc>https://memradar.com/about.html</loc>
-    <lastmod>2026-08-23</lastmod>
+    <lastmod>2026-08-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://memradar.com/contact.html</loc>
-    <lastmod>2026-08-23</lastmod>
+    <lastmod>2026-08-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://memradar.com/privacy.html</loc>
-    <lastmod>2026-08-23</lastmod>
+    <lastmod>2026-08-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://memradar.com/terms.html</loc>
-    <lastmod>2026-08-23</lastmod>
+    <lastmod>2026-08-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://memradar.com/affiliate.html</loc>
-    <lastmod>2026-08-23</lastmod>
+    <lastmod>2026-08-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://memradar.com/guides/</loc>
+    <lastmod>2026-08-26</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://memradar.com/guides/should-i-buy-ram-now/</loc>
+    <lastmod>2026-08-26</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://memradar.com/price-index/</loc>
@@ -56,19 +68,19 @@
   </url>
   <url>
     <loc>https://memradar.com/faq/</loc>
-    <lastmod>2026-08-23</lastmod>
+    <lastmod>2026-08-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://memradar.com/blog/</loc>
-    <lastmod>2026-08-23</lastmod>
+    <lastmod>2026-08-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://memradar.com/blog/why-ram-prices-are-so-high/</loc>
-    <lastmod>2026-08-23</lastmod>
+    <lastmod>2026-08-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

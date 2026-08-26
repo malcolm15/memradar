@@ -2002,6 +2002,69 @@ html.dark .pdp-buy-indicator--neutral {
 .pulse-indexlink a { color: var(--brand-primary); font-weight: 600; }
 html.dark .pulse-indexlink a { color: var(--brand-light); }
 
+/* ── Guides ──
+   The verdict box carries the page's answer above the fold, weighted like the
+   PDP buy-indicator so it reads as a conclusion rather than an aside. */
+.guide-crumbs { font-size: 0.8rem; color: #9ca3af; margin-bottom: 10px; }
+.guide-crumbs a { color: #6b7280; }
+.guide-crumbs a:hover { color: var(--brand-primary); }
+.guide-sub { color: #6b7280; font-size: 0.95rem; }
+.guide-updated { color: #9ca3af; font-size: 0.85rem; }
+.guide-verdict {
+  background: rgba(var(--brand-rgb), 0.06);
+  border: 1px solid rgba(var(--brand-rgb), 0.22);
+  border-left: 4px solid var(--brand-primary);
+  border-radius: 10px;
+  padding: 18px 20px;
+  margin: 8px 0 30px;
+}
+.guide-verdict p { margin: 0; font-size: 1.02rem; line-height: 1.65; }
+.guide-page h2 { margin-top: 34px; }
+.guide-q { margin-bottom: 4px; color: #374151; font-weight: 600; }
+.guide-disclosure { color: #6b7280; font-size: 0.92rem; }
+.guide-table-wrap { margin-top: 18px; }
+/* RAM rows carry this guide's argument, so they are emphasised. */
+.guide-table tbody tr.guide-row--ram th { color: var(--brand-primary); }
+.guide-table tbody tr.guide-row--ram { background: rgba(var(--brand-rgb), 0.045); }
+.guide-chart { margin: 26px 0 8px; }
+.guide-chart-container { position: relative; height: 300px; }
+.guide-chart figcaption { font-size: 0.82rem; color: #9ca3af; margin-top: 10px; }
+.guide-atl { list-style: none; padding: 0; margin: 16px 0 6px; }
+.guide-atl-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  padding: 11px 0;
+  border-top: 1px solid #f1f5f9;
+}
+.guide-atl-row:first-child { border-top: 0; }
+.guide-atl-name { font-weight: 600; flex: 1 1 260px; }
+.guide-atl-price { font-weight: 700; font-variant-numeric: tabular-nums; }
+.guide-atl-gap { color: #6b7280; font-size: 0.88rem; }
+.guide-freshness { margin-top: 30px; font-size: 0.8rem; color: #9ca3af; }
+.guides-list { list-style: none; padding: 0; }
+.guides-item { padding: 16px 0; border-top: 1px solid #e5e7eb; }
+.guides-item:first-child { border-top: 0; }
+.guides-link { font-size: 1.1rem; font-weight: 700; color: var(--brand-primary); }
+.guides-blurb { margin: 6px 0 4px; color: #374151; }
+.guides-date { margin: 0; font-size: 0.8rem; color: #9ca3af; }
+.ram-guide-link { margin: 0 0 14px; font-size: 0.9rem; }
+.ram-guide-link a { color: var(--brand-primary); font-weight: 600; }
+html.dark .guide-sub, html.dark .guides-blurb { color: #cbd5e1; }
+html.dark .guide-q { color: #e2e8f0; }
+html.dark .guide-disclosure, html.dark .guide-atl-gap { color: #94a3b8; }
+html.dark .guide-verdict { background: rgba(var(--brand-rgb), 0.14); border-color: rgba(var(--brand-rgb), 0.4); }
+html.dark .guide-table tbody tr.guide-row--ram th { color: var(--brand-light); }
+html.dark .guide-table tbody tr.guide-row--ram { background: rgba(var(--brand-rgb), 0.12); }
+html.dark .guide-atl-row { border-top-color: #1e293b; }
+html.dark .guides-item { border-top-color: #2d3f55; }
+html.dark .guide-crumbs a { color: #94a3b8; }
+html.dark .ram-guide-link a { color: var(--brand-light); }
+@media (max-width: 560px) {
+  .guide-chart-container { height: 230px; }
+}
+
 /* ── Memory Price Index (/price-index/) ──
    A citable reference page: the table is the artifact people screenshot, so
    it stays a real 4x4 matrix at every width rather than restacking into

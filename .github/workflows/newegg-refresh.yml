@@ -19,7 +19,8 @@ name: newegg-refresh
 
 on:
   schedule:
-    - cron: '0 6 * * *'
+    - cron: '0 6 * * *'    # Newegg feed refresh
+    - cron: '0 9 * * *'    # daily page regeneration (after the 08:00 stats compute)
   workflow_dispatch:
     inputs:
       mode:
@@ -29,6 +30,9 @@ on:
 
 jobs:
   refresh-offers:
+    # 06:00 cron only (or a manual dispatch). The Newegg feed regenerates once
+    # nightly, so pulling it again at 09:00 would re-read the same file.
+    if: github.event_name != 'schedule' || github.event.schedule == '0 6 * * *'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -53,7 +57,66 @@ jobs:
           echo "mode: ${MODE:-delta}"
           node scripts/refresh-newegg-offers.js --confirm ${MODE:+--$MODE}
 
-  # Future second job (see CLAUDE.md "Not built" TODO):
-  # regenerate-pages:
-  #   needs: refresh-offers
-  #   ... daily PDP regeneration + commit + Cloudflare purge ...
+  # Daily page regeneration. Built 2026-08-26: the Should I Buy RAM Now guide
+  # ARGUES from baked values (trend table, near-ATL ranking, build date) and
+  # tells the reader it updates automatically, so a stale build is a page
+  # making a false claim about itself. Every other page degrades gracefully;
+  # this one does not. Runs after refresh-offers so Newegg stock is current,
+  # and the price fetch's 08:00 slot has recomputed market_stats by now.
+  #
+  # STALE BEATS WRONG: any failure commits nothing and exits red. The commit
+  # is conditional on the honest-lastmod manifest showing real content change,
+  # so a quiet day produces no commit rather than 30 noise commits a month.
+  regenerate-pages:
+    # 09:00 cron only. NOT `needs: refresh-offers`: they run on different
+    # schedules now, and a needs-edge would skip the regen whenever the
+    # refresh job is filtered out.
+    if: github.event_name == 'schedule' && github.event.schedule == '0 9 * * *'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --omit=dev
+
+      - name: Regenerate
+        id: regen
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: |
+          set -euo pipefail   # any generator error fails the job, committing nothing
+          node scripts/generate-product-pages.js --confirm
+
+      - name: Commit only if content actually changed
+        id: commit
+        run: |
+          set -euo pipefail
+          # The lastmod manifest is the source of truth for "did content
+          # change": ?v=, build dates and priceValidUntil are normalised out of
+          # its hashes, so a diff here means real content moved.
+          CHANGED=$(git status --porcelain frontend/ scripts/lastmod-manifest.json | wc -l | tr -d ' ')
+          PAGES=$(git status --porcelain frontend/ram frontend/ssd frontend/guides frontend/price-index | wc -l | tr -d ' ')
+          if [ "$CHANGED" = "0" ]; then
+            echo "committed=false" >> "$GITHUB_OUTPUT"
+            echo "pages_changed=0" >> "$GITHUB_OUTPUT"
+            echo "No content change - nothing to commit."
+          else
+            git config user.name "MemRadar"
+            git config user.email "malcolmkonner@gmail.com"
+            git add -A frontend/ scripts/lastmod-manifest.json
+            git commit -q -m "chore: daily page regeneration ($PAGES pages changed)"
+            git push -q
+            echo "committed=true" >> "$GITHUB_OUTPUT"
+            echo "pages_changed=$PAGES" >> "$GITHUB_OUTPUT"
+            echo "Committed $PAGES changed pages."
+          fi
+
+      - name: Summary
+        run: |
+          echo "SUMMARY {\"job\":\"regenerate-pages\",\"committed\":${{ steps.commit.outputs.committed }},\"pages_changed\":${{ steps.commit.outputs.pages_changed }}}"

@@ -488,6 +488,17 @@ Automated posting on GitHub Actions. **Bluesky is the primary and only live targ
 
 **RULE: tweet copy changes get a dry-run review before shipping.** `workflow_dispatch` defaults `dry_run` to **true** so a manual run composes and logs but never posts. Rollout for any copy change: dry-run dispatch reviewed by Malcolm, then one watched real dispatch, then the schedule.
 
+## Guides (`/guides/`)
+
+Editorial pages argued from our own data, generated (not hand-written) so the argument never drifts from the numbers beside it. Index at `/guides/` (sitemap 0.6), first guide at `/guides/should-i-buy-ram-now/` (0.7). Templates live beside their output; builders are `buildGuideRamNow()` / `buildGuidesIndex()` in the generator; hydration is `frontend/js/guide-ram-now.js`.
+
+- **FOOTER RULE: exactly ONE footer link, "Guides", pointing at the index.** Individual guides never get footer links, however good they are. The footer is navigation, not a reading list, and it is duplicated on 258 pages.
+- **Prose states magnitudes; the table states figures.** The copy says "over 300%" and "well over 150%", never a decimal, because a per-period fairness subset can move a single figure by tens of points (measured: DDR4's 1-year change swings from +189.5% to +159.3% depending on cohort). The table carries the precise current numbers and links the Price Index methodology. Same principle as the index page's tens-floor: **a claim in prose must survive scrutiny that a table cell does not have to.**
+- **Live elements:** the 4x4 trend table (same `market_stats` source as the Price Index, RAM rows emphasised), a decade chart, and the near-all-time-low RAM list. Hydration parity applies: the table and the ATL list both refresh from the same sources they were baked from. The ATL list hydrates the CURRENT price and recomputes the gap from it, since the all-time low itself only moves when a new low is set, which a regeneration captures. Out-of-stock products are excluded at BOTH retailers: recommending an unbuyable kit is the same failure as quoting an unbuyable price.
+- **Chart:** a small dedicated static renderer, deliberately NOT a fork of the PDP's chart (100 lines coupled to range buttons and the hydrate config) and deliberately not a shared extraction (that would touch all 235 PDPs for a one-page benefit). It reuses only the visual language. **If a second guide needs a chart, revisit the extraction then.**
+
+**DAILY REGENERATION (`regenerate-pages` job in `newegg-refresh.yml`, 09:00 UTC).** Built for this guide and long deferred before it. Every other page degrades gracefully when stale, but this one ARGUES from baked values, ranks products, prints its own build date and tells the reader it updates automatically, so a stale build is a page making a false claim about itself. That was the trigger condition. Runs after the 06:00 Newegg refresh and the 08:00 stats compute. **`set -euo pipefail`: any error commits nothing and exits red** (stale beats wrong). **The commit is conditional on the lastmod manifest showing real content change**, since `?v=`, build dates and `priceValidUntil` are normalised out of its hashes, so a quiet day produces no commit rather than ~30 noise commits a month. The summary JSON reports `committed` and `pages_changed` so a silent no-op day is distinguishable from a broken one. Each job is gated to its own cron (`if: github.event.schedule == ...`), because two crons times two jobs would otherwise pull the Newegg feed twice daily and regenerate before stats exist.
+
 ## Retailer & Affiliate Program Status
 
 Current queue (as of 2026-08-23):
@@ -537,7 +548,7 @@ Below the **768px** breakpoint the desktop `.nav-link`s hide (`nav .nav-link { d
 
 `style.css` is served with `Cache-Control: max-age=14400` (**4 hours** of browser caching). A Cloudflare purge clears the edge but **NOT** visitors' browser caches — so after a CSS change, returning devices can render new HTML against a stale 4-hour-cached stylesheet (this exact mismatch broke the mobile nav on first ship: new hamburger HTML + old CSS).
 
-**Fix / convention:** a single shared version query is appended to **both `style.css` and every local JS include** on every page — `?v=YYYYMMDD` (current value: **`20260831`**). A new URL forces browsers to refetch immediately regardless of max-age.
+**Fix / convention:** a single shared version query is appended to **both `style.css` and every local JS include** on every page — `?v=YYYYMMDD` (current value: **`20260901`**). A new URL forces browsers to refetch immediately regardless of max-age.
 
 - **Bump the `?v=` value whenever any `style.css` OR local JS file changes**, and update ALL pages together (one shared stamp — they must all match). Bumping rebusts every asset; that's fine.
 - Applies to local assets only: `css/style.css` and `js/*.js` (main, theme, alert-modal, supabase-client, market-pulse, product-listing, mobile-nav, filter-sheet, back-to-top). **External CDN scripts are NOT versioned** (jsdelivr supabase-js, cdnjs Chart.js, Cloudflare Turnstile, gtag) — they carry their own versioning.
