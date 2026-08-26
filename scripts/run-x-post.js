@@ -11,6 +11,7 @@ require('dotenv').config();
 const supabase = require('../backend/lib/supabase');
 const { composeDaily, composeWeekly } = require('../backend/lib/tweetCompose');
 const { postTweet, tweetLength } = require('../backend/lib/xClient');
+const { getState, setState } = require('../backend/lib/botState');
 
 const arg = (name) => {
   const hit = process.argv.find((a) => a.startsWith(`--${name}=`));
@@ -18,7 +19,6 @@ const arg = (name) => {
 };
 const MODE = arg('mode') || 'daily';
 const DRY = process.argv.includes('--dry-run') || !process.argv.includes('--confirm');
-const LAST_SKU = arg('last-sku') || process.env.LAST_TWEETED_SKU || '';
 const log = (m) => console.log(`[${new Date().toISOString()}] ${m}`);
 
 const paged = async (build) => {
@@ -72,16 +72,33 @@ async function dailyCandidates() {
   }
   candidates.sort((a, b) => a.dropPct - b.dropPct);
 
-  // All-time low only for the few we might actually tweet (one query each).
+  // All-time low AND 90-day average, only for the few we might actually
+  // tweet (one query each). The average backs the non-doom context clause.
+  const since90 = new Date(now - 90 * 86400000).toISOString();
   for (const c of candidates.slice(0, 8)) {
-    const hist = await paged(() => supabase.from('price_history').select('price').eq('product_id', c.product.id));
-    c.atl = hist.length ? Math.min(...hist.map((r) => Number(r.price))) : null;
+    const hist = await paged(() => supabase.from('price_history')
+      .select('price, fetched_at').eq('product_id', c.product.id));
+    const prices = hist.map((r) => Number(r.price));
+    c.atl = prices.length ? Math.min(...prices) : null;
+    const win = hist.filter((r) => r.fetched_at >= since90).map((r) => Number(r.price));
+    c.avg90 = win.length ? win.reduce((a, b) => a + b, 0) / win.length : null;
   }
   return { candidates, priceDataAgeH };
 }
 
+const STATE_KEY = 'x_daily_last_tweet';
+
 async function run() {
   log(`X post runner: mode=${MODE}${DRY ? ' (DRY RUN - nothing will be posted)' : ''}`);
+  // Dedup state in Supabase (backend/lib/botState.js). A read error THROWS,
+  // so a broken state store fails the run loudly rather than silently
+  // disabling dedup and letting the bot repeat itself.
+  let lastSku = '';
+  if (MODE === 'daily') {
+    const st = await getState(STATE_KEY, null);
+    lastSku = (st && st.sku) || '';
+    log(`Dedup state: ${lastSku ? `last tweeted ${lastSku} on ${st.date || 'unknown date'}` : '(none yet)'}`);
+  }
   let result;
   if (MODE === 'weekly') {
     const { data: rows, error } = await supabase
@@ -91,8 +108,8 @@ async function run() {
     result = composeWeekly({ rows, period: '1m', computedAt });
   } else {
     const { candidates, priceDataAgeH } = await dailyCandidates();
-    log(`Drop candidates: ${candidates.length}${candidates.length ? `, biggest ${candidates[0].dropPct.toFixed(1)}% (${candidates[0].product.sku})` : ''}; price data ${priceDataAgeH == null ? 'unknown' : priceDataAgeH.toFixed(1) + 'h'} old; dedup excludes ${LAST_SKU || '(nothing)'}`);
-    result = composeDaily({ candidates, lastTweetedSku: LAST_SKU, priceDataAgeH });
+    log(`Drop candidates: ${candidates.length}${candidates.length ? `, biggest ${candidates[0].dropPct.toFixed(1)}% (${candidates[0].product.sku})` : ''}; price data ${priceDataAgeH == null ? 'unknown' : priceDataAgeH.toFixed(1) + 'h'} old; dedup excludes ${lastSku || '(nothing)'}`);
+    result = composeDaily({ candidates, lastTweetedSku: lastSku, priceDataAgeH });
   }
 
   (result.rejected || []).forEach((r) => log(`  rejected: ${r}`));
@@ -114,8 +131,11 @@ async function run() {
   const posted = await postTweet(result.text);
   log(`Posted: id=${posted.id || '(unknown)'}`);
   console.log('SUMMARY ' + JSON.stringify({ mode: MODE, posted: true, dry_run: false, branch: result.branch, chars: tweetLength(result.text), sku: result.sku || null, tweet_id: posted.id || null }));
-  // The workflow reads this line to update the dedup state variable.
-  if (result.sku) console.log('TWEETED_SKU=' + result.sku);
+  // Record what we posted so tomorrow's run can exclude it.
+  if (result.sku) {
+    await setState(STATE_KEY, { sku: result.sku, date: new Date().toISOString().slice(0, 10), tweet_id: posted.id || null });
+    log(`Dedup state updated: ${result.sku}`);
+  }
 }
 
 run().catch((err) => {

@@ -19,6 +19,16 @@ const PRICE_DATA_MAX_AGE_H = 6;  // "biggest drop today" on stale data is a wron
                                  // tweet wearing a right format
 const MARKET_STATS_MAX_AGE_H = 36;
 const NEAR_ATL_PCT = 5.0;        // "within N% of its all-time low"
+// Above this ATL gap the all-time-low comparison stops being actionable and
+// becomes daily doom: after the 2026 memory price crisis most products sit
+// 100-400% above lows set years ago, so "still 307% above its all-time low"
+// is true, unhelpful, and relentless. Past the threshold we switch to a
+// comparator the reader can act on.
+const ATL_DOOM_PCT = 50.0;
+// ...but only if THAT comparator says something. A drop that lands barely
+// under a falling average ("5% below its 90-day average" on an 18.5% drop)
+// undersells the news, and the bot's principle is silence over triviality.
+const MIN_BELOW_AVG_PCT = 5.0;
 
 const pct1 = (v) => (Math.round(v * 10) / 10).toFixed(1).replace(/\.0$/, '');
 const money = (v) => '$' + Number(v).toFixed(2).replace(/\.00$/, '');
@@ -35,12 +45,20 @@ function segmentFigure(pctChange) {
 
 // All-time-low context is MANDATORY on every daily tweet: it is the honesty
 // signature. Branches mirror the PDP Price Analysis logic.
-function atlClause(current, atl) {
+// Returns the context clause, or null when no honest, useful one exists (the
+// caller then skips the candidate rather than tweeting a bare price).
+function atlClause(current, atl, avg90) {
   if (atl == null || !(atl > 0)) return null;
   if (current <= atl) return "That's a new all-time low.";
   const above = ((current - atl) / atl) * 100;
   if (above <= NEAR_ATL_PCT) return `That's within ${pct1(above)}% of its all-time low.`;
-  return `Still ${pct1(above)}% above its all-time low.`;
+  if (above <= ATL_DOOM_PCT) return `Still ${pct1(above)}% above its all-time low.`;
+  // Doom territory: use the 90-day average instead, the same statistic the
+  // PDP Price Analysis reasons with, so tweet and page agree by construction.
+  if (avg90 == null || !(avg90 > 0)) return null;
+  const below = ((avg90 - current) / avg90) * 100;
+  if (below < MIN_BELOW_AVG_PCT) return null; // not meaningfully cheap: stay silent
+  return `That's ${pct1(below)}% below its 90-day average.`;
 }
 
 // Composer-layer polish ONLY - never changes the shared shortName() builder,
@@ -85,8 +103,8 @@ function composeDaily({ candidates, lastTweetedSku, priceDataAgeH }) {
     if (c.inStock === false) { rejected.push(`${c.product.sku}: out of stock at Amazon`); isTop = false; continue; }
     if (lastTweetedSku && c.product.sku === lastTweetedSku) { rejected.push(`${c.product.sku}: tweeted in the previous run (dedup)`); isTop = false; continue; }
 
-    const atl = atlClause(c.current, c.atl);
-    if (!atl) { rejected.push(`${c.product.sku}: no all-time-low context available`); isTop = false; continue; }
+    const atl = atlClause(c.current, c.atl, c.avg90);
+    if (!atl) { rejected.push(`${c.product.sku}: no useful price context (far above ATL and under ${MIN_BELOW_AVG_PCT}% below its 90-day average)`); isTop = false; continue; }
 
     const url = `${SITE}/${c.product.category}/${c.product.slug}/`;
     const lead = isTop ? 'Biggest drop today' : 'Big drop today';
@@ -119,5 +137,5 @@ function composeWeekly({ rows, period = '1m', computedAt, nowMs = Date.now() }) 
 
 module.exports = {
   composeDaily, composeWeekly, segmentFigure, atlClause, displayName,
-  MIN_DROP_PCT, MAX_DROP_PCT, PRICE_DATA_MAX_AGE_H, MARKET_STATS_MAX_AGE_H,
+  MIN_DROP_PCT, MAX_DROP_PCT, PRICE_DATA_MAX_AGE_H, MARKET_STATS_MAX_AGE_H, ATL_DOOM_PCT, MIN_BELOW_AVG_PCT,
 };

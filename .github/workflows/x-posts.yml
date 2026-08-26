@@ -10,12 +10,13 @@
 # backend/lib/tweetCompose.js skips with a logged reason and exits 0 posting
 # nothing. Only real failures exit nonzero -> red run + GitHub failure email.
 #
-# DEDUP STATE lives in this workflow's own run logs, not a repo variable or a
-# committed file. Repo variables need a classic-`repo`-scope PAT (the
-# automatic GITHUB_TOKEN cannot write them), and a committed state file means
-# ~30 bot commits a month, each a push with side effects. Reading the previous
-# run's TWEETED_SKU marker needs only `actions: read`, which is already
-# granted, and log retention (90 days) far exceeds the one-day dedup window.
+# DEDUP STATE lives in Supabase (`bot_state` table, backend/lib/botState.js).
+# Repo Actions variables were the first design but GITHUB_TOKEN cannot write
+# them (HTTP 403, probed empirically); scraping our own run logs was rejected
+# because retention expires and a failed enumeration is indistinguishable from
+# "nothing found", so dedup would fail OPEN. The Supabase store needs no extra
+# credential, has no retention limit, and throws on error so the run fails
+# loudly.
 name: x-posts
 
 on:
@@ -34,7 +35,6 @@ on:
         default: 'true'
 
 permissions:
-  actions: read      # read the previous run's log for the dedup marker
   contents: read
 
 jobs:
@@ -63,22 +63,6 @@ jobs:
           echo "dry=$DRY" >> "$GITHUB_OUTPUT"
           echo "mode=$MODE dry_run=$DRY"
 
-      - name: Read last tweeted SKU (dedup state)
-        id: state
-        if: steps.cfg.outputs.mode == 'daily'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          # Most recent successful run of THIS workflow that actually posted.
-          LAST=""
-          for id in $(gh run list --workflow=x-posts.yml --status=success --limit 10 \
-                        --json databaseId --jq '.[].databaseId'); do
-            SKU=$(gh run view "$id" --log 2>/dev/null | grep -o 'TWEETED_SKU=[A-Z0-9]*' | tail -1 | cut -d= -f2)
-            if [ -n "$SKU" ]; then LAST="$SKU"; break; fi
-          done
-          echo "last_sku=$LAST" >> "$GITHUB_OUTPUT"
-          echo "dedup excludes: ${LAST:-(nothing yet)}"
-
       - name: Post
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -90,5 +74,4 @@ jobs:
         run: |
           FLAGS="--mode=${{ steps.cfg.outputs.mode }}"
           if [ "${{ steps.cfg.outputs.dry }}" = "true" ]; then FLAGS="$FLAGS --dry-run"; else FLAGS="$FLAGS --confirm"; fi
-          if [ -n "${{ steps.state.outputs.last_sku }}" ]; then FLAGS="$FLAGS --last-sku=${{ steps.state.outputs.last_sku }}"; fi
           node scripts/run-x-post.js $FLAGS
