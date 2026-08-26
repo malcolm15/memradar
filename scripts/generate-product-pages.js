@@ -221,12 +221,25 @@ function groupBy(arr, keyFn) {
 function buildDesc(p, token) {
   const s = p.stats;
   const prefix = 'Track the ';
+  // "Daily Amazon price tracking" was doubly stale: the fetch runs every 4
+  // hours now, and 151 of 235 PDPs carry a Newegg comparison row. Naming
+  // Newegg here would be false on the other 84, so the tail states the
+  // cadence and the alert, both true on every page.
   const middle = ' price history. Current price ' + money(s.current) + '. All-time low ' + money(s.atl.price) +
-    ' (' + monthYear(s.atl.day) + '). Daily Amazon price tracking and free drop alerts.';
+    ' (' + monthYear(s.atl.day) + '). Updated every few hours with free drop alerts.';
   const tok = token ? ' ' + token : '';
-  const nameBudget = DESC_TARGET - prefix.length - middle.length - tok.length;
-  const name = capWords(shortName(p), Math.max(6, nameBudget));
-  return prefix + name + tok + middle;
+  // Budget against the ESCAPED length, not the raw one. Names containing a
+  // quote render as &#39; (6 chars for 1), so a raw-length budget silently
+  // overshoots the 160-char band - latent until a shorter tail freed enough
+  // room to let those characters in. Shrink until the escaped result fits.
+  let budget = DESC_TARGET - prefix.length - middle.length - tok.length;
+  let out;
+  for (;;) {
+    out = prefix + capWords(shortName(p), Math.max(6, budget)) + tok + middle;
+    if (esc(out).length <= DESC_TARGET || budget <= 6) break;
+    budget -= 1;
+  }
+  return out;
 }
 
 // Compute unique, in-band pageTitle + pageDesc for every product (mutates).
