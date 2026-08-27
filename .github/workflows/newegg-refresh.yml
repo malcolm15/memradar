@@ -83,6 +83,7 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: write
+      actions: write   # to dispatch the Pages deploy after committing
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -140,6 +141,21 @@ jobs:
             echo "pages_changed=$PAGES" >> "$GITHUB_OUTPUT"
             echo "Committed. $PAGES pages had real content changes (manifest-derived)."
           fi
+
+      - name: Trigger the Pages deploy
+        if: steps.commit.outputs.committed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Pages is build_type=workflow: it deploys ONLY via deploy-frontend.
+          # A push made with GITHUB_TOKEN does not trigger push workflows, so
+          # without this step every daily regen commit sits in git unpublished
+          # (discovered 2026-08-27: the incident's deletions never went live
+          # for the same reason - the bug shielded us once and starved the
+          # regen always). workflow_dispatch is the documented exception that
+          # GITHUB_TOKEN CAN trigger.
+          gh workflow run deploy-frontend.yml -R "${{ github.repository }}"
+          echo "Deploy dispatched."
 
       - name: Summary
         run: |
