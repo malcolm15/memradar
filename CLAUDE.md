@@ -83,6 +83,9 @@ memradar/
 │   ├── fetch-upcs.js            # Keepa UPC/EAN/GTIN -> products.upc for tier-1.5 (dry-run default)
 │   ├── refresh-newegg-offers.js # Phase-2 cron body: delta I/U/D apply, Sunday full reconciliation, 9-day staleness net
 │   └── fetch-newegg-feed.js     # Rakuten SFTP feed pull (lists dir first; single connection; binary-safe SFTP)
+├── ops/
+│   └── supervisor/          # Cloudflare Worker: scheduled-workflow supervisor (stage 1, read-only).
+│                            # DEPLOY BY HAND (npx wrangler deploy), NEVER from Actions.
 ├── vercel.json              # Vercel cron config
 ├── package.json
 └── .env                     # Local secrets — NEVER commit this file
@@ -567,6 +570,44 @@ The generator **writes first, then sweeps only orphans**. It used to delete ever
 **3. EXTERNAL SMOKE TEST** (`scripts/smoke-test-live.js`, a step in `deploy-frontend.yml` after Pages publishes). Samples the live sitemap and asserts 200 on the homepage, both listings, the price index, both guides, and three PDPs spread deterministically across the catalog. **Deliberately outside the generator**, because preflight and parity run in its process and share its assumptions: if the generator is confidently wrong, they are wrong with it. This trusts only live HTTP.
 
 **What these still cannot catch:** a page that returns 200 with wrong or stale CONTENT. Every check here is structural (does it exist, do the counts agree, does it serve). A regeneration that quietly bakes last week's prices onto all 235 pages passes all three. Content correctness still rests on the hydration layer and on human review.
+
+## Scheduled-Workflow Supervisor (`ops/supervisor/`, stage 1, 2026-08-27)
+
+A Cloudflare Worker that asks, from **outside GitHub**, whether this repo's scheduled jobs actually ran, and opens a GitHub Issue labeled `supervisor-alert` when one goes stale. Stage 1 is **read-only alerting**: no dispatch, no self-healing, and the token is scoped Actions:**read** so it cannot start a workflow even by mistake.
+
+**WHY IT EXISTS: on 2026-08-27 five scheduled slots across two workflows were never CREATED by GitHub at all.** No run record, nothing queued, nothing cancelled, no published incident covering the window, no concurrency group that could have suppressed them, and the repo is public so Actions minutes cannot gate it. The failure is upstream of run creation, which means **nothing inside GitHub reports it**. Every existing guardrail (preflight, parity, the live smoke test) presumes a run happened; this is the first check that does not.
+
+**IT KEYS ON (workflow file, job id), NEVER ON WORKFLOW FILE ALONE.** `newegg-refresh.yml` carries two crons gating two different jobs, and a run where one job succeeds while its sibling is `skipped` still reports run-level conclusion `success`. On 2026-08-27 the 06:00 `refresh-offers` job succeeded while the 09:00 `regenerate-pages` cron was never created, and workflow-level freshness would have called that file healthy. Verified before writing: the Actions API reports job `name` equal to the YAML job id for all four watched jobs.
+
+**Thresholds are derived, not chosen:** `max_age_hours = interval + p95 + margin`, and `assertConfigArithmetic()` throws at tick time if the three inputs do not add up to the stored value. **This exists specifically so a future session cannot quiet a noisy alert by nudging the number**; changing it requires changing an input and saying why. Margins differ per pair by consequence: `regenerate-pages` is tightest (0.25x interval, 30.82h) because the guides and Price Index argue from baked values and print their own build date, so a stale build is a page making a false claim about itself, while `post` is most tolerant (1.00x, 49.87h) because a missed Bluesky post is invisible and harmless. Two p95 figures rest on n=1 and carry a **REVISIT 2026-09-10** note.
+
+**Manual dispatches COUNT toward freshness, deliberately.** Freshness measures whether the work happened, not how, and a manual recovery must clear the alert, otherwise the supervisor stays red after the thing is fixed, which is how alerts get ignored. The triggering event is recorded in the alert body and the tick log so cron-death stays distinguishable from job-failure when read later.
+
+**KNOWN COVERAGE HOLE, accepted and not worked around: the Bluesky weekly pulse.** `bluesky-posts.yml` has ONE job (`post`) on TWO crons, and the daily/weekly split happens inside a step rather than a job gate. So freshness on `post` observes the **daily** cron only, and the Sunday pulse (`0 18 * * 0`) could stop firing indefinitely without any signal, because a daily-drop success satisfies the same key. Tolerable because it is the least consequential job on the board. **If the weekly ever carries real weight, the fix is a distinct marker written by the weekly path** (a separate job id, or a `bot_state` key), NOT a cleverer run scan. No scan can separate two crons that land on one job id.
+
+**Config self-audit, and its limit.** Each tick reads `.github/workflows/*` and alerts if any job in a workflow with an active cron is missing from the config array, plus the mirror case of a config entry pointing at a job that no longer exists. The direction is deliberate: workflows are the source of truth, the hand-assembled array is under suspicion. A workflow change ships through git and registers instantly while a config change needs a manual deploy, so the two can never be atomic and **the default outcome of adding a cron is that it is unwatched, silently**. **It proves coverage, not correctness**: it cannot tell you a threshold is wrong, and it cannot see the Bluesky hole above, because that cron does map to a watched job.
+
+**Scan bound:** stop walking runs once one predates `now - max_age_hours`, because not-found and found-too-old are the same verdict. Without it, a job that never succeeds (or whose id was renamed in config) walks the whole run history every tick forever, getting slower exactly as the incident gets worse. Costs ~7 API calls per tick, 0.56% of the hourly ceiling. `cancelled` is explicitly not a success, since `deploy-frontend.yml` cancels in-progress runs via `concurrency: group: pages`.
+
+### DEPLOY BY HAND. NEVER FROM ACTIONS.
+
+`cd ops/supervisor && npx wrangler deploy`. **There is deliberately no GitHub Actions workflow that deploys this Worker, and one must never be added.** A supervisor deployed by the system it supervises cannot be updated while that system is degraded, which is exactly when you need to change it. On 2026-08-27 Actions could not create runs for eleven hours; a deploy pipeline living there would have been unavailable for the entire incident it exists to report. The manual step is the design, not an omission. Secrets (`SUPERVISOR_GITHUB_TOKEN`, `SUPERVISOR_QA_SECRET`) are set via `wrangler secret put` and never appear in a file or a log.
+
+### Signal 2 (published-SHA drift) is a STUB, and why
+
+`checkPublishedSha()` is a named empty seam. It is **deferred, not blocked**. It will compare `https://memradar.com/build.json` against the newest successful `github-pages` deployment SHA, alerting only on drift persisting across two consecutive ticks (a deploy in flight is legitimately mid-drift). Two things must land first: **`build.json` does not exist**, and `deploy-frontend.yml` has no step between `actions/checkout@v5` and `actions/upload-pages-artifact@v5` that could write it (only `setup-node` and `configure-pages` sit there; the only `run:` block executes after the artifact is sealed). And **a query string does NOT bust GitHub's Fastly layer** (measured 2026-08-27: distinct random query values returned `x-cache: HIT` on URLs never requested before, because the object is keyed without the query string), so the 600s cache window needs a Cloudflare-side rule or a different assertion shape. Cloudflare itself is not the obstacle: root-level `.json` returns `cf-cache-status: DYNAMIC` and is not edge-cached.
+
+The deployment half is already implemented and reported in every tick's JSON. Note its **mandatory second call**: a deployment row exists from the moment it is queued, so the row alone proves nothing was published; only an explicit `state == "success"` status does. Do not optimize that call away.
+
+### Failing loudly, and the gap that remains
+
+Failure modes split in two. **(a) The tick ran and threw**, self-reportable if the channel still works. **(b) The tick never ran at all** (Worker not deployed, cron removed, Cloudflare incident), **structurally unreportable from inside the Worker** because nothing executes. (b) is the faithful analogue of 2026-08-27, where the failure was not "a job errored" but "nothing ran and nothing said so", so it was built FIRST.
+
+**LAYER 0, the dead-man switch: healthchecks.io, pinged at the end of every successful tick, 45-minute grace (three missed ticks).** Covers (b); the failure path also pings `/fail` so (a) alerts in seconds instead of waiting out the grace period. **The independence IS the feature, so it was verified rather than assumed:** `hc-ping.com` resolves to Hetzner (`176.9.71.146` HETZNER-fsn1-dc6, `159.69.66.229`) serving `server: nginx` with no Cloudflare in front, so it shares no infrastructure with GitHub Actions or with the Cloudflare edge this Worker runs on. **Better Stack was rejected on measurement, not preference:** `server: cloudflare`, same blast radius as us. A Supabase `bot_state` heartbeat stays rejected as circular, since nothing independent would read it.
+
+**Two properties not to break.** The success ping is the LAST statement in `runTick()`, because silence is the alarm and the ping must be unreachable by any path that did not fully succeed. **Never wrap the tick in a try/catch that pings anyway**: that converts the one check catching "nothing ran" into a check that always says everything is fine. And `SUPERVISOR_HEARTBEAT_URL` is a secret rather than a var because the URL's UUID *is* the credential; anyone holding it can forge a healthy ping and silence the switch.
+
+**Layers 1 to 3 of (a), in deliberate order:** `console.error` (Workers observability, `npx wrangler tail`), then the heartbeat `/fail`, then a `[supervisor] TICK FAILURE` issue that self-closes on the next good tick and states plainly that no freshness result is trustworthy while it is open, then **a Resend email sent ONLY when the GitHub path itself failed**. GitHub being unreachable is exactly when the issue channel is useless, and emailing on every tick failure would train it to be ignored. The email goes to `hello@memradar.com`, the project's own public mailbox, so no personal address is committed to a public repo (change `ALERT_TO` to redirect it).
 
 ## Incident: 2026-08-26 daily regen deleted 151 pages
 
