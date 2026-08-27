@@ -9,3 +9,7 @@ node_modules/
 
 # Generated data artifacts (regenerable; source of truth is the DB after upsert)
 scripts/output/
+
+# Cloudflare Worker local secrets (plaintext credentials - never commit)
+.dev.vars
+.dev.vars.*
