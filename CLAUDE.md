@@ -524,6 +524,30 @@ Automated posting on GitHub Actions. **Bluesky is the primary and only live targ
 
 **RULE: tweet copy changes get a dry-run review before shipping.** `workflow_dispatch` defaults `dry_run` to **true** so a manual run composes and logs but never posts. Rollout for any copy change: dry-run dispatch reviewed by Malcolm, then one watched real dispatch, then the schedule.
 
+## Probe-Guard Rule
+
+**Every probe-guard gets an explicit expiry condition at the time it is written**: a date, a "remove when X lands" note, or a loud flag once the guarded thing becomes required. Write it in the same commit as the guard, never later.
+
+A probe-guard is written for a migration window: the column or table does not exist yet, so the code degrades instead of crashing. That is correct *during* the window. **A guard that outlives its migration becomes a silent feature-deletion mechanism** - it stops meaning "not built yet" and starts meaning "this broke, carry on without it". The `retailer_offers` guard is the worked example: written in July when the table genuinely did not exist, still present in August when the table held all 151 Newegg offers, at which point a probe failure would have silently published 151 single-retailer pages that look exactly like "Newegg has nothing today".
+
+Current guards and their expiry:
+- `retailer_offers` (generator): **EXPIRED, now throws in `--confirm`**; degrades only on a dry run.
+- `products.upc` (match-newegg): active, additive feature, absence is a real state. Expiry: remove if UPC matching ever becomes required for a gated write.
+- `parent_asin` (build-families): active, falls back to a checked-in JSON. Expiry: remove when the column is guaranteed populated.
+- `market_stats.stability_delta_pp`: active until the ALTER TABLE lands, then remove the fallback branch.
+
+## Atomic-ish Generation (delete-only-orphans, 2026-08-27)
+
+The generator **writes first, then sweeps only orphans**. It used to delete every generated page dir BEFORE writing, which made any mid-run failure destructive: on 2026-08-26, 151 products failed after the delete and 151 live pages vanished.
+
+**THE INVARIANT: never delete a directory whose slug is in the catalog, no matter what else is true.** A product that fails generation is still in the catalog, so its page is protected by construction and keeps serving slightly stale content instead of becoming a 404. Detection lives in `findOrphans()`, which is pure and side-effect free so **the dry run reports exactly what `--confirm` would delete**. Proven both ways before it shipped: a normal catalog reports zero orphans, and a simulated renamed slug reports exactly the old slug and nothing else.
+
+**Mass-orphan alarm:** more than 10 orphans throws rather than deleting. That many at once is a slug-scheme change, not routine churn, and deleting dozens of live URLs deserves a human. Override with `--allow-mass-orphan`.
+
+**This makes failure non-destructive; it does NOT make failure acceptable.** The nonzero exit on any `--confirm` failure and the parity assertions both stay exactly as they were.
+
+**New risk this introduced, and its signal:** a product that fails every run now serves its old page forever, silently. Consecutive failures per SKU are tracked in `bot_state` (`generator_failure_streaks`), and **3+ consecutive failures raise a STALE PAGE ALARM naming the SKU and its URL**, with a `STREAK_SUMMARY` line in every run. A streak clears by simply generating cleanly. Tracking failures are reported but never fail an otherwise-good build, since this is diagnostics rather than correctness.
+
 ## Silent Degradation: the rule and the audit
 
 **A fallback that fires invisibly is indistinguishable from a feature that works.** Every fallback must announce itself, or carry a written reason why silence is correct there. All three of this week's failures were this shape: a guard fired, the run looked healthy, and the damage was found by a human.

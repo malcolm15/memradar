@@ -27,6 +27,7 @@ const crypto = require('crypto');
 const supabase = require('../backend/lib/supabase');
 const { classifySegment } = require('../backend/lib/marketStats');
 const { neweggDeepLink } = require('../backend/lib/rakutenLink');
+const { getState, setState } = require('../backend/lib/botState');
 
 const CONFIRM = process.argv.includes('--confirm');
 // Shrink guard: abort rather than delete if a run would emit materially fewer
@@ -293,6 +294,33 @@ const REQUIRED_ENV = ['SUPABASE_URL', 'SUPABASE_SECRET_KEY', 'RAKUTEN_AFFILIATE_
 // A catalog this far off its usual size means a broken read, not a real
 // change; refuse rather than regenerate a truncated site.
 const MIN_EXPECTED_PRODUCTS = 100;
+
+
+// Orphan detection: generated page dirs whose slug the catalog no longer
+// contains. Pure and side-effect free so the DRY RUN reports precisely what
+// --confirm would delete. THE INVARIANT: a slug present in the catalog is
+// never an orphan, no matter what else is true - which is what protects the
+// page of a product that failed to generate this run.
+function findOrphans(generable) {
+  const keep = new Set(generable.map((p) => `${p.category}/${p.finalSlug}`));
+  const orphans = [];
+  for (const cat of ['ram', 'ssd']) {
+    const catDir = path.join(FRONTEND, cat);
+    if (!fs.existsSync(catDir)) continue;
+    for (const entry of fs.readdirSync(catDir, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const idx = path.join(catDir, entry.name, 'index.html');
+      if (!fs.existsSync(idx)) continue;
+      if (!fs.readFileSync(idx, 'utf8').includes(MARKER)) continue; // not ours
+      const key = `${cat}/${entry.name}`;
+      if (keep.has(key)) continue;                                  // in catalog: NEVER delete
+      orphans.push(key);
+    }
+  }
+  return orphans;
+}
+const ORPHAN_ALARM = 10;
+const GENERATOR_STREAK_KEY = 'generator_failure_streaks';
 
 async function preflight() {
   const problems = [];
@@ -1971,6 +1999,14 @@ async function run() {
       });
     }
     console.log('\nSitemap would contain: 11 static + ' + generable.length + ' product URLs');
+    const dryOrphans = findOrphans(generable);
+    if (dryOrphans.length) {
+      console.log(`\nOrphan sweep would delete ${dryOrphans.length} page dir(s) whose slug is not in the catalog:`);
+      dryOrphans.forEach((o) => console.log(`   ORPHAN ${o}`));
+      if (dryOrphans.length > ORPHAN_ALARM) console.log(`   (exceeds the ${ORPHAN_ALARM} alarm threshold: --confirm would REFUSE without --allow-mass-orphan)`);
+    } else {
+      console.log('\nOrphan sweep: no orphans (every generated page dir matches a catalog slug)');
+    }
     console.log('Dry run complete — nothing written. Re-run with --confirm to generate.');
     return;
   }
@@ -2018,21 +2054,21 @@ async function run() {
     );
   }
 
+  // ATOMIC-ISH GENERATION: write first, then sweep ONLY orphans.
+  //
+  // This used to delete every generated page dir here, BEFORE writing. That
+  // made any mid-run failure destructive: on 2026-08-26, 151 products failed
+  // after the delete and 151 live pages simply vanished. Now a failed product
+  // keeps its existing page (slightly stale, still served) instead of
+  // becoming a 404, because its slug is in the catalog and the sweep only
+  // removes slugs the catalog no longer contains.
+  //
+  // THE INVARIANT: never delete a directory whose slug is in the catalog, no
+  // matter what else is true. Failure is now non-destructive; it is still not
+  // acceptable, which is what the nonzero exit and parity checks are for.
   let deleted = 0;
   if (!IS_SAMPLE) {
-    for (const cat of ['ram', 'ssd']) {
-      const catDir = path.join(FRONTEND, cat);
-      if (!fs.existsSync(catDir)) continue;
-      for (const entry of fs.readdirSync(catDir, { withFileTypes: true })) {
-        if (!entry.isDirectory()) continue;
-        const idx = path.join(catDir, entry.name, 'index.html');
-        if (fs.existsSync(idx) && fs.readFileSync(idx, 'utf8').includes(MARKER)) {
-          fs.rmSync(path.join(catDir, entry.name), { recursive: true });
-          deleted++;
-        }
-      }
-    }
-    log(`Deleted ${deleted} previously generated page dirs (${existingGenerated} existed, ${generable.length} will be written)`);
+    log(`Writing ${generable.length} pages, then sweeping orphans (${existingGenerated} page dirs exist now)`);
   }
 
   // 2) Generate pages
@@ -2079,6 +2115,35 @@ async function run() {
   }
   log(`Generated ${written} pages (${failures.length} failures)`);
   failures.forEach((f) => log(`  FAILED ${f.sku}: ${f.error}`));
+
+  // ---- orphan sweep: the ONLY deletion in this script ----
+  // A directory is an orphan only if it is one of ours (carries MARKER) and
+  // its slug is absent from the catalog we just generated. A product that
+  // FAILED is still in the catalog, so its page is protected here by
+  // construction, which is the whole point of the reordering.
+  if (!IS_SAMPLE) {
+    const orphans = findOrphans(generable);
+    if (orphans.length) {
+      log(`Orphan sweep: ${orphans.length} generated page dir(s) no longer in the catalog:`);
+      orphans.forEach((o) => log(`  ORPHAN ${o} (no product with this slug)`));
+    } else {
+      log('Orphan sweep: no orphans (every generated page dir matches a catalog slug)');
+    }
+    // An orphan wave is what a slug-scheme change looks like, and deleting
+    // dozens of live URLs deserves a human, not a cron.
+    if (orphans.length > ORPHAN_ALARM && !process.argv.includes('--allow-mass-orphan')) {
+      throw new Error(`${orphans.length} orphans exceeds the ${ORPHAN_ALARM} alarm threshold - that is a slug-scheme change, not routine churn. Nothing deleted. Re-run with --allow-mass-orphan if intended.`);
+    }
+    if (CONFIRM) {
+      for (const key of orphans) {
+        fs.rmSync(path.join(FRONTEND, key), { recursive: true });
+        deleted++;
+      }
+      if (deleted) log(`Deleted ${deleted} orphaned page dir(s)`);
+    } else if (orphans.length) {
+      log(`DRY RUN: would delete ${orphans.length} orphan(s); nothing removed`);
+    }
+  }
 
   if (IS_SAMPLE) {
     console.log(`\nSAMPLE preview complete: ${written} page(s) written in place. No delete/slug/sitemap/manifest/search changes.`);
@@ -2219,6 +2284,41 @@ async function run() {
   console.log(`New slugs stored:   ${slugWrites}`);
   console.log(`Deleted stale dirs: ${deleted}`);
   console.log(`Duration:           ${Math.round((Date.now() - startTime) / 1000)}s`);
+
+  // ---- consecutive-failure tracking ----
+  // Delete-only-orphans makes failure non-destructive, which introduces a new
+  // silent rot: a product that fails EVERY run keeps serving its old page
+  // forever and nothing says so. One failure is a hiccup; three in a row is a
+  // URL quietly going stale, and we need its name.
+  const FAILURE_STREAK_ALARM = 3;
+  if (CONFIRM) {
+    try {
+      const prev = (await getState(GENERATOR_STREAK_KEY, {})) || {};
+      const failedSkus = new Set(failures.map((f) => f.sku));
+      const next = {};
+      for (const sku of failedSkus) next[sku] = (prev[sku] || 0) + 1;
+      // A product that generated cleanly this run has its streak cleared by
+      // simply not being carried forward.
+      const rotting = Object.entries(next)
+        .filter(([, n]) => n >= FAILURE_STREAK_ALARM)
+        .sort((a, b) => b[1] - a[1]);
+      if (rotting.length) {
+        console.error(`\n⚠ STALE PAGE ALARM: ${rotting.length} product(s) have failed ${FAILURE_STREAK_ALARM}+ consecutive runs and are serving increasingly stale pages:`);
+        rotting.forEach(([sku, n]) => {
+          const p = generable.find((g) => g.sku === sku);
+          console.error(`  ${sku} failed ${n} runs in a row${p ? ` (/${p.category}/${p.finalSlug}/)` : ''}`);
+        });
+      }
+      const recovered = Object.keys(prev).filter((sku) => !failedSkus.has(sku));
+      if (recovered.length) log(`Failure streaks cleared for ${recovered.length} product(s): ${recovered.join(', ')}`);
+      await setState(GENERATOR_STREAK_KEY, next);
+      console.log('STREAK_SUMMARY ' + JSON.stringify({ failing_now: Object.keys(next).length, rotting: rotting.map(([sku, n]) => ({ sku, runs: n })) }));
+    } catch (e) {
+      // Streak tracking is diagnostics, not correctness: never let it fail a
+      // build that otherwise succeeded, but never let it fail SILENTLY either.
+      console.error(`⚠ failure-streak tracking unavailable: ${e.message}`);
+    }
+  }
 
   // PARITY ASSERTIONS. Partial generation leaves a signature: the counts stop
   // agreeing. On 2026-08-26 the site went to 84 pages against a 235-product
