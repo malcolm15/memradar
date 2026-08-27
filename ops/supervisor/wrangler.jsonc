@@ -1,0 +1,39 @@
+{
+  // MemRadar scheduled-workflow supervisor. Stage 1: READ-ONLY alerting.
+  //
+  // DEPLOY BY HAND ONLY:  cd ops/supervisor && npx wrangler deploy
+  //
+  // There is deliberately NO GitHub Actions workflow that deploys this Worker.
+  // A supervisor deployed by the system it supervises cannot be updated while
+  // that system is degraded, which is exactly when it is needed. See
+  // ops/supervisor/README.md and the supervisor section of CLAUDE.md.
+  //
+  // NO SECRETS IN THIS FILE. All four are set out of band:
+  //   npx wrangler secret put SUPERVISOR_GITHUB_TOKEN   (fine-grained PAT)
+  //   npx wrangler secret put SUPERVISOR_QA_SECRET      (random, gates the fetch handler)
+  //   npx wrangler secret put SUPERVISOR_HEARTBEAT_URL  (healthchecks.io ping URL, contains a UUID)
+  //   npx wrangler secret put RESEND_API_KEY            (existing MemRadar key)
+  //
+  // SUPERVISOR_HEARTBEAT_URL is a secret rather than a var because the ping
+  // URL's UUID IS the credential: anyone holding it can forge a healthy ping
+  // and silence the dead-man switch.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "memradar-supervisor",
+  "main": "src/index.js",
+  "compatibility_date": "2026-08-27",
+
+  // */15 chosen to match nothing in particular: every threshold in the config
+  // array is measured in hours, so tick granularity only bounds how late an
+  // alert can be, never whether it fires. 15 minutes keeps worst-case alert
+  // latency well under the smallest margin (6h) at ~1% of the API rate limit.
+  "triggers": {
+    "crons": ["*/15 * * * *"]
+  },
+
+  "observability": {
+    // Required. console.error from a failed tick is the innermost layer of the
+    // failure reporting described in README.md; without this it goes nowhere.
+    "enabled": true,
+    "head_sampling_rate": 1
+  }
+}
