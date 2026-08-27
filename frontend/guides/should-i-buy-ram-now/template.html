@@ -32,7 +32,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
   <meta name="theme-color" content="#0f1623">
-  <link rel="stylesheet" href="../../css/style.css?v=20260901">
+  <link rel="stylesheet" href="../../css/style.css?v=20260902">
 </head>
 <body>
 
@@ -82,7 +82,7 @@
 
       <h2>What actually happened to RAM prices</h2>
       <p>The surge wasn't gradual. Through most of 2024 and early 2025, memory was cheap and getting cheaper, DDR4 kits at $50, DDR5 at prices that now look like typos. The explosion came in roughly October through December 2025, driven by DRAM supply shifting toward AI datacenter demand, and it repriced everything: DDR5 up over 300% year over year at its peak, DDR4 up well over 150%, and it dragged SSDs along with it.</p>
-      <p>What's happened since matters more for your decision: prices mostly stopped climbing. Across the products we track, DDR5 has moved only a few percent in recent months. DDR4 actually fell double digits from its peak and has now flattened, its cooldown appears finished. This is a plateau at elevated prices, not an ongoing explosion and not a recovery.</p>
+      <p>What's happened since matters more for your decision: prices mostly stopped climbing. Across the products we track, DDR5 has kept drifting upward, a slow grind rather than another surge. DDR4 actually fell double digits from its peak and has now flattened, its cooldown appears finished. This is a slow grind at elevated prices, not an ongoing explosion and not a recovery.</p>
 
       <div class="pi-table-wrap guide-table-wrap" tabindex="0" role="region" aria-label="Price trend table, scrollable">
         <table class="pi-table guide-table" id="piTable">
@@ -121,13 +121,15 @@
 
       <h2>Honest answers to the questions people actually ask</h2>
       <p class="guide-q"><em>Will DDR5 prices drop in 2026?</em></p>
-      <p>The recent trend says no meaningful drop is underway, DDR5 has been flat-to-slightly-up for months. A 2018-style normalization is possible but historically took over a year from peak, and the peak was late 2025.</p>
+      <p>The recent trend says no meaningful drop is underway, DDR5 has kept drifting upward for months, slowly next to the surge but persistently. A 2018-style normalization is possible but historically took over a year from peak, and the peak was late 2025.</p>
       <p class="guide-q"><em>Is DDR4 a smart buy right now?</em></p>
       <p>It's complicated in an interesting way. DDR4 fell hard from its peak and that decline has now flattened, so the discount you see today may be the discount you get. For an older platform you're keeping, buying DDR4 near its recent lows is defensible. For a new build, DDR4's price advantage over DDR5 has narrowed enough that it's no longer the automatic budget answer.</p>
       <p class="guide-q"><em>Should I just buy used?</em></p>
       <p>Used prices track new prices with a lag, and the same surge inflated them. The checks above apply, know what the kit sells for new before valuing a used one, and remember used carries no warranty in a market where you're paying near-new prices.</p>
       <p class="guide-q"><em>How current is this page?</em></p>
       <p>The prices and the list above update automatically, several times a day. The market narrative is reviewed when conditions change meaningfully, if the plateau breaks in either direction, this page will say so.</p>
+
+      <p class="guide-crosslink">Buying storage too? See <a href="../should-i-buy-an-ssd-now/">Should I Buy an SSD Now</a>.</p>
 
       <p class="guide-freshness">Prices on this page update automatically every few hours. Page last regenerated: <!--BUILD_DATE-->.</p>
     </article>
@@ -160,13 +162,14 @@
     </div>
   </footer>
 
-  <script src="../../js/main.js?v=20260901"></script>
-  <script src="../../js/theme.js?v=20260901"></script>
-  <script src="../../js/mobile-nav.js?v=20260901"></script>
+  <script src="../../js/main.js?v=20260902"></script>
+  <script src="../../js/theme.js?v=20260902"></script>
+  <script src="../../js/mobile-nav.js?v=20260902"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script type="application/json" id="guideChartData"><!--CHART_DATA--></script>
-  <script src="../../js/supabase-client.js?v=20260901"></script>
-  <script src="../../js/guide-ram-now.js?v=20260901"></script>
-  <script src="../../js/search.js?v=20260901"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="../../js/supabase-client.js?v=20260902"></script>
+  <script src="../../js/guide-live.js?v=20260902"></script>
+  <script src="../../js/search.js?v=20260902"></script>
 </body>
 </html>

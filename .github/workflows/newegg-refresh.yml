@@ -93,28 +93,38 @@ jobs:
           set -euo pipefail   # any generator error fails the job, committing nothing
           node scripts/generate-product-pages.js --confirm
 
-      - name: Commit only if content actually changed
+      - name: Commit the regenerated pages
         id: commit
         run: |
           set -euo pipefail
-          # The lastmod manifest is the source of truth for "did content
-          # change": ?v=, build dates and priceValidUntil are normalised out of
-          # its hashes, so a diff here means real content moved.
+          # DAILY COMMITS ARE EXPECTED, not a failure of a no-op guard.
+          # Guides and the Price Index print their own "last regenerated" date
+          # and contentHash does not normalise it, so those pages change every
+          # day by design - the printed date has to stay true. PDPs change
+          # whenever a price moved, which is the point of the regen. A literal
+          # quiet day is therefore impossible, and that is fine: there are no
+          # Vercel crons left for a push to collide with.
+          #
+          # What this gate still does is avoid an empty commit, and report a
+          # TRUTHFUL page count. pages_changed comes from the lastmod manifest
+          # (hash diff vs HEAD), NOT from `git status`, which would also count
+          # files dirty only because the shared ?v= stamp moved - exactly the
+          # churn contentHash normalises away.
           CHANGED=$(git status --porcelain frontend/ scripts/lastmod-manifest.json | wc -l | tr -d ' ')
-          PAGES=$(git status --porcelain frontend/ram frontend/ssd frontend/guides frontend/price-index | wc -l | tr -d ' ')
+          PAGES=$(node scripts/count-content-changes.js)
           if [ "$CHANGED" = "0" ]; then
             echo "committed=false" >> "$GITHUB_OUTPUT"
             echo "pages_changed=0" >> "$GITHUB_OUTPUT"
-            echo "No content change - nothing to commit."
+            echo "Nothing to commit (no working-tree change at all)."
           else
             git config user.name "MemRadar"
             git config user.email "malcolmkonner@gmail.com"
             git add -A frontend/ scripts/lastmod-manifest.json
-            git commit -q -m "chore: daily page regeneration ($PAGES pages changed)"
+            git commit -q -m "chore: daily page regeneration ($PAGES pages with content changes)"
             git push -q
             echo "committed=true" >> "$GITHUB_OUTPUT"
             echo "pages_changed=$PAGES" >> "$GITHUB_OUTPUT"
-            echo "Committed $PAGES changed pages."
+            echo "Committed. $PAGES pages had real content changes (manifest-derived)."
           fi
 
       - name: Summary

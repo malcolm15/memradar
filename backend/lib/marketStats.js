@@ -203,12 +203,25 @@ async function computeMarketStats(supabase, batchTimestamp, log = () => {}) {
       ? { ...rest, stability_delta_pp, computed_at: computedAt }
       : { ...rest, computed_at: computedAt };
   };
+  let tripwireDisabled = false;
   let { error: upsertErr } = await supabase
     .from('market_stats')
     .upsert(stats.map((s) => toRow(s, true)), { onConflict: 'segment,period' });
   if (upsertErr && /stability_delta_pp/.test(upsertErr.message)) {
     // Column not added yet: write everything else rather than failing the run.
-    log('market_stats.stability_delta_pp column missing - writing without it (run the ALTER TABLE to enable the tripwire)');
+    //
+    // THIS MUST SHOUT. The original version logged one quiet line, and a
+    // pending ALTER TABLE consequently sat unnoticed for a week while every
+    // run silently discarded its deltas - so the tripwire built to stop a
+    // volatile figure reaching prose was itself invisible when a guide was
+    // being written against it. The flag now rides the summary JSON, where a
+    // disabled safety check is as visible as a firing one.
+    tripwireDisabled = true;
+    log('*** STABILITY TRIPWIRE DISABLED: column missing ***');
+    log('    market_stats.stability_delta_pp does not exist, so cohort-sensitivity');
+    log('    deltas are computed and then DISCARDED. Figures from this run carry no');
+    log('    stability evidence - do not quote them in prose until the ALTER lands:');
+    log('    ALTER TABLE market_stats ADD COLUMN stability_delta_pp NUMERIC(6,1);');
     ({ error: upsertErr } = await supabase
       .from('market_stats')
       .upsert(stats.map((s) => toRow(s, false)), { onConflict: 'segment,period' }));
@@ -236,7 +249,7 @@ async function computeMarketStats(supabase, batchTimestamp, log = () => {}) {
   }
   if (!unstable.length) log(`Stability: every figure moves < ${STABILITY_FLAG_PP}pp on cohort choice`);
 
-  return { stats, excluded, computedAt, unstable, severe };
+  return { stats, excluded, computedAt, unstable, severe, tripwireDisabled };
 }
 
 module.exports = { computeMarketStats, classifySegment, SEGMENTS, PERIODS, STABILITY_FLAG_PP, STABILITY_SEVERE_PP };

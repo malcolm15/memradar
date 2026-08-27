@@ -141,9 +141,13 @@ async function runPriceFetch(opts = {}) {
       // be looked up before someone quotes it.
       const shape = (u) => ({ segment: u.segment, period: u.period, pct_change: u.pct_change, moves_pp: u.stability_delta_pp });
       unstableFigures = {
+        // A DISABLED tripwire is reported as loudly as a firing one: absent
+        // this field, "severe: []" is indistinguishable from "we never looked".
+        disabled: res.tripwireDisabled === true,
         severe: (res.severe || []).map(shape),
         moderate: (res.unstable || []).filter((u) => !(res.severe || []).includes(u)).map(shape),
       };
+      if (res.tripwireDisabled) log('SUMMARY WILL REPORT: unstable_figures.disabled=true (tripwire column missing)');
     } catch (err) {
       statsError = err.message;
       logError('computeMarketStats FAILED (non-fatal, price inserts unaffected)', err);

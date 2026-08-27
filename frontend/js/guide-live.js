@@ -1,12 +1,18 @@
-// Guide page live elements: the 4x4 trend table, the decade chart, and the
-// near-all-time-low RAM list.
+// Live elements shared by every /guides/ page: the 4x4 trend table, the
+// decade chart, and the near-all-time-low product list.
 //
-// HYDRATION PARITY (same rule as the Price Index): any figure on this page
+// SHARED, not forked. CLAUDE.md's guides section said to revisit the chart
+// extraction when a second guide needed one; the SSD guide is that second
+// guide. Nothing in this file was ever RAM-specific - it is entirely
+// DOM-driven (table cell ids, .guide-atl-row[data-sku], #guideChartData), so
+// one module serves both guides and they cannot drift apart.
+//
+// HYDRATION PARITY (same rule as the Price Index): any figure on a guide page
 // that also appears in a hydrated element must itself hydrate from the same
 // source, so prose and numbers can never disagree. The table and the ATL list
 // both refresh here; the editorial prose deliberately states magnitudes
-// ("over 300%", "double digits") rather than exact figures, so it stays true
-// between regenerations.
+// ("more than doubled", "well over double") rather than exact figures, so it
+// stays true between regenerations.
 (function () {
   var sb = window.memradarSupabase;
 
@@ -14,6 +20,8 @@
   // Deliberately NOT a fork of the PDP's interactive chart, which is coupled
   // to range switching and the hydrate config. This renders one long view and
   // reuses only the visual language (brand cobalt, dark-mode redraw).
+  // Every guide gets the same renderer; the series is whatever the generator
+  // baked into #guideChartData.
   var dataEl = document.getElementById('guideChartData');
   var canvas = document.getElementById('guideChart');
   if (dataEl && canvas && window.Chart) {
