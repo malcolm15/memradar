@@ -27,12 +27,17 @@ on:
         description: 'delta or full (empty = delta, or full automatically on Sundays)'
         required: false
         default: ''
+      job:
+        description: 'refresh (Newegg offers) or regen (page regeneration)'
+        required: false
+        default: 'refresh'
 
 jobs:
   refresh-offers:
-    # 06:00 cron only (or a manual dispatch). The Newegg feed regenerates once
-    # nightly, so pulling it again at 09:00 would re-read the same file.
-    if: github.event_name != 'schedule' || github.event.schedule == '0 6 * * *'
+    # 06:00 cron, or a manual dispatch that did not ask for the regen job.
+    # The Newegg feed regenerates once nightly, so pulling it again at 09:00
+    # would re-read the same file.
+    if: (github.event_name == 'schedule' && github.event.schedule == '0 6 * * *') || (github.event_name == 'workflow_dispatch' && inputs.job != 'regen')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -68,10 +73,12 @@ jobs:
   # is conditional on the honest-lastmod manifest showing real content change,
   # so a quiet day produces no commit rather than 30 noise commits a month.
   regenerate-pages:
-    # 09:00 cron only. NOT `needs: refresh-offers`: they run on different
-    # schedules now, and a needs-edge would skip the regen whenever the
-    # refresh job is filtered out.
-    if: github.event_name == 'schedule' && github.event.schedule == '0 9 * * *'
+    # 09:00 cron, or a manual dispatch with job=regen. Discovered 2026-08-27:
+    # the schedule-only gate meant a misfired cron could not be recovered by
+    # hand without editing this file. NOT `needs: refresh-offers` - they run
+    # on different schedules, and a needs-edge would skip the regen whenever
+    # the refresh job is filtered out.
+    if: (github.event_name == 'schedule' && github.event.schedule == '0 9 * * *') || (github.event_name == 'workflow_dispatch' && inputs.job == 'regen')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
