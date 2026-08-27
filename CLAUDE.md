@@ -524,6 +524,16 @@ Automated posting on GitHub Actions. **Bluesky is the primary and only live targ
 
 **RULE: tweet copy changes get a dry-run review before shipping.** `workflow_dispatch` defaults `dry_run` to **true** so a manual run composes and logs but never posts. Rollout for any copy change: dry-run dispatch reviewed by Malcolm, then one watched real dispatch, then the schedule.
 
+## Incident: 2026-08-26 daily regen deleted 151 pages
+
+**Cause: the `regenerate-pages` job's env block omitted `RAKUTEN_AFFILIATE_ID`.** Every product with a Newegg offer builds a Rakuten deep link, which throws without it, so exactly the 151 Newegg-matched products failed. The generator **deletes all page dirs BEFORE writing**, so those 151 live pages were deleted and never rewritten, and the run **exited 0**, so the commit gate saw ordinary-looking changes and pushed the deletion.
+
+**The hypothesis it was NOT.** A partial `pagedSelect` read was the obvious suspect and was wrong: that run logged `Loaded 235 products` and `Loaded 77843 price_history rows`, a complete load. Check the log before believing a plausible mechanism.
+
+**Fixes:** the secret is now passed (with a comment that any new env the generator reads must be added there too), and **the generator exits nonzero whenever `--confirm` produces any failures**, because a run that deletes page dirs up front has already removed N live pages by the time N products fail. A partial site is never a success, and the caller that commits must never see one. `pagedSelect` now reports rows and pages on labelled calls and accepts an `expected` count that fails loudly on mismatch, since a short page genuinely is treated as end-of-data.
+
+**Still open (deeper fix, not built):** the delete-before-generate ordering is the underlying hazard. Generating to a temp location and swapping, or deleting only slugs absent from the catalog after a successful build, would make partial output non-destructive rather than merely loud.
+
 ## Guides (`/guides/`)
 
 Editorial pages argued from our own data, generated (not hand-written) so the argument never drifts from the numbers beside it. Index at `/guides/` (sitemap 0.6); guides at `/guides/should-i-buy-ram-now/` and `/guides/should-i-buy-an-ssd-now/` (0.7 each, changefreq daily). Templates live beside their output; builders are `buildGuideRamNow()` / `buildGuideSsdNow()` / `buildGuidesIndex()`; the `GUIDES` registry drives the index.

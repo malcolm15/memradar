@@ -89,6 +89,13 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          # REQUIRED: every product with a Newegg offer builds a Rakuten deep
+          # link, which throws without this. Omitting it on 2026-08-26 failed
+          # exactly the 151 products that have Newegg offers, and because the
+          # generator deletes page dirs BEFORE writing, those 151 pages were
+          # deleted and the run still exited 0. Any new env the generator
+          # reads must be added here too.
+          RAKUTEN_AFFILIATE_ID: ${{ secrets.RAKUTEN_AFFILIATE_ID }}
         run: |
           set -euo pipefail   # any generator error fails the job, committing nothing
           node scripts/generate-product-pages.js --confirm

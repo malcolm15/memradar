@@ -269,13 +269,26 @@ function computePageMeta(products) {
 }
 
 // --------------------------------------------------------------- data load
-async function pagedSelect(build) {
+// Paginated select. A SHORT PAGE IS TREATED AS END-OF-DATA, which is correct
+// for PostgREST but means a transient short response mid-pagination would end
+// the loop cleanly with partial results and no error. That did NOT cause the
+// 2026-08-26 incident (that run loaded all 77,843 rows; the failure was a
+// missing env var), but the exposure is real and silent, so every call now
+// reports pages and rows. Pass `label` to make a partial read visible in any
+// run's log, and `expected` to fail loudly when a cheap expected count exists.
+async function pagedSelect(build, opts = {}) {
   const out = [];
+  let pages = 0;
   for (let from = 0; ; from += PAGE) {
     const { data, error } = await build().range(from, from + PAGE - 1);
     if (error) throw error;
+    pages++;
     out.push(...data);
     if (data.length < PAGE) break;
+  }
+  if (opts.label) log(`  ${opts.label}: ${out.length} rows in ${pages} page(s)`);
+  if (opts.expected != null && out.length !== opts.expected) {
+    throw new Error(`${opts.label || 'pagedSelect'}: expected ${opts.expected} rows, got ${out.length} - refusing to continue on a partial read`);
   }
   return out;
 }
@@ -1446,7 +1459,13 @@ function buildGuideRamNow(ctx) {
   const headline = d5 && d5.pct_change != null ? `DDR5 is up ${piPct(Number(d5.pct_change))} year over year` : 'The 2026 memory market';
   // Band-checked: the headline figure varies in width (+353% vs +9.7%), so
   // the tail is sized to keep the worst case inside 160.
-  const metaDesc = esc(`${headline}, and prices have plateaued rather than fallen. What the data says about waiting, and how to spot a fair RAM price.`);
+  const d5pct = d5 && d5.pct_change != null ? piPct(Number(d5.pct_change)) : null;
+  // DDR5 1Y is deliberately the interpolated figure: it is the most
+  // cohort-stable number in the table (0.0pp on the stability tripwire), so
+  // it survives the daily regen refreshing it.
+  const metaDesc = esc(d5pct
+    ? `Should you buy RAM now? DDR5 is up ${d5pct} year over year and still grinding higher. What a decade of real price data says about buying in this market.`
+    : 'Should you buy RAM now? What a decade of real price data says about buying memory in this market.');
   const chartCaption = `${esc(shortName(chartProduct))}, tracked since ${chartProduct.series[0].day.slice(0, 4)}. Both DRAM spikes are visible: the 2017-18 climb and decline, and the late-2025 surge.`;
 
   const jsonld = JSON.stringify({
@@ -1752,7 +1771,8 @@ async function run() {
 
   log('Loading full price_history (paginated)...');
   const allRows = await pagedSelect(() =>
-    supabase.from('price_history').select('product_id, price, in_stock, fetched_at').order('id')
+    supabase.from('price_history').select('product_id, price, in_stock, fetched_at').order('id'),
+    { label: 'price_history' }
   );
   log(`Loaded ${allRows.length} price_history rows`);
 
@@ -2139,6 +2159,18 @@ async function run() {
   console.log(`New slugs stored:   ${slugWrites}`);
   console.log(`Deleted stale dirs: ${deleted}`);
   console.log(`Duration:           ${Math.round((Date.now() - startTime) / 1000)}s`);
+
+  // FAIL LOUDLY ON PARTIAL OUTPUT. Page dirs are deleted BEFORE generation, so
+  // a run that fails N products has already removed N live pages. Exiting 0
+  // there let the 2026-08-26 cron commit the deletion of 151 pages as if it
+  // were a normal regeneration. A partial site is never a success.
+  if (CONFIRM && failures.length) {
+    console.error(`\nFATAL: ${failures.length} product(s) failed to generate, so ${failures.length} previously live page(s) are missing from this build.`);
+    console.error('Refusing to exit 0: a caller that commits this output would publish the deletion.');
+    console.error('First failures:');
+    failures.slice(0, 5).forEach((f) => console.error(`  ${f.sku}: ${f.error}`));
+    process.exit(1);
+  }
 }
 
 run().catch((err) => {
