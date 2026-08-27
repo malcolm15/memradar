@@ -350,7 +350,7 @@
           }
         });
       })
-      .catch(function () { /* keep baked values */ });
+      .catch(function (e) { console.log('[pdp-hydrate] retailer offers failed, keeping baked values:', e && e.message); });
   }
 
   function relativeTime(iso) {

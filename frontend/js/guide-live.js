@@ -82,7 +82,7 @@
     if (newest && note) {
       note.textContent = new Date(newest).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
     }
-  }).catch(function () { /* keep baked */ });
+  }).catch(function (e) { console.log('[guide] hydration failed, keeping baked values:', e && e.message); });
 
   // ---- near-ATL list: refresh the current price and restate the gap ----
   // The all-time low is baked (it moves only when a new low is set, which a
@@ -121,5 +121,5 @@
         gapEl.textContent = phrase + ' of ' + money(atl);
       });
     })
-    .catch(function () { /* keep baked */ });
+    .catch(function (e) { console.log('[guide] hydration failed, keeping baked values:', e && e.message); });
 })();

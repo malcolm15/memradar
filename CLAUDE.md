@@ -524,6 +524,26 @@ Automated posting on GitHub Actions. **Bluesky is the primary and only live targ
 
 **RULE: tweet copy changes get a dry-run review before shipping.** `workflow_dispatch` defaults `dry_run` to **true** so a manual run composes and logs but never posts. Rollout for any copy change: dry-run dispatch reviewed by Malcolm, then one watched real dispatch, then the schedule.
 
+## Silent Degradation: the rule and the audit
+
+**A fallback that fires invisibly is indistinguishable from a feature that works.** Every fallback must announce itself, or carry a written reason why silence is correct there. All three of this week's failures were this shape: a guard fired, the run looked healthy, and the damage was found by a human.
+
+**Audit, 2026-08-27.** Two fallbacks were genuine liabilities and were removed:
+- **`retailer_offers` probe-guard in the generator.** It existed for the window before the DDL landed. That table now holds every Newegg and Amazon offer, so a probe failure meant silently publishing 151 single-retailer pages that look exactly like "Newegg has nothing today". Now **throws in `--confirm`** and only degrades on a dry run.
+- **`(offers || [])` in the social bot.** A failed query yielded an empty stock map, silently disabling the out-of-stock gate, so the bot could have posted an unbuyable product. Now **throws**: a bot that cannot check stock must not post.
+
+**Silence kept, with reasons.** Frontend hydration fallbacks (`pdp-hydrate`, `price-index`, `guide-live`) keep baked values on any error. Silence toward the READER is correct there: baked values were accurate at build time, and a broken banner helps nobody. They now `console.log` so the failure is visible in devtools rather than invisible everywhere. Probe-guards for genuinely optional columns (`products.upc`, `parent_asin`, `stability_delta_pp`) log and continue, because those features are additive and their absence is a real state, not a fault.
+
+## Generation Guardrails (built 2026-08-27 after the 151-page incident)
+
+**1. VALIDATE EVERYTHING YOU NEED BEFORE YOU DESTROY ANYTHING.** `preflight()` runs first, before any load or delete: required env present (`SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `RAKUTEN_AFFILIATE_ID`), the deep-link builder actually invoked rather than merely checked for presence (a set-but-malformed id fails here), Supabase reachable, and the catalog above a 100-product floor. Verified against the incident's exact condition: aborts in 0.3s with every page directory intact. **Any new env the generator or its libraries read must be added to `REQUIRED_ENV`.**
+
+**2. PARITY ASSERTIONS.** After generation: pages on disk == sitemap product URLs == manifest product entries == generable products, plus a >10% catalog-shortfall check. Partial generation's signature is the counts disagreeing, and every one of these was detectable in the 2026-08-26 run. Note the manifest filter needs a slug segment (`/(ram|ssd)/[^/]+/$`): `/ram/` and `/ssd/` are listing pages and are manifest entries too.
+
+**3. EXTERNAL SMOKE TEST** (`scripts/smoke-test-live.js`, a step in `deploy-frontend.yml` after Pages publishes). Samples the live sitemap and asserts 200 on the homepage, both listings, the price index, both guides, and three PDPs spread deterministically across the catalog. **Deliberately outside the generator**, because preflight and parity run in its process and share its assumptions: if the generator is confidently wrong, they are wrong with it. This trusts only live HTTP.
+
+**What these still cannot catch:** a page that returns 200 with wrong or stale CONTENT. Every check here is structural (does it exist, do the counts agree, does it serve). A regeneration that quietly bakes last week's prices onto all 235 pages passes all three. Content correctness still rests on the hydration layer and on human review.
+
 ## Incident: 2026-08-26 daily regen deleted 151 pages
 
 **Cause: the `regenerate-pages` job's env block omitted `RAKUTEN_AFFILIATE_ID`.** Every product with a Newegg offer builds a Rakuten deep link, which throws without it, so exactly the 151 Newegg-matched products failed. The generator **deletes all page dirs BEFORE writing**, so those 151 live pages were deleted and never rewritten, and the run **exited 0**, so the commit gate saw ordinary-looking changes and pushed the deletion.

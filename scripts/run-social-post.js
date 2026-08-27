@@ -68,9 +68,13 @@ async function dailyCandidates() {
   const { data: products, error } = await supabase
     .from('products').select('id, sku, name, brand, category, slug').eq('retailer', 'amazon');
   if (error) throw new Error(error.message);
-  const { data: offers } = await supabase
+  const { data: offers, error: offersErr } = await supabase
     .from('retailer_offers').select('product_id, in_stock').eq('retailer', 'amazon');
-  const stock = new Map((offers || []).map((o) => [o.product_id, o.in_stock]));
+  // NOT `(offers || [])`: an empty map silently disables the out-of-stock gate,
+  // and a bot that cannot check stock must not post rather than post an
+  // unbuyable product. Fail loudly instead.
+  if (offersErr) throw new Error(`retailer_offers read failed (${offersErr.message}) - cannot verify stock, refusing to post`);
+  const stock = new Map(offers.map((o) => [o.product_id, o.in_stock]));
 
   const candidates = [];
   for (const p of products) {

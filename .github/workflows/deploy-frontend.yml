@@ -26,6 +26,10 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
       - uses: actions/configure-pages@v6
 
       - uses: actions/upload-pages-artifact@v5
@@ -34,3 +38,14 @@ jobs:
 
       - id: deployment
         uses: actions/deploy-pages@v5
+
+      # EXTERNAL smoke test: fetches what the public internet actually serves.
+      # Preflight and the parity checks live inside the generator and share its
+      # assumptions; this only trusts live HTTP, so it catches a class they
+      # structurally cannot (a deploy that did not publish, a path regression,
+      # a CDN serving 404s for pages that exist in git). Pages propagation is
+      # not instant, so give it a moment before asserting.
+      - name: Smoke test live site
+        run: |
+          sleep 20
+          node scripts/smoke-test-live.js

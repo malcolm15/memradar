@@ -68,5 +68,5 @@
         if (note) note.textContent = d;
       }
     })
-    .catch(function () { /* keep baked values */ });
+    .catch(function (e) { console.log('[price-index] hydration failed, keeping baked values:', e && e.message); });
 })();

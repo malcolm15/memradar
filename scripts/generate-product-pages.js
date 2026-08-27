@@ -276,6 +276,59 @@ function computePageMeta(products) {
 // missing env var), but the exposure is real and silent, so every call now
 // reports pages and rows. Pass `label` to make a partial read visible in any
 // run's log, and `expected` to fail loudly when a cheap expected count exists.
+
+// ------------------------------------------------------------- preflight
+// VALIDATE EVERYTHING YOU NEED BEFORE YOU DESTROY ANYTHING.
+//
+// This generator deletes every page directory before it writes, so any
+// precondition that fails mid-run has already destroyed live pages. On
+// 2026-08-26 a missing RAKUTEN_AFFILIATE_ID failed 151 products AFTER the
+// delete, and 151 pages went missing. Every check here is one that used to be
+// discovered too late.
+//
+// Env list is derived from what the generator's own library path actually
+// reads (supabase.js, rakutenLink.js). KEEPA_API_KEY is deliberately absent:
+// the generator reads from the database, never from Keepa.
+const REQUIRED_ENV = ['SUPABASE_URL', 'SUPABASE_SECRET_KEY', 'RAKUTEN_AFFILIATE_ID'];
+// A catalog this far off its usual size means a broken read, not a real
+// change; refuse rather than regenerate a truncated site.
+const MIN_EXPECTED_PRODUCTS = 100;
+
+async function preflight() {
+  const problems = [];
+
+  const missing = REQUIRED_ENV.filter((k) => !process.env[k]);
+  if (missing.length) problems.push(`missing env: ${missing.join(', ')}`);
+
+  // Prove the deep-link builder actually works rather than trusting presence:
+  // a set-but-empty or malformed id fails here, not after the delete.
+  if (process.env.RAKUTEN_AFFILIATE_ID) {
+    try {
+      neweggDeepLink('https://www.newegg.com/p/TEST');
+    } catch (e) {
+      problems.push(`RAKUTEN_AFFILIATE_ID present but unusable: ${e.message}`);
+    }
+  }
+
+  let productCount = null;
+  if (!missing.includes('SUPABASE_URL') && !missing.includes('SUPABASE_SECRET_KEY')) {
+    const { count, error } = await supabase
+      .from('products').select('*', { count: 'exact', head: true }).eq('retailer', 'amazon');
+    if (error) problems.push(`Supabase unreachable or products unreadable: ${error.message}`);
+    else if (count == null) problems.push('products count came back null');
+    else if (count < MIN_EXPECTED_PRODUCTS) problems.push(`catalog returned ${count} products, below the ${MIN_EXPECTED_PRODUCTS} floor - refusing to regenerate over a partial read`);
+    else productCount = count;
+  }
+
+  if (problems.length) {
+    console.error(`\n[${new Date().toISOString()}] PREFLIGHT FAILED - nothing was deleted or written:`);
+    problems.forEach((p) => console.error(`  - ${p}`));
+    process.exit(1);
+  }
+  log(`Preflight OK: env present, Supabase reachable, ${productCount} products in catalog`);
+  return productCount;
+}
+
 async function pagedSelect(build, opts = {}) {
   const out = [];
   let pages = 0;
@@ -1761,6 +1814,7 @@ ${productXml.join('\n')}
 async function run() {
   const startTime = Date.now();
   log(`PDP generation started${CONFIRM ? '' : ' (DRY RUN — no writes; pass --confirm to generate)'}`);
+  const expectedProducts = await preflight();
 
   const template = fs.readFileSync(TEMPLATE_PATH, 'utf8');
 
@@ -1810,8 +1864,14 @@ async function run() {
         .eq('retailer', 'amazon').order('id'));
       amazonBySku = new Map(amzOffers.map((o) => [o.products.sku, o]));
       log(`Amazon offers loaded: ${amazonBySku.size} (${amzOffers.filter((o) => o.in_stock === false).length} out of stock)`);
+    } else if (CONFIRM) {
+      // The DDL landed long ago and this table now holds every Newegg and
+      // Amazon offer. A probe failure here used to mean "not built yet"; today
+      // it means the read broke, and continuing would silently publish 151
+      // single-retailer pages that look exactly like "Newegg has nothing".
+      throw new Error(`retailer_offers unreadable (${probe.error.message}) - refusing to generate offer-less pages over live data`);
     } else {
-      log('retailer_offers not available (DDL pending) - single-retailer pages');
+      log(`retailer_offers not available (${probe.error.message}) - single-retailer pages (dry run only)`);
     }
   }
   // Per-product series + stats
@@ -2159,6 +2219,41 @@ async function run() {
   console.log(`New slugs stored:   ${slugWrites}`);
   console.log(`Deleted stale dirs: ${deleted}`);
   console.log(`Duration:           ${Math.round((Date.now() - startTime) / 1000)}s`);
+
+  // PARITY ASSERTIONS. Partial generation leaves a signature: the counts stop
+  // agreeing. On 2026-08-26 the site went to 84 pages against a 235-product
+  // catalog and nothing checked. Each of these was detectable in that run.
+  if (CONFIRM) {
+    const onDisk = ['ram', 'ssd'].reduce((n, cat) => {
+      const dir = path.join(FRONTEND, cat);
+      if (!fs.existsSync(dir)) return n;
+      return n + fs.readdirSync(dir, { withFileTypes: true })
+        .filter((d) => d.isDirectory() && fs.existsSync(path.join(dir, d.name, 'index.html'))).length;
+    }, 0);
+    const sitemapProductUrls = (fs.readFileSync(SITEMAP_PATH, 'utf8')
+      .match(/<loc>https:\/\/memradar\.com\/(?:ram|ssd)\/[^<]+<\/loc>/g) || []).length;
+    // Must require a slug segment: /ram/ and /ssd/ are the LISTING pages and
+    // are manifest entries too, so a bare category test overcounts by 2.
+    const manifestProductEntries = Object.keys(manifest)
+      .filter((u) => /\/(ram|ssd)\/[^/]+\/$/.test(u)).length;
+
+    const mismatches = [];
+    if (onDisk !== generable.length) mismatches.push(`pages on disk ${onDisk} != generable products ${generable.length}`);
+    if (sitemapProductUrls !== generable.length) mismatches.push(`sitemap product URLs ${sitemapProductUrls} != generable products ${generable.length}`);
+    if (manifestProductEntries !== generable.length) mismatches.push(`manifest product entries ${manifestProductEntries} != generable products ${generable.length}`);
+    // The catalog itself: generable can legitimately be lower than the full
+    // catalog (a product with no price history is skipped), so this compares
+    // against the preflight count only to catch a wholesale shortfall.
+    if (expectedProducts != null && generable.length < expectedProducts * 0.9) {
+      mismatches.push(`only ${generable.length} of ${expectedProducts} catalog products were generable (>10% shortfall)`);
+    }
+    if (mismatches.length) {
+      console.error(`\n[${new Date().toISOString()}] PARITY CHECK FAILED - the site is inconsistent:`);
+      mismatches.forEach((m) => console.error(`  - ${m}`));
+      process.exit(1);
+    }
+    log(`Parity OK: ${onDisk} pages on disk = ${sitemapProductUrls} sitemap URLs = ${manifestProductEntries} manifest entries = ${generable.length} generable products`);
+  }
 
   // FAIL LOUDLY ON PARTIAL OUTPUT. Page dirs are deleted BEFORE generation, so
   // a run that fails N products has already removed N live pages. Exiting 0
