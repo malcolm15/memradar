@@ -32,7 +32,28 @@
     "@type": "WebSite",
     "name": "MemRadar",
     "url": "https://memradar.com",
-    "description": "RAM and SSD price tracker for PC builders. Track price history, get drop alerts, and know the best time to buy."
+    "description": "RAM and SSD price tracker for PC builders. Track price history, get drop alerts, and know the best time to buy.",
+    "publisher": { "@id": "https://memradar.com/#organization" }
+  }
+  </script>
+  <!-- Site-wide brand identity. Declared ONCE, here on the homepage, and
+       referenced by @id from the WebSite node above so the two are one entity
+       rather than two unrelated ones. sameAs lists ONLY live profiles: the X
+       account is dormant and pointing search engines at a dead profile is the
+       same accuracy problem removed from the footer on 2026-08-27. Do not add
+       a second @type Organization to this page; Organization also appears on
+       other pages as a NESTED value (author/publisher on blog posts, creator
+       on the price index, brand on PDPs) and those are different nodes. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": "https://memradar.com/#organization",
+    "name": "MemRadar",
+    "url": "https://memradar.com",
+    "sameAs": [
+      "https://bsky.app/profile/memradar.bsky.social"
+    ]
   }
   </script>
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
