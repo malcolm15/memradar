@@ -18,7 +18,7 @@
 // exit nonzero, which surfaces as a red run plus GitHub's failure email.
 require('dotenv').config();
 const supabase = require('../backend/lib/supabase');
-const { composeDaily, composeWeekly } = require('../backend/lib/tweetCompose');
+const { composeDaily, composeWeekly, PRICE_DATA_MAX_AGE_H, MARKET_STATS_MAX_AGE_H } = require('../backend/lib/tweetCompose');
 const { postTweet, tweetLength } = require('../backend/lib/xClient');
 const bluesky = require('../backend/lib/blueskyClient');
 const { getState, setState } = require('../backend/lib/botState');
@@ -119,14 +119,23 @@ async function run() {
     log(`Dedup state: ${lastSku ? `last tweeted ${lastSku} on ${st.date || 'unknown date'}` : '(none yet)'}`);
   }
   let result;
+  // Data age rides EVERY summary, posts and skips alike. The staleness ceiling
+  // was loosened 6h -> 12h on 2026-08-27 (see tweetCompose.js for why and for
+  // the reversal condition); a loosened guarantee that is only observable when
+  // it FAILS is not observable at all, because you cannot tell afterwards how
+  // old the data was on the runs that went out.
+  let ageInfo;
   if (MODE === 'weekly') {
     const { data: rows, error } = await supabase
       .from('market_stats').select('segment, period, pct_change, computed_at').eq('period', '1m');
     if (error) throw new Error(error.message);
     const computedAt = (rows || []).map((r) => r.computed_at).sort().pop();
+    const statsAgeH = computedAt ? (Date.now() - new Date(computedAt).getTime()) / 3600000 : null;
+    ageInfo = { data_age_h: statsAgeH == null ? null : +statsAgeH.toFixed(1), data_age_of: 'market_stats', data_age_max_h: MARKET_STATS_MAX_AGE_H };
     result = composeWeekly({ rows, period: '1m', computedAt });
   } else {
     const { candidates, priceDataAgeH } = await dailyCandidates();
+    ageInfo = { data_age_h: priceDataAgeH == null ? null : +priceDataAgeH.toFixed(1), data_age_of: 'price_history', data_age_max_h: PRICE_DATA_MAX_AGE_H };
     log(`Drop candidates: ${candidates.length}${candidates.length ? `, biggest ${candidates[0].dropPct.toFixed(1)}% (${candidates[0].product.sku})` : ''}; price data ${priceDataAgeH == null ? 'unknown' : priceDataAgeH.toFixed(1) + 'h'} old; dedup excludes ${lastSku || '(nothing)'}`);
     result = composeDaily({ candidates, lastTweetedSku: lastSku, priceDataAgeH });
   }
@@ -135,7 +144,7 @@ async function run() {
 
   if (result.skip) {
     log(`SKIP: ${result.skip}`);
-    console.log('SUMMARY ' + JSON.stringify({ mode: MODE, posted: false, dry_run: DRY, skip: result.skip }));
+    console.log('SUMMARY ' + JSON.stringify({ mode: MODE, posted: false, dry_run: DRY, skip: result.skip, ...ageInfo }));
     return;
   }
 
@@ -159,7 +168,7 @@ async function run() {
 
   if (DRY) {
     log('DRY RUN: not posting.');
-    console.log('SUMMARY ' + JSON.stringify({ platform: PLATFORM, mode: MODE, posted: false, dry_run: true, branch: result.branch, size, facets, sku: result.sku || null, text: result.text }));
+    console.log('SUMMARY ' + JSON.stringify({ platform: PLATFORM, mode: MODE, posted: false, dry_run: true, branch: result.branch, size, facets, sku: result.sku || null, text: result.text, ...ageInfo }));
     return;
   }
 
@@ -173,7 +182,36 @@ async function run() {
     postUri = posted.id || null;
     log(`Posted to X: id=${posted.id || '(unknown)'}`);
   }
-  console.log('SUMMARY ' + JSON.stringify({ platform: PLATFORM, mode: MODE, posted: true, dry_run: false, branch: result.branch, size, sku: result.sku || null, uri: postUri, url: postUrl }));
+  console.log('SUMMARY ' + JSON.stringify({ platform: PLATFORM, mode: MODE, posted: true, dry_run: false, branch: result.branch, size, sku: result.sku || null, uri: postUri, url: postUrl, ...ageInfo }));
+  // OUTCOME HEARTBEAT. Fired ONLY here, on a real publish - never on a skip,
+  // never on a dry run, never merely because the job exited 0.
+  //
+  // WHY THIS EXISTS: run-level success is not job-level success is not
+  // OUTCOME-level success. The supervisor watches whether this job ran; this
+  // watches whether the account actually published. On 2026-08-27 the daily
+  // post ran, hit the staleness gate, skipped, and exited 0 - so every
+  // job-level check called it healthy on a day nothing was posted.
+  //
+  // Deliberately NOT a supervisor reading bot_state: that table is
+  // service-role only, and handing the watcher a service key to satisfy a
+  // liveness check would break its read-only principle for a signal the bot
+  // can emit itself for free. healthchecks.io is already proven independent
+  // of both GitHub and Cloudflare (hc-ping.com is Hetzner/nginx, verified
+  // 2026-08-27), so this needs no new credential beyond the ping URL.
+  //
+  // Best-effort by construction: a heartbeat must never fail a run that
+  // already published successfully.
+  if (process.env.SOCIAL_POST_HEARTBEAT_URL) {
+    try {
+      const res = await fetch(process.env.SOCIAL_POST_HEARTBEAT_URL, { method: 'POST' });
+      log(`Outcome heartbeat pinged: ${res.status}`);
+    } catch (e) {
+      log(`Outcome heartbeat FAILED (post still succeeded): ${e.message}`);
+    }
+  } else {
+    log('SOCIAL_POST_HEARTBEAT_URL not set: outcome coverage is DISABLED');
+  }
+
   // Record what we posted so tomorrow's run can exclude it.
   if (result.sku) {
     await setState(STATE_KEY, { sku: result.sku, date: new Date().toISOString().slice(0, 10), uri: postUri });

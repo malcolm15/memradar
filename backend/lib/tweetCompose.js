@@ -15,8 +15,30 @@ const SITE = 'https://memradar.com';
 // --- gates (all tunable in one place, all documented in CLAUDE.md) ---
 const MIN_DROP_PCT = 3.0;        // silence threshold: below this it is not news
 const MAX_DROP_PCT = 60.0;       // above this it is almost certainly a data glitch
-const PRICE_DATA_MAX_AGE_H = 6;  // "biggest drop today" on stale data is a wrong
-                                 // tweet wearing a right format
+// "Biggest drop today" computed on stale data is a wrong post wearing a right
+// format. That is what this gate protects against: a superlative about the
+// present tense, screenshotted, where the drop has since reversed or a bigger
+// one appeared that we could not see. It was NEVER a precision claim; the site
+// says plainly that prices are not real time.
+//
+// RAISED 6 -> 12 ON 2026-08-27. Measured: GitHub stopped creating scheduled
+// runs reliably on 2026-08-26 20:00 UTC, and price-fetch went from firing every
+// ~4h (observed gaps 211-284 min, 6/6 slots daily) to every ~8-12h (gaps 355,
+// 492, 714, 554 min; 3 of 12 slots delivered). At 6h the gate rejected a post
+// that had 12 qualifying drops and a -10.7% leader, by 0.5 hours. It held 100%
+// of the time at the old cadence and about 68% at the new one, so it had begun
+// converting an infrastructure fault into editorial silence, which reads
+// identical to "the market was quiet" and is exactly the silent-degradation
+// shape this repo keeps getting bitten by.
+//
+// 12 = one degraded fetch cycle (mean gap 8.8h, worst observed 11.9h). A
+// 12-hour-old "biggest drop today" is still TRUE, because the comparison
+// window is 24h and the linked PDP hydrates live.
+//
+// REVERSAL CONDITION, verbatim: when fetch cadence returns to 4-hourly, this
+// returns to 6. Scheduled reader: the 2026-09-10 revisit list in CLAUDE.md.
+// An undated reversal condition is the probe-guard lesson waiting to recur.
+const PRICE_DATA_MAX_AGE_H = 12;
 const MARKET_STATS_MAX_AGE_H = 36;
 const NEAR_ATL_PCT = 5.0;        // "within N% of its all-time low"
 // Above this ATL gap the all-time-low comparison stops being actionable and

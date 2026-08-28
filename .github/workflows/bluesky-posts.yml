@@ -66,6 +66,10 @@ jobs:
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
           BLUESKY_IDENTIFIER: ${{ secrets.BLUESKY_IDENTIFIER }}
           BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
+          # Outcome heartbeat: pinged by the runner ONLY on a real publish, so
+          # "the job ran and skipped" can no longer read as healthy. Absence
+          # disables it with a loud log line rather than failing the run.
+          SOCIAL_POST_HEARTBEAT_URL: ${{ secrets.SOCIAL_POST_HEARTBEAT_URL }}
         run: |
           FLAGS="--platform=bluesky --mode=${{ steps.cfg.outputs.mode }}"
           if [ "${{ steps.cfg.outputs.dry }}" = "true" ]; then FLAGS="$FLAGS --dry-run"; else FLAGS="$FLAGS --confirm"; fi
