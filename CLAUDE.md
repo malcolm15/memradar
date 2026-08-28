@@ -56,7 +56,7 @@ memradar/
 │   ├── favicon-source.svg           # Editable favicon source — re-run generate-favicons.js after changes
 │   ├── og-image.png                 # Social share image (1200×630)
 │   ├── og-image.svg                 # Editable OG image source
-│   ├── brand/                       # Brand assets — og-image.png, og-image.svg, memradar-x-header.png, memradar-x-profile.png
+│   ├── brand/                       # Brand assets: og-image.png, og-image.svg (verified 2026-08-27)
 │   ├── css/style.css                # All styles — no CSS framework
 │   ├── js/main.js                   # Homepage hero search (navigates to top result) + submit rate limiter
 │   ├── js/theme.js                  # Dark mode toggle + localStorage persistence
@@ -264,7 +264,7 @@ The frontend is fully built and live. The listing pages (`/ram/`, `/ssd/`) and t
 - **Google Search Console:** memradar.com added as a property. Sitemap submitted at `https://memradar.com/sitemap.xml`.
 - **Google Analytics:** GA4 installed on all HTML pages. Measurement ID: `G-797Q89S8GG`. Snippet is in the `<head>` of every page.
 - **SEO:** Full SEO pass complete. All pages have unique titles, descriptions, Open Graph, Twitter cards, canonical tags, and JSON-LD structured data (WebSite schema on homepage, WebPage/ContactPage on inner pages). Keywords targeted: "RAM price tracker", "SSD price history", "DDR5 price drops", "PC memory deals", "best time to buy RAM", "SSD price alert".
-- **Brand assets:** `frontend/brand/` contains brand assets for safekeeping — og-image.png, og-image.svg, memradar-x-header.png, and memradar-x-profile.png. The X header/profile images are uploaded manually on GitHub.
+- **Brand assets:** `frontend/brand/` holds `og-image.png` and `og-image.svg` for safekeeping. **Corrected 2026-08-27:** this entry previously also listed `memradar-x-header.png` and `memradar-x-profile.png`; neither file exists in `brand/` nor is tracked anywhere in the repo (`git ls-files | grep memradar-x` returns nothing). They were presumably uploaded straight to X and never committed. If the Bluesky account ever needs banner/avatar art, it starts from scratch or from `favicon-source.svg`.
 - **OG image:** `https://memradar.com/og-image.png` — live and confirmed working (1200×630px). Source SVG at `frontend/og-image.svg` for future edits. Convert with Sharp: `node -e "require('sharp')(fs.readFileSync('frontend/og-image.svg')).png().toFile('frontend/og-image.png', ...)"` .
 - **Favicons:** Full set generated from `frontend/favicon-source.svg` using `node scripts/generate-favicons.js` (requires sharp + to-ico dev deps). Files: `favicon.ico` (16+32px), `favicon-16x16.png`, `favicon-32x32.png`, `apple-touch-icon.png` (180px), `android-chrome-192x192.png`, `android-chrome-512x512.png`, `site.webmanifest`. All 6 HTML pages include the full favicon `<link>` block.
 - **Privacy policy / GA cookies:** Resolved — `privacy.html` updated to accurately state that Google Analytics is used and may set anonymous cookies for traffic measurement.
@@ -712,7 +712,7 @@ Below the **768px** breakpoint the desktop `.nav-link`s hide (`nav .nav-link { d
 
 **Do not add a second top-level `@type: Organization` to the homepage.** `Organization` also appears across 156 other pages as a NESTED value and those are different nodes: `author`/`publisher` on blog articles and `creator` on the Price Index (all MemRadar), and `brand` on PDPs (the product manufacturer, e.g. Samsung). None of those conflict, because a nested node is not a page-level entity declaration. Validated on add: both homepage blocks parse, exactly one top-level Organization, no duplicate `@type` or `@id`, and the `publisher` reference resolves to a node declared on the same page.
 
-**Not included, and available if wanted:** `logo`. Google recommends it for Organization and it is required for some rich results; `frontend/og-image.png` would be the obvious source. Left out because the brief specified name, url and sameAs.
+**`logo` is `android-chrome-512x512.png`, NOT `og-image.png`, and this distinction matters.** The OG image is a 1200x630 social share card with text, which is the wrong shape and content for this field: Google wants a clean image of the mark itself, square-ish, minimum 112x112. The 512x512 app icon is the radar mark on the `#0f1623` rounded square with no text and no wordmark, 96.6% opaque with only the rounded corners transparent. It is the largest square master the site ships. Both it and the OG image derive from `frontend/favicon-source.svg`, so **re-run `scripts/generate-favicons.js` if that master changes**, or the schema will point at a stale mark.
 
 There are no `twitter:site` / `twitter:creator` meta tags anywhere. The `twitter:card` / `twitter:title` / `twitter:image` tags on every page are card metadata that name no account, so they are correct as-is and were left alone.
 
