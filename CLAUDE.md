@@ -683,7 +683,7 @@ Below the **768px** breakpoint the desktop `.nav-link`s hide (`nav .nav-link { d
 
 `style.css` is served with `Cache-Control: max-age=14400` (**4 hours** of browser caching). A Cloudflare purge clears the edge but **NOT** visitors' browser caches — so after a CSS change, returning devices can render new HTML against a stale 4-hour-cached stylesheet (this exact mismatch broke the mobile nav on first ship: new hamburger HTML + old CSS).
 
-**Fix / convention:** a single shared version query is appended to **both `style.css` and every local JS include** on every page — `?v=YYYYMMDD` (current value: **`20260902`**). A new URL forces browsers to refetch immediately regardless of max-age.
+**Fix / convention:** a single shared version query is appended to **both `style.css` and every local JS include** on every page — `?v=YYYYMMDD` (current value: **`20260903`**). A new URL forces browsers to refetch immediately regardless of max-age.
 
 - **Bump the `?v=` value whenever any `style.css` OR local JS file changes**, and update ALL pages together (one shared stamp — they must all match). Bumping rebusts every asset; that's fine.
 - Applies to local assets only: `css/style.css` and `js/*.js` (main, theme, alert-modal, supabase-client, market-pulse, product-listing, mobile-nav, filter-sheet, back-to-top, guide-live, price-index). **External CDN scripts are NOT versioned** (jsdelivr supabase-js, cdnjs Chart.js, Cloudflare Turnstile, gtag) — they carry their own versioning.
@@ -699,7 +699,14 @@ Below the **768px** breakpoint the desktop `.nav-link`s hide (`nav .nav-link { d
 
 ## Social
 
-- **X (Twitter):** `@memradar` — official account at `https://x.com/memradar`. The X icon link appears in the footer of every HTML page (`index.html`, `about.html`, `contact.html`, `privacy.html`, `terms.html`, `affiliate.html`, `ram/index.html`, `ssd/index.html`, `ram/product-template.html`).
+- **Bluesky:** `@memradar.bsky.social`, the live account, posting daily. `https://bsky.app/profile/memradar.bsky.social`. **This is the ONLY social link in the footer** (swapped from X on 2026-08-27, since X went dormant at the API pivot and linking to a profile with no recent activity is the same small accuracy problem as a stale `sameAs`).
+- **X (Twitter):** `@memradar` at `https://x.com/memradar`. Account still exists, **no longer linked from the site**. See the Social Bot section: the posting path is dormant, not deleted.
+
+**THE FOOTER SOCIAL LINK IS DUPLICATED MARKUP ON 260 FILES** (235 generated PDPs + 25 hand-written/template pages), because the footer is not a shared include and the consolidation TODO still stands. The block is byte-identical everywhere by design, so **grep for every instance and verify the hashes match afterwards**; editing one and assuming is how the three alert-result pages get missed. The PDP footer comes from `frontend/ram/product-template.html`, and guides/price-index from their own templates, so any change must land in the templates AND the already-generated output together or the next regen silently reverts it.
+
+**BLUESKY LOGO: official asset only, and it may NOT be recolored to the footer grey.** The mark is the official butterfly from `https://bsky.social/about/brand-assets/butterfly/bluesky_media_kit_logo_transparent_1.svg`, embedded with its path data byte-for-byte and its `viewBox="0 0 568 501"` intact (verified against the downloaded file at build time, not eyeballed). Bluesky's brand guidelines explicitly permit the butterfly as a profile-link icon without permission, but prohibit **"recolor the logo (other than the approved black and white variants)"** and direct you to **"use a monochrome (black or white) variant when displaying alongside other social media icons"**. The old X mark used `fill="currentColor"` to sit at the footer grey; doing that here would be a prohibited alteration. **So the resting state is the exact official black (light) / white (dark) variant via `.footer-social-icon`, and the hover affordance is opacity, not colour.** Do not "fix" this back to `currentColor`. Same standing rule as the retailer logos: source the official mark or ship text, never approximate one.
+
+**No `sameAs` exists anywhere on the site** (checked 2026-08-27) and there are no `twitter:site` / `twitter:creator` meta tags, so there was no stale social pointer for search engines to pick up. The `twitter:card` / `twitter:title` / `twitter:image` tags on every page are Open Graph-style card metadata and name no account, so they are correct as-is and were left alone. Adding an `Organization` JSON-LD block with `sameAs: ["https://bsky.app/profile/memradar.bsky.social"]` is an open option, not built.
 
 ## Rate Limiting & Spam Protection
 

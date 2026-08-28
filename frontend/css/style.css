@@ -498,17 +498,28 @@ html.dark .section-sub { color: #94a3b8; }
 }
 
 .footer-social { display: flex; justify-content: center; }
+/* Bluesky's brand guidelines permit the butterfly as a profile-link icon but
+   prohibit "recolor the logo (other than the approved black and white
+   variants)", and direct you to "use a monochrome (black or white) variant
+   when displaying alongside other social media icons". The old X mark used
+   fill="currentColor" to sit at the footer grey; doing that to this mark
+   would be a prohibited alteration. So the resting state is the exact
+   official black (light) / white (dark) variant, and the hover affordance is
+   opacity rather than colour. Same rule as the retailer logos: source it or
+   don't ship it, never approximate it. Do not "fix" this back to
+   currentColor. */
 .footer-social-link {
-  color: #9ca3af;
   display: flex;
   align-items: center;
   padding: 5px;
   border-radius: 6px;
-  transition: color 0.15s;
+  transition: opacity 0.15s;
 }
-.footer-social-link:hover { color: #6b7280; }
-html.dark .footer-social-link { color: #64748b; }
-html.dark .footer-social-link:hover { color: #94a3b8; }
+.footer-social-link:hover { opacity: 0.7; }
+/* No fill fallback needed: SVG's default fill is already black, so a page
+   that renders before this stylesheet loads still shows an approved variant. */
+.footer-social-icon { fill: #000; }
+html.dark .footer-social-icon { fill: #fff; }
 
 /* ── Content Pages ── */
 .content-page {
