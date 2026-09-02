@@ -418,17 +418,21 @@ A short `About this kit` / `About this drive` paragraph on the pages that have o
 
 **Keyed by SKU, never by page path.** A path-keyed blurb silently orphans itself if a slug ever changes, or worse lands on a different product. **Pages without an entry render nothing, no placeholder and no generated substitute** - an auto-written blurb would be precisely the scaled content R1 removed, and the whole value of these is that a person wrote them about a specific product line. Baked, never hydrated; they carry no prices and no price history by design, because the page already has both and prose quoting them would go stale between regenerations.
 
-**19 of 25 shipped. SIX ARE HELD, and the verification is why.** Every claim in every blurb was cross-checked against that product's parsed specs and its raw listing title before anything shipped: 84 claims across 25 blurbs. Four blurbs contradicted their own listing, one omitted a material fact, and all are commented out at the bottom of the overrides file with the reason, awaiting an author rewrite. **They were NOT silently edited**, which is the standing rule for hand-authored copy: flag it and let the author decide.
+**All 25 shipped, after six were held and rewritten.** Every claim was cross-checked against that product's parsed specs and its raw listing title before anything shipped: 84 claims on the first pass, and the four axes again on the rewrites. Four blurbs contradicted their own listing and one omitted a material fact, so those six were held with the reason recorded and returned to the author. **They were NOT silently edited**, which is the standing rule for hand-authored copy: flag it and let the author decide.
 
-| held | what the listing says |
-|---|---|
-| `B0B3HGJ4V7` + `B0B3HHB3Z9` | **The two T-Force Delta RGB blurbs are swapped.** The no-suffix slug is the WHITE kit (`FF4D...`) and carries the blurb labelled black; the `-2` slug is BLACK (`FF3D...`) and carries "white heatspreader, if your build is white". |
-| `B0BNTRRLYP` | Blurb asserts "both XMP and EXPO"; the T-Force Vulcan listing says "XMP 3.0 Ready" only. |
-| `B0DSQMKYLN` | Crucial 128GB is "Laptop Memory Kit, SODIMM 262-Pin"; the blurb describes a desktop workstation and says "motherboard and BIOS". |
-| `B0BLTDRRLF` | Crucial 32GB 5600 is "Laptop Memory 262-Pin SODIMM"; the blurb says it "will work in any DDR5 board" and suits "a first build". A SODIMM does not fit a desktop board. |
-| `B0GV1RCHX2` | WD_Black SN770 listing ends "(Renewed)". The blurb recommends the drive without noting it is a refurbished unit. |
+What was wrong the first time, and what the rewrites fixed:
 
-**THE LESSON WORTH KEEPING: the two failure modes were assignment and form factor, not prose.** The colour swap and both SODIMM cases came from writing at the product-line level and then binding the text to a specific ASIN, where the line is right and the individual listing differs. **Any future hand-authored per-product copy must be verified against the listing title, not just read for sense**, and the verifier should check colour, form factor (UDIMM vs SODIMM), condition (Renewed/Refurbished) and profile support (XMP vs EXPO) explicitly, because those are the four axes that varied.
+| SKU | the error | the listing |
+|---|---|---|
+| `B0B3HGJ4V7` + `B0B3HHB3Z9` | **the two T-Force Delta RGB blurbs were swapped** | no-suffix slug is WHITE (`FF4D...`), `-2` is BLACK (`FF3D...`) |
+| `B0BNTRRLYP` | asserted "both XMP and EXPO" | T-Force Vulcan is `XMP 3.0 Ready` only |
+| `B0DSQMKYLN` | described a desktop workstation | `Laptop Memory Kit, SODIMM 262-Pin` |
+| `B0BLTDRRLF` | said it fits "any DDR5 board", suits "a first build" | `Laptop Memory 262-Pin SODIMM` |
+| `B0GV1RCHX2` | recommended the drive without qualification | listing ends `(Renewed)` |
+
+**VERIFY ON FOUR AXES. These are the four that actually went wrong, and the prose was never the problem:** COLOUR, FORM FACTOR (UDIMM vs SODIMM), CONDITION (Renewed/Refurbished), and PROFILE SUPPORT (XMP vs EXPO). Every failure came from writing at product-LINE level and then binding the text to a specific ASIN, where the line is right and the individual listing differs. Reading a blurb for sense will not catch any of them.
+
+**A fifth check earned its place on the rewrite: any claim about MemRadar's own content must be verified against that page.** The rewritten SN770 blurb says "Our own storage guide advises against used flash", which is checkable by any reader. It verifies: `/guides/should-i-buy-an-ssd-now/` carries a "Should I buy a used SSD?" section stating "Used flash is a gamble with your data" and "a used drive's remaining endurance is invisible unless the seller shares SMART data". The blurb's reasoning mirrors the guide rather than contradicting it. **A self-referential claim that turned out to be false would be worse than a spec error**, because anyone can click through and check.
 
 **Claims that are true but NOT verifiable from our data** are recorded rather than treated as errors: the Samsung 990 PRO's TLC flash and DRAM cache, the Acer GM7 and WD SN770 being DRAM-less, and the GM7 being manufactured by BIWIN. None appears in its listing title, all are correct per manufacturer specification. The glossary pull on those pages is name-token driven, so it correctly does not claim TLC or DRAM either.
 
