@@ -875,14 +875,43 @@ function buildPriceAnalysis(ctx) {
 // Baked, never hydrated: static prose with no figures in it. The blurbs carry
 // no prices and no price history by design, because the page already has both
 // and prose that quoted them would go stale between regenerations.
+// An entry is either a plain string, or { text, guide } where guide is 'ram' or
+// 'ssd'. The optional guide adds a trailing link to that buying guide.
+//
+// THE LINK IS TEMPLATE-OWNED, THE COPY IS NOT. The blurb text still goes through
+// esc() as plain prose and no author ever writes markup; the anchor is built
+// here from the GUIDES registry, so a retitled or re-slugged guide follows
+// automatically instead of leaving a hand-typed link behind. It reuses
+// .listing-guide-link, which already exists and was deliberately renamed off its
+// RAM origins to be category-neutral, so this needs no new CSS.
+const GUIDE_FOR = { ram: 'should-i-buy-ram-now', ssd: 'should-i-buy-an-ssd-now' };
+
 function buildBlurb(ctx) {
-  const body = BLURBS[ctx.p.sku];
-  if (!body) return '';
+  const entry = BLURBS[ctx.p.sku];
+  if (!entry) return '';
+  const body = typeof entry === 'string' ? entry : entry.text;
+  const guideKey = typeof entry === 'string' ? null : entry.guide;
+  if (!body) throw new Error(`blurb for ${ctx.p.sku} has no text`);
+
+  let guideLink = '';
+  if (guideKey) {
+    // Fail loudly rather than emit a dead link: a 404 from our own page is
+    // worse than no link, and a typo here would otherwise ship silently.
+    const slug = GUIDE_FOR[guideKey];
+    if (!slug) throw new Error(`blurb for ${ctx.p.sku} names unknown guide '${guideKey}' (expected ram|ssd)`);
+    const g = GUIDES.find((x) => x.slug === slug);
+    if (!g) throw new Error(`blurb for ${ctx.p.sku} points at guide '${slug}' which is not in the GUIDES registry`);
+    // Title comes from the registry, not from the blurb file, so it cannot
+    // drift from the guide's own heading.
+    guideLink = `
+          <p class="listing-guide-link"><a href="/guides/${g.slug}/">Read our guide: ${esc(g.title)}</a></p>`;
+  }
+
   const noun = ctx.p.category === 'ram' ? 'kit' : 'drive';
   return `
         <section class="pdp-blurb" aria-labelledby="pdpBlurbHeading">
           <h2 class="pdp-blurb-heading" id="pdpBlurbHeading">About this ${noun}</h2>
-          <p class="pdp-blurb-text">${esc(body)}</p>
+          <p class="pdp-blurb-text">${esc(body)}</p>${guideLink}
         </section>`;
 }
 

@@ -17,6 +17,12 @@
 // content ("our own storage guide advises...") must be verified against that
 // page, since it is checkable by any reader.
 //
+// AN ENTRY IS EITHER a plain string, OR { text, guide } where guide is 'ram' or
+// 'ssd'. The optional guide field makes the template append a trailing link to
+// that buying guide. Authors still write plain prose only: the anchor is built
+// by the generator from the GUIDES registry, so a retitled guide follows
+// automatically and no blurb ever contains markup.
+//
 // These are product-line level by design; SKU-specific numbers (capacity,
 // speed, CL, colour) live on the generated spec line.
 //
@@ -84,7 +90,13 @@ module.exports = {
   B0BLTH3KWV: 'A single 16GB desktop module at JEDEC speed. The usual reason to buy one stick rather than a kit is to pair it with one you already have, and Crucial\'s standard line is the safest bet for that, since it runs at the platform default with no profile to reconcile. As a lone module it runs single-channel. As an upgrade to a prebuilt that shipped with one stick, it is exactly the right part.',
   // WD_Black SN770 2TB  [rewritten 2026-09-02 after verification]
   // /ssd/western-digital-wd-black-2tb-sn770-nvme/
-  B0GV1RCHX2: 'This is the renewed listing for the SN770, WD\'s DRAM-less Gen4 gaming drive, and the drive itself is excellent: close to the SN850X in the things games do, single-sided, laptop-friendly. Renewed changes the math. Flash wears with writes, a refurbished drive\'s remaining endurance is unknown unless the seller shows SMART data, and the warranty is the seller\'s short guarantee rather than WD\'s five years. Our own storage guide advises against used flash. Compare this against a new SN770 before deciding the discount covers the uncertainty.',
+  B0GV1RCHX2: {
+    text: 'This is the renewed listing for the SN770, WD\'s DRAM-less Gen4 gaming drive, and the drive itself is excellent: close to the SN850X in the things games do, single-sided, laptop-friendly. Renewed changes the math. Flash wears with writes, a refurbished drive\'s remaining endurance is unknown unless the seller shows SMART data, and the warranty is the seller\'s short guarantee rather than WD\'s five years. Our own storage guide advises against used flash. Compare this against a new SN770 before deciding the discount covers the uncertainty.',
+    // The blurb cites the SSD guide in prose; the link makes that citation
+    // followable. Verified 2026-09-02: the guide's "Should I buy a used SSD?"
+    // section does advise against used flash.
+    guide: 'ssd',
+  },
   // TEAMGROUP Elite SODIMM 32GB 5600
   // /ram/teamgroup-elite-sodimm-ddr5-32gb-5600mhz/
   B0CN92HXZL: 'The laptop upgrade most people actually need: 32GB across two SODIMMs at 5600, the capacity that turns a 16GB machine from adequate into comfortable. JEDEC speed, no profiles, works in any DDR5 laptop or mini PC with two free slots. The single check that matters is whether your machine\'s memory is soldered; if it is, no kit on this site will help. If it is socketed, this is the plain, reliable option.',
