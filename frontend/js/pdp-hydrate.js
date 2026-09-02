@@ -289,6 +289,57 @@
     });
   }
 
+  // R2 PEER TABLE. One .in() query for the peer prices, exactly the shape the
+  // capacity-family chips already use. The peer SET never changes here: it is
+  // chosen deterministically from specs at build time so the table's membership
+  // (and the internal links it carries) is stable day to day. Only the numbers
+  // move, and the "vs this" delta is recomputed against the just-hydrated price
+  // of THIS product so the column cannot contradict the price shown above it.
+  //
+  // Graceful: on any failure every baked value stands.
+  function recomputePeers(cfg, currentPrice) {
+    var table = document.querySelector('.pdp-peer-table');
+    if (!table || !cfg.peers || !cfg.peers.length) return;
+    var myPerGb = (cfg.capGb > 0 && currentPrice != null) ? currentPrice / cfg.capGb : null;
+    var skus = cfg.peers.map(function (x) { return x.sku; });
+    var since = new Date(Date.now() - 3 * 86400000).toISOString();
+    sb.from('price_history')
+      .select('price, fetched_at, products!inner(sku)')
+      .in('products.sku', skus)
+      .gte('fetched_at', since)
+      .lte('fetched_at', new Date().toISOString())
+      .order('fetched_at', { ascending: false })
+      .then(function (res) {
+        var live = {};
+        if (!res.error && res.data) {
+          res.data.forEach(function (r) {
+            var sku = r.products && r.products.sku;
+            if (sku && !(sku in live)) live[sku] = Number(r.price); // first = latest
+          });
+        }
+        cfg.peers.forEach(function (pr) {
+          var tr = table.querySelector('tr[data-peer-sku="' + pr.sku + '"]');
+          if (!tr) return;
+          var price = isNaN(live[pr.sku]) ? pr.price : live[pr.sku];
+          if (price == null) return;
+          var pEl = tr.querySelector('.pdp-peer-price');
+          var gEl = tr.querySelector('.pdp-peer-pergb');
+          var dEl = tr.querySelector('.pdp-peer-delta');
+          if (pEl) pEl.textContent = money(price);
+          var pg = (pr.cap > 0) ? price / pr.cap : null;
+          if (gEl) gEl.textContent = pg == null ? 'n/a' : perGb(pg);
+          if (dEl) {
+            if (pg == null || myPerGb == null) { dEl.textContent = 'n/a'; dEl.className = 'pdp-peer-delta'; return; }
+            var d = ((pg - myPerGb) / myPerGb) * 100;
+            var r2 = Math.round(d);
+            dEl.textContent = Math.abs(r2) < 1 ? 'same' : (d > 0 ? '+' : '') + r2 + '%';
+            dEl.className = 'pdp-peer-delta' + (Math.abs(r2) < 1 ? '' : d > 0 ? ' pdp-peer-up' : ' pdp-peer-down');
+          }
+        });
+      })
+      .catch(function () { /* baked values stand */ });
+  }
+
   // Newegg comparison row (present when cfg.newegg): refresh price + stock
   // from retailer_offers. One query; graceful fallback to baked values. The
   // row ORDER stays as baked (no DOM re-sorting on hydration).
@@ -409,6 +460,7 @@
         recomputeValueMetric(price, hydrateCfg);
         recomputeAnalysis(price, hydrateCfg);
         recomputeCapacityFamily(hydrateCfg, price);
+        recomputePeers(hydrateCfg, price);
         updateJsonLd('Amazon', price, row.fetched_at, null);
       }
       updatedEl.textContent = 'Updated ' + relativeTime(row.fetched_at);

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-797Q89S8GG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-797Q89S8GG');
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>(function(){var t=localStorage.getItem('memradar-theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark');}})();</script>
+  <title>Guides | MemRadar</title>
+  <meta name="description" content="Every RAM and SSD specification MemRadar reads off a product listing, defined in plain English: DDR generation, CAS latency, NVMe and SATA, TLC and QLC, PCIe generation and more.">
+  <link rel="canonical" href="https://memradar.com/glossary/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="MemRadar">
+  <meta property="og:url" content="https://memradar.com/glossary/">
+  <meta property="og:title" content="RAM and SSD spec glossary">
+  <meta property="og:description" content="Every RAM and SSD specification MemRadar reads off a product listing, defined in plain English: DDR generation, CAS latency, NVMe and SATA, TLC and QLC, PCIe generation and more.">
+  <meta property="og:image" content="https://memradar.com/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="RAM and SSD spec glossary">
+  <meta name="twitter:description" content="Every RAM and SSD specification MemRadar reads off a product listing, defined in plain English: DDR generation, CAS latency, NVMe and SATA, TLC and QLC, PCIe generation and more.">
+  <meta name="twitter:image" content="https://memradar.com/og-image.png">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "DefinedTermSet",
+      "name": "MemRadar spec glossary",
+      "url": "https://memradar.com/glossary/",
+      "description": "Every RAM and SSD specification MemRadar reads off a product listing, defined in plain English: DDR generation, CAS latency, NVMe and SATA, TLC and QLC, PCIe generation and more.",
+      "hasDefinedTerm": [
+        {
+          "@type": "DefinedTerm",
+          "@id": "https://memradar.com/glossary/#ddr4",
+          "name": "DDR4",
+          "description": "DDR4 is the memory generation that dominated desktops and laptops from about 2015 until DDR5 arrived in late 2021. DDR4 kits typically run between 2133 and 3600 MT/s and use 288-pin desktop modules or 260-pin laptop modules. DDR4 is not compatible with DDR5 motherboards; the slots are keyed differently. For buyers on an existing DDR4 platform, the practical question is price against the kit's own history, since DDR4 pricing has moved independently of DDR5 during the 2025 to 2026 surge.",
+          "inDefinedTermSet": "https://memradar.com/glossary/"
+        },
+        {
+          "@type": "DefinedTerm",
+          "@id": "https://memradar.com/glossary/#ddr5",
+          "name": "DDR5",
+          "description": "DDR5 is the current memory generation, standard on AMD AM5 and Intel LGA1700 and LGA1851 platforms. DDR5 kits start around 4800 MT/s and enthusiast kits run 6000 to 8000 MT/s, with on-module power management and on-die error correction that DDR4 lacks. DDR5 modules do not fit DDR4 boards. DDR5 has been the most price-volatile segment MemRadar tracks, so the kit's position against its own 90-day average matters more than the sticker discount.",
+          "inDefinedTermSet": "https://memradar.com/glossary/"
+        },
+        {
+          "@type": "DefinedTerm",
+          "@id": "https://memradar.com/glossary/#speed",
+          "name": "Speed (MT/s and MHz)",
+          "description": "Memory speed is quoted in megatransfers per second (MT/s), though retailers and manufacturers often label the same number as MHz. A DDR5-6000 kit transfers data 6000 million times per second. Higher speed generally helps in memory-sensitive workloads and on AMD Ryzen systems up to the platform's sweet spot, beyond which gains shrink. Kits at the same capacity but different speeds are different products with separate price histories, which is why MemRadar tracks them on separate pages.",
+          "inDefinedTermSet": "https://memradar.com/glossary/"
+        },
+        {
+          "@type": "DefinedTerm",
+          "@id": "https://memradar.com/glossary/#cas-latency",
+          "name": "CAS latency (CL)",
+          "description": "CAS latency, written CL followed by a number such as CL30 or CL36, is the number of clock cycles between a memory request and the start of data delivery. Lower is faster at the same speed. Because faster kits run more cycles per second, a CL36 kit at 6000 MT/s can have similar real latency to a CL30 kit at 5200 MT/s. CL is one of the specs that most often separates two kits that otherwise look identical, and it usually carries a price premium at the low end.",
+          "inDefinedTermSet": "https://memradar.com/glossary/"
+        },
+        {
+          "@type": "DefinedTerm",
+          "@id": "https://memradar.com/glossary/#xmp",
+          "name": "XMP",
+          "description": "XMP (Extreme Memory Profile) is Intel's standard for storing a kit's rated speed and timings on the module so a motherboard can apply them with one BIOS setting. Without an XMP or equivalent profile enabled, memory runs at the platform's default speed, often well below the kit's rating. XMP profiles also work on most AMD boards. A kit advertised at 6000 MT/s is only 6000 MT/s once its profile is enabled.",
+          "inDefinedTermSet": "https://memradar.com/glossary/"
+        },
+        {
+          "@type": "DefinedTerm",
+          "@id": "https://memradar.com/glossary/#expo",
+          "name": "EXPO",
+          "description": "EXPO (Extended Profiles for Overclocking) is AMD's equivalent of XMP for DDR5, storing rated speed and timings tuned for Ryzen 7000 and later. Many kits carry both XMP and EXPO profiles. For an AM5 build, an EXPO-certified kit is the lower-friction choice, and kits that are otherwise identical except for EXPO certification are sometimes priced differently, which shows up as separate product pages on MemRadar.",
+          "inDefinedTermSet": "https://memradar.com/glossary/"
+        },
+        {
+          "@type": "DefinedTerm",
+          "@id": "https://memradar.com/glossary/#kit-configuration",
+          "name": "Kit configuration and dual channel",
+          "description": "A memory kit's configuration, such as 2x16GB or 1x32GB, is the number of modules and the capacity of each. Two matched modules run in dual-channel mode, which roughly doubles available memory bandwidth compared with a single module of the same total capacity. A 1x16GB module and a 2x8GB kit both provide 16GB but perform differently and cost differently, so MemRadar treats them as separate products.",
+          "inDefinedTermSet": "https://memradar.com/glossary/"
+        },
+        {
+          "@type": "DefinedTerm",
+          "@id": "https://memradar.com/glossary/#udimm-sodimm",
+          "name": "UDIMM and SODIMM",
+          "description": "UDIMM is the full-size unbuffered module used in desktops; SODIMM is the shorter module used in laptops and small-form-factor systems. The two are not interchangeable. Desktop DDR5 UDIMMs have 288 pins and laptop DDR5 SODIMMs have 262 pins. A kit listed as \"laptop memory\" is a SODIMM, and MemRadar's product name states Desktop or Laptop wherever a listing's title left it ambiguous.",
+          "inDefinedTermSet": "https://memradar.com/glossary/"
+        },
+        {
+          "@type": "DefinedTerm",
+          "@id": "https://memradar.com/glossary/#nvme",
+          "name": "NVMe",
+          "description": "NVMe (Non-Volatile Memory Express) is the protocol modern SSDs use to talk to the system over PCIe, replacing the older AHCI protocol designed for spinning disks. NVMe drives, almost always in the M.2 form factor, are several times faster than SATA SSDs in sequential transfers and much faster at handling many simultaneous requests. NVMe has become the default for new builds, and its price per gigabyte now overlaps with SATA on many capacities.",
+          "inDefinedTermSet": "https://memradar.com/glossary/"
+        },
+        {
+          "@type": "DefinedTerm",
+          "@id": "https://memradar.com/glossary/#sata",
+          "name": "SATA",
+          "description": "SATA (Serial ATA) is the older storage interface, capped at roughly 550 MB/s for SSDs. SATA SSDs come in the 2.5-inch drive shape or as M.2 SATA modules, and they remain useful for older systems, secondary storage, and machines without spare NVMe slots. SATA's traditional price advantage over NVMe has narrowed, so a SATA drive is worth buying on its own price history rather than on the assumption that it is the budget option.",
+          "inDefinedTermSet": "https://memradar.com/glossary/"
+        },
+        {
+          "@type": "DefinedTerm",
+          "@id": "https://memradar.com/glossary/#m2-2280",
+          "name": "M.2 2280",
+          "description": "M.2 is the compact card form factor for SSDs that plugs directly into a motherboard slot, and 2280 describes the dimensions: 22mm wide and 80mm long, the most common size for desktops and laptops. Other lengths exist, notably 2230 for handhelds like the Steam Deck. An M.2 slot may carry NVMe, SATA, or both, and a drive must match what the slot supports.",
+          "inDefinedTermSet": "https://memradar.com/glossary/"
+        },
+        {
+          "@type": "DefinedTerm",
+          "@id": "https://memradar.com/glossary/#two-point-five-inch",
+          "name": "2.5-inch",
+          "description": "A 2.5-inch drive is the laptop-sized rectangular case that SATA SSDs share with laptop hard drives, connected by separate SATA data and power cables. It fits any system with a SATA port and a drive bay. 2.5-inch SSDs are the simplest upgrade path for older desktops and laptops, and they are the form factor most often bought as bulk secondary storage.",
+          "inDefinedTermSet": "https://memradar.com/glossary/"
+        },
+        {
+          "@type": "DefinedTerm",
+          "@id": "https://memradar.com/glossary/#pcie-generation",
+          "name": "PCIe generation (Gen3, Gen4, Gen5)",
+          "description": "The PCIe generation of an NVMe drive sets its maximum bandwidth: roughly 3.5 GB/s for Gen3, 7 GB/s for Gen4, and 14 GB/s for Gen5 on four lanes. A drive runs at the lower of its own generation and the slot's. Gen4 covers gaming and general use with no perceptible difference for most people; Gen5 carries a price premium and runs hot enough to usually need a heatsink. Buying a generation beyond what the workload uses is a common way to overpay for storage.",
+          "inDefinedTermSet": "https://memradar.com/glossary/"
+        },
+        {
+          "@type": "DefinedTerm",
+          "@id": "https://memradar.com/glossary/#tlc",
+          "name": "TLC",
+          "description": "TLC (triple-level cell) flash stores three bits per memory cell and is the mainstream NAND type in performance SSDs. TLC balances cost, speed, and endurance, and it holds sustained write speed better than QLC once a drive's fast cache fills. Two drives with the same capacity and interface can differ in price mainly because one is TLC and the other QLC.",
+          "inDefinedTermSet": "https://memradar.com/glossary/"
+        },
+        {
+          "@type": "DefinedTerm",
+          "@id": "https://memradar.com/glossary/#qlc",
+          "name": "QLC",
+          "description": "QLC (quad-level cell) flash stores four bits per cell, which lowers cost per gigabyte at the expense of slower sustained writes and lower rated endurance. QLC drives perform well for game libraries, media, and general storage, where reads dominate. For scratch disks, video editing, or heavy daily writes, TLC is the safer choice. In a market where every gigabyte costs more, the QLC discount is real money, and it is worth knowing which type a drive uses before comparing prices.",
+          "inDefinedTermSet": "https://memradar.com/glossary/"
+        },
+        {
+          "@type": "DefinedTerm",
+          "@id": "https://memradar.com/glossary/#dram-cache",
+          "name": "DRAM cache and DRAM-less (HMB)",
+          "description": "Some SSDs include a small DRAM chip to hold the map of where data lives, which keeps performance steady under heavy use. DRAM-less drives instead borrow a slice of system memory through Host Memory Buffer (HMB), which works well for everyday use and lowers the price. DRAM-less designs are common in budget NVMe drives and are usually fine as a boot or game drive; the difference shows up under sustained mixed workloads.",
+          "inDefinedTermSet": "https://memradar.com/glossary/"
+        },
+        {
+          "@type": "DefinedTerm",
+          "@id": "https://memradar.com/glossary/#slc-cache",
+          "name": "SLC cache",
+          "description": "Most TLC and QLC SSDs reserve part of their flash to operate in a fast single-level (SLC) mode as a write cache. Writes are quick until that cache fills, after which speed drops to the drive's native rate, sometimes sharply on QLC drives. Advertised write speeds usually describe cache speed. The cache size and the speed after it fills matter for anyone regularly copying large files.",
+          "inDefinedTermSet": "https://memradar.com/glossary/"
+        },
+        {
+          "@type": "DefinedTerm",
+          "@id": "https://memradar.com/glossary/#tbw",
+          "name": "TBW (endurance)",
+          "description": "TBW (terabytes written) is the manufacturer's endurance rating: the total amount of data the drive is warranted to write over its life, such as 600 TBW for a typical 1TB TLC drive. Most consumer use never approaches the rating. TBW matters for write-heavy work and for used drives, where the remaining endurance is unknown unless the seller provides SMART data. A higher TBW rating often accompanies a higher price and a longer warranty.",
+          "inDefinedTermSet": "https://memradar.com/glossary/"
+        },
+        {
+          "@type": "DefinedTerm",
+          "@id": "https://memradar.com/glossary/#sequential-speeds",
+          "name": "Sequential read and write speeds",
+          "description": "The headline speeds on an SSD listing, such as 7,450 MB/s read, describe large sequential transfers under ideal conditions. They are the numbers that separate PCIe generations, and they are the least representative of everyday use, where small random reads dominate and most modern drives feel similar. Two drives with different headline speeds but the same generation and NAND type usually perform indistinguishably for gaming and desktop work.",
+          "inDefinedTermSet": "https://memradar.com/glossary/"
+        },
+        {
+          "@type": "DefinedTerm",
+          "@id": "https://memradar.com/glossary/#heatsink",
+          "name": "Heatsink",
+          "description": "Some NVMe drives ship with an attached heatsink to keep the controller from throttling under sustained load; others ship bare. Most motherboards include their own M.2 heatsinks, and a drive with a built-in heatsink may not fit under them or in a laptop. Gen5 drives are the ones that most often need cooling. The heatsink version of a drive is a separate product with its own price, which is why MemRadar lists it on its own page.",
+          "inDefinedTermSet": "https://memradar.com/glossary/"
+        },
+        {
+          "@type": "DefinedTerm",
+          "@id": "https://memradar.com/glossary/#price-per-gb",
+          "name": "Price per GB",
+          "description": "Price per gigabyte divides a product's current price by its capacity, so a 2TB drive at $200 is $0.10 per GB and a 32GB kit at $160 is $5.00 per GB. It is the most useful way to compare different capacities of the same product line and to judge a drive or kit against its segment. MemRadar compares each product's price per GB against the current median for its segment, so \"above\" or \"below\" is relative to the market as it stands, not to a fixed threshold.",
+          "inDefinedTermSet": "https://memradar.com/glossary/"
+        },
+        {
+          "@type": "DefinedTerm",
+          "@id": "https://memradar.com/glossary/#all-time-low-high",
+          "name": "All-time low and all-time high",
+          "description": "On MemRadar, a product's all-time low and all-time high are the lowest and highest prices recorded in its tracked history, which for the longest-tracked products reaches back to 2015. They are bounds, not predictions. During the 2025 to 2026 price surge most products sit far above their all-time low, so a price near the all-time low is rare and worth attention, while a price near the all-time high is a signal to check the 90-day average before buying.",
+          "inDefinedTermSet": "https://memradar.com/glossary/"
+        },
+        {
+          "@type": "DefinedTerm",
+          "@id": "https://memradar.com/glossary/#ninety-day-average",
+          "name": "90-day average",
+          "description": "The 90-day average is the mean of a product's recorded prices over the past 90 days, and it is the baseline MemRadar's buy indicator compares against. A price below the average means the product is cheaper than it has recently been; it does not mean the product is cheap historically. That distinction is the reason the indicator also notes how far the current price sits above the all-time low.",
+          "inDefinedTermSet": "https://memradar.com/glossary/"
+        }
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://memradar.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Glossary",
+          "item": "https://memradar.com/glossary/"
+        }
+      ]
+    }
+  ]
+}
+  </script>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#0f1623">
+  <link rel="stylesheet" href="../css/style.css?v=20260905">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container">
+      <a href="/" class="logo">
+        <span class="logo-mem">Mem</span><span class="logo-radar">Radar</span>
+      </a>
+      <nav>
+        <a href="/ram/" class="nav-link">RAM</a>
+        <a href="/ssd/" class="nav-link">SSDs</a>
+        <a href="/faq/" class="nav-link">FAQ</a>
+        <a href="/blog/" class="nav-link">Blog</a>
+        <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Menu" aria-expanded="false" aria-controls="mobileNavPanel">
+          <svg class="icon-menu" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          <svg class="icon-close" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+        </button>
+        <a href="#" class="btn-alert">Set an Alert</a>
+        <button class="header-search-toggle" id="headerSearchToggle" aria-label="Search products" aria-expanded="false" aria-controls="headerSearchPanel">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </button>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode"></button>
+        <div class="mobile-nav-panel" id="mobileNavPanel">
+          <a href="/ram/" class="mobile-nav-link">RAM</a>
+          <a href="/ssd/" class="mobile-nav-link">SSDs</a>
+          <a href="/faq/" class="mobile-nav-link">FAQ</a>
+          <a href="/blog/" class="mobile-nav-link">Blog</a>
+        </div>
+        <div class="header-search-panel" id="headerSearchPanel" hidden>
+          <input type="text" class="header-search-input" placeholder="Search RAM &amp; SSDs…" aria-label="Search products" autocomplete="off">
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="content-page">
+      <div class="page-header">
+        <h1>Spec glossary</h1>
+        <p>Every RAM and SSD specification MemRadar reads off a product listing, defined once.</p>
+      </div>
+<nav class="glossary-toc" aria-label="Glossary contents"><ul><li><a href="#ddr4">DDR4</a></li><li><a href="#ddr5">DDR5</a></li><li><a href="#speed">Speed (MT/s and MHz)</a></li><li><a href="#cas-latency">CAS latency (CL)</a></li><li><a href="#xmp">XMP</a></li><li><a href="#expo">EXPO</a></li><li><a href="#kit-configuration">Kit configuration and dual channel</a></li><li><a href="#udimm-sodimm">UDIMM and SODIMM</a></li><li><a href="#nvme">NVMe</a></li><li><a href="#sata">SATA</a></li><li><a href="#m2-2280">M.2 2280</a></li><li><a href="#two-point-five-inch">2.5-inch</a></li><li><a href="#pcie-generation">PCIe generation (Gen3, Gen4, Gen5)</a></li><li><a href="#tlc">TLC</a></li><li><a href="#qlc">QLC</a></li><li><a href="#dram-cache">DRAM cache and DRAM-less (HMB)</a></li><li><a href="#slc-cache">SLC cache</a></li><li><a href="#tbw">TBW (endurance)</a></li><li><a href="#sequential-speeds">Sequential read and write speeds</a></li><li><a href="#heatsink">Heatsink</a></li><li><a href="#price-per-gb">Price per GB</a></li><li><a href="#all-time-low-high">All-time low and all-time high</a></li><li><a href="#ninety-day-average">90-day average</a></li></ul></nav>
+      <section class="glossary-section">
+        <h2>RAM</h2>
+        <dl class="glossary-list">
+          <div class="glossary-item" id="ddr4">
+            <dt><a class="glossary-anchor" href="#ddr4">DDR4</a></dt>
+            <dd>DDR4 is the memory generation that dominated desktops and laptops from about 2015 until DDR5 arrived in late 2021. DDR4 kits typically run between 2133 and 3600 MT/s and use 288-pin desktop modules or 260-pin laptop modules. DDR4 is not compatible with DDR5 motherboards; the slots are keyed differently. For buyers on an existing DDR4 platform, the practical question is price against the kit&#39;s own history, since DDR4 pricing has moved independently of DDR5 during the 2025 to 2026 surge.</dd>
+          </div>
+          <div class="glossary-item" id="ddr5">
+            <dt><a class="glossary-anchor" href="#ddr5">DDR5</a></dt>
+            <dd>DDR5 is the current memory generation, standard on AMD AM5 and Intel LGA1700 and LGA1851 platforms. DDR5 kits start around 4800 MT/s and enthusiast kits run 6000 to 8000 MT/s, with on-module power management and on-die error correction that DDR4 lacks. DDR5 modules do not fit DDR4 boards. DDR5 has been the most price-volatile segment MemRadar tracks, so the kit&#39;s position against its own 90-day average matters more than the sticker discount.</dd>
+          </div>
+          <div class="glossary-item" id="speed">
+            <dt><a class="glossary-anchor" href="#speed">Speed (MT/s and MHz)</a></dt>
+            <dd>Memory speed is quoted in megatransfers per second (MT/s), though retailers and manufacturers often label the same number as MHz. A DDR5-6000 kit transfers data 6000 million times per second. Higher speed generally helps in memory-sensitive workloads and on AMD Ryzen systems up to the platform&#39;s sweet spot, beyond which gains shrink. Kits at the same capacity but different speeds are different products with separate price histories, which is why MemRadar tracks them on separate pages.</dd>
+          </div>
+          <div class="glossary-item" id="cas-latency">
+            <dt><a class="glossary-anchor" href="#cas-latency">CAS latency (CL)</a></dt>
+            <dd>CAS latency, written CL followed by a number such as CL30 or CL36, is the number of clock cycles between a memory request and the start of data delivery. Lower is faster at the same speed. Because faster kits run more cycles per second, a CL36 kit at 6000 MT/s can have similar real latency to a CL30 kit at 5200 MT/s. CL is one of the specs that most often separates two kits that otherwise look identical, and it usually carries a price premium at the low end.</dd>
+          </div>
+          <div class="glossary-item" id="xmp">
+            <dt><a class="glossary-anchor" href="#xmp">XMP</a></dt>
+            <dd>XMP (Extreme Memory Profile) is Intel&#39;s standard for storing a kit&#39;s rated speed and timings on the module so a motherboard can apply them with one BIOS setting. Without an XMP or equivalent profile enabled, memory runs at the platform&#39;s default speed, often well below the kit&#39;s rating. XMP profiles also work on most AMD boards. A kit advertised at 6000 MT/s is only 6000 MT/s once its profile is enabled.</dd>
+          </div>
+          <div class="glossary-item" id="expo">
+            <dt><a class="glossary-anchor" href="#expo">EXPO</a></dt>
+            <dd>EXPO (Extended Profiles for Overclocking) is AMD&#39;s equivalent of XMP for DDR5, storing rated speed and timings tuned for Ryzen 7000 and later. Many kits carry both XMP and EXPO profiles. For an AM5 build, an EXPO-certified kit is the lower-friction choice, and kits that are otherwise identical except for EXPO certification are sometimes priced differently, which shows up as separate product pages on MemRadar.</dd>
+          </div>
+          <div class="glossary-item" id="kit-configuration">
+            <dt><a class="glossary-anchor" href="#kit-configuration">Kit configuration and dual channel</a></dt>
+            <dd>A memory kit&#39;s configuration, such as 2x16GB or 1x32GB, is the number of modules and the capacity of each. Two matched modules run in dual-channel mode, which roughly doubles available memory bandwidth compared with a single module of the same total capacity. A 1x16GB module and a 2x8GB kit both provide 16GB but perform differently and cost differently, so MemRadar treats them as separate products.</dd>
+          </div>
+          <div class="glossary-item" id="udimm-sodimm">
+            <dt><a class="glossary-anchor" href="#udimm-sodimm">UDIMM and SODIMM</a></dt>
+            <dd>UDIMM is the full-size unbuffered module used in desktops; SODIMM is the shorter module used in laptops and small-form-factor systems. The two are not interchangeable. Desktop DDR5 UDIMMs have 288 pins and laptop DDR5 SODIMMs have 262 pins. A kit listed as &quot;laptop memory&quot; is a SODIMM, and MemRadar&#39;s product name states Desktop or Laptop wherever a listing&#39;s title left it ambiguous.</dd>
+          </div>
+        </dl>
+      </section>
+      <section class="glossary-section">
+        <h2>SSD</h2>
+        <dl class="glossary-list">
+          <div class="glossary-item" id="nvme">
+            <dt><a class="glossary-anchor" href="#nvme">NVMe</a></dt>
+            <dd>NVMe (Non-Volatile Memory Express) is the protocol modern SSDs use to talk to the system over PCIe, replacing the older AHCI protocol designed for spinning disks. NVMe drives, almost always in the M.2 form factor, are several times faster than SATA SSDs in sequential transfers and much faster at handling many simultaneous requests. NVMe has become the default for new builds, and its price per gigabyte now overlaps with SATA on many capacities.</dd>
+          </div>
+          <div class="glossary-item" id="sata">
+            <dt><a class="glossary-anchor" href="#sata">SATA</a></dt>
+            <dd>SATA (Serial ATA) is the older storage interface, capped at roughly 550 MB/s for SSDs. SATA SSDs come in the 2.5-inch drive shape or as M.2 SATA modules, and they remain useful for older systems, secondary storage, and machines without spare NVMe slots. SATA&#39;s traditional price advantage over NVMe has narrowed, so a SATA drive is worth buying on its own price history rather than on the assumption that it is the budget option.</dd>
+          </div>
+          <div class="glossary-item" id="m2-2280">
+            <dt><a class="glossary-anchor" href="#m2-2280">M.2 2280</a></dt>
+            <dd>M.2 is the compact card form factor for SSDs that plugs directly into a motherboard slot, and 2280 describes the dimensions: 22mm wide and 80mm long, the most common size for desktops and laptops. Other lengths exist, notably 2230 for handhelds like the Steam Deck. An M.2 slot may carry NVMe, SATA, or both, and a drive must match what the slot supports.</dd>
+          </div>
+          <div class="glossary-item" id="two-point-five-inch">
+            <dt><a class="glossary-anchor" href="#two-point-five-inch">2.5-inch</a></dt>
+            <dd>A 2.5-inch drive is the laptop-sized rectangular case that SATA SSDs share with laptop hard drives, connected by separate SATA data and power cables. It fits any system with a SATA port and a drive bay. 2.5-inch SSDs are the simplest upgrade path for older desktops and laptops, and they are the form factor most often bought as bulk secondary storage.</dd>
+          </div>
+          <div class="glossary-item" id="pcie-generation">
+            <dt><a class="glossary-anchor" href="#pcie-generation">PCIe generation (Gen3, Gen4, Gen5)</a></dt>
+            <dd>The PCIe generation of an NVMe drive sets its maximum bandwidth: roughly 3.5 GB/s for Gen3, 7 GB/s for Gen4, and 14 GB/s for Gen5 on four lanes. A drive runs at the lower of its own generation and the slot&#39;s. Gen4 covers gaming and general use with no perceptible difference for most people; Gen5 carries a price premium and runs hot enough to usually need a heatsink. Buying a generation beyond what the workload uses is a common way to overpay for storage.</dd>
+          </div>
+          <div class="glossary-item" id="tlc">
+            <dt><a class="glossary-anchor" href="#tlc">TLC</a></dt>
+            <dd>TLC (triple-level cell) flash stores three bits per memory cell and is the mainstream NAND type in performance SSDs. TLC balances cost, speed, and endurance, and it holds sustained write speed better than QLC once a drive&#39;s fast cache fills. Two drives with the same capacity and interface can differ in price mainly because one is TLC and the other QLC.</dd>
+          </div>
+          <div class="glossary-item" id="qlc">
+            <dt><a class="glossary-anchor" href="#qlc">QLC</a></dt>
+            <dd>QLC (quad-level cell) flash stores four bits per cell, which lowers cost per gigabyte at the expense of slower sustained writes and lower rated endurance. QLC drives perform well for game libraries, media, and general storage, where reads dominate. For scratch disks, video editing, or heavy daily writes, TLC is the safer choice. In a market where every gigabyte costs more, the QLC discount is real money, and it is worth knowing which type a drive uses before comparing prices.</dd>
+          </div>
+          <div class="glossary-item" id="dram-cache">
+            <dt><a class="glossary-anchor" href="#dram-cache">DRAM cache and DRAM-less (HMB)</a></dt>
+            <dd>Some SSDs include a small DRAM chip to hold the map of where data lives, which keeps performance steady under heavy use. DRAM-less drives instead borrow a slice of system memory through Host Memory Buffer (HMB), which works well for everyday use and lowers the price. DRAM-less designs are common in budget NVMe drives and are usually fine as a boot or game drive; the difference shows up under sustained mixed workloads.</dd>
+          </div>
+          <div class="glossary-item" id="slc-cache">
+            <dt><a class="glossary-anchor" href="#slc-cache">SLC cache</a></dt>
+            <dd>Most TLC and QLC SSDs reserve part of their flash to operate in a fast single-level (SLC) mode as a write cache. Writes are quick until that cache fills, after which speed drops to the drive&#39;s native rate, sometimes sharply on QLC drives. Advertised write speeds usually describe cache speed. The cache size and the speed after it fills matter for anyone regularly copying large files.</dd>
+          </div>
+          <div class="glossary-item" id="tbw">
+            <dt><a class="glossary-anchor" href="#tbw">TBW (endurance)</a></dt>
+            <dd>TBW (terabytes written) is the manufacturer&#39;s endurance rating: the total amount of data the drive is warranted to write over its life, such as 600 TBW for a typical 1TB TLC drive. Most consumer use never approaches the rating. TBW matters for write-heavy work and for used drives, where the remaining endurance is unknown unless the seller provides SMART data. A higher TBW rating often accompanies a higher price and a longer warranty.</dd>
+          </div>
+          <div class="glossary-item" id="sequential-speeds">
+            <dt><a class="glossary-anchor" href="#sequential-speeds">Sequential read and write speeds</a></dt>
+            <dd>The headline speeds on an SSD listing, such as 7,450 MB/s read, describe large sequential transfers under ideal conditions. They are the numbers that separate PCIe generations, and they are the least representative of everyday use, where small random reads dominate and most modern drives feel similar. Two drives with different headline speeds but the same generation and NAND type usually perform indistinguishably for gaming and desktop work.</dd>
+          </div>
+          <div class="glossary-item" id="heatsink">
+            <dt><a class="glossary-anchor" href="#heatsink">Heatsink</a></dt>
+            <dd>Some NVMe drives ship with an attached heatsink to keep the controller from throttling under sustained load; others ship bare. Most motherboards include their own M.2 heatsinks, and a drive with a built-in heatsink may not fit under them or in a laptop. Gen5 drives are the ones that most often need cooling. The heatsink version of a drive is a separate product with its own price, which is why MemRadar lists it on its own page.</dd>
+          </div>
+        </dl>
+      </section>
+      <section class="glossary-section">
+        <h2>Price terms</h2>
+        <dl class="glossary-list">
+          <div class="glossary-item" id="price-per-gb">
+            <dt><a class="glossary-anchor" href="#price-per-gb">Price per GB</a></dt>
+            <dd>Price per gigabyte divides a product&#39;s current price by its capacity, so a 2TB drive at $200 is $0.10 per GB and a 32GB kit at $160 is $5.00 per GB. It is the most useful way to compare different capacities of the same product line and to judge a drive or kit against its segment. MemRadar compares each product&#39;s price per GB against the current median for its segment, so &quot;above&quot; or &quot;below&quot; is relative to the market as it stands, not to a fixed threshold.</dd>
+          </div>
+          <div class="glossary-item" id="all-time-low-high">
+            <dt><a class="glossary-anchor" href="#all-time-low-high">All-time low and all-time high</a></dt>
+            <dd>On MemRadar, a product&#39;s all-time low and all-time high are the lowest and highest prices recorded in its tracked history, which for the longest-tracked products reaches back to 2015. They are bounds, not predictions. During the 2025 to 2026 price surge most products sit far above their all-time low, so a price near the all-time low is rare and worth attention, while a price near the all-time high is a signal to check the 90-day average before buying.</dd>
+          </div>
+          <div class="glossary-item" id="ninety-day-average">
+            <dt><a class="glossary-anchor" href="#ninety-day-average">90-day average</a></dt>
+            <dd>The 90-day average is the mean of a product&#39;s recorded prices over the past 90 days, and it is the baseline MemRadar&#39;s buy indicator compares against. A price below the average means the product is cheaper than it has recently been; it does not mean the product is cheap historically. That distinction is the reason the indicator also notes how far the current price sits above the all-time low.</dd>
+          </div>
+        </dl>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-inner">
+        <p class="footer-brand"><strong>MemRadar</strong> · RAM &amp; SSD price tracking for PC builders.</p>
+        <nav class="footer-nav">
+          <a href="../about.html">About</a>
+          <a href="../contact.html">Contact</a>
+          <a href="../privacy.html">Privacy Policy</a>
+          <a href="../terms.html">Terms of Service</a>
+          <a href="../affiliate.html">Affiliate Disclosure</a>
+          <a href="/price-index/">Price Index</a>
+          <a href="/glossary/">Glossary</a>
+          <a href="/guides/">Guides</a>
+          <a href="/faq/">FAQ</a>
+          <a href="/blog/">Blog</a>
+        </nav>
+        <div class="footer-social">
+          <a href="https://bsky.app/profile/memradar.bsky.social" target="_blank" rel="noopener noreferrer" class="footer-social-link" aria-label="MemRadar on Bluesky">
+            <svg class="footer-social-icon" width="18" height="18" viewBox="0 0 568 501" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M123.121 33.6637C188.241 82.5526 258.281 181.681 284 234.873C309.719 181.681 379.759 82.5526 444.879 33.6637C491.866 -1.61183 568 -28.9064 568 57.9464C568 75.2916 558.055 203.659 552.222 224.501C531.947 296.954 458.067 315.434 392.347 304.249C507.222 323.8 536.444 388.56 473.333 453.32C353.473 576.312 301.061 422.461 287.631 383.039C285.169 375.812 284.017 372.431 284 375.306C283.983 372.431 282.831 375.812 280.369 383.039C266.939 422.461 214.527 576.312 94.6667 453.32C31.5556 388.56 60.7778 323.8 175.653 304.249C109.933 315.434 36.0535 296.954 15.7778 224.501C9.94525 203.659 0 75.2916 0 57.9464C0 -28.9064 76.1345 -1.61183 123.121 33.6637Z"/></svg>
+          </a>
+        </div>
+        <p class="footer-legal">MemRadar participates in the Amazon Associates Program and in Newegg's affiliate program via Rakuten Advertising. Links to products may be affiliate links. If you purchase through them, we may earn a small commission at no extra cost to you.</p>
+        <p class="footer-copyright">© <span class="footer-year">2026</span> MemRadar</p>
+        <script>document.querySelectorAll(".footer-year").forEach(function(e){e.textContent=new Date().getFullYear();});</script>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../js/main.js?v=20260905"></script>
+  <script src="../js/theme.js?v=20260905"></script>
+  <script src="../js/mobile-nav.js?v=20260905"></script>
+  <script src="../js/search.js?v=20260905"></script>
+</body>
+</html>
