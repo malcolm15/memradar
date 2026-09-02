@@ -3327,3 +3327,25 @@ html.dark .glossary-toc a { border-color: #2d3f55; color: #94a3b8; }
   .pdp-milestone dt { min-width: 100%; }
   .pdp-data-table { font-size: 0.8rem; }
 }
+
+/* R3: hand-curated product blurb. Conditional block, present on 19 of 235
+   pages. The heading matches the weight of the existing section labels rather
+   than competing with the h1 above it. */
+.pdp-blurb { margin: 14px 0 4px; }
+.pdp-blurb-heading {
+  margin: 0 0 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-secondary, #64748b);
+}
+.pdp-blurb-text {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: var(--text-secondary, #475569);
+  max-width: 62ch;
+}
+html.dark .pdp-blurb-text { color: #cbd5e1; }
+html.dark .pdp-blurb-heading { color: #94a3b8; }

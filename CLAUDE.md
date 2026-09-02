@@ -412,6 +412,28 @@ Found by the standing corrupt-DOM QA pattern, which is the only method that catc
 
 **R2 is the last structural change to the PDP template for the foreseeable future. After this, the daily regen changes prices and dates only.** The reason is not aesthetic: **Google needs a stable improved state to re-evaluate.** A site that keeps changing its template gives the crawler a moving target and restarts whatever assessment was in progress, so continuing to iterate would actively delay recovery even if each individual change were an improvement. Content changes (a new guide, a new glossary term, catalog additions) are fine. Structural changes to the PDP shape are not, until there is evidence in Search Console that the re-evaluation has happened and settled.
 
+## Recovery Build R3 (2026-09-02): hand-curated product blurbs
+
+A short `About this kit` / `About this drive` paragraph on the pages that have one, from `scripts/blurb-overrides.js`. **Content, not structure**: a conditional block on the existing template, same override pattern as the titles. The R2 template freeze holds.
+
+**Keyed by SKU, never by page path.** A path-keyed blurb silently orphans itself if a slug ever changes, or worse lands on a different product. **Pages without an entry render nothing, no placeholder and no generated substitute** - an auto-written blurb would be precisely the scaled content R1 removed, and the whole value of these is that a person wrote them about a specific product line. Baked, never hydrated; they carry no prices and no price history by design, because the page already has both and prose quoting them would go stale between regenerations.
+
+**19 of 25 shipped. SIX ARE HELD, and the verification is why.** Every claim in every blurb was cross-checked against that product's parsed specs and its raw listing title before anything shipped: 84 claims across 25 blurbs. Four blurbs contradicted their own listing, one omitted a material fact, and all are commented out at the bottom of the overrides file with the reason, awaiting an author rewrite. **They were NOT silently edited**, which is the standing rule for hand-authored copy: flag it and let the author decide.
+
+| held | what the listing says |
+|---|---|
+| `B0B3HGJ4V7` + `B0B3HHB3Z9` | **The two T-Force Delta RGB blurbs are swapped.** The no-suffix slug is the WHITE kit (`FF4D...`) and carries the blurb labelled black; the `-2` slug is BLACK (`FF3D...`) and carries "white heatspreader, if your build is white". |
+| `B0BNTRRLYP` | Blurb asserts "both XMP and EXPO"; the T-Force Vulcan listing says "XMP 3.0 Ready" only. |
+| `B0DSQMKYLN` | Crucial 128GB is "Laptop Memory Kit, SODIMM 262-Pin"; the blurb describes a desktop workstation and says "motherboard and BIOS". |
+| `B0BLTDRRLF` | Crucial 32GB 5600 is "Laptop Memory 262-Pin SODIMM"; the blurb says it "will work in any DDR5 board" and suits "a first build". A SODIMM does not fit a desktop board. |
+| `B0GV1RCHX2` | WD_Black SN770 listing ends "(Renewed)". The blurb recommends the drive without noting it is a refurbished unit. |
+
+**THE LESSON WORTH KEEPING: the two failure modes were assignment and form factor, not prose.** The colour swap and both SODIMM cases came from writing at the product-line level and then binding the text to a specific ASIN, where the line is right and the individual listing differs. **Any future hand-authored per-product copy must be verified against the listing title, not just read for sense**, and the verifier should check colour, form factor (UDIMM vs SODIMM), condition (Renewed/Refurbished) and profile support (XMP vs EXPO) explicitly, because those are the four axes that varied.
+
+**Claims that are true but NOT verifiable from our data** are recorded rather than treated as errors: the Samsung 990 PRO's TLC flash and DRAM cache, the Acer GM7 and WD SN770 being DRAM-less, and the GM7 being manufactured by BIWIN. None appears in its listing title, all are correct per manufacturer specification. The glossary pull on those pages is name-token driven, so it correctly does not claim TLC or DRAM either.
+
+**Allocation note:** 3 of the 25 blurbs sit on pages that are currently `noindex,follow` for having under 30 tracked days. They still serve readers, and the pages flip back automatically once they cross the threshold.
+
 ## Site-Wide Instant Search
 
 One implementation (`frontend/js/search.js`) powers all search on the site. No server: it searches a static index client-side.
@@ -756,7 +778,7 @@ Below the **768px** breakpoint the desktop `.nav-link`s hide (`nav .nav-link { d
 
 `style.css` is served with `Cache-Control: max-age=14400` (**4 hours** of browser caching). A Cloudflare purge clears the edge but **NOT** visitors' browser caches — so after a CSS change, returning devices can render new HTML against a stale 4-hour-cached stylesheet (this exact mismatch broke the mobile nav on first ship: new hamburger HTML + old CSS).
 
-**Fix / convention:** a single shared version query is appended to **both `style.css` and every local JS include** on every page — `?v=YYYYMMDD` (current value: **`20260905`**). A new URL forces browsers to refetch immediately regardless of max-age.
+**Fix / convention:** a single shared version query is appended to **both `style.css` and every local JS include** on every page — `?v=YYYYMMDD` (current value: **`20260906`**). A new URL forces browsers to refetch immediately regardless of max-age.
 
 - **Bump the `?v=` value whenever any `style.css` OR local JS file changes**, and update ALL pages together (one shared stamp — they must all match). Bumping rebusts every asset; that's fine.
 - Applies to local assets only: `css/style.css` and `js/*.js` (main, theme, alert-modal, supabase-client, market-pulse, product-listing, mobile-nav, filter-sheet, back-to-top, guide-live, price-index). **External CDN scripts are NOT versioned** (jsdelivr supabase-js, cdnjs Chart.js, Cloudflare Turnstile, gtag) — they carry their own versioning.
