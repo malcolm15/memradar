@@ -82,10 +82,16 @@
     var pct = Math.round(Math.abs(((current - cfg.avg90) / cfg.avg90) * 100));
     if (buyState(current, cfg) !== 'elevated') {
       var phrase = buyState(current, cfg) === 'typical' ? 'in line with the ' + cfg.avgLabel : pct + '% below the ' + cfg.avgLabel;
+      // Honest flag: mirrors the generator's buy-indicator clause exactly. Cheap
+      // against the recent average, still far above the all-time low. Hydrates
+      // WITH the indicator so the two can never disagree.
+      var gap = (cfg.extremesOk && cfg.atl != null && current >= cfg.atl * cfg.inflationRatio)
+        ? ', though still ' + Math.round(((current - cfg.atl) / cfg.atl) * 100) + '% above its all-time low of ' + money(cfg.atl) + ' (' + cfg.atlMonth + ')'
+        : '';
       ind.className = 'pdp-buy-indicator pdp-buy-indicator--good';
       ind.innerHTML = '<div class="pdp-buy-indicator-icon" aria-hidden="true">' + GOOD_ICON + '</div>' +
         '<div class="pdp-buy-indicator-body"><strong>Good time to buy</strong>' +
-        '<span>Current price is ' + esc(phrase) + '.</span></div>';
+        '<span>Current price is ' + esc(phrase + gap) + '.</span></div>';
     } else {
       ind.className = 'pdp-buy-indicator pdp-buy-indicator--caution';
       ind.innerHTML = '<div class="pdp-buy-indicator-icon" aria-hidden="true">⚠</div>' +
@@ -107,56 +113,64 @@
     if (wordEl) wordEl.textContent = '· ' + wording + ' for ' + cfg.segLabel;
   }
 
-  // Price-Analysis verdict sentence (S4). Mirrors the generator's
-  // verdictSentence() exactly, and uses buyState() so it can never disagree
-  // with the buy-indicator above it.
-  function verdictText(current, cfg) {
-    var state = buyState(current, cfg);
-    if (state == null) return '';
-    var segNoun = (cfg.segWord ? cfg.segWord + ' ' : '') + cfg.noun;
-    if (state !== 'elevated' && cfg.atl != null && current >= cfg.atl * cfg.inflationRatio) {
-      return "It's near its recent low, though still well above where it traded a year or two ago, a reflection of the broader " + cfg.market + ' market.';
-    }
-    if (state === 'good') return 'For a ' + segNoun + ', this is a strong price relative to its own history, a reasonable time to buy.';
-    if (state === 'elevated') return 'Historically this sits on the expensive side, so if you can wait, it may be worth watching for a drop.';
-    return 'This is a fairly typical price for this ' + cfg.noun + ' based on its recent history.';
-  }
-
-  // Rebuild the current-assessment span of the Price Analysis paragraph from the
-  // live price (position vs low/high, $/GB, verdict). Mirrors the generator's
-  // currentAssessment(). textContent throughout, so nothing needs escaping. The
-  // historical span (.pdp-analysis-history) is baked and left untouched.
-  function recomputeAnalysis(current, cfg) {
-    var el = document.getElementById('pdpAnalysisCurrent');
-    if (!el) return;
-    if (amazonOos) { // mirrors the generator's currentAssessment() OOS branch
-      el.textContent = 'Last seen at ' + money(current) + ', currently unavailable at Amazon.';
-      return;
-    }
-    var parts = [];
-    if (cfg.atl != null) {
+  // R1: EXACT mirror of the generator's analysisSentences(). Same order, same
+  // thresholds (passed in cfg, never duplicated as literals here), same
+  // wording. If these two ever disagree the page contradicts itself between
+  // load and hydration, which is worse than either version alone.
+  //
+  // Returns an array; empty is legitimate and means nothing about this price is
+  // notable, in which case the whole section is hidden rather than left showing
+  // a stale sentence that hydration decided not to replace.
+  function analysisSentences(current, cfg) {
+    if (amazonOos) return ['Last seen at ' + money(current) + ', currently unavailable at Amazon.'];
+    var out = [];
+    if (cfg.rangeReal) {
       if (current <= cfg.atl) {
-        parts.push('Currently at ' + money(current) + ", this is the lowest price we've recorded.");
-      } else if (current <= cfg.atl * 1.02) {
-        parts.push('Currently at ' + money(current) + ", it's within " + money(current - cfg.atl) + ' of its all-time low.');
-      } else {
-        var sent = 'Currently at ' + money(current) + ', it sits ' + Math.round(((current - cfg.atl) / cfg.atl) * 100) + '% above that low';
-        if (cfg.ath != null && cfg.ath > current) {
-          sent += ' and ' + Math.round(((cfg.ath - current) / cfg.ath) * 100) + '% below that high';
-        }
-        parts.push(sent + '.');
+        out.push('At ' + money(current) + ', this is the lowest price MemRadar has recorded for it.');
+      } else if (current <= cfg.atl * (1 + cfg.nearAtlPct / 100)) {
+        var lp = Math.max(1, Math.round(((current - cfg.atl) / cfg.atl) * 100));
+        out.push('At ' + money(current) + ', it is within ' + lp + '% of its all-time low of ' + money(cfg.atl) + ', set in ' + cfg.atlMonth + '.');
+      } else if (current >= cfg.ath) {
+        out.push('At ' + money(current) + ', this is the highest price MemRadar has recorded for it.');
+      } else if (current >= cfg.ath * (1 - cfg.nearAthPct / 100)) {
+        var hp = Math.max(1, Math.round(((cfg.ath - current) / cfg.ath) * 100));
+        out.push('At ' + money(current) + ', it is within ' + hp + '% of its all-time high of ' + money(cfg.ath) + ', set in ' + cfg.athMonth + '.');
+      }
+    }
+    if (cfg.base30 != null) {
+      var ch = ((current - cfg.base30) / cfg.base30) * 100;
+      if (Math.abs(ch) >= cfg.change30Pct) {
+        out.push('The price has ' + (ch < 0 ? 'fallen' : 'risen') + ' ' + money(Math.abs(current - cfg.base30)) +
+          ' (' + Math.abs(Math.round(ch)) + '%) in the past 30 days.');
       }
     }
     if (cfg.capGb != null && cfg.segMedian != null) {
-      var mine = current / cfg.capGb;
-      var rel = mine / cfg.segMedian;
-      var word = rel < cfg.valueLowRatio ? 'below' : rel > cfg.valueHighRatio ? 'above' : 'in line with';
-      parts.push('At ' + perGb(mine) + ', it runs ' + word + ' the current ' + cfg.segLabel + ' average of ' + perGb(cfg.segMedian) + '.');
+      var rel = (current / cfg.capGb) / cfg.segMedian;
+      if (rel <= cfg.valueLowRatio || rel >= cfg.valueHighRatio) {
+        out.push('At ' + perGb(current / cfg.capGb) + ', it runs ' + (rel <= cfg.valueLowRatio ? 'below' : 'above') +
+          ' the current ' + cfg.segLabel + ' average of ' + perGb(cfg.segMedian) + '.');
+      }
     }
-    var v = verdictText(current, cfg);
-    if (v) parts.push(v);
-    el.textContent = parts.join(' ');
+    return out;
   }
+
+  function recomputeAnalysis(current, cfg) {
+    var el = document.getElementById('pdpAnalysisCurrent');
+    if (!el) return;
+    var sentences = analysisSentences(current, cfg);
+    var section = document.getElementById('pdpPriceAnalysis');
+    if (!sentences.length) {
+      // Nothing notable at the live price. Hide the section rather than leave
+      // the baked sentences standing: they were true at build time and are not
+      // now, and a section that silently keeps stale text is the exact failure
+      // the conditional rewrite exists to remove.
+      if (section) section.style.display = 'none';
+      return;
+    }
+    if (section) section.style.display = '';
+    el.textContent = sentences.join(' ');
+  }
+
   // Price-fetch schedule, UTC hours. Deliberate duplicate of the generator's
   // FETCH_HOURS_UTC (this file runs in the browser and cannot require it);
   // .github/workflows/price-fetch.yml's cron is the source of truth. Change

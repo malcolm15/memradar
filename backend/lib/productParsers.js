@@ -101,7 +101,15 @@ function shortName(p) {
   return out;
 }
 
-const MPN_SPEC_TOKEN = /^(?:\d+X\d+(?:GB|TB)|DDR[45][-\d]*|PC[34][-\d]+|CL\d[\d-]*|\d+(?:GB|TB|MHZ|MTS?)|\d+MT\/S|XMP[\d.]*|EXPO|AMD|INTEL|RGB|NVME|SATA(?:\s?III)?|SSD|M\.2|2280|2242|PCIE[\d.X]*|GEN[\d.X]+|U-?DIMM|SO-?DIMM|RDIMM|QLC|TLC|NAND|\d+V|1\.\d+V|PS5|PC)$/;
+// PC[3-5][-\dA-Z]* (was PC[34][-\d]+): the old form missed DDR5 bandwidth codes
+// entirely (PC5-38400) and any code with trailing letters (PC4-3200AA, PC4-2666V),
+// so 13 of 235 products parsed a bandwidth code as their "part number". Harmless
+// while the MPN was only an internal matching hint; not harmless from 2026-09-01,
+// when R1 began printing it as a labelled "Part number" spec row. A wrong part
+// number is worse than none. Stricter here can only REDUCE false MPN matches in
+// match-newegg.js, and matching is human-gated with rulings keyed on sku+neweggSku,
+// so no existing accepted offer is disturbed.
+const MPN_SPEC_TOKEN = /^(?:\d+X\d+(?:GB|TB)|DDR[45][-\d]*|PC[3-5][-\dA-Z]*|CL\d[\d-]*|\d+(?:GB|TB|MHZ|MTS?)|\d+MT\/S|XMP[\d.]*|EXPO|AMD|INTEL|RGB|NVME|SATA(?:\s?III)?|SSD|M\.2|2280|2242|PCIE[\d.X]*|GEN[\d.X]+|U-?DIMM|SO-?DIMM|RDIMM|QLC|TLC|NAND|\d+V|1\.\d+V|PS5|PC)$/;
 function mpnCandidate(t) {
   return /^[A-Z0-9][A-Z0-9\-\/\.]{5,}$/.test(t) && /[A-Z]/.test(t) &&
     ((t.match(/\d/g) || []).length >= 3) && !MPN_SPEC_TOKEN.test(t);

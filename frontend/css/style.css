@@ -1898,6 +1898,21 @@ html.dark .notice-btn--primary { color: #fff; }
   line-height: 1.5;
 }
 
+
+/* R1: the raw Amazon marketing title, demoted from h1 to an attributed line.
+   Muted and small on purpose: it is someone else's listing text kept only for
+   the model tokens people search, and it must never compete with the real
+   product name above it. Wraps rather than truncates, since a clipped part
+   number defeats the reason for keeping it. */
+.pdp-raw-listing {
+  margin: 6px 0 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--text-secondary, #64748b);
+  overflow-wrap: anywhere;
+}
+.pdp-raw-listing-label { font-weight: 600; }
+html.dark .pdp-raw-listing { color: #94a3b8; }
 /* ── Share Buttons ── */
 .pdp-share {
   display: flex;
