@@ -49,3 +49,31 @@ jobs:
         run: |
           sleep 20
           node scripts/smoke-test-live.js
+
+      # HYDRATION CHECK. Dead hydration and working baked fallbacks are visually
+      # identical, so "it looks right" and "no console errors" both prove
+      # nothing. This loads real pages in headless Chromium, corrupts every
+      # element the page's own hydration writes to, and asserts each was
+      # restored. It closes a failure class that shipped three times and was
+      # only ever caught by hand.
+      #
+      # Uses the runner's preinstalled Chrome rather than downloading Chromium,
+      # and installs only puppeteer instead of the full dev tree, so the deploy
+      # pays a few seconds rather than a few minutes. If Chrome is ever missing
+      # from the image, PUPPETEER_EXECUTABLE_PATH stays empty and puppeteer
+      # falls back to its own browser.
+      - name: Hydration check
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: '1'
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium-browser || true)"
+          if [ -n "$CHROME" ]; then
+            echo "Using preinstalled Chrome at $CHROME"
+            export PUPPETEER_EXECUTABLE_PATH="$CHROME"
+          else
+            echo "No system Chrome found; letting puppeteer download its own."
+            unset PUPPETEER_SKIP_DOWNLOAD
+          fi
+          npm i --no-save --no-audit --no-fund puppeteer@25
+          node scripts/hydration-check.js
