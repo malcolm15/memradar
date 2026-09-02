@@ -1,0 +1,28 @@
+# MemRadar
+
+MemRadar tracks retail prices for 235 RAM and SSD products and keeps the history, so a shopper can tell a fair price from a bad one instead of guessing. Price history reaches back to 2015 for the longest-tracked products and is licensed from Keepa; current prices are compared across Amazon and Newegg, and the whole catalog is re-checked several times a day. The Memory Price Index aggregates that history into median price changes per segment (DDR5, DDR4, NVMe SSD, SATA SSD) over 1 month, 3 months, 6 months and 1 year, recomputed daily. Everything on the site is derived from recorded observations: there are no review scores, no star ratings, and no editorial claims that the data does not support.
+
+## Key pages
+
+- [Homepage](https://memradar.com/): Search the catalog, see the Market Pulse summary of segment price changes, and the largest current price drops.
+- [RAM](https://memradar.com/ram/): All tracked DDR5 and DDR4 kits with live prices, filterable by type, capacity, speed and brand.
+- [SSDs](https://memradar.com/ssd/): All tracked NVMe and SATA drives with live prices, filterable by type, form factor, capacity and brand.
+- [Memory Price Index](https://memradar.com/price-index/): Median price change per segment across four time windows, recomputed daily from the full price history.
+- [Guides](https://memradar.com/guides/): Buying guides argued from the tracked price data rather than opinion.
+- [Should I Buy RAM Now?](https://memradar.com/guides/should-i-buy-ram-now/): What the 2025 to 2026 memory price surge did to DDR5 and DDR4, and how to judge a fair kit price today.
+- [Should I Buy an SSD Now?](https://memradar.com/guides/should-i-buy-an-ssd-now/): A decade of falling storage prices, what changed in late 2025, and how to buy a drive well in the current market.
+- [Spec glossary](https://memradar.com/glossary/): Plain-English definitions of every RAM and SSD specification MemRadar reads off a product listing.
+- [Product pages](https://memradar.com/sitemap.xml): One page per tracked product, each with full price history, all-time low and high, a monthly and yearly price table, dated price milestones, and a per-gigabyte comparison against similar products.
+
+## Notes for reuse
+
+- Price figures change daily. A page's own "last updated" line states when its figures were computed.
+- Figures over longer windows rest on smaller, older product sets, so quote long-window percentages as magnitudes rather than to a decimal.
+- Product pages with under 30 days of tracked history carry noindex and are excluded from the sitemap; they hold too little history to be worth citing.
+- Amazon and Newegg links are affiliate links. Price history is Amazon data licensed from Keepa. Newegg data comes from Rakuten Advertising.
+
+## Citation
+
+Source: MemRadar Memory Price Index, memradar.com/price-index/
+
+Contact: hello@memradar.com
