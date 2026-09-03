@@ -66,6 +66,10 @@
   var money = function (v) { return v.toLocaleString('en-US', { style: 'currency', currency: 'USD' }); };
 
   // ---- trend table ----
+  // DOM-gated like everything else here: a page may use only the chart (the
+  // "Why is RAM so expensive" explainer does), and firing a market_stats query
+  // for a table that is not on the page is a request for nothing.
+  if (document.querySelector('[id^="pi-"]')) {
   sb.from('market_stats').select('segment, period, pct_change, computed_at').then(function (res) {
     if (res.error || !res.data || !res.data.length) return; // keep baked
     var newest = null;
@@ -83,6 +87,7 @@
       note.textContent = new Date(newest).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
     }
   }).catch(function (e) { console.log('[guide] hydration failed, keeping baked values:', e && e.message); });
+  }
 
   // ---- near-ATL list: refresh the current price and restate the gap ----
   // The all-time low is baked (it moves only when a new low is set, which a

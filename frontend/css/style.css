@@ -3349,3 +3349,15 @@ html.dark .glossary-toc a { border-color: #2d3f55; color: #94a3b8; }
 }
 html.dark .pdp-blurb-text { color: #cbd5e1; }
 html.dark .pdp-blurb-heading { color: #94a3b8; }
+
+/* Guides index: Explainers subheading. A guide answers "what should I do", an
+   explainer answers "why did this happen"; the index is where a reader picks. */
+.guides-subhead {
+  margin: 34px 0 14px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary, #64748b);
+}
+html.dark .guides-subhead { color: #94a3b8; }
