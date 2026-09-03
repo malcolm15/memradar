@@ -13,6 +13,8 @@
 // product_count = that period's subset size, which is why counts legitimately
 // differ between periods (a 1y window can only include products we were
 // already tracking a year ago).
+const { checkClaimFloors, logClaimFloors } = require('./claimRegistry');
+
 const PERIODS = [
   { key: '1m', target: 30, min: 25, max: 35 },
   { key: '3m', target: 90, min: 80, max: 100 },
@@ -176,9 +178,17 @@ async function computeMarketStats(supabase, batchTimestamp, log = () => {}) {
         stCur.push(currentByProduct.get(productId));
         stBase.push(baselineByProduct.get(productId).price);
       }
+      // stability_delta_pp is Math.abs() by design: as a "how much does this
+      // move" warning, direction is noise. But the published-claim floors need
+      // the stable cohort's OWN figure, because a claim has to clear its floor
+      // on that cohort too and an unsigned distance cannot say which side of the
+      // floor it landed on. So keep both: the absolute delta for the tripwire,
+      // the signed figure for the floors.
       let stabilityDelta = null;
+      let stablePct = null;
       if (stCur.length) {
         const sPct = ((median(stCur) - median(stBase)) / median(stBase)) * 100;
+        stablePct = round1(sPct);
         stabilityDelta = round1(Math.abs(pct - sPct));
       }
 
@@ -190,15 +200,20 @@ async function computeMarketStats(supabase, batchTimestamp, log = () => {}) {
         pct_change: round1(pct),
         product_count: matchedCurrent.length,
         stability_delta_pp: stabilityDelta,
+        stable_pct_change: stablePct,
         stable_count: stCur.length,
       });
     }
   }
 
   const computedAt = new Date().toISOString();
-  // stable_count is derived context, not a stored column; strip before write.
+  // stable_count and stable_pct_change are derived context consumed in-process
+  // by the tripwire and the claim floors; neither is a stored column, so both
+  // are stripped before the write. Deliberately NOT persisted: the floors are a
+  // monitoring layer and adding a column would put a pending ALTER TABLE
+  // between them and the run that needs them.
   const toRow = (s, withStability) => {
-    const { stable_count, stability_delta_pp, ...rest } = s;
+    const { stable_count, stable_pct_change, stability_delta_pp, ...rest } = s;
     return withStability
       ? { ...rest, stability_delta_pp, computed_at: computedAt }
       : { ...rest, computed_at: computedAt };
@@ -249,7 +264,20 @@ async function computeMarketStats(supabase, batchTimestamp, log = () => {}) {
   }
   if (!unstable.length) log(`Stability: every figure moves < ${STABILITY_FLAG_PP}pp on cohort choice`);
 
-  return { stats, excluded, computedAt, unstable, severe, tripwireDisabled };
+  // PUBLISHED-CLAIM FLOORS. The tripwire above guards figures on their way INTO
+  // prose; this checks the prose already published against the figures it rests
+  // on, on both cohorts. Isolated because a registry problem must never fail a
+  // stats run: the numbers are the product, the monitor is commentary on them.
+  let claimFloors = null;
+  try {
+    claimFloors = checkClaimFloors(stats);
+    logClaimFloors(claimFloors, log);
+  } catch (err) {
+    log(`⚠ CLAIM FLOOR CHECK FAILED: ${err.message} - published claims are UNVERIFIED for this run`);
+    claimFloors = { error: err.message };
+  }
+
+  return { stats, excluded, computedAt, unstable, severe, tripwireDisabled, claimFloors };
 }
 
 module.exports = { computeMarketStats, classifySegment, SEGMENTS, PERIODS, STABILITY_FLAG_PP, STABILITY_SEVERE_PP };

@@ -47,7 +47,7 @@ async function run() {
   const batchTs = await latestCronBatch();
   log(`Using cron batch: ${batchTs}`);
 
-  const { stats, excluded, computedAt } = await computeMarketStats(supabase, batchTs, log);
+  const { stats, excluded, computedAt, claimFloors } = await computeMarketStats(supabase, batchTs, log);
 
   console.log('\n==================== MARKET STATS ====================');
   console.log(`Computed at: ${computedAt}`);
@@ -64,6 +64,26 @@ async function run() {
     );
   }
   console.log(`\n${stats.length} rows upserted into market_stats (conflict on segment,period).`);
+
+  // Published-claim floors, printed in full here rather than only logged: this
+  // runner is what a person invokes by hand before writing or reviewing copy,
+  // and the headroom column is the number that matters when deciding whether a
+  // sentence can stay as written.
+  if (claimFloors && !claimFloors.error) {
+    console.log('\n================= PUBLISHED CLAIM FLOORS =================');
+    console.log('claim                              | floor | full   | stable | headroom');
+    console.log('-----------------------------------+-------+--------+--------+---------');
+    const row = (c, mark) => {
+      const worst = c.figures.reduce((a, f) => (f.full_pct + f.stable_pct < a.full_pct + a.stable_pct ? f : a));
+      const head = Math.min(...c.figures.flatMap((f) => [f.full_margin_pp, f.stable_margin_pp]));
+      console.log(`${(mark + c.id).padEnd(34).slice(0, 34)} | ${(c.floor_pct + '%').padStart(5)} | ${(worst.full_pct + '%').padStart(6)} | ${(worst.stable_pct + '%').padStart(6)} | ${(head >= 0 ? '+' : '') + head}pp`);
+    };
+    claimFloors.breached.forEach((c) => row(c, '! '));
+    claimFloors.ok.slice().sort((a, b) => a.min_margin_pp - b.min_margin_pp).forEach((c) => row(c, '  '));
+    for (const u of claimFloors.unresolved) console.log(`? ${u.id}: ${u.reason}`);
+    console.log(`\n${claimFloors.registered} claims registered, ${claimFloors.checked} checked, ${claimFloors.breached.length} breached, ${claimFloors.unresolved.length} unresolved.`);
+    console.log('"full" and "stable" show the WORST required figure for that claim; headroom is the tightest margin across both cohorts.');
+  }
 }
 
 run().catch((err) => {

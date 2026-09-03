@@ -129,6 +129,7 @@ async function runPriceFetch(opts = {}) {
   let statsError = null;
   let marketStatsSkipped = false;
   let unstableFigures = null;
+  let claimFloors = null;
   if (!withMarketStats) {
     marketStatsSkipped = true;
     log(`Market stats skipped (recomputed once daily on the ${String(MARKET_STATS_HOUR_UTC).padStart(2, '0')}:00 UTC run)`);
@@ -148,6 +149,24 @@ async function runPriceFetch(opts = {}) {
         moderate: (res.unstable || []).filter((u) => !(res.severe || []).includes(u)).map(shape),
       };
       if (res.tripwireDisabled) log('SUMMARY WILL REPORT: unstable_figures.disabled=true (tripwire column missing)');
+
+      // PUBLISHED-CLAIM FLOORS ride the summary as their OWN field, not folded
+      // into unstable_figures. The two answer different questions - "is this
+      // figure safe to quote" versus "is a sentence we already published still
+      // true" - and a breach demands a specific action (reword that sentence)
+      // that a stability flag does not. Merging them would bury the actionable
+      // one inside a field people have learned reads as advisory.
+      const c = res.claimFloors || {};
+      claimFloors = {
+        breached: c.breached || [],
+        unresolved: c.unresolved || [],
+        checked: c.checked ?? 0,
+        registered: c.registered ?? 0,
+        ...(c.error ? { error: c.error } : {}),
+      };
+      if (claimFloors.breached.length) {
+        log(`SUMMARY WILL REPORT: claim_floors.breached=${claimFloors.breached.length} (published sentences need rewording)`);
+      }
     } catch (err) {
       statsError = err.message;
       logError('computeMarketStats FAILED (non-fatal, price inserts unaffected)', err);
@@ -183,6 +202,7 @@ async function runPriceFetch(opts = {}) {
     market_stats: marketStats,
     market_stats_skipped: marketStatsSkipped,
     unstable_figures: unstableFigures,
+    claim_floors: claimFloors,
     ...(statsError ? { market_stats_error: statsError } : {}),
     alerts: alertStats,
     errors,
