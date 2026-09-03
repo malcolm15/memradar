@@ -178,18 +178,25 @@ async function computeMarketStats(supabase, batchTimestamp, log = () => {}) {
         stCur.push(currentByProduct.get(productId));
         stBase.push(baselineByProduct.get(productId).price);
       }
-      // stability_delta_pp is Math.abs() by design: as a "how much does this
-      // move" warning, direction is noise. But the published-claim floors need
-      // the stable cohort's OWN figure, because a claim has to clear its floor
-      // on that cohort too and an unsigned distance cannot say which side of the
-      // floor it landed on. So keep both: the absolute delta for the tripwire,
-      // the signed figure for the floors.
+      // STORED SIGNED, compared with Math.abs(). It was originally stored
+      // absolute, on the reasoning that a "how much does this move" warning does
+      // not care about direction. That reasoning was right about the tripwire and
+      // wrong about everything downstream: an unsigned distance cannot say which
+      // side of a floor the stable cohort landed on, so any consumer needing the
+      // stable figure had to recompute it from scratch. DDR4 is the case in
+      // point - it moves 39.6pp and the stable cohort reads HIGHER, so assuming
+      // the worst direction understates it by nearly 80pp.
+      //
+      // Signed, `pct_change - stability_delta_pp` IS the stable-cohort figure,
+      // exactly, recoverable from a stored row by anything that reads the table.
+      // The tripwire wraps its own comparisons in Math.abs(), where the
+      // discarding of the sign belongs.
       let stabilityDelta = null;
       let stablePct = null;
       if (stCur.length) {
         const sPct = ((median(stCur) - median(stBase)) / median(stBase)) * 100;
         stablePct = round1(sPct);
-        stabilityDelta = round1(Math.abs(pct - sPct));
+        stabilityDelta = round1(pct - sPct);
       }
 
       stats.push({
@@ -244,23 +251,23 @@ async function computeMarketStats(supabase, batchTimestamp, log = () => {}) {
   if (upsertErr) throw upsertErr;
 
   for (const s of stats) {
-    log(`Market stats ${s.segment} [${s.period}]: current=$${s.current_avg_price} baseline=$${s.baseline_avg_price} change=${s.pct_change}% (n=${s.product_count}, stability ${s.stability_delta_pp == null ? 'n/a' : s.stability_delta_pp + 'pp'})`);
+    log(`Market stats ${s.segment} [${s.period}]: current=$${s.current_avg_price} baseline=$${s.baseline_avg_price} change=${s.pct_change}% (n=${s.product_count}, stability ${s.stability_delta_pp == null ? 'n/a' : Math.abs(s.stability_delta_pp) + 'pp'})`);
   }
 
   // THE TRIPWIRE ANNOUNCES ITSELF. A figure this cohort-sensitive must not be
   // quoted to a decimal in prose, a guide or a social post; state a magnitude
   // that survives the swing instead.
   const unstable = stats
-    .filter((s) => s.stability_delta_pp != null && s.stability_delta_pp >= STABILITY_FLAG_PP)
-    .sort((a, b) => b.stability_delta_pp - a.stability_delta_pp);
-  const severe = unstable.filter((s) => s.stability_delta_pp >= STABILITY_SEVERE_PP);
-  const moderate = unstable.filter((s) => s.stability_delta_pp < STABILITY_SEVERE_PP);
+    .filter((s) => s.stability_delta_pp != null && Math.abs(s.stability_delta_pp) >= STABILITY_FLAG_PP)
+    .sort((a, b) => Math.abs(b.stability_delta_pp) - Math.abs(a.stability_delta_pp));
+  const severe = unstable.filter((s) => Math.abs(s.stability_delta_pp) >= STABILITY_SEVERE_PP);
+  const moderate = unstable.filter((s) => Math.abs(s.stability_delta_pp) < STABILITY_SEVERE_PP);
   if (severe.length) {
     log(`⚠ STABILITY FLAG (SEVERE): ${severe.length} figure(s) move >= ${STABILITY_SEVERE_PP}pp on cohort choice - do NOT quote these to a decimal in prose, a guide or a post:`);
-    severe.forEach((s) => log(`    ${s.segment} [${s.period}] ${s.pct_change}% moves ${s.stability_delta_pp}pp (n=${s.product_count}, stable n=${s.stable_count})`));
+    severe.forEach((s) => log(`    ${s.segment} [${s.period}] ${s.pct_change}% moves ${Math.abs(s.stability_delta_pp)}pp to ${s.stable_pct_change}% on the stable cohort (n=${s.product_count}, stable n=${s.stable_count})`));
   }
   if (moderate.length) {
-    log(`Stability (moderate, context only): ${moderate.map((s) => `${s.segment}/${s.period} ${s.stability_delta_pp}pp`).join(', ')}`);
+    log(`Stability (moderate, context only): ${moderate.map((s) => `${s.segment}/${s.period} ${Math.abs(s.stability_delta_pp)}pp`).join(', ')}`);
   }
   if (!unstable.length) log(`Stability: every figure moves < ${STABILITY_FLAG_PP}pp on cohort choice`);
 
@@ -280,4 +287,13 @@ async function computeMarketStats(supabase, batchTimestamp, log = () => {}) {
   return { stats, excluded, computedAt, unstable, severe, tripwireDisabled, claimFloors };
 }
 
-module.exports = { computeMarketStats, classifySegment, SEGMENTS, PERIODS, STABILITY_FLAG_PP, STABILITY_SEVERE_PP };
+// The stable-cohort figure for a STORED market_stats row. The single place
+// that knows the sign convention, so no caller has to remember it.
+// Returns null when the delta is absent, which callers must treat as "unknown",
+// never as "equal to the full cohort".
+function stablePctOf(row) {
+  if (row == null || row.pct_change == null || row.stability_delta_pp == null) return null;
+  return Math.round((Number(row.pct_change) - Number(row.stability_delta_pp)) * 10) / 10;
+}
+
+module.exports = { computeMarketStats, classifySegment, SEGMENTS, PERIODS, STABILITY_FLAG_PP, STABILITY_SEVERE_PP, stablePctOf };

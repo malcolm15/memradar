@@ -140,7 +140,11 @@ async function runPriceFetch(opts = {}) {
       // Tripwire result rides the summary JSON so a cohort-sensitive figure
       // announces itself in the run that produced it, rather than waiting to
       // be looked up before someone quotes it.
-      const shape = (u) => ({ segment: u.segment, period: u.period, pct_change: u.pct_change, moves_pp: u.stability_delta_pp });
+      // moves_pp stays UNSIGNED in the summary: it is the tripwire's "how far does
+      // this move" reading and readers of the JSON compare it against the 5/15pp
+      // lines. The signed figure it came from is reported as stable_pct, which is
+      // the more useful number anyway.
+      const shape = (u) => ({ segment: u.segment, period: u.period, pct_change: u.pct_change, moves_pp: Math.abs(u.stability_delta_pp), stable_pct: u.stable_pct_change });
       unstableFigures = {
         // A DISABLED tripwire is reported as loudly as a firing one: absent
         // this field, "severe: []" is indistinguishable from "we never looked".

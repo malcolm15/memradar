@@ -25,7 +25,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const supabase = require('../backend/lib/supabase');
-const { classifySegment } = require('../backend/lib/marketStats');
+const { classifySegment, stablePctOf } = require('../backend/lib/marketStats');
 const { neweggDeepLink } = require('../backend/lib/rakutenLink');
 const { getState, setState } = require('../backend/lib/botState');
 
@@ -2086,7 +2086,26 @@ function buildPriceIndex(ctx) {
       // HYDRATES from market_stats on load while these sentences stay baked
       // until the next regeneration - so the claim needs enough headroom to
       // survive a day of drift without contradicting the table beside it.
-      const weakest = Number(y[y.length - 1].pct_change);
+      //
+      // WEAKEST ON BOTH COHORTS, not just the full one. This originally read
+      // y[y.length - 1].pct_change, the weakest FULL-cohort figure, and the
+      // published-claim monitor caught the result: at a 130 floor, NVMe was
+      // +134.9% on the full cohort but +127.3% on the stable one, so the site's
+      // most citable page carried the only magnitude claim that failed the
+      // cohort rule every other one is held to. "Every segment" means every
+      // segment on either reading, so the floor takes the worse of the two.
+      const worst = y.map((r) => {
+        const stable = stablePctOf(r);
+        return { segment: r.segment, pct: stable == null ? Number(r.pct_change) : Math.min(Number(r.pct_change), stable), stableKnown: stable != null };
+      });
+      // A missing delta means the stable figure is UNKNOWN, never "the same".
+      // Silently falling back to the full cohort would rebuild the exact bug
+      // above, so it says so instead.
+      const noStable = worst.filter((w) => !w.stableKnown).map((w) => w.segment);
+      if (noStable.length) {
+        log(`⚠ price index tens-floor: no stable-cohort figure for ${noStable.join(', ')} - that segment is floored on the full cohort ALONE and the sentence is not cohort-verified`);
+      }
+      const weakest = Math.min(...worst.map((w) => w.pct));
       const floorPct = Math.floor(weakest / 10) * 10;
       notables.push(`<strong>Every segment is up more than ${floorPct}% year over year.</strong> The memory and storage market has not returned to its pre-2026 pricing.`);
     }
@@ -3186,7 +3205,7 @@ async function run() {
   // 2b) The Memory Price Index page (generated, so its baked table refreshes
   // with every regeneration; it also hydrates from market_stats on load).
   const { data: msRows, error: msErr } = await supabase
-    .from('market_stats').select('segment, period, pct_change, product_count, computed_at');
+    .from('market_stats').select('segment, period, pct_change, product_count, computed_at, stability_delta_pp');
   if (msErr) {
     log(`⚠ market_stats unavailable (${msErr.message}) - price index NOT regenerated this run`);
   } else if (!msRows.length) {

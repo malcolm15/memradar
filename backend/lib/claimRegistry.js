@@ -100,13 +100,19 @@ const CLAIM_REGISTRY = [
 
   // --------------------------------------------------------------- RAM guide
   {
-    id: 'ram-guide-ddr4-well-over-150',
+    // Reworded from "DDR4 up well over 150%" on 2026-09-03, PROACTIVELY, while
+    // the old wording still held. It had 8.1pp of headroom on the board's most
+    // cohort-sensitive figure (ddr4 1y moves 39.6pp), so it could have breached
+    // in any week's data. "More than doubled" says the same thing rhetorically
+    // and clears its floor by roughly 50pp. It also reads true whether the
+    // reader takes it as the peak or as today, which the 150% version did not.
+    id: 'ram-guide-ddr4-more-than-doubled',
     page: '/guides/should-i-buy-ram-now/',
     where: 'what actually happened',
-    sentence: 'DDR4 up well over 150%',
+    sentence: 'DDR4 more than doubled',
     requires: [{ segment: 'ddr4', period: '1y' }],
-    floorRatio: 2.5,
-    floorLabel: '2.5x (+150%)',
+    floorRatio: 2.0,
+    floorLabel: '2.0x',
   },
 
   // --------------------------------------------------------------- SSD guide
