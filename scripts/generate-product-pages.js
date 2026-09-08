@@ -2716,12 +2716,21 @@ function listingIntro(category, msRows) {
   const noun = category === 'ram' ? 'RAM' : 'SSD';
   const pair = category === 'ram' ? 'DDR5 and DDR4' : 'NVMe and SATA drives';
   const guide = category === 'ram' ? '/guides/should-i-buy-ram-now/' : '/guides/should-i-buy-an-ssd-now/';
+  // THE TRIO LINKS EACH OTHER AT THE TOP. /ram/, /ssd/ and /price-index/ answer
+  // one question for one searcher ("what does this cost and is that normal"),
+  // and GSC has category-intent queries as the site's most valuable family, so
+  // they should read as one system rather than three destinations. The sibling
+  // category link already existed but sat in the last paragraph of the page,
+  // 100% of the way down <main>; this puts all three in the first screen.
+  const sibling = category === 'ram'
+    ? '<a href="/ssd/">SSD Price Tracker</a>'
+    : '<a href="/ram/">RAM Price Tracker</a>';
   const html = `    <section class="listing-intro">
       <div class="container">
         <div class="listing-intro-inner">
           <h2>Is ${noun} expensive right now?</h2>
           <p>Yes, and not marginally. Both ${pair} are up more than ${floorPct}% year over year across the products tracked here, and neither has given the rise back. The market has not returned to its pre-2026 pricing, so the question worth asking is not whether prices are high but whether the one you are looking at is fairly priced against the rest. Every card below carries its price per gigabyte for exactly that comparison.</p>
-          <p class="listing-intro-link"><a href="${guide}">Should I buy ${noun} now? Read the full answer</a> &middot; <a href="/price-index/">See the Memory Price Index</a></p>
+          <p class="listing-intro-link"><a href="${guide}">Should I buy ${noun} now? Read the full answer</a> &middot; ${sibling} &middot; <a href="/price-index/">Memory Price Index</a></p>
         </div>
       </div>
     </section>`;

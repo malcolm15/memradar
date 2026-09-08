@@ -74,6 +74,12 @@
         <h1>The MemRadar Memory Price Index</h1>
         <p class="pi-lede">Median price changes across <!--PRODUCT_COUNT--> tracked RAM and SSD products, computed from live price history and updated daily.</p>
         <p class="pi-asof" id="piAsOf">Last computed <!--COMPUTED_DATE--></p>
+        <!-- The trio (/ram/, /ssd/, /price-index/) answers one question for one
+             searcher, so each links the other two in the first screen rather
+             than only in the footer. These two links already existed under
+             "Explore the data" at 90% of the way down <main>, which is not
+             where someone arriving on a category-intent query will find them. -->
+        <p class="pi-lede pi-explore">Or browse the tracked products themselves: <a href="../ram/">RAM Price Tracker</a> &middot; <a href="../ssd/">SSD Price Tracker</a></p>
       </div>
 
       <div class="pi-table-wrap" tabindex="0" role="region" aria-label="Memory price index table, scrollable">
