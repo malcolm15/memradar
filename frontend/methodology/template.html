@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-797Q89S8GG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-797Q89S8GG');
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>(function(){var t=localStorage.getItem('memradar-theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark');}})();</script>
+  <title>How MemRadar Tracks Prices | MemRadar</title>
+  <meta name="description" content="<!--META_DESC-->">
+  <link rel="canonical" href="https://memradar.com/methodology/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="MemRadar">
+  <meta property="og:url" content="https://memradar.com/methodology/">
+  <meta property="og:title" content="How MemRadar Tracks Prices">
+  <meta property="og:description" content="<!--META_DESC-->">
+  <meta property="og:image" content="https://memradar.com/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="How MemRadar Tracks Prices">
+  <meta name="twitter:description" content="<!--META_DESC-->">
+  <meta name="twitter:image" content="https://memradar.com/og-image.png">
+  <!--JSONLD-->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#0f1623">
+  <link rel="stylesheet" href="../css/style.css?v=20260910">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container">
+      <a href="/" class="logo">
+        <span class="logo-mem">Mem</span><span class="logo-radar">Radar</span>
+      </a>
+      <nav>
+        <a href="/ram/" class="nav-link">RAM</a>
+        <a href="/ssd/" class="nav-link">SSDs</a>
+        <a href="/faq/" class="nav-link">FAQ</a>
+        <a href="/blog/" class="nav-link">Blog</a>
+        <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Menu" aria-expanded="false" aria-controls="mobileNavPanel">
+          <svg class="icon-menu" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          <svg class="icon-close" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+        </button>
+        <a href="#" class="btn-alert">Set an Alert</a>
+        <button class="header-search-toggle" id="headerSearchToggle" aria-label="Search products" aria-expanded="false" aria-controls="headerSearchPanel">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </button>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode"></button>
+        <div class="mobile-nav-panel" id="mobileNavPanel">
+          <a href="/ram/" class="mobile-nav-link">RAM</a>
+          <a href="/ssd/" class="mobile-nav-link">SSDs</a>
+          <a href="/faq/" class="mobile-nav-link">FAQ</a>
+          <a href="/blog/" class="mobile-nav-link">Blog</a>
+        </div>
+        <div class="header-search-panel" id="headerSearchPanel" hidden>
+          <input type="text" class="header-search-input" placeholder="Search RAM &amp; SSDs…" aria-label="Search products" autocomplete="off">
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <div class="content-page pi-page">
+      <nav class="pdp-breadcrumb" aria-label="Breadcrumb">
+        <a href="/">Home</a> <span aria-hidden="true">/</span> <span>Methodology</span>
+      </nav>
+
+      <div class="page-header">
+        <h1>How MemRadar Tracks Prices</h1>
+        <p class="pi-lede">This page describes exactly how MemRadar collects, stores, and interprets price data, including what the data cannot tell you. It exists so that anyone citing a figure from this site can see how it was produced. If something here is unclear or looks wrong, write to <a href="mailto:hello@memradar.com">hello@memradar.com</a>.</p>
+      </div>
+
+      <h2>What we track</h2>
+      <p>MemRadar tracks <!--TOTAL--> consumer RAM and SSD products sold in the United States: <!--RAM_COUNT--> memory kits and modules, and <!--SSD_COUNT--> solid state drives. The catalog covers DDR4 and DDR5 memory in desktop and laptop form factors, and NVMe and SATA drives across the common capacities.</p>
+      <p>The catalog is not a complete census of the market. It was assembled from the products PC builders actually shop for, which means it over-represents mainstream and enthusiast parts and under-represents server memory, industrial storage, and obscure brands. Products are added over time; none have been removed for reasons other than being wrong.</p>
+
+<!--COMPOSITION-->
+
+      <h2>Where the prices come from</h2>
+      <p>Amazon price history is licensed from <strong>Keepa</strong>, a long-running price-tracking service with its own historical archive of Amazon listings. That archive is why some products on this site have price history predating MemRadar itself, in a few cases back to <!--OLDEST_YEAR-->. Keepa is the source of every historical chart, every all-time low and high, and every average on the site.</p>
+      <p>Newegg prices come from Newegg's product catalog feed, distributed through <strong>Rakuten Advertising</strong>, which MemRadar receives as an approved publisher. The feed carries current prices and availability, not history, so Newegg appears on this site as a live price comparison and never as a line on a chart.</p>
+      <p>No prices on this site are scraped. Both sources are licensed or contractual, which is a deliberate choice: a price you cannot explain the provenance of is a price you should not publish.</p>
+
+      <h2>How often prices update</h2>
+      <p>Amazon prices are fetched every four hours, six times a day. Each fetch writes one observation per product that has a price, and every product page shows how long ago its price was recorded.</p>
+      <p>Newegg's catalog feed regenerates once daily, so Newegg prices refresh once a day, with a full reconciliation weekly. Fetching more often would re-read the same file.</p>
+      <p>Scheduled jobs occasionally run late or fail. When that happens the site keeps showing the last recorded price rather than guessing, and the timestamp on the page tells you how stale it is. The site is built to be visibly out of date rather than invisibly wrong.</p>
+
+      <h2>How the numbers are calculated</h2>
+      <p><strong>Current price.</strong> The most recent recorded price for a product. Where Amazon has no offer at all, the page says the product is unavailable and shows the last price seen, labelled as such.</p>
+      <p><strong>All-time low and high.</strong> The lowest and highest prices in that product's recorded history, with the month they occurred. These are bounds within our data, not claims about every price the product has ever carried anywhere.</p>
+      <p><strong>90-day average.</strong> The mean of a product's recorded prices over the past 90 days. This is the baseline the buy indicator compares against, which is why the indicator describes a price as good or elevated relative to its own recent history rather than to any absolute standard.</p>
+      <p><strong>Price per gigabyte.</strong> Current price divided by total capacity. For memory kits, capacity means the kit total: a 2x16GB kit is 32GB. Price per gigabyte is compared against the median for that product's segment, calculated fresh at each rebuild from every tracked product in that segment whose capacity we can parse.</p>
+      <p><strong>Segment medians.</strong> Median rather than mean, for every figure computed across a segment. In a market with occasional gray-market listings and outlier pricing, a mean can be dragged by a handful of rows while a median cannot. The 90-day average above is the one deliberate exception, because it describes a single product against itself rather than a population.</p>
+
+      <h2>How the price index works</h2>
+      <p>The Memory Price Index compares each segment's median price today against its median at four earlier points: one month, three months, six months, and one year ago.</p>
+      <p>Every comparison uses a matched subset. A product counts toward a given window only if it has a recorded price both now and at that earlier point, and both medians are computed over that same set of products. Without this rule, a segment's figure would move whenever the catalog grew, independent of any actual price movement.</p>
+      <p>One consequence is worth stating plainly: because each window has its own matched subset, the "current" median can differ slightly between windows on the same segment. That is the fairness rule working, not an inconsistency. The index displays percentage change rather than the underlying medians for exactly this reason.</p>
+
+<!--INDEX_MATRIX-->
+
+      <h2>What this data cannot tell you</h2>
+      <p>This is the part most worth reading before citing anything here.</p>
+      <p><strong>Longer windows rest on smaller, older product sets.</strong> A product counts toward a one-year comparison only if it was already being tracked a year ago. As the catalog grows, the one-year figure for a segment is computed over fewer products than the one-month figure, and it can move when that subset changes rather than when prices do. For that reason, figures over long windows should be quoted as magnitudes ("more than doubled") rather than to a decimal place. We hold our own writing to that rule.</p>
+      <p><strong>Retail lags contract pricing.</strong> Memory is sold to large buyers on quarterly contracts, and retail prices follow with a lag of weeks. Everything on this site describes what a consumer pays at retail, which is a different series from the contract and spot prices quoted in industry reporting. Retail will show a market turn later than the industry feels it, in both directions.</p>
+      <p><strong>Amazon prices are not always Amazon's price.</strong> More than two thirds of the products we track are priced from third-party marketplace offers rather than Amazon's own. The page shows the offer whose price it displays, and the stock badge describes that offer. A marketplace price can be higher, lower, or briefly absurd, and the median-based segment figures are chosen partly to limit the effect of the last case.</p>
+      <p><strong>Flash sales and short-lived prices may be missed.</strong> At six observations a day, a price that exists for an hour may not be recorded. The history is a sample of a continuous series, not a complete record of every price the product ever carried.</p>
+      <p><strong>Out of stock is inferred, not announced.</strong> Amazon availability comes from whether any offer exists in the data. For Newegg, the feed contains only purchasable items, so a product disappearing from the feed is how we learn it is unavailable. Both are inferences that can lag reality by hours.</p>
+      <p><strong>The catalog is a sample.</strong> Segment figures describe the products MemRadar tracks, not the entire memory market. They are a reasonable proxy for consumer retail pricing and should be described that way rather than as the market.</p>
+
+      <h2>How we check our own numbers</h2>
+      <p>Every quantitative claim written in prose on this site is checked against the data twice: once against the full set of products in a segment, and once against the subset that has been tracked across the whole comparison window. A claim ships only if it holds on both. Claims are recorded in a registry and rechecked every time the statistics recompute, so a sentence that stops being true raises a flag rather than sitting on the site.</p>
+      <p>Where a figure varies meaningfully depending on which products are counted, the prose states a magnitude rather than a precise number. Where a page displays a computed figure and also describes it in a sentence, the two are derived from the same value so they cannot disagree.</p>
+
+      <h2>Corrections and contact</h2>
+      <p>If a price looks wrong, a product is mismatched, or a figure here does not reconcile, email <a href="mailto:hello@memradar.com">hello@memradar.com</a> and it will be investigated. Corrections are made to the underlying data rather than papered over in the copy.</p>
+      <p>MemRadar is built and run by <a href="/about.html">Malcolm Konner</a>. Affiliate commissions from retailer links fund the site and never influence prices, rankings, or verdicts. The full disclosure is on the <a href="/affiliate.html">affiliate disclosure page</a>.</p>
+
+      <h2>Citing this data</h2>
+      <p>Data on this site may be cited with attribution. Suggested form:</p>
+      <p class="pi-citation">Source: MemRadar Memory Price Index, memradar.com/price-index/</p>
+      <p>Figures change daily. Every page carries the date its figures were computed; please cite the date alongside the number. If you need a cut of the data that is not published here, a specific segment, a longer window, or a product-level series, write to <a href="mailto:hello@memradar.com">hello@memradar.com</a>.</p>
+
+      <p class="pi-tablenote">Page last regenerated: <!--BUILD_DATE_LONG-->. Figures on this page update automatically from tracked prices.</p>
+    </div>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-inner">
+        <p class="footer-brand"><strong>MemRadar</strong> · RAM &amp; SSD price tracking for PC builders.</p>
+        <nav class="footer-nav">
+          <a href="../about.html">About</a>
+          <a href="../contact.html">Contact</a>
+          <a href="../privacy.html">Privacy Policy</a>
+          <a href="../terms.html">Terms of Service</a>
+          <a href="../affiliate.html">Affiliate Disclosure</a>
+          <a href="/price-index/">Price Index</a>
+          <a href="/glossary/">Glossary</a>
+          <a href="/methodology/">Methodology</a>
+          <a href="/guides/">Guides</a>
+          <a href="/faq/">FAQ</a>
+          <a href="/blog/">Blog</a>
+        </nav>
+        <div class="footer-social">
+          <a href="https://bsky.app/profile/memradar.bsky.social" target="_blank" rel="noopener noreferrer" class="footer-social-link" aria-label="MemRadar on Bluesky">
+            <svg class="footer-social-icon" width="18" height="18" viewBox="0 0 568 501" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M123.121 33.6637C188.241 82.5526 258.281 181.681 284 234.873C309.719 181.681 379.759 82.5526 444.879 33.6637C491.866 -1.61183 568 -28.9064 568 57.9464C568 75.2916 558.055 203.659 552.222 224.501C531.947 296.954 458.067 315.434 392.347 304.249C507.222 323.8 536.444 388.56 473.333 453.32C353.473 576.312 301.061 422.461 287.631 383.039C285.169 375.812 284.017 372.431 284 375.306C283.983 372.431 282.831 375.812 280.369 383.039C266.939 422.461 214.527 576.312 94.6667 453.32C31.5556 388.56 60.7778 323.8 175.653 304.249C109.933 315.434 36.0535 296.954 15.7778 224.501C9.94525 203.659 0 75.2916 0 57.9464C0 -28.9064 76.1345 -1.61183 123.121 33.6637Z"/></svg>
+          </a>
+        </div>
+        <p class="footer-legal">MemRadar participates in the Amazon Associates Program and in Newegg's affiliate program via Rakuten Advertising. Links to products may be affiliate links. If you purchase through them, we may earn a small commission at no extra cost to you.</p>
+        <p class="footer-copyright">© <span class="footer-year">2026</span> MemRadar</p>
+        <script>document.querySelectorAll(".footer-year").forEach(function(e){e.textContent=new Date().getFullYear();});</script>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../js/main.js?v=20260910"></script>
+  <script src="../js/theme.js?v=20260910"></script>
+  <script src="../js/mobile-nav.js?v=20260910"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="../js/supabase-client.js?v=20260910"></script>
+  <script src="../js/guide-live.js?v=20260910"></script>
+  <script src="../js/search.js?v=20260910"></script>
+</body>
+</html>

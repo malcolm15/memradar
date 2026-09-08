@@ -803,6 +803,27 @@ Generated explainer that **REPLACED the hand-written post of the same name IN PL
 
 **`guide-live.js`'s trend-table query is now DOM-gated** (`if (document.querySelector('[id^="pi-"]'))`). This page uses the chart and nothing else, and firing a `market_stats` request for a table that is not on the page is a request for nothing.
 
+## Methodology (`/methodology/`, 2026-09-08)
+
+A reference document for journalists and researchers checking whether a figure from this site can be cited, and **the page outreach links to**. Generated, sitemap priority 0.7, `Article` JSON-LD authored by Malcolm.
+
+**EVERY FACTUAL STATEMENT WAS VERIFIED AGAINST THE IMPLEMENTATION BEFORE IT SHIPPED, and four did not match.** A wrong claim here is worse than a wrong claim anywhere else on the site, because it is a claim about how the numbers are made. What the check caught, all in the author's draft:
+
+| draft said | implementation | resolution |
+|---|---|---|
+| "Roughly two thirds of the products we track are priced from third-party marketplace offers" | **73.3%** (165 of 225 priced; 70.2% of all 235) | reworded UP to "More than two thirds" |
+| "Each fetch writes one observation per product" | out-of-stock products get **no row** (`priceFetch.js`, `outOfStock++` then `continue`) | "one observation per product that has a price" |
+| $/GB segment median "calculated fresh from all **in-stock** products" | `segPerGb` filters on segment and parseable capacity only, **not stock** | "from every tracked product in that segment whose capacity we can parse" |
+| "Median rather than mean, **throughout**" | the 90-day average is a **mean** (`in90.reduce(...)/in90.length`), two paragraphs above | scoped to "every figure computed across a segment", with the exception named |
+
+Everything else checked out: the six-times-daily cadence (`0 */4 * * *` = 00/04/08/12/16/20 UTC), the Newegg daily feed plus Sunday full reconciliation (`date -u +%u = 7`), the kit-total capacity rule, the per-window matched-subset rule, medians in `marketStats`, and that no price on the site is scraped.
+
+**The marketplace share is `monitorable: false` in the registry, and the reason is structural.** The price SOURCE (Keepa's AMAZON series versus the NEW marketplace series) is **not stored anywhere in our database**; only the resulting price is. Recomputing it costs one Keepa token per product and needs a live stats call, so it cannot ride a stats run the way every other floor does. **Recompute with `node scripts/output/marketplace-share.js`.** Reworded to a magnitude precisely because it cannot be floored: "more than two thirds" holds on both denominators with 4pp and 7pp of headroom, where the draft's "roughly two thirds" was already wrong on the day it was written.
+
+**Two generated blocks.** The catalog composition table (per segment: product count, median tracked days, earliest first-tracked) exists on no other page and is the number a researcher needs to judge a long-window figure. The 4x4 index matrix **reuses the Price Index's exact cell ids** (`pi-{segment}-{period}`), so `guide-live.js` hydrates it with no new JavaScript: that is the hydration-parity rule applied literally, two pages showing the same figure reading it from the same place.
+
+**FOOTER, NOT THE GUIDES INDEX.** The guides index is where a shopper chooses between editorial arguments, and it already carries an Explainers subheading for the same reason. Methodology is a reference document for a different reader, and filing it beside "Should I Buy RAM Now?" would misdescribe both. It sits in the footer next to Glossary and Price Index, which is where this site's reference material already lives. Links in: About's data paragraph (moved off `/faq/`), the Price Index methodology section, and four FAQ answers that previously restated the data sources.
+
 ## Retailer & Affiliate Program Status
 
 Current queue (as of 2026-08-23):
@@ -852,7 +873,7 @@ Below the **768px** breakpoint the desktop `.nav-link`s hide (`nav .nav-link { d
 
 `style.css` is served with `Cache-Control: max-age=14400` (**4 hours** of browser caching). A Cloudflare purge clears the edge but **NOT** visitors' browser caches — so after a CSS change, returning devices can render new HTML against a stale 4-hour-cached stylesheet (this exact mismatch broke the mobile nav on first ship: new hamburger HTML + old CSS).
 
-**Fix / convention:** a single shared version query is appended to **both `style.css` and every local JS include** on every page — `?v=YYYYMMDD` (current value: **`20260909`**). A new URL forces browsers to refetch immediately regardless of max-age.
+**Fix / convention:** a single shared version query is appended to **both `style.css` and every local JS include** on every page — `?v=YYYYMMDD` (current value: **`20260910`**). A new URL forces browsers to refetch immediately regardless of max-age.
 
 - **Bump the `?v=` value whenever any `style.css` OR local JS file changes**, and update ALL pages together (one shared stamp — they must all match). Bumping rebusts every asset; that's fine.
 - Applies to local assets only: `css/style.css` and `js/*.js` (main, theme, alert-modal, supabase-client, market-pulse, product-listing, mobile-nav, filter-sheet, back-to-top, guide-live, price-index). **External CDN scripts are NOT versioned** (jsdelivr supabase-js, cdnjs Chart.js, Cloudflare Turnstile, gtag) — they carry their own versioning.

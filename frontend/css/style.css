@@ -2160,6 +2160,18 @@ html.dark .listing-guide-link a { color: var(--brand-light); }
 .pi-down { color: #16a34a; }
 .pi-na { color: #9ca3af; font-weight: 500; }
 .pi-tablenote { font-size: 0.8rem; color: #9ca3af; margin: 0 0 26px; }
+/* Table captions: /methodology/ carries two tables and an unlabelled one would
+   be ambiguous both visually and to a screen reader. */
+.pi-caption {
+  caption-side: top;
+  text-align: left;
+  padding: 11px 14px 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #9ca3af;
+}
 .pi-notables { margin: 0 0 26px; padding-left: 20px; }
 .pi-notables li { margin-bottom: 9px; line-height: 1.55; }
 .pi-citation {

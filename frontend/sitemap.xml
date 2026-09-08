@@ -74,7 +74,7 @@
   </url>
   <url>
     <loc>https://memradar.com/faq/</loc>
-    <lastmod>2026-09-02</lastmod>
+    <lastmod>2026-09-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -95,6 +95,12 @@
     <lastmod>2026-09-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://memradar.com/methodology/</loc>
+    <lastmod>2026-09-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://memradar.com/ram/corsair-vengeance-ddr5-ram-32gb-6000mhz/</loc>

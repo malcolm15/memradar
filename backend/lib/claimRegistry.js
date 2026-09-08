@@ -231,6 +231,13 @@ const CLAIM_REGISTRY = [
     reason: 'historical, about a closed period. Cannot drift.',
   },
   {
+    id: 'methodology-marketplace-share',
+    page: '/methodology/',
+    sentence: 'More than two thirds of the products we track are priced from third-party marketplace offers rather than Amazon\'s own.',
+    monitorable: false,
+    reason: 'no market_stats figure can falsify it. The price SOURCE (Keepa AMAZON series vs NEW marketplace series) is not stored anywhere in our database; only the resulting price is. Recomputing it costs one Keepa token per product (235) and needs a live stats call, so it cannot ride a stats run. RECOMPUTE WITH: node scripts/output/marketplace-share.js. Measured 2026-09-08: 165 of 225 priced products, 73.3%, and 165 of all 235 tracked, 70.2%, so the claim holds on either denominator with roughly 4pp and 7pp of headroom. The author\'s draft said "roughly two thirds", which understated the measured value; it was reworded UP to a magnitude that is both true and robust rather than pinned to a number that would need a Keepa call to re-verify.',
+  },
+  {
     id: 'explainer-atl-multiple-counts',
     page: '/blog/why-ram-prices-are-so-high/',
     sentence: 'N of the M products MemRadar tracks are priced at least one and a half times their all-time low, and K are at more than triple it',
