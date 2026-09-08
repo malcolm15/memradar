@@ -182,7 +182,7 @@ const CLAIM_REGISTRY = [
   {
     id: 'ssd-listing-both-up',
     page: '/ssd/',
-    where: 'Is SSD expensive right now?',
+    where: 'Are SSDs expensive right now?',
     sentence: 'Both NVMe and SATA drives are up more than N% year over year across the products tracked here.',
     requires: [{ segment: 'nvme_ssd', period: '1y' }, { segment: 'sata_ssd', period: '1y' }],
     resolveFloor: bakedListingFloor('ssd'),

@@ -2714,6 +2714,11 @@ function listingIntro(category, msRows) {
   const floorPct = Math.floor(Math.min(...worst) / 10) * 10;
   if (floorPct < 10) return { html: '', floorPct: null }; // nothing striking to say
   const noun = category === 'ram' ? 'RAM' : 'SSD';
+  // RAM is a mass noun and SSD is a count noun, so the same sentence frame does
+  // not fit both: "Is RAM expensive" is right and "Is SSD expensive" is not.
+  // Each gets the phrasing its own noun takes.
+  const question = category === 'ram' ? 'Is RAM expensive right now?' : 'Are SSDs expensive right now?';
+  const guideAsk = category === 'ram' ? 'Should I buy RAM now?' : 'Should I buy an SSD now?';
   const pair = category === 'ram' ? 'DDR5 and DDR4' : 'NVMe and SATA drives';
   const guide = category === 'ram' ? '/guides/should-i-buy-ram-now/' : '/guides/should-i-buy-an-ssd-now/';
   // THE TRIO LINKS EACH OTHER AT THE TOP. /ram/, /ssd/ and /price-index/ answer
@@ -2728,9 +2733,9 @@ function listingIntro(category, msRows) {
   const html = `    <section class="listing-intro">
       <div class="container">
         <div class="listing-intro-inner">
-          <h2>Is ${noun} expensive right now?</h2>
+          <h2>${question}</h2>
           <p>Yes, and not marginally. Both ${pair} are up more than ${floorPct}% year over year across the products tracked here, and neither has given the rise back. The market has not returned to its pre-2026 pricing, so the question worth asking is not whether prices are high but whether the one you are looking at is fairly priced against the rest. Every card below carries its price per gigabyte for exactly that comparison.</p>
-          <p class="listing-intro-link"><a href="${guide}">Should I buy ${noun} now? Read the full answer</a> &middot; ${sibling} &middot; <a href="/price-index/">Memory Price Index</a></p>
+          <p class="listing-intro-link"><a href="${guide}">${guideAsk} Read the full answer</a> &middot; ${sibling} &middot; <a href="/price-index/">Memory Price Index</a></p>
         </div>
       </div>
     </section>`;
