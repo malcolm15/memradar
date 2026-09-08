@@ -17,10 +17,55 @@
 
   var AFFILIATE_TAG = 'memradar-20';
 
-  // The empty-state block is the JS-failure fallback: detach and hold it.
-  var emptyState = grid.querySelector('.listing-empty');
-  if (emptyState) emptyState.remove();
+  // THE FAILURE COPY IS BUILT HERE, NOT READ FROM THE PAGE. It used to be a
+  // hidden div in the HTML that this script un-hid, which meant "Prices didn't
+  // load." sat in the crawlable source of both category pages permanently,
+  // whether or not anything had failed. Constructed on demand, it can only ever
+  // be seen by someone who actually hit the failure.
+  function buildEmptyState() {
+    var d = document.createElement('div');
+    d.className = 'listing-empty';
+    d.innerHTML = '<div class="radar-pulse"><div class="radar-pulse-ring"></div><div class="radar-pulse-ring"></div>' +
+      '<div class="radar-pulse-ring"></div><div class="radar-pulse-dot"></div></div>' +
+      '<h2>Prices didn\'t load.</h2>' +
+      '<p>Having trouble loading prices. Try refreshing.</p>' +
+      '<a href="#" class="btn-alert">Set an Alert</a>';
+    return d;
+  }
   var countEl = document.querySelector('.listing-count');
+
+  // ---------- baked list ----------
+  // The generator bakes every indexable product as a real anchor. This reads
+  // that DOM back into the same shape the fetch returns, so filtering and
+  // sorting work before any network call resolves and keep working if the call
+  // never does. The page is progressively enhanced, not client-rendered.
+  var bakedMeta = {}; // sku -> { perGb, buy } - not in the product feed, preserved across re-renders
+  function readBaked() {
+    var out = [];
+    grid.querySelectorAll('.listing-card[data-sku]').forEach(function (card) {
+      var sku = card.getAttribute('data-sku');
+      var price = card.getAttribute('data-price');
+      var chg = card.getAttribute('data-change30');
+      var href = card.getAttribute('data-href') || '';
+      out.push({
+        sku: sku,
+        name: card.getAttribute('data-name') || '',
+        brand: card.getAttribute('data-brand') || null,
+        price: price === '' || price == null ? null : Number(price),
+        change30: chg === '' || chg == null ? null : Number(chg),
+        slug: href.replace(/^\/[^/]+\//, '').replace(/\/$/, ''),
+        image_url: (card.querySelector('.listing-card-img-el') || {}).src || null,
+        product_url: card.getAttribute('data-aff') || null,
+        _baked: true
+      });
+      bakedMeta[sku] = {
+        perGb: card.getAttribute('data-pergb') || '',
+        buy: card.getAttribute('data-buy') || '',
+        oos: card.getAttribute('data-oos') === '1'
+      };
+    });
+    return out;
+  }
 
   var state = { products: [], filters: {}, sort: 'name-az', query: null };
 
@@ -48,6 +93,7 @@
   }
   function affiliateUrl(url) {
     if (!url) return '#';
+    if (url.indexOf('tag=' + AFFILIATE_TAG) >= 0) return url; // already tagged (baked cards carry the full URL)
     return url + (url.indexOf('?') >= 0 ? '&' : '?') + 'tag=' + AFFILIATE_TAG;
   }
 
@@ -165,6 +211,21 @@
     if (r > 0) return '<span class="listing-card-change listing-card-change--up">▲ ' + r + '%</span>';
     return '';
   }
+  // $/GB and the buy state come from the generator (the client feed carries no
+  // avg90 and no capacity parse, so it could not recompute either) and are
+  // carried through re-renders rather than dropped on the first filter click.
+  var BUY_LABEL = { good: 'Good price', typical: 'Typical price', elevated: 'Above average' };
+  function metaHtml(p) {
+    var m = bakedMeta[p.sku];
+    if (!m) return '';
+    var bits = '';
+    if (m.perGb) {
+      var v = Number(m.perGb);
+      bits += '<span class="listing-card-per-gb">$' + (v >= 1 ? v.toFixed(2) : v.toFixed(3)) + '/GB</span>';
+    }
+    if (m.buy) bits += '<span class="listing-card-buy listing-card-buy--' + m.buy + '">' + BUY_LABEL[m.buy] + '</span>';
+    return bits ? '<div class="listing-card-meta">' + bits + '</div>' : '';
+  }
   function cardHtml(p) {
     var brand = p.brand ? '<span class="listing-card-brand">' + esc(p.brand) + '</span>' : '';
     var img = p.image_url
@@ -182,6 +243,7 @@
         brand +
         '<h3 class="listing-card-name">' + name + '</h3>' +
         '<div class="listing-card-pricing"><span class="listing-card-price">' + fmtPrice(p.price) + '</span>' + changeHtml(p) + '</div>' +
+        metaHtml(p) +
         '<span class="listing-card-retailer">Amazon</span>' +
       '</div>' +
       '<div class="listing-card-actions">' +
@@ -256,13 +318,23 @@
 
   // ---------- states ----------
   function showSkeleton() {
+    if (state.products.length) return; // a baked list is already better than a skeleton
     grid.innerHTML = skeletonHtml();
     if (countEl) countEl.textContent = 'Loading products…';
   }
+  // A fetch failure with a baked list present is NOT an error state for the
+  // reader: the baked prices were correct at the last regeneration and are the
+  // same ones a crawler sees. Keep them, say so in the console, and never
+  // replace real content with an apology. The error node is for the case where
+  // there is genuinely nothing on the page.
   function showFailure(msg) {
     console.error('Product listing failed to load:', msg);
+    if (state.products.length) {
+      console.log('Product listing: keeping the ' + state.products.length + ' baked products from the last regeneration.');
+      return;
+    }
     grid.innerHTML = '';
-    if (emptyState) { emptyState.hidden = false; grid.appendChild(emptyState); }
+    grid.appendChild(buildEmptyState());
     if (countEl) countEl.textContent = '';
   }
 
@@ -274,7 +346,7 @@
       var products = await window.memradarProductData.load(sb, category);
       if (!products.length) { showFailure('no products returned'); return; }
       state.products = products;
-      applyAndRender();
+      applyAndRender();  // fresh prices replace the baked ones; bakedMeta rides along
     } catch (err) {
       showFailure(err.message);
     }
@@ -321,5 +393,9 @@
   }
 
   wireControls();
+  // Seed from the baked DOM BEFORE any network call so filters and sort respond
+  // immediately, then upgrade to live prices when they arrive.
+  state.products = readBaked();
+  if (state.products.length) updateCount(state.products.length);
   load();
 })();

@@ -26,9 +26,21 @@
     return u + (u.indexOf('?') >= 0 ? '&' : '?') + 'tag=' + AFFILIATE_TAG;
   }
 
-  function hideSection() { section.hidden = true; }
+  // The grid is BAKED by the generator now, so "hide the section" is only the
+  // right answer when there is nothing baked to fall back to. Hiding a section
+  // that already holds four real, correct-at-last-regeneration products would
+  // destroy working content to report a transient fetch failure.
+  var bakedCount = grid.querySelectorAll('.listing-card[data-sku]').length;
+  function degrade(why) {
+    if (bakedCount) {
+      console.log('[home-drops] ' + why + '; keeping the ' + bakedCount + ' baked cards from the last regeneration.');
+      return;
+    }
+    section.hidden = true;
+  }
 
   function skeleton() {
+    if (bakedCount) return; // baked cards beat skeletons
     var one = '<div class="listing-card listing-card--skeleton" aria-hidden="true">' +
       '<div class="listing-card-img skeleton-box"></div>' +
       '<div class="listing-card-body"><div class="skeleton-line skeleton-line--sm"></div>' +
@@ -107,7 +119,7 @@
   }
 
   async function run() {
-    if (!sb || !window.memradarProductData) { hideSection(); return; }
+    if (!sb || !window.memradarProductData) { degrade('data layer not initialized'); return; }
     skeleton();
     try {
       var products = await window.memradarProductData.load(sb);
@@ -136,7 +148,7 @@
         }
       }
 
-      if (!chosen.length) { hideSection(); return; }
+      if (!chosen.length) { degrade('no products qualified'); return; }
 
       chosenBySku = {};
       chosen.forEach(function (p) { chosenBySku[p.sku] = p; });
@@ -148,8 +160,8 @@
       grid.innerHTML = chosen.map(cardHtml).join('');
       attachHandlers();
     } catch (err) {
-      console.error('[home-drops] failed, hiding section:', err.message);
-      hideSection();
+      console.error('[home-drops] failed:', err.message);
+      degrade('fetch failed');
     }
   }
 

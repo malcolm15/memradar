@@ -207,6 +207,12 @@ async function pickTargets() {
   }
   const guide = locs.map(rebase).find((u) => /\/guides\/[^/]+\/$/.test(u));
   return [
+    // The homepage joined the set in the P1 pass (2026-09-08), when Market
+    // Pulse, the product count and Biggest Drops all became generator output.
+    // It is the page with the most baked state hydration can silently stop
+    // updating, and a stale-but-plausible "+42% vs 6 months ago" is precisely
+    // the failure this check exists to catch.
+    { kind: 'Homepage', url: `${BASE}/` },
     { kind: 'PDP', url: best },
     { kind: 'Price Index', url: `${BASE}/price-index/` },
     { kind: 'Guide', url: guide || `${BASE}/guides/should-i-buy-ram-now/` },

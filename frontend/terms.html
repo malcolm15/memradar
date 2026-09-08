@@ -26,13 +26,39 @@
   <meta name="twitter:description" content="MemRadar terms of service, including our price accuracy disclaimer. RAM and SSD prices come from third parties and may not be real-time.">
   <meta name="twitter:image" content="https://memradar.com/og-image.png">
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    "name": "Terms of Service",
-    "url": "https://memradar.com/terms.html",
-    "isPartOf": { "@type": "WebSite", "name": "MemRadar", "url": "https://memradar.com" }
-  }
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "Terms of Service",
+      "url": "https://memradar.com/terms.html",
+      "isPartOf": {
+        "@type": "WebSite",
+        "name": "MemRadar",
+        "url": "https://memradar.com"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://memradar.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Terms of Service",
+          "item": "https://memradar.com/terms.html"
+        }
+      ]
+    }
+  ]
+}
   </script>
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -40,7 +66,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
   <meta name="theme-color" content="#0f1623">
-  <link rel="stylesheet" href="css/style.css?v=20260907">
+  <link rel="stylesheet" href="css/style.css?v=20260908">
 </head>
 <body>
 
@@ -134,9 +160,9 @@
     </div>
   </footer>
 
-  <script src="js/main.js?v=20260907"></script>
-  <script src="js/theme.js?v=20260907"></script>
-  <script src="js/mobile-nav.js?v=20260907"></script>
-  <script src="js/search.js?v=20260907"></script>
+  <script src="js/main.js?v=20260908"></script>
+  <script src="js/theme.js?v=20260908"></script>
+  <script src="js/mobile-nav.js?v=20260908"></script>
+  <script src="js/search.js?v=20260908"></script>
 </body>
 </html>

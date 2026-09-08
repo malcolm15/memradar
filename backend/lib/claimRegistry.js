@@ -39,25 +39,36 @@ const pctOf = (ratio) => (ratio - 1) * 100;
 // into the sentence. Its floor therefore moves with the regen, so hardcoding a
 // value here would go stale the first time the weakest segment crossed a tens
 // boundary. Read it back off the page instead — the baked HTML is the claim.
-const PRICE_INDEX_PAGE = path.join(__dirname, '..', '..', 'frontend', 'price-index', 'index.html');
-const PRICE_INDEX_RE = /Every segment is up more than (\d+)% year over year/;
+const PAGE = (...parts) => path.join(__dirname, '..', '..', 'frontend', ...parts);
 
-function bakedPriceIndexFloor() {
+// Reads a generated tens-floor back off the page that carries it. Used by every
+// claim whose number the generator derives rather than a human writing it.
+function bakedFloor(file, re, url, what) {
   let html;
   try {
-    html = fs.readFileSync(PRICE_INDEX_PAGE, 'utf8');
+    html = fs.readFileSync(file, 'utf8');
   } catch (err) {
-    throw new Error(`cannot read the baked Price Index page (${err.code || err.message})`);
+    throw new Error(`cannot read the baked ${url} page (${err.code || err.message})`);
   }
-  const m = PRICE_INDEX_RE.exec(html);
+  const m = re.exec(html);
   if (!m) {
     // The sentence was reworded or dropped without updating this entry, which
     // is exactly the drift the registry rule exists to prevent. Unresolved, and
     // reported as loudly as a breach.
-    throw new Error('the "Every segment is up more than N%" sentence is no longer on the page');
+    throw new Error(`the ${what} sentence is no longer on ${url}`);
   }
-  return { floorPct: Number(m[1]), source: `baked into /price-index/ as ${m[1]}%` };
+  return { floorPct: Number(m[1]), source: `baked into ${url} as ${m[1]}%` };
 }
+
+const bakedPriceIndexFloor = () => bakedFloor(
+  PAGE('price-index', 'index.html'),
+  /Every segment is up more than (\d+)% year over year/,
+  '/price-index/', '"Every segment is up more than N%"');
+
+const bakedListingFloor = (cat) => () => bakedFloor(
+  PAGE(cat, 'index.html'),
+  /are up more than (\d+)% year over year/,
+  `/${cat}/`, '"up more than N% year over year"');
 
 const CLAIM_REGISTRY = [
   // ---------------------------------------------------------------- explainer
@@ -152,6 +163,30 @@ const CLAIM_REGISTRY = [
     ],
     resolveFloor: bakedPriceIndexFloor,
     floorLabel: 'the tens-floor baked into the page',
+  },
+
+  // --------------------------------------------------------- listing pages
+  // Generated intros, added in the P1 pass (2026-09-08). Both floor on
+  // Math.min(full, stable) per segment the way the Price Index does, so the
+  // number baked into the sentence already survives cohort choice; these
+  // entries keep it that way as the data moves.
+  {
+    id: 'ram-listing-both-up',
+    page: '/ram/',
+    where: 'Is RAM expensive right now?',
+    sentence: 'Both DDR5 and DDR4 are up more than N% year over year across the products tracked here.',
+    requires: [{ segment: 'ddr5', period: '1y' }, { segment: 'ddr4', period: '1y' }],
+    resolveFloor: bakedListingFloor('ram'),
+    floorLabel: 'the tens-floor baked into /ram/',
+  },
+  {
+    id: 'ssd-listing-both-up',
+    page: '/ssd/',
+    where: 'Is SSD expensive right now?',
+    sentence: 'Both NVMe and SATA drives are up more than N% year over year across the products tracked here.',
+    requires: [{ segment: 'nvme_ssd', period: '1y' }, { segment: 'sata_ssd', period: '1y' }],
+    resolveFloor: bakedListingFloor('ssd'),
+    floorLabel: 'the tens-floor baked into /ssd/',
   },
 
   // ------------------------------------- registered, deliberately not checked

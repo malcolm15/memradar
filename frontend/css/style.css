@@ -1904,15 +1904,6 @@ html.dark .notice-btn--primary { color: #fff; }
    the model tokens people search, and it must never compete with the real
    product name above it. Wraps rather than truncates, since a clipped part
    number defeats the reason for keeping it. */
-.pdp-raw-listing {
-  margin: 6px 0 0;
-  font-size: 0.78rem;
-  line-height: 1.45;
-  color: var(--text-secondary, #64748b);
-  overflow-wrap: anywhere;
-}
-.pdp-raw-listing-label { font-weight: 600; }
-html.dark .pdp-raw-listing { color: #94a3b8; }
 /* ── Share Buttons ── */
 .pdp-share {
   display: flex;
@@ -3361,3 +3352,117 @@ html.dark .pdp-blurb-heading { color: #94a3b8; }
   color: var(--text-secondary, #64748b);
 }
 html.dark .guides-subhead { color: #94a3b8; }
+
+/* ---- Category listing: editorial intro + best value (P1 pass, 2026-09-08) ---- */
+.listing-intro {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 34px 0 30px;
+}
+.listing-intro-inner { max-width: 760px; }
+.listing-intro h2 {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 10px;
+}
+.listing-intro p {
+  font-size: 1rem;
+  line-height: 1.65;
+  color: #4b5563;
+  margin-bottom: 10px;
+}
+.listing-intro-link { font-size: 0.92rem; }
+.listing-intro-link a { color: var(--brand-primary); font-weight: 600; }
+.listing-intro-link a:hover { text-decoration: underline; }
+html.dark .listing-intro { border-bottom-color: #2d3f55; }
+html.dark .listing-intro h2 { color: #e2e8f0; }
+html.dark .listing-intro p { color: #94a3b8; }
+html.dark .listing-intro-link a { color: var(--brand-light); }
+
+.listing-bestvalue { padding: 30px 0 6px; }
+.listing-bestvalue h2 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 6px;
+}
+.listing-bv-sub {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin-bottom: 4px;
+  max-width: 760px;
+  line-height: 1.55;
+}
+/* Same scroll-in-place rule as .pi-table-wrap: the page body must never scroll
+   sideways, so a wide table scrolls inside its own box. */
+.listing-bv-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 16px 0 4px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
+.listing-bv-wrap:focus-visible { outline: 3px solid var(--brand-primary); outline-offset: 2px; }
+.listing-bv-table {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.listing-bv-table th, .listing-bv-table td { padding: 11px 14px; text-align: right; white-space: nowrap; }
+.listing-bv-table thead th {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #9ca3af;
+  border-bottom: 1px solid #e5e7eb;
+}
+.listing-bv-table thead th:first-child { text-align: left; }
+.listing-bv-table tbody th {
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.92rem;
+  white-space: normal;
+  min-width: 240px;
+}
+.listing-bv-table tbody th a { color: #111827; }
+.listing-bv-table tbody th a:hover { color: var(--brand-primary); text-decoration: underline; }
+.listing-bv-table tbody tr + tr th, .listing-bv-table tbody tr + tr td { border-top: 1px solid #f1f5f9; }
+/* Cheaper than the segment median is GOOD for a buyer, so it is the green one.
+   Same polarity as the Price Index cells, where a falling price is green. */
+.listing-bv-delta { font-weight: 700; }
+.listing-bv-delta--down { color: #16a34a; }
+.listing-bv-delta--up { color: #ea580c; }
+html.dark .listing-bestvalue h2 { color: #e2e8f0; }
+html.dark .listing-bv-sub { color: #64748b; }
+html.dark .listing-bv-wrap { border-color: #2d3f55; }
+html.dark .listing-bv-table thead th { border-bottom-color: #2d3f55; color: #64748b; }
+html.dark .listing-bv-table tbody th a { color: #e2e8f0; }
+html.dark .listing-bv-table tbody tr + tr th, html.dark .listing-bv-table tbody tr + tr td { border-top-color: #22304a; }
+
+/* Card metrics: $/GB and the buy state, baked by the generator and carried
+   through client re-renders (the product feed has neither). */
+.listing-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+.listing-card-per-gb { font-size: 0.75rem; color: #9ca3af; font-weight: 600; }
+.listing-card-buy {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 2px 7px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.listing-card-buy--good { color: #15803d; background: #dcfce7; }
+.listing-card-buy--typical { color: #a16207; background: #fef9c3; }
+.listing-card-buy--elevated { color: #b91c1c; background: #fee2e2; }
+html.dark .listing-card-per-gb { color: #64748b; }
+html.dark .listing-card-buy--good { color: #86efac; background: rgba(22, 163, 74, 0.18); }
+html.dark .listing-card-buy--typical { color: #fde047; background: rgba(202, 138, 4, 0.18); }
+html.dark .listing-card-buy--elevated { color: #fca5a5; background: rgba(220, 38, 38, 0.18); }
