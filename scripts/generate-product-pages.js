@@ -2251,7 +2251,7 @@ function buildGuideRamNow(ctx) {
         description: metaDesc,
         url: SITE + '/guides/should-i-buy-ram-now/',
         author: AUTHOR_PERSON,
-        publisher: { '@type': 'Organization', name: 'MemRadar', url: SITE + '/' },
+        publisher: PUBLISHER_ORG,
         dateModified: buildDate,
         isAccessibleForFree: true,
       },
@@ -2375,7 +2375,7 @@ function buildGuideSsdNow(ctx) {
         description: metaDesc,
         url: SITE + '/guides/should-i-buy-an-ssd-now/',
         author: AUTHOR_PERSON,
-        publisher: { '@type': 'Organization', name: 'MemRadar', url: SITE + '/' },
+        publisher: PUBLISHER_ORG,
         dateModified: buildDate,
         isAccessibleForFree: true,
       },
@@ -2506,7 +2506,7 @@ function buildExplainer(ctx) {
         datePublished: EXPLAINER_PUBLISHED,
         dateModified: buildDate,
         author: AUTHOR_PERSON,
-        publisher: { '@id': `${SITE}/#organization` },
+        publisher: PUBLISHER_ORG,
         mainEntityOfPage: { '@type': 'WebPage', '@id': url },
       },
       { '@type': 'BreadcrumbList', itemListElement: [
@@ -2543,6 +2543,21 @@ const AUTHOR_PERSON = {
   '@id': `${SITE}/#malcolm`,
   name: 'Malcolm Konner',
   url: `${SITE}/about.html`,
+};
+
+// PUBLISHER. Declared INLINE on every Article rather than referenced by @id.
+// The explainer used to carry `publisher: { '@id': SITE + '/#organization' }`,
+// but that node is declared only on the homepage, so on the explainer itself the
+// reference resolved to nothing local: legal JSON-LD, and indistinguishable from
+// a bug to a strict parser or to the next person reading the page source. Every
+// Article now carries the same self-contained node, and the @id still names the
+// entity so it unifies with the homepage Organization rather than competing
+// with it. Same stub-plus-@id pattern as AUTHOR_PERSON above.
+const PUBLISHER_ORG = {
+  '@type': 'Organization',
+  '@id': `${SITE}/#organization`,
+  name: 'MemRadar',
+  url: `${SITE}/`,
 };
 
 // ------------------------------------------------------------- homepage
