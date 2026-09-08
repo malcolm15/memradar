@@ -2250,7 +2250,7 @@ function buildGuideRamNow(ctx) {
         headline: 'Should I Buy RAM Now?',
         description: metaDesc,
         url: SITE + '/guides/should-i-buy-ram-now/',
-        author: { '@type': 'Organization', name: 'MemRadar', url: SITE + '/' },
+        author: AUTHOR_PERSON,
         publisher: { '@type': 'Organization', name: 'MemRadar', url: SITE + '/' },
         dateModified: buildDate,
         isAccessibleForFree: true,
@@ -2374,7 +2374,7 @@ function buildGuideSsdNow(ctx) {
         headline: 'Should I Buy an SSD Now?',
         description: metaDesc,
         url: SITE + '/guides/should-i-buy-an-ssd-now/',
-        author: { '@type': 'Organization', name: 'MemRadar', url: SITE + '/' },
+        author: AUTHOR_PERSON,
         publisher: { '@type': 'Organization', name: 'MemRadar', url: SITE + '/' },
         dateModified: buildDate,
         isAccessibleForFree: true,
@@ -2505,7 +2505,7 @@ function buildExplainer(ctx) {
         url,
         datePublished: EXPLAINER_PUBLISHED,
         dateModified: buildDate,
-        author: { '@type': 'Organization', name: 'MemRadar', url: SITE },
+        author: AUTHOR_PERSON,
         publisher: { '@id': `${SITE}/#organization` },
         mainEntityOfPage: { '@type': 'WebPage', '@id': url },
       },
@@ -2532,6 +2532,18 @@ function buildExplainer(ctx) {
     .replace('<!--CHART_CAPTION-->', esc(caption));
   return { html, dist: d, chart: chartP, desc };
 }
+
+// AUTHOR. Every Article on the site is written by Malcolm, not by a faceless
+// brand, and Google's guidance on who-wrote-this is not satisfied by naming the
+// site again. This is a STUB carrying the @id: the canonical Person node with
+// the full detail lives once on /about.html, so the facts cannot drift between
+// pages. Same pattern the Organization already uses via #organization.
+const AUTHOR_PERSON = {
+  '@type': 'Person',
+  '@id': `${SITE}/#malcolm`,
+  name: 'Malcolm Konner',
+  url: `${SITE}/about.html`,
+};
 
 // ------------------------------------------------------------- homepage
 // The homepage shipped hand-written fallbacks: Market Pulse frozen at "+42% vs
