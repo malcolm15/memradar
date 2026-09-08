@@ -1047,9 +1047,12 @@ html.dark .modal-field-hint { color: #64748b; }
 
 /* ── Listing Pages (RAM / SSD) ── */
 .listing-hero {
-  padding: 48px 0 40px;
+  /* Was 48px 0 40px, with a second bordered .listing-intro section under it.
+     The two are one block now; this is the whole intro region's padding. */
+  padding: 34px 0 26px;
   border-bottom: 1px solid #e5e7eb;
 }
+.listing-hero-inner { max-width: 900px; }
 .listing-hero h1 {
   font-size: 2rem;
   font-weight: 800;
@@ -1063,6 +1066,30 @@ html.dark .modal-field-hint { color: #64748b; }
   margin-bottom: 20px;
   max-width: 500px;
 }
+/* The one-line subtitle keeps the narrow 500px measure; the answer paragraph
+   needs a real one. At 500px inside a 1100px container it wrapped after a
+   handful of words with most of the row empty to its right. */
+.listing-hero-sub {
+  /* Inherited .listing-hero p's 500px, which wrapped it after four words on a
+     1100px container with the rest of the row empty. */
+  max-width: 64ch !important;
+  margin-bottom: 14px !important;
+}
+.listing-hero-q {
+  font-size: 1.08rem;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 5px;
+}
+.listing-hero-answer {
+  max-width: 78ch !important;
+  font-size: 0.97rem;
+  line-height: 1.6;
+  color: #4b5563 !important;
+  margin-bottom: 10px !important;
+}
+html.dark .listing-hero-q { color: #e2e8f0; }
+html.dark .listing-hero-answer { color: #94a3b8 !important; }
 .filter-bar-wrap {
   position: sticky;
   top: var(--header-height);
@@ -1131,7 +1158,9 @@ html.dark .modal-field-hint { color: #64748b; }
   transition: border-color 0.15s;
 }
 .filter-select:focus { outline: none; border-color: var(--brand-primary); }
-.listing-section { padding: 40px 0 64px; }
+/* Top padding cut from 40px: the filter bar above already separates this
+   from the intro, and every pixel here pushes the first card down. */
+.listing-section { padding: 20px 0 40px; }
 .listing-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1736,8 +1765,12 @@ html.dark .notice-btn--primary { color: #fff; }
   .modal-card { border-radius: 20px 20px 0 0; max-height: 92vh; }
   .modal-footer-row { flex-wrap: wrap; gap: 8px; }
   .modal-footer-row .modal-btn-primary { flex: 1; min-width: 120px; }
-  .listing-hero { padding: 32px 0 28px; }
+  .listing-hero { padding: 22px 0 18px; }
   .listing-hero h1 { font-size: 1.5rem; }
+  .listing-hero-q { font-size: 1rem; }
+  .listing-hero-answer { font-size: 0.92rem; line-height: 1.5; }
+  .listing-hero-sub { margin-bottom: 10px !important; }
+  .listing-section { padding: 14px 0 32px; }
   .listing-grid { grid-template-columns: 1fr; }
 }
 
@@ -3379,7 +3412,11 @@ html.dark .listing-intro h2 { color: #e2e8f0; }
 html.dark .listing-intro p { color: #94a3b8; }
 html.dark .listing-intro-link a { color: var(--brand-light); }
 
-.listing-bestvalue { padding: 30px 0 6px; }
+.listing-bestvalue {
+  padding: 30px 0 34px;
+  border-top: 1px solid #e5e7eb;
+}
+html.dark .listing-bestvalue { border-top-color: #2d3f55; }
 .listing-bestvalue h2 {
   font-size: 1.15rem;
   font-weight: 800;
