@@ -483,11 +483,11 @@ html.dark .section-sub { color: #94a3b8; }
   /* Was a single centred flex row. It had grown to 12 links and stopped being
      scannable; grouping is what makes 15 readable where 12 was not. */
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 22px 48px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px 36px;
   text-align: left;
   width: 100%;
-  max-width: 640px;
+  max-width: 760px;
   margin: 4px auto 0;
 }
 .footer-col-title {
@@ -1735,19 +1735,16 @@ html.dark .notice-btn--primary { color: #fff; }
      MUST live in a media block AFTER the base .footer-nav rule: a media query
      adds no specificity, so an earlier one loses to the later plain rule. */
   .footer-nav {
+    /* Four groups fall into a 2x2 here. align-items:start keeps each column's
+       links under their own heading rather than stretching to the row height. */
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 18px 20px;
+    align-items: start;
+    gap: 22px 20px;
     max-width: 400px;
   }
   /* Two columns leaves Site alone on row two with an empty cell beside it, so
      it spans the full width and flows its own list in two columns instead.
      Fills the dead space and takes ~150px off the footer. */
-  .footer-col:last-child { grid-column: 1 / -1; }
-  .footer-col:last-child ul {
-    columns: 2;
-    column-gap: 20px;
-  }
-  .footer-col:last-child li { break-inside: avoid; }
 
   .hero h1 { font-size: 1.8rem; }
   .pulse-grid { grid-template-columns: repeat(2, 1fr); }
