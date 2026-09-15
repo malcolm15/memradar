@@ -2169,6 +2169,15 @@ function buildPriceIndex(ctx) {
 // chart, near-ATL list) so the argument never drifts from the numbers
 // beside it. Same hydration-parity rule as the Price Index: any figure that
 // also appears in a hydrated element must itself hydrate.
+// Hoisted to module scope when /feed.xml landed: the guides index and the feed
+// must read ONE list, or a new explainer appears on the index and silently
+// never reaches the feed.
+const EXPLAINERS = [{
+  href: '/blog/why-ram-prices-are-so-high/',
+  title: 'Why Is RAM So Expensive in 2026?',
+  blurb: 'What drove the memory price surge, why it landed on consumers, and what the industry\'s own cycle says about how it ends.',
+}];
+
 const GUIDES = [{
   slug: 'should-i-buy-ram-now',
   title: 'Should I Buy RAM Now?',
@@ -2795,6 +2804,118 @@ function buildMethodology(ctx) {
   return { html, desc, title: pageTitle };
 }
 
+// ------------------------------------------------------------- /feed.xml
+// RSS 2.0 over the site's EDITORIAL content only. Product pages are excluded on
+// purpose: 231 catalog entries would drown six articles, and a feed reader
+// subscribing to "MemRadar" wants the writing, not a catalog export.
+//
+// THE CONTENT SET IS DERIVED FROM THE REGISTRIES THAT ALREADY EXIST. Guides come
+// from GUIDES and explainers from EXPLAINERS, the same two lists that build the
+// guides index, so a new guide reaches the feed with no separate step and
+// cannot be forgotten. Only the standalone reference pages are named here,
+// because there is no list of them to borrow.
+const FEED_PATH = 'feed.xml';
+const FEED_STANDALONE = ['/price-index/', '/methodology/', '/data/', '/glossary/'];
+
+// EVERY FIELD IS READ BACK OFF THE PAGE'S OWN BAKED HTML rather than restated
+// here. A feed that carries its own copy of a title drifts the first time a page
+// is retitled, and the drift is invisible because nobody reads their own feed.
+// This way the feed is wrong only if the page is wrong.
+function feedItemFrom(href) {
+  const rel = href.replace(/^\//, '').replace(/\/$/, '');
+  const file = path.join(FRONTEND, rel, 'index.html');
+  let html;
+  try {
+    html = fs.readFileSync(file, 'utf8');
+  } catch (err) {
+    throw new Error(`${href} has no generated page at ${rel}/index.html (${err.code})`);
+  }
+  const title = (/<title>([\s\S]*?)<\/title>/.exec(html) || [])[1];
+  const desc = (/<meta name="description" content="([^"]*)"/.exec(html) || [])[1];
+  if (!title) throw new Error(`${href} has no <title>`);
+  if (!desc) throw new Error(`${href} has no meta description`);
+  // dateModified comes from the page's own JSON-LD. Deliberately NO fallback to
+  // the build date: a page reaching this list without one is a page that did not
+  // get the treatment the others did, and silently dating it today would hide
+  // that. Every content page carries one (the glossary gained one for this).
+  let modified = null;
+  for (const m of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) {
+    const hit = /"dateModified":\s*"(\d{4}-\d{2}-\d{2})"/.exec(m[1]);
+    if (hit) { modified = hit[1]; break; }
+  }
+  if (!modified) throw new Error(`${href} carries no dateModified in its JSON-LD`);
+  return {
+    href,
+    url: SITE + href,
+    // The feed shows the page's own <title> minus the site suffix: a reader's
+    // river already shows the channel name beside every item, so repeating it
+    // in each headline is noise.
+    title: decodeEntities(title).replace(/\s*\|\s*MemRadar\s*$/, ''),
+    description: decodeEntities(desc),
+    modified,
+  };
+}
+
+function decodeEntities(x) {
+  return String(x)
+    .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&middot;/g, '·');
+}
+
+// RFC 822, which RSS 2.0 requires and ISO 8601 does not satisfy. Fixed GMT and
+// fixed English names: a locale-dependent month name would produce a feed that
+// parses on the build machine and nowhere else.
+const RFC822_DAY = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const RFC822_MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+function rfc822(iso) {
+  const d = new Date(`${iso}T00:00:00Z`);
+  if (Number.isNaN(d.getTime())) throw new Error(`cannot format '${iso}' as RFC 822`);
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${RFC822_DAY[d.getUTCDay()]}, ${pad(d.getUTCDate())} ${RFC822_MON[d.getUTCMonth()]} ${d.getUTCFullYear()} `
+       + `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())} GMT`;
+}
+
+function buildFeed(buildDate) {
+  const hrefs = [
+    ...GUIDES.map((g) => `/guides/${g.slug}/`),
+    ...EXPLAINERS.map((e) => e.href),
+    ...FEED_STANDALONE,
+  ];
+  const items = hrefs.map(feedItemFrom)
+    .sort((a, b) => b.modified.localeCompare(a.modified) || a.title.localeCompare(b.title));
+  if (!items.length) throw new Error('feed has no items');
+
+  const CH_TITLE = 'MemRadar';
+  const CH_DESC = 'Guides, explainers and reference data on RAM and SSD prices, argued from a decade of tracked retail price history.';
+  const body = items.map((it) => `    <item>
+      <title>${escXml(it.title)}</title>
+      <link>${escXml(it.url)}</link>
+      <guid isPermaLink="true">${escXml(it.url)}</guid>
+      <description>${escXml(it.description)}</description>
+      <pubDate>${rfc822(it.modified)}</pubDate>
+    </item>`).join('\n');
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>${escXml(CH_TITLE)}</title>
+    <link>${SITE}/</link>
+    <description>${escXml(CH_DESC)}</description>
+    <language>en-us</language>
+    <lastBuildDate>${rfc822(buildDate)}</lastBuildDate>
+    <atom:link href="${SITE}/${FEED_PATH}" rel="self" type="application/rss+xml"/>
+    <image>
+      <url>${SITE}/android-chrome-512x512.png</url>
+      <title>${escXml(CH_TITLE)}</title>
+      <link>${SITE}/</link>
+    </image>
+${body}
+  </channel>
+</rss>
+`;
+  return { xml, items };
+}
+
 // -------------------------------------------------------------- /data/
 // The page outreach pitches link to. A journalist may lift a findings sentence
 // VERBATIM, which sets the bar: each one has to read correctly in isolation,
@@ -3161,11 +3282,6 @@ function buildGuidesIndex(buildDate) {
   // A guide answers "what should I do" and an explainer answers "why did this
   // happen"; filing them together would misdescribe both, and the index is the
   // only place a reader chooses between them.
-  const EXPLAINERS = [{
-    href: '/blog/why-ram-prices-are-so-high/',
-    title: 'Why Is RAM So Expensive in 2026?',
-    blurb: 'What drove the memory price surge, why it landed on consumers, and what the industry\'s own cycle says about how it ends.',
-  }];
   const items = GUIDES.map((g) => `        <li class="guides-item">
           <a class="guides-link" href="${g.slug}/">${esc(g.title)}</a>
           <p class="guides-blurb">${esc(g.blurb)}</p>
@@ -3230,6 +3346,12 @@ ${items.map((e) => `          <div class="glossary-item" id="${e.id}">
           inDefinedTermSet: SITE + '/glossary/',
         })),
       },
+      // dateModified added when /feed.xml landed. Every other content page
+      // already carried one; without it the feed would have had to guess this
+      // page's date, and a fallback that guesses is the thing this repo keeps
+      // getting bitten by. The glossary is rebuilt every regen, so the build
+      // date is the honest answer rather than a substitute for one.
+      { '@type': 'WebPage', '@id': SITE + '/glossary/', url: SITE + '/glossary/', dateModified: buildDate },
       { '@type': 'BreadcrumbList', itemListElement: [
         { '@type': 'ListItem', position: 1, name: 'Home', item: SITE + '/' },
         { '@type': 'ListItem', position: 2, name: 'Glossary', item: SITE + '/glossary/' },
@@ -3998,6 +4120,19 @@ async function run() {
       log(`Homepage written: ${hp.pulse} Market Pulse cards + ${hp.drops} baked drops`);
     } catch (e) {
       log(`⚠ homepage NOT regenerated: ${e.message}`);
+    }
+  }
+
+  // 2e) /feed.xml. LAST among the content builds on purpose: it reads each
+  // page's baked HTML for its title, description and dateModified, so it has to
+  // run after every one of them has been written this run.
+  if (!IS_SAMPLE) {
+    try {
+      const feed = buildFeed(buildDate);
+      fs.writeFileSync(path.join(FRONTEND, FEED_PATH), feed.xml);
+      log(`Feed written: /${FEED_PATH} (${feed.items.length} items, newest ${feed.items[0].modified} ${feed.items[0].title})`);
+    } catch (e) {
+      log(`⚠ /${FEED_PATH} NOT regenerated: ${e.message}`);
     }
   }
 

@@ -842,6 +842,22 @@ Three findings are floored on both cohorts. The two ATL counts are `monitorable:
 
 Links in: the Price Index citation block, the methodology page, About's data paragraph, and the footer beside Methodology, Glossary and Price Index.
 
+## RSS feed (`/feed.xml`, 2026-09-15)
+
+RSS 2.0 over the site's **editorial** content: both guides, the explainer, the Price Index, `/methodology/`, `/data/` and the glossary. **Product pages are excluded on purpose** - 231 catalog entries would drown seven articles, and someone subscribing to "MemRadar" wants the writing, not a catalog export. **NOT in the sitemap** (a feed is a syndication endpoint, not a page to index), linked from the `<head>` of all 270 pages with the standard `rel="alternate"` tag so readers and browsers discover it.
+
+**THE CONTENT SET IS DERIVED FROM THE REGISTRIES THAT ALREADY EXIST.** Guides come from `GUIDES` and explainers from `EXPLAINERS`, the same two lists that build the guides index, so **a new guide reaches the feed with no separate step**. `EXPLAINERS` was local to `buildGuidesIndex()` and was hoisted to module scope for this: two lists would mean a new explainer appearing on the index and silently never reaching the feed. Only `FEED_STANDALONE` (the four reference pages) is named by hand, because there is no existing list of them to borrow.
+
+**EVERY FIELD IS READ BACK OFF THE PAGE'S OWN BAKED HTML** - title from `<title>`, description from the meta description, `pubDate` from the JSON-LD `dateModified`. A feed carrying its own copy of a title drifts the first time a page is retitled, and **the drift is invisible because nobody reads their own feed**. This way the feed is wrong only if the page is wrong. The item title drops the ` | MemRadar` suffix, since a reader's river already shows the channel name beside every headline.
+
+**NO FALLBACK ON A MISSING dateModified, deliberately.** A page reaching this list without one is a page that did not get the treatment the others did, and dating it "today" would hide that. The glossary was the only content page with no `dateModified`; it **gained one in its JSON-LD** rather than the feed guessing on its behalf. The whole build is wrapped so a feed failure logs `⚠ /feed.xml NOT regenerated` and leaves the last good feed in place, same rule as the guides.
+
+**`rfc822()` is hand-rolled with fixed English day and month names**, not `toLocaleString`. RSS 2.0 requires RFC 822 dates, which ISO 8601 does not satisfy, and a locale-dependent month name would produce a feed that parses on the build machine and nowhere else.
+
+**Build order matters:** the feed is written LAST among the content builds (`2e`), after every page it reads has been regenerated this run. Moving it earlier would feed it yesterday's titles.
+
+First build: 7 items. Validated locally against the RSS 2.0 requirements including the one people miss, that `image/title` and `image/link` must match the channel's.
+
 ## Retailer & Affiliate Program Status
 
 Current queue (as of 2026-08-23):
