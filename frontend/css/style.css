@@ -1900,30 +1900,6 @@ html.dark .notice-btn--primary { color: #fff; }
   color: #111827;
 }
 
-.pdp-rating {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.pdp-stars {
-  position: relative;
-  display: inline-block;
-  font-size: 1.15rem;
-  line-height: 1;
-}
-.pdp-stars-bg { color: #d1d5db; letter-spacing: 2px; }
-.pdp-stars-fg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  color: #fbbf24;
-  letter-spacing: 2px;
-}
-.pdp-rating-text { font-size: 0.88rem; color: #6b7280; }
-.pdp-rating-link { color: var(--brand-primary); }
-.pdp-rating-link:hover { text-decoration: underline; }
 
 .pdp-spec-summary {
   font-size: 0.9rem;
@@ -2942,8 +2918,6 @@ html.dark .pdp-thumb-img { background: #141e2d; }
 html.dark .pdp-badge--brand { background: #1a2332; color: #94a3b8; }
 html.dark .pdp-badge--cat  { background: rgba(var(--brand-rgb),0.15); color: var(--brand-light); }
 html.dark .pdp-product-title { color: #f1f5f9; }
-html.dark .pdp-rating-text { color: #64748b; }
-html.dark .pdp-stars-bg { color: #2d3f55; }
 html.dark .pdp-spec-summary { color: #64748b; }
 html.dark .pdp-share-btn { border-color: #2d3f55; color: #64748b; }
 html.dark .pdp-share-btn:hover { color: #94a3b8; border-color: #374151; background: #1a2332; }
@@ -3089,65 +3063,7 @@ html.dark .back-to-top:hover { border-color: var(--brand-primary); color: var(--
   .back-to-top.visible { transform: none; }
 }
 
-/* ══════════════════════════════════════════════════════════════
-   Coming Soon Banner
-   ══════════════════════════════════════════════════════════════ */
-.coming-soon-banner {
-  background: var(--brand-tint);
-  border-top: 1px solid rgba(var(--brand-rgb), 0.15);
-  border-bottom: 1px solid rgba(var(--brand-rgb), 0.15);
-  padding: 10px 0;
-}
-.coming-soon-inner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  flex-wrap: wrap;
-}
-.coming-soon-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--brand-primary);
-  flex-shrink: 0;
-  position: relative;
-}
-.coming-soon-dot::after {
-  content: '';
-  position: absolute;
-  inset: -5px;
-  border-radius: 50%;
-  border: 2px solid var(--brand-primary);
-  opacity: 0;
-  animation: cs-pulse 1.8s ease-out infinite;
-}
-@keyframes cs-pulse {
-  0%   { transform: scale(0.6); opacity: 0.8; }
-  100% { transform: scale(2.2); opacity: 0; }
-}
-.coming-soon-text {
-  font-size: 0.9rem;
-  color: #1e40af;
-  line-height: 1.4;
-  text-align: center;
-}
-.coming-soon-text strong { font-weight: 700; }
-.coming-soon-text a { font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
-.coming-soon-text a:hover { opacity: 0.8; }
 
-html.dark .coming-soon-banner {
-  background: rgba(var(--brand-rgb), 0.14);
-  border-top-color: rgba(var(--brand-rgb), 0.28);
-  border-bottom-color: rgba(var(--brand-rgb), 0.28);
-}
-html.dark .coming-soon-text  { color: var(--brand-light); }
-html.dark .coming-soon-dot   { background: var(--brand-light); }
-html.dark .coming-soon-dot::after { border-color: var(--brand-light); }
-
-@media (max-width: 600px) {
-  .coming-soon-text { font-size: 0.85rem; }
-}
 
 /* ── Market Pulse - last updated ── */
 .pulse-updated {
