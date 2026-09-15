@@ -3431,3 +3431,13 @@ html.dark .listing-card-per-gb { color: #64748b; }
 html.dark .listing-card-buy--good { color: #86efac; background: rgba(22, 163, 74, 0.18); }
 html.dark .listing-card-buy--typical { color: #fde047; background: rgba(202, 138, 4, 0.18); }
 html.dark .listing-card-buy--elevated { color: #fca5a5; background: rgba(220, 38, 38, 0.18); }
+
+/* Findings on /data/: each sentence carries the date it was computed, muted so
+   the sentence reads as the unit a journalist lifts and the date as its stamp. */
+.data-findings li { margin-bottom: 12px; }
+.data-finding-date {
+  color: #9ca3af;
+  font-size: 0.86rem;
+  white-space: nowrap;
+}
+html.dark .data-finding-date { color: #64748b; }

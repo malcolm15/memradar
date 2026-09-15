@@ -824,6 +824,24 @@ Everything else checked out: the six-times-daily cadence (`0 */4 * * *` = 00/04/
 
 **FOOTER, NOT THE GUIDES INDEX.** The guides index is where a shopper chooses between editorial arguments, and it already carries an Explainers subheading for the same reason. Methodology is a reference document for a different reader, and filing it beside "Should I Buy RAM Now?" would misdescribe both. It sits in the footer next to Glossary and Price Index, which is where this site's reference material already lives. Links in: About's data paragraph (moved off `/faq/`), the Price Index methodology section, and four FAQ answers that previously restated the data sources.
 
+## Press page (`/data/`, 2026-09-15)
+
+"Memory Price Data for Journalists and Researchers". The page outreach pitches link to. Generated, sitemap priority 0.6, `WebPage` JSON-LD authored by Malcolm with the Organization as publisher. **Deliberately NOT in the main nav**: it is for someone arriving from a pitch, not a shopper.
+
+**THE FINDINGS BLOCK IS THE PAGE, and its design constraint is that a journalist may lift one sentence verbatim.** That sets three rules a normal generated list does not have to meet. Each item must read correctly **in isolation** (an early draft's fifth item said "154 of them sell for more than three times that low", which only resolves if you read the fourth first; it now names its own denominator). Each carries **the date it was computed**. And **two different dates are in play**: the segment magnitudes come from the last `market_stats` run, while the all-time-low counts are computed from product history during *this* build, so stamping both with one date would misdate one of them on the page most likely to be quoted with its date.
+
+**The magnitude is DERIVED, never chosen.** `magnitudeOf()` takes the worse of the two cohorts, finds the largest whole multiple it clears, and phrases that. A hand-picked word would need re-picking every time the data moved; this follows it. Word form, not digits, because "more than four times" reads like prose where "more than 4 times" reads like a spreadsheet.
+
+**`data-floor-pct` on each `<li>` is the mechanism worth understanding.** The registry reads each finding's floor back off that attribute (`bakedFindingFloor()`), which is the Price Index tens-floor pattern at one level finer. The attribute exists for exactly one reason: **it lets the prose stay words while the monitor still reads the exact number the generator derived.** Without it the choice would be between a regex-parseable sentence (worse prose) and a hardcoded floor (drifts the first time the data moves a multiple).
+
+Three findings are floored on both cohorts. The two ATL counts are `monitorable: false` and the reason is structural, matching the explainer's counts: they are recomputed from each product's own history on every regen, so unlike a hand-written magnitude they cannot go stale between builds, and no `market_stats` row can falsify them.
+
+**A suggested finding was DROPPED, with reason.** The brief asked for "the most recent segment to stop rising, with the approximate month". `market_stats` is a 16-row upsert with no history, so deriving it means recomputing monthly medians from `price_history`, and "stopped rising" is a judgement threshold rather than a stored figure. It is the same class as the RAM guide's "fell double digits from its peak", which is already registered unmonitorable. On the one page built for lifting sentences verbatim, a claim we cannot re-verify on a schedule is the wrong thing to offer.
+
+**The catalog composition table is SHARED, not reimplemented**: one `compositionTable()` definition, two call sites, and the rendered tables on `/methodology/` and `/data/` are byte-identical (asserted). `EARLIEST_YEAR` spans the whole catalog rather than RAM alone, because the lede is a claim about the site's reach and would be wrong the day an SSD became the deepest series.
+
+Links in: the Price Index citation block, the methodology page, About's data paragraph, and the footer beside Methodology, Glossary and Price Index.
+
 ## Retailer & Affiliate Program Status
 
 Current queue (as of 2026-08-23):
@@ -873,7 +891,7 @@ Below the **768px** breakpoint the desktop `.nav-link`s hide (`nav .nav-link { d
 
 `style.css` is served with `Cache-Control: max-age=14400` (**4 hours** of browser caching). A Cloudflare purge clears the edge but **NOT** visitors' browser caches — so after a CSS change, returning devices can render new HTML against a stale 4-hour-cached stylesheet (this exact mismatch broke the mobile nav on first ship: new hamburger HTML + old CSS).
 
-**Fix / convention:** a single shared version query is appended to **both `style.css` and every local JS include** on every page — `?v=YYYYMMDD` (current value: **`20260911`**). A new URL forces browsers to refetch immediately regardless of max-age.
+**Fix / convention:** a single shared version query is appended to **both `style.css` and every local JS include** on every page — `?v=YYYYMMDD` (current value: **`20260912`**). A new URL forces browsers to refetch immediately regardless of max-age.
 
 - **Bump the `?v=` value whenever any `style.css` OR local JS file changes**, and update ALL pages together (one shared stamp — they must all match). Bumping rebusts every asset; that's fine.
 - Applies to local assets only: `css/style.css` and `js/*.js` (main, theme, alert-modal, supabase-client, market-pulse, product-listing, mobile-nav, filter-sheet, back-to-top, guide-live, price-index). **External CDN scripts are NOT versioned** (jsdelivr supabase-js, cdnjs Chart.js, Cloudflare Turnstile, gtag) — they carry their own versioning.

@@ -65,6 +65,16 @@ const bakedPriceIndexFloor = () => bakedFloor(
   /Every segment is up more than (\d+)% year over year/,
   '/price-index/', '"Every segment is up more than N%"');
 
+// /data/ bakes each floored finding's requirement into a data-floor-pct
+// attribute on its own <li>. The attribute exists ONLY for this: it lets the
+// prose stay words ("more than doubled") instead of being bent into a shape a
+// regex can read, while the monitor still reads the exact floor the generator
+// derived. Same principle as the Price Index tens-floor, one level finer.
+const bakedFindingFloor = (claimId) => () => bakedFloor(
+  PAGE('data', 'index.html'),
+  new RegExp(`data-claim="${claimId}"[^>]*data-floor-pct="(\\d+)"`),
+  '/data/', `the "${claimId}" finding`);
+
 const bakedListingFloor = (cat) => () => bakedFloor(
   PAGE(cat, 'index.html'),
   /are up more than (\d+)% year over year/,
@@ -187,6 +197,47 @@ const CLAIM_REGISTRY = [
     requires: [{ segment: 'nvme_ssd', period: '1y' }, { segment: 'sata_ssd', period: '1y' }],
     resolveFloor: bakedListingFloor('ssd'),
     floorLabel: 'the tens-floor baked into /ssd/',
+  },
+
+  // --------------------------------------------------- /data/ (press page)
+  // The findings a journalist is most likely to lift verbatim, so these are the
+  // entries most worth having. Floors are read off the page, not written here,
+  // because the generator derives the magnitude from the worse cohort and the
+  // wording follows the data rather than the other way round.
+  {
+    id: 'data-ddr5-1y',
+    page: '/data/',
+    where: 'Current findings',
+    sentence: 'The median DDR5 memory kit costs more than four times what it cost a year ago.',
+    requires: [{ segment: 'ddr5', period: '1y' }],
+    resolveFloor: bakedFindingFloor('data-ddr5-1y'),
+    floorLabel: 'the multiple baked into /data/',
+  },
+  {
+    id: 'data-ddr4-1y',
+    page: '/data/',
+    where: 'Current findings',
+    sentence: 'DDR4, the older generation, has more than doubled over the same year.',
+    requires: [{ segment: 'ddr4', period: '1y' }],
+    resolveFloor: bakedFindingFloor('data-ddr4-1y'),
+    floorLabel: 'the multiple baked into /data/',
+  },
+  {
+    id: 'data-ssd-1y',
+    page: '/data/',
+    where: 'Current findings',
+    sentence: 'Storage followed memory up: NVMe and SATA solid state drives have both more than doubled year over year.',
+    requires: [{ segment: 'nvme_ssd', period: '1y' }, { segment: 'sata_ssd', period: '1y' }],
+    resolveFloor: bakedFindingFloor('data-ssd-1y'),
+    floorLabel: 'the multiple baked into /data/, on BOTH drive segments',
+  },
+  {
+    id: 'data-atl-counts',
+    page: '/data/',
+    where: 'Current findings',
+    sentence: 'N of the M products MemRadar tracks sell for at least one and a half times their lowest recorded price, and K for more than three times it.',
+    monitorable: false,
+    reason: 'counts, not segment figures. Both are recomputed from each product\'s own recorded history during every regen (atlMultipleDistribution), so unlike a hand-written magnitude they cannot go stale between builds, and no market_stats row can falsify them. Same standing as the explainer\'s ATL-multiple counts. They are dated with the BUILD date on the page rather than the market_stats computed_at, because that is when they were actually calculated.',
   },
 
   // ------------------------------------- registered, deliberately not checked

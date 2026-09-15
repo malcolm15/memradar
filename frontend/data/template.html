@@ -12,17 +12,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script>(function(){var t=localStorage.getItem('memradar-theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark');}})();</script>
-  <title>PC Memory &amp; Storage Buying Guides | MemRadar</title>
+  <title>Memory Price Data for Journalists | MemRadar</title>
   <meta name="description" content="<!--META_DESC-->">
-  <link rel="canonical" href="https://memradar.com/guides/">
+  <link rel="canonical" href="https://memradar.com/data/">
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="MemRadar">
-  <meta property="og:url" content="https://memradar.com/guides/">
-  <meta property="og:title" content="<!--OG_TITLE-->">
+  <meta property="og:url" content="https://memradar.com/data/">
+  <meta property="og:title" content="Memory Price Data for Journalists and Researchers">
   <meta property="og:description" content="<!--META_DESC-->">
   <meta property="og:image" content="https://memradar.com/og-image.png">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="<!--OG_TITLE-->">
+  <meta name="twitter:title" content="Memory Price Data for Journalists and Researchers">
   <meta name="twitter:description" content="<!--META_DESC-->">
   <meta name="twitter:image" content="https://memradar.com/og-image.png">
   <!--JSONLD-->
@@ -69,15 +69,60 @@
   </header>
 
   <main>
-    <div class="content-page">
+
+    <div class="content-page pi-page">
+      <nav class="pdp-breadcrumb" aria-label="Breadcrumb">
+        <a href="/">Home</a> <span aria-hidden="true">/</span> <span>Data for journalists</span>
+      </nav>
+
       <div class="page-header">
-        <h1>Guides</h1>
-        <p>Plain-English answers to buying questions, argued from our own price data.</p>
+        <h1>Memory Price Data for Journalists and Researchers</h1>
+        <p class="pi-lede">MemRadar tracks retail prices for <!--TOTAL--> consumer RAM and SSD products, with recorded history reaching back to <!--EARLIEST_YEAR--> on the longest-tracked parts. The data is free to cite with attribution, and custom cuts are available on request at no cost. This page exists so you can decide quickly whether it is useful for a story.</p>
+        <p class="pi-asof">Contact: <a href="mailto:hello@memradar.com">hello@memradar.com</a>. Malcolm Konner runs the site and answers this address.</p>
       </div>
-      <ul class="guides-list">
-<!--GUIDE_ITEMS-->
+
+      <h2>What the data covers</h2>
+
+<!--COMPOSITION-->
+
+      <p>Prices are what a consumer pays at retail in the United States, recorded from Amazon (history, licensed from Keepa) and Newegg (current prices, via the retailer's catalog feed). This is a different series from the contract and spot prices quoted in industry reporting, and it follows those with a lag of weeks.</p>
+      <p>Amazon prices are recorded six times a day. The full definitions, calculations, and limitations are on the <a href="/methodology/">methodology page</a>, including what this data cannot tell you. That page is worth a skim before citing a figure.</p>
+
+      <h2>Current findings</h2>
+      <p>Figures below are computed from tracked prices and update automatically. Each is stated as a magnitude rather than to a decimal place, because comparisons over longer windows rest on smaller product sets and can shift as the catalog changes. The exact current numbers are on the <a href="/price-index/">price index</a>.</p>
+
+<!--FINDINGS-->
+
+      <h2>How to cite</h2>
+      <p>Suggested attribution:</p>
+      <p class="pi-citation">Source: MemRadar Memory Price Index, memradar.com/price-index/</p>
+      <p>Please include the date the figure was computed, which appears on every page carrying data. Figures change daily.</p>
+      <p>You are welcome to reproduce charts and tables from this site with attribution. If you need a higher-resolution version of a chart, ask.</p>
+
+      <h2>Custom data requests</h2>
+      <p>Most of what is useful for a story is not on the site. If you tell us what you are writing about, we can usually produce it the same day at no cost. Examples of what has been asked for or is readily available:</p>
+      <ul class="pi-notables">
+        <li>A segment's median price by month over any period we cover.</li>
+        <li>The price history of a specific product, as a series rather than a chart.</li>
+        <li>Which tracked products are furthest from, or closest to, their all-time lows.</li>
+        <li>A comparison of two segments over a matched window, using the same fairness rule the index applies.</li>
+        <li>The distribution of current prices against all-time lows across the catalog.</li>
       </ul>
+      <p>We do not charge for this and do not ask for anything in return beyond attribution. Write to <a href="mailto:hello@memradar.com">hello@memradar.com</a> with the question you are trying to answer and a deadline if you have one.</p>
+
+      <h2>What we can and cannot speak to</h2>
+      <p>Worth stating plainly so you know whether to call.</p>
+      <p><strong>We can speak to:</strong> what consumer retail prices have actually done over the period we cover, how specific products and segments have moved, how current prices compare with their own history, and how our figures are calculated.</p>
+      <p><strong>We cannot speak to:</strong> contract or spot pricing, manufacturer production decisions, supply forecasts, or anything about the memory industry's internals. Those are TrendForce's and the manufacturers' territory, and we would be guessing.</p>
+      <p>We are a single-person project with a licensed data source, not a research firm. That is worth knowing before you describe us in print.</p>
+
+      <h2>About the source</h2>
+      <p>MemRadar is an independent price tracker built and run by <a href="/about.html">Malcolm Konner</a>. It is funded by affiliate commissions from retailer links, disclosed on every page that carries them, and those commissions do not influence prices, rankings, or the figures published here. The full disclosure is on the <a href="/affiliate.html">affiliate disclosure page</a>.</p>
+      <p>The site's data and methodology are public because a number nobody can check is a number nobody should print.</p>
+
+      <p class="pi-tablenote">Figures on this page update automatically from tracked prices. Page last regenerated: <!--BUILD_DATE_LONG-->.</p>
     </div>
+
   </main>
 
   <footer class="site-footer">
@@ -113,6 +158,9 @@
   <script src="../js/main.js?v=20260912"></script>
   <script src="../js/theme.js?v=20260912"></script>
   <script src="../js/mobile-nav.js?v=20260912"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="../js/supabase-client.js?v=20260912"></script>
+  <script src="../js/guide-live.js?v=20260912"></script>
   <script src="../js/search.js?v=20260912"></script>
 </body>
 </html>
