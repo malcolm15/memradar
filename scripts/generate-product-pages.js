@@ -2643,8 +2643,14 @@ function buildHomepage(ctx) {
           </div>`;
   }).join('\n');
 
+  // Both facts the removed announcement banner carried, now plain present-tense
+  // hero copy. Generator-filled for the same reason the banner should have been:
+  // its "235" was hand-typed and would have gone wrong silently.
+  const tracked = products.filter((p) => p.stats && p.stats.current != null);
+  const oldestYear = tracked.map((p) => p.stats.firstDay).sort()[0].slice(0, 4);
   const html = tpl
-    .replace('<!--TRACKING_COUNT-->', String(products.filter((p) => p.stats && p.stats.current != null).length))
+    .replace(/<!--TRACKING_COUNT-->/g, String(tracked.length))
+    .replace(/<!--OLDEST_YEAR-->/g, oldestYear)
     .replace('<!--PULSE_CARDS-->', pulseCards)
     .replace('<!--PULSE_UPDATED-->', pulseUpdated)
     .replace('<!--DROPS-->', dropCards);
