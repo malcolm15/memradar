@@ -480,11 +480,31 @@ html.dark .section-sub { color: #94a3b8; }
 }
 
 .footer-nav {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 6px 20px;
+  /* Was a single centred flex row. It had grown to 12 links and stopped being
+     scannable; grouping is what makes 15 readable where 12 was not. */
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px 48px;
+  text-align: left;
+  width: 100%;
+  max-width: 640px;
+  margin: 4px auto 0;
 }
+.footer-col-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #9ca3af;
+  margin-bottom: 8px;
+}
+.footer-col ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.footer-col li { margin-bottom: 5px; }
+html.dark .footer-col-title { color: #64748b; }
 
 .footer-nav a {
   font-size: 0.85rem;
@@ -1710,6 +1730,25 @@ html.dark .notice-btn--primary { color: #fff; }
 
 /* ── Responsive ── */
 @media (max-width: 768px) {
+  /* TWO columns, not one. A single column stacks three headings and fifteen
+     links into a tower, which is the thing this restructure is fixing.
+     MUST live in a media block AFTER the base .footer-nav rule: a media query
+     adds no specificity, so an earlier one loses to the later plain rule. */
+  .footer-nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 20px;
+    max-width: 400px;
+  }
+  /* Two columns leaves Site alone on row two with an empty cell beside it, so
+     it spans the full width and flows its own list in two columns instead.
+     Fills the dead space and takes ~150px off the footer. */
+  .footer-col:last-child { grid-column: 1 / -1; }
+  .footer-col:last-child ul {
+    columns: 2;
+    column-gap: 20px;
+  }
+  .footer-col:last-child li { break-inside: avoid; }
+
   .hero h1 { font-size: 1.8rem; }
   .pulse-grid { grid-template-columns: repeat(2, 1fr); }
   .products-grid { grid-template-columns: repeat(2, 1fr); }
