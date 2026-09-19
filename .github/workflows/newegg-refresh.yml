@@ -46,8 +46,9 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      # --omit=dev skips puppeteer/sharp (render tooling); ssh2-sftp-client
-      # is a production dependency for exactly this reason.
+      # --omit=dev skips puppeteer (render tooling); ssh2-sftp-client is a
+      # production dependency for exactly this reason, and so is sharp, which
+      # the regen job uses to render the /data/charts/ images.
       - run: npm ci --omit=dev
       - name: Refresh Newegg offers
         env:

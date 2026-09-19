@@ -40,6 +40,10 @@ const SHRINK_MIN_RATIO = ALLOW_SHRINK ? 0 : 0.9;
 const SAMPLE_SLUGS = (process.argv.find((a) => a.startsWith('--sample=')) || '').replace('--sample=', '')
   .split(',').map((s) => s.trim()).filter(Boolean);
 const IS_SAMPLE = SAMPLE_SLUGS.length > 0;
+// Chart images for a NEW month are written only in CI, where they render in
+// Liberation Sans; a Mac renders Arial. This flag overrides that locally.
+// See scripts/chart-images.js.
+const RENDER_CHARTS = process.argv.includes('--render-charts');
 const FRONTEND = path.join(__dirname, '..', 'frontend');
 const TEMPLATE_PATH = path.join(FRONTEND, 'ram', 'product-template.html');
 const SITEMAP_PATH = path.join(FRONTEND, 'sitemap.xml');
@@ -207,6 +211,7 @@ const {
 } = require('../backend/lib/productParsers');
 const GLOSSARY = require('./glossary.js');
 const BLURBS = require('./blurb-overrides.js');
+const CHART_IMAGES = require('./chart-images.js');
 
 // ------------------------------------------------------------------- slugs
 function computeSlug(p) {
@@ -2979,7 +2984,11 @@ ${body}
 //
 // PRICE PER GB IS A COLUMN because the typical DDR4 product flips between 16GB
 // and 32GB from month to month, which moves the median price with no real
-// price change. Capacity cancels out of $/GB.
+// price change. Capacity cancels out of $/GB for RAM, but NOT for SSDs: the
+// cheapest capacity's $/GB against the dearest's is 1.03x DDR5 and 1.15x DDR4,
+// but 1.40x NVMe and 3.49x SATA (September 2026), so an SSD month whose mix
+// shifts toward big or small drives moves its $/GB with no price change. That
+// is why the chart images plot SSDs as median price per drive.
 //
 // Reuses buildDailySeries (via p.series, so the in_stock=false copies are
 // already gone), classifySegment (via p.segment, same rules as the index) and
@@ -2987,8 +2996,27 @@ ${body}
 // kept the copies) or downsampleForChart (last point per week or month beyond a
 // year, so it discards readings).
 const CSV_PATH = ['data', 'memradar-price-index-monthly.csv'];
+const CHART_DIR = ['data', 'charts'];
 const CSV_MIN_PRODUCTS = 10;
 const CSV_SEGMENTS = ['ddr5', 'ddr4', 'nvme_ssd', 'sata_ssd'];
+
+// The /data/ download section, listing whichever chart files exist on disk.
+// Empty until the first CI render, so the page never shows a heading over
+// nothing. The embed advice is the reason dated files exist at all.
+function chartDownloads(charts) {
+  if (!charts.length) return '';
+  const url = (f) => `/${CHART_DIR.join('/')}/${f}`;
+  const items = charts.map(({ spec, newest }) =>
+    `        <li><a href="${url(newest.file)}" download>${esc(spec.title)}</a>, data through ${CHART_IMAGES.monthLong(newest.month)}. Always the newest month: <a href="${url(`${spec.slug}-latest.png`)}">${spec.slug}-latest.png</a></li>`).join('\n');
+  return `      <h2>Charts to download</h2>
+      <p>${NUMBER_WORD[charts.length] ? NUMBER_WORD[charts.length].replace(/^./, (c) => c.toUpperCase()) : charts.length} charts of the monthly series, free to publish with attribution. Each is 1200 by 675 pixels and carries its source and the month its data runs through inside the image, so the credit survives if a caption is dropped.</p>
+      <p><strong>Embed the dated file, not the latest one.</strong> A dated file never changes once published. The latest file is replaced each month when a new month of data completes, so an article embedding it would find its chart changing under text written about the old one. Earlier months stay at their own addresses.</p>
+      <ul class="pi-notables">
+${items}
+      </ul>
+      <p>Memory is charted per gigabyte because the typical kit size shifts from month to month. SSDs are charted per drive because their price per gigabyte moves with the mix of drive sizes. These are price levels: for how much prices changed over a period, cite the <a href="/price-index/">price index</a>, which compares each product with itself.</p>
+`;
+}
 
 function buildMonthlyCsv(products, buildDate) {
   const thisMonth = buildDate.slice(0, 7);
@@ -3148,7 +3176,7 @@ function buildFindings(ctx) {
 }
 
 function buildDataPage(ctx) {
-  const { generable, marketStats, computedAt, buildDate, buildDateLong } = ctx;
+  const { generable, marketStats, computedAt, buildDate, buildDateLong, charts } = ctx;
   if (!marketStats || !marketStats.length) throw new Error('no market_stats rows; refusing to publish a press page with no findings');
   const dist = atlMultipleDistribution(generable);
   const findings = buildFindings({ marketStats, dist, computedAt, buildDate });
@@ -3200,6 +3228,7 @@ function buildDataPage(ctx) {
     // SHARED, not reimplemented: the same compositionTable() /methodology/ uses.
     .replace('<!--COMPOSITION-->', compositionTable(generable))
     .replace('<!--FINDINGS-->', findings.html)
+    .replace('<!--CHARTS-->', chartDownloads(charts || []))
     .replace(/<!--BUILD_DATE_LONG-->/g, buildDateLong);
   if (/<!--[A-Z_]+-->/.test(html)) throw new Error(`data page: unreplaced anchor ${(/<!--[A-Z_]+-->/.exec(html) || [])[0]}`);
   return { html, desc, title: pageTitle, findings: findings.items, earliest };
@@ -4236,31 +4265,49 @@ async function run() {
     }
   }
 
-  // 2c-ter) /data/, the press page. Same skip-rather-than-fail rule as the
-  // guides: it argues from live figures and prints its own build date.
-  if (!IS_SAMPLE && !msErr && msRows && msRows.length) {
-    try {
-      const computedAt = msRows.map((r) => r.computed_at).sort().pop();
-      const d = buildDataPage({ generable, marketStats: msRows, computedAt, buildDate, buildDateLong });
-      fs.mkdirSync(path.join(FRONTEND, 'data'), { recursive: true });
-      fs.writeFileSync(path.join(FRONTEND, 'data', 'index.html'), d.html);
-      log(`Data page written: /data/ (${d.findings.length} findings, ${d.findings.filter((f) => f.floorPct != null).length} floored; earliest ${d.earliest})`);
-    } catch (e) {
-      log(`⚠ /data/ NOT regenerated: ${e.message}`);
-    }
-  }
-
-  // 2c-quater) The monthly CSV. Written beside /data/, which links it.
+  // 2c-ter) The monthly CSV and the chart images drawn from it. Written
+  // BEFORE /data/, which links both and lists whichever chart files exist.
   // Independently skippable: a failure leaves yesterday's file in place, and
   // yesterday's file is still a correct description of every complete month.
+  let csvRows = null;
   if (!IS_SAMPLE) {
     try {
       const m = buildMonthlyCsv(generable, buildDate);
+      csvRows = m.rows;
       fs.mkdirSync(path.join(FRONTEND, CSV_PATH[0]), { recursive: true });
       fs.writeFileSync(path.join(FRONTEND, ...CSV_PATH), m.csv);
       log(`Monthly CSV written: /${CSV_PATH.join('/')} (${m.rows.length} rows, ${Buffer.byteLength(m.csv)} bytes; starts ${Object.entries(m.starts).map(([k, v]) => `${k} ${v}`).join(', ')})`);
     } catch (e) {
       log(`⚠ /${CSV_PATH.join('/')} NOT regenerated: ${e.message}`);
+    }
+  }
+
+  // Charts: dated files are write-once, -latest mirrors the newest dated file,
+  // so a normal day writes nothing. A render failure leaves every existing
+  // file in place and /data/ keeps linking them.
+  const chartDir = path.join(FRONTEND, ...CHART_DIR);
+  if (!IS_SAMPLE && csvRows) {
+    try {
+      const allowNew = process.env.GITHUB_ACTIONS === 'true' || RENDER_CHARTS;
+      const res = await CHART_IMAGES.writeChartImages(csvRows, chartDir, { allowNew });
+      for (const r of res) log(`Chart ${r.spec.slug}: data through ${r.through}, dated ${r.status}, latest ${r.latestStatus}${r.newest ? ` (${r.newest.file})` : ''}`);
+      if (res.some((r) => r.status.startsWith('skipped'))) log('⚠ a new month of charts is due and was NOT rendered here (local run); the next CI regen renders it');
+    } catch (e) {
+      log(`⚠ chart images NOT regenerated: ${e.message}`);
+    }
+  }
+
+  // 2c-quater) /data/, the press page. Same skip-rather-than-fail rule as the
+  // guides: it argues from live figures and prints its own build date.
+  if (!IS_SAMPLE && !msErr && msRows && msRows.length) {
+    try {
+      const computedAt = msRows.map((r) => r.computed_at).sort().pop();
+      const d = buildDataPage({ generable, marketStats: msRows, computedAt, buildDate, buildDateLong, charts: CHART_IMAGES.chartIndex(chartDir) });
+      fs.mkdirSync(path.join(FRONTEND, 'data'), { recursive: true });
+      fs.writeFileSync(path.join(FRONTEND, 'data', 'index.html'), d.html);
+      log(`Data page written: /data/ (${d.findings.length} findings, ${d.findings.filter((f) => f.floorPct != null).length} floored; earliest ${d.earliest})`);
+    } catch (e) {
+      log(`⚠ /data/ NOT regenerated: ${e.message}`);
     }
   }
 
