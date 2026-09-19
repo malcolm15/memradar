@@ -692,9 +692,30 @@ async function pagedSelect(build, opts = {}) {
 }
 
 // Daily series: last reading of each UTC day, chronological.
+//
+// OUT-OF-STOCK ROWS ARE EXCLUDED, and they are excluded HERE because this is
+// the one function every price statistic flows through: the 90-day average,
+// the monthly history table, the milestones, the tracked-day count, and the
+// monthly CSV. Filter at the source and every consumer is correct; filter
+// downstream and the next consumer someone adds is wrong again.
+//
+// Why they exist: the one-time Keepa backfill wrote a row on each day Keepa
+// reported no offer (-1), carrying the LAST KNOWN PRICE with in_stock=false,
+// because price is NOT NULL. Measured 2026-09-19: 1,931 such rows, and every
+// one of them repeats the previous row's price exactly. They are copies, not
+// observations. Left in, they pulled 90-day averages toward stale prices,
+// padded history-table months, inflated each product's "days of tracked
+// prices", and extended "longest stretch without a real move" across days the
+// product could not be bought (one page claimed 171 flat days; the truth was
+// 37). The live fetch never writes such rows, so this only ever touched
+// backfilled history.
+//
+// in_stock === false only, deliberately: null means "unknown", not "absent",
+// and dropping it would discard real readings.
 function buildDailySeries(rows) {
   const byDay = new Map();
   for (const r of rows) {
+    if (r.in_stock === false) continue;
     const day = r.fetched_at.slice(0, 10);
     const prev = byDay.get(day);
     if (!prev || r.fetched_at > prev.fetched_at) byDay.set(day, r);
