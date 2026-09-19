@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "RAM & SSD price tracker for PC builders",
   "engines": {
-    "node": ">=18"
+    "node": ">=20.9"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.0.0",
