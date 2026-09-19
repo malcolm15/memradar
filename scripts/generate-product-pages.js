@@ -1028,6 +1028,25 @@ function milestones(series, stats) {
 
   // Longest run where the price never moved more than FLAT_TOLERANCE from the
   // price at the start of the run.
+  //
+  // A RUN IS DELIBERATELY NOT BROKEN BY A SHORT OUT-OF-STOCK GAP. Do not "fix"
+  // this into something less true. The claim this milestone makes is that the
+  // PRICE did not move, and across these gaps it did not: measured 2026-09-19,
+  // 44 stretches span a gap of 1 to 14 days (median 1), the price is identical
+  // on both sides of every gap in 36 of them, and in the other 8 it stays inside
+  // the run's 2% band. Breaking runs at every gap would shorten true stretches
+  // to report product availability, which is a different claim this line does
+  // not make.
+  //
+  // What WAS wrong, and is fixed upstream in buildDailySeries(), is the backfill
+  // writing COPIES of the last price on those out-of-stock days. Copies are
+  // fabricated observations, and a run that ended on one reported absence as
+  // flat time (one page said 171 days where the truth was 37). Removing copies
+  // is correct; treating the gap itself as a price move would not be.
+  //
+  // Also do not break runs on long gaps between readings in general: Keepa
+  // records a price only when it CHANGES, so a long gap in backfilled history
+  // usually means the price held, which is the thing this line measures.
   let bs = 0, best = null;
   for (let i = 1; i <= series.length; i++) {
     const broke = i === series.length || Math.abs(series[i].price - series[bs].price) / series[bs].price > FLAT_TOLERANCE;
@@ -3030,7 +3049,7 @@ function buildMonthlyCsv(products, buildDate) {
   }
   const header = [
     '# MemRadar Price Index: monthly price levels by segment',
-    "# Lines starting with # are notes, not data. pandas: read_csv(url, comment='#'). R: read.csv(url, comment.char='#'). DuckDB reads the file as is. Spreadsheets show these lines as text rows above the data.",
+    "# Lines starting with # are notes, not data. pandas: read_csv(url, comment='#'). R: read.csv(url, comment.char='#'). DuckDB: a saved copy reads as is; reading from the URL needs SET force_download=true first. Spreadsheets show these lines as text rows above the data.",
     '#',
     '# WHAT THIS IS: one row per segment per month. median_price_usd is the median retail price across the products MemRadar tracked that month. median_usd_per_gb is the median of each product\'s price divided by its total capacity (a 2x16GB kit is 32GB). product_count is how many products the row is computed over.',
     '#',

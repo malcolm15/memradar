@@ -1,5 +1,5 @@
 # MemRadar Price Index: monthly price levels by segment
-# Lines starting with # are notes, not data. pandas: read_csv(url, comment='#'). R: read.csv(url, comment.char='#'). DuckDB reads the file as is. Spreadsheets show these lines as text rows above the data.
+# Lines starting with # are notes, not data. pandas: read_csv(url, comment='#'). R: read.csv(url, comment.char='#'). DuckDB: a saved copy reads as is; reading from the URL needs SET force_download=true first. Spreadsheets show these lines as text rows above the data.
 #
 # WHAT THIS IS: one row per segment per month. median_price_usd is the median retail price across the products MemRadar tracked that month. median_usd_per_gb is the median of each product's price divided by its total capacity (a 2x16GB kit is 32GB). product_count is how many products the row is computed over.
 #
