@@ -171,7 +171,12 @@ module.exports = async (req, res) => {
       });
       const sendRes = await sendEmail({ to: email, subject: tmpl.subject, html: tmpl.html, text: tmpl.text });
       if (sendRes.ok) {
-        await supabase.from('email_send_log').insert({ email, send_type: 'confirmation' });
+        // No address: the breaker counts rows by type and time and never reads
+        // one, so storing it would only be retention the privacy policy does
+        // not describe. Checked, because an unrecorded send undercounts the
+        // breaker silently.
+        const { error: logErr } = await supabase.from('email_send_log').insert({ send_type: 'confirmation' });
+        if (logErr) logError('send log insert (breaker undercounts this send)', logErr.message);
         neutral(res, 'created_sent', email);
       } else {
         logError('confirmation send', sendRes.error);

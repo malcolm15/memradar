@@ -96,7 +96,10 @@ async function checkAlerts(supabase, priceByProductId, log, logError) {
     if (!sendRes.ok) { stats.failed++; logError(`alert send (alert ${a.id})`, { message: sendRes.error }); continue; }
     stats.sent++;
 
-    await supabase.from('email_send_log').insert({ email: a.email, send_type: 'alert' });
+    // No address stored: see api/alerts.js. Nothing reads 'alert' rows today,
+    // so a failure here is logged and costs nothing else.
+    const { error: logErr } = await supabase.from('email_send_log').insert({ send_type: 'alert' });
+    if (logErr) logError(`send log insert (alert ${a.id})`, logErr);
     // The alert has done its job; the policy says its address goes now. The
     // price-drop email's unsubscribe link then finds nothing to delete, and
     // lands on the unsubscribed page anyway, which is the right outcome.
