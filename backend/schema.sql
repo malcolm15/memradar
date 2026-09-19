@@ -83,6 +83,31 @@ CREATE POLICY "Public read market_stats" ON market_stats
 CREATE POLICY "Service role write market_stats" ON market_stats
   FOR ALL USING (auth.role() = 'service_role');
 
+-- email_send_log: one row per email SENT. Its only reader is the signup
+-- circuit breaker in api/alerts.js, which counts 'confirmation' rows in the
+-- last 24h by send_type and sent_at.
+--
+-- DELIBERATELY HOLDS NO PERSONAL DATA. The email column was dropped on
+-- 2026-09-19 (it had been written on every send and read by nothing); see
+-- CLAUDE.md, "email_send_log holds no personal data". Do not add it back.
+--
+-- Recorded from the LIVE table (PostgREST schema) after the drop, because
+-- this table was created outside this file. Verified: columns, types, NOT
+-- NULL, the sent_at default, id as a self-filling primary key, RLS enabled
+-- (anon inserts are refused by RLS and anon reads return nothing). NOT
+-- verified, since nothing here has SQL access: whether id is BIGSERIAL or
+-- IDENTITY, any CHECK constraint or index, and the policy text. No policy is
+-- written below rather than a guessed one; the Supabase dashboard is
+-- authoritative until its text is copied here.
+CREATE TABLE IF NOT EXISTS email_send_log (
+  id         BIGSERIAL PRIMARY KEY,
+  send_type  TEXT NOT NULL,                        -- 'confirmation' | 'alert'
+  sent_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE email_send_log ENABLE ROW LEVEL SECURITY;
+-- Policy: UNRECORDED. Observed behaviour (2026-09-19): service role only.
+
 -- -----------------------------------------------
 -- INDEXES
 -- Run these in Supabase SQL Editor after data starts flowing.
