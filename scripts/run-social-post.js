@@ -183,35 +183,6 @@ async function run() {
     log(`Posted to X: id=${posted.id || '(unknown)'}`);
   }
   console.log('SUMMARY ' + JSON.stringify({ platform: PLATFORM, mode: MODE, posted: true, dry_run: false, branch: result.branch, size, sku: result.sku || null, uri: postUri, url: postUrl, ...ageInfo }));
-  // OUTCOME HEARTBEAT. Fired ONLY here, on a real publish - never on a skip,
-  // never on a dry run, never merely because the job exited 0.
-  //
-  // WHY THIS EXISTS: run-level success is not job-level success is not
-  // OUTCOME-level success. The supervisor watches whether this job ran; this
-  // watches whether the account actually published. On 2026-08-27 the daily
-  // post ran, hit the staleness gate, skipped, and exited 0 - so every
-  // job-level check called it healthy on a day nothing was posted.
-  //
-  // Deliberately NOT a supervisor reading bot_state: that table is
-  // service-role only, and handing the watcher a service key to satisfy a
-  // liveness check would break its read-only principle for a signal the bot
-  // can emit itself for free. healthchecks.io is already proven independent
-  // of both GitHub and Cloudflare (hc-ping.com is Hetzner/nginx, verified
-  // 2026-08-27), so this needs no new credential beyond the ping URL.
-  //
-  // Best-effort by construction: a heartbeat must never fail a run that
-  // already published successfully.
-  if (process.env.SOCIAL_POST_HEARTBEAT_URL) {
-    try {
-      const res = await fetch(process.env.SOCIAL_POST_HEARTBEAT_URL, { method: 'POST' });
-      log(`Outcome heartbeat pinged: ${res.status}`);
-    } catch (e) {
-      log(`Outcome heartbeat FAILED (post still succeeded): ${e.message}`);
-    }
-  } else {
-    log('SOCIAL_POST_HEARTBEAT_URL not set: outcome coverage is DISABLED');
-  }
-
   // Record what we posted so tomorrow's run can exclude it.
   if (result.sku) {
     await setState(STATE_KEY, { sku: result.sku, date: new Date().toISOString().slice(0, 10), uri: postUri });
