@@ -182,7 +182,7 @@ async function runPriceFetch(opts = {}) {
   let alertStats = null;
   try {
     alertStats = await checkAlerts(supabase, currentPriceByProductId, log, logError);
-    log(`Alerts: checked=${alertStats.checked} matched=${alertStats.matched} sent=${alertStats.sent} failed=${alertStats.failed} expired_cleaned=${alertStats.expired_cleaned}`);
+    log(`Alerts: checked=${alertStats.checked} matched=${alertStats.matched} sent=${alertStats.sent} failed=${alertStats.failed} expired_cleaned=${alertStats.expired_cleaned} deleted_after_send=${alertStats.deleted_after_send} stale_cleaned=${alertStats.stale_cleaned} triggered_swept=${alertStats.triggered_swept}`);
   } catch (err) {
     logError('checkAlerts FAILED (non-fatal, price inserts unaffected)', err);
   }
