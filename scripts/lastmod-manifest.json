@@ -1,10 +1,10 @@
 {
  "https://memradar.com/ram/corsair-vengeance-ddr5-ram-32gb-6000mhz/": {
-  "hash": "41cabdd0db53f6844f74c72287741cffdd1e5a3ee976f6a738b3f8f20f693218",
+  "hash": "05d374a6d7fb3aee4f8dd01285ccc408fdf927176b2d3cb8e6dd0bdbe54953a1",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/lexar-thor-z-series-rgb-ddr5-ram-32gb-6000mhz/": {
-  "hash": "cff9ef4c8515bbd4e7323ce3d32444813acc38bea193a0da2e29869e2c43a917",
+  "hash": "3472246a01eb72f0c062a016bc4c28bff0f36f6f32ecc8d43caeaed87e9ef180",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/crucial-32gb-ddr5-ram-kit-5600mhz/": {
@@ -20,7 +20,7 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/teamgroup-t-force-delta-rgb-ddr5-ram-32gb-6000mhz/": {
-  "hash": "427c48f544d1536c9d16e6549c03b695f87386a59bb077c44abe9a5739a3be62",
+  "hash": "7b604a0dbe90cecd8bb7dc48c4948a34a82e69f47baa36cd8318095f3f250117",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/corsair-vengeance-rgb-ddr5-32gb-6000mhz/": {
@@ -28,11 +28,11 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/crucial-32gb-ddr5-ram-kit-4800mhz/": {
-  "hash": "b6045f7318a770b6c90b05b2d8ab578d867d0bfd0d275a4a2bd101551bc26ed2",
+  "hash": "f1c77ab51e96df4b8ffa66c43619dd8d81c79ae28504b4a7b41fc172f0dd8f2c",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz/": {
-  "hash": "f44bc8c1cdd433ad0bb7e37053dc10c2408a4809204ceec756c426ae821f4aff",
+  "hash": "60b0db7064478bfeed227892c22d593dc4dcdbb1bd8100f86132dfa8e5e098a7",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/g-skill-flare-x5-series-ddr5-ram-32gb-6000mhz/": {
@@ -44,7 +44,7 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/corsair-vengeance-rgb-rs-ddr5-ram-32gb-5600mhz/": {
-  "hash": "4be98725310762b6757d0964aeca3e38932544f893a2b55187848a041def192f",
+  "hash": "2f8b05930b36b891fe409309638319c2e7a4cbcf2dcf287dfd9d1e3423f741fe",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/teamgroup-elite-sodimm-ddr5-32gb-5600mhz/": {
@@ -52,7 +52,7 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz-2/": {
-  "hash": "7880321d4d31c93535f4052aa3551b08ba5e5ba583b3a4fdd39e6fc30f520a1f",
+  "hash": "496fce1532dfcd9334f3f62339b8e300efaca88ed3eb656ed85e271ac983fce5",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/acer-predator-vesta-ii-rgb-ddr5-ram-32gb-6000mhz/": {
@@ -60,67 +60,67 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz-3/": {
-  "hash": "c9af8b3cf1652b28bba9bfc6f652c088da0634f6d871ab6788ce06090414cc65",
+  "hash": "cd7f3d9b2d852dd3b81938479ee88da9e5fa686877c31c06683781a2f7ce63e0",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/corsair-vengeance-rgb-rs-ddr5-ram-64gb-6000mhz/": {
-  "hash": "2afea1235bd4da03c5640b5cfd29d7d6ce30c2a82daedf72c6ca61de9e12df0b",
+  "hash": "25b0035247f19c360e5ee50936a4300591b007e23286136e9201b0c91b83faff",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/g-skill-flare-x5-series-ddr5-ram-64gb-6000mhz/": {
-  "hash": "832e68b72566b4bd1fc220a25b8d0c1a5115bc6d5f23ce31ae57988f510d2ab4",
+  "hash": "ecd10da9187722abb998f99c04039edfc5477172ece0982e1b8bed269c9236d2",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-64gb-6000mhz/": {
-  "hash": "a87f4647b03a6fb69ec07e80a6616064e3ba2a5ee53c9ed9fd02b37bc286c9fb",
+  "hash": "2e510bc45e1cb246a8566e64e64445fbbc1f90b4d9916e34b76e12f90927fe92",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/crucial-pro-64gb-ddr5-ram-kit-5600mhz/": {
-  "hash": "dcf831ef6792c2b796f4c84bc849cac79a890cfe653b36111c76204e22c15ea9",
+  "hash": "64fc3847e7d3150f376b53f6ae9487a09c2d951442c1d78f1819d11651b38851",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/crucial-pro-ddr5-ram-64gb-kit-6400mhz/": {
-  "hash": "56adddd14d7c586667ed4e600c8ebda596cb1c8c51d414bc82ca42098f6b137e",
+  "hash": "ff603e92e8a9d90621c8e0ba688db4b85c5f8d9e0e0aa4e0285af69c1e3aabb8",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/crucial-128gb-kit-5600mhz/": {
-  "hash": "58f180a8a2e43b5804b83581620f27b1f6a97cf4188fa09b393c6edb52e1bf5b",
+  "hash": "46f0c68545f695e98ae626c405ba5521f7bd3ef4bf0443f27c7a523d087171ab",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/g-skill-ripjaws-s5-series-ddr5-ram-64gb-6000mhz/": {
-  "hash": "6bd4f3b44cf1aa6772bc22416a68268920fc87762c6a6e0ce2a79c26ce793eaa",
+  "hash": "aa92fdcb7ffced9f0a3de34df6965d9258df8d7d8717f224c0fd6bb48f1c5808",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-64gb-6000mhz-2/": {
-  "hash": "00e845b418db6c7750513e36f86be017712c05285a916175e84e2e7040a36481",
+  "hash": "c005ced9c61452ff797bd71930626c91942edae4e1c0ab955d8bfd681b45c4ff",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/g-skill-trident-z5-royal-neo-series-ddr5-64gb-6000mhz/": {
-  "hash": "2ed4c92853d63751cd620f5543673f928cf6e5c386fd856534e0d99cc6616787",
+  "hash": "140c6a4721683ae988bcb90b9566459a1d2b0e9145343ac5a11b2fa481b07b3e",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/crucial-64gb-ddr5-ram-kit-4800mhz/": {
-  "hash": "8e34a5b1a72a64d0e531563d7fb6781e988322bea90469d9f3c1da30c43d8601",
+  "hash": "24474a2813f8ccf440cf0ebf4086a8affdacc05adf6c5585bffec9f2275e77b2",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/silicon-power-ddr5-64gb-6000mhz/": {
-  "hash": "ee9d325945c307ed0a541fb787c5dab07a9da4349d152ec7b4c00c9bf4788762",
+  "hash": "847acacc23d8c3472750e530485f48b1761c75bdc76303c129dd378e4ade163b",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/g-skill-trident-z5-neo-series-ddr5-ram-64gb-6000mhz/": {
-  "hash": "13e4f0c92804b189f03d669ecae372092169cb1751683bb5f4b98dc6e81eae99",
+  "hash": "118b163a0b3b10bc53d71bf0bf67f356c97637a48066093bfedd638dfdb0c3a6",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/crucial-64gb-ddr5-ram-5600mhz/": {
-  "hash": "ff2507d1bdb7a1aae246be3ff7de33ae6e1676d7988052fc47e88aea84644131",
+  "hash": "cb8a92b398be11eceb68dd2ecd37d51a39d85036bfa17c663034b6039357663a",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/teamgroup-elite-sodimm-ddr5-64gb-5600mhz/": {
-  "hash": "aad7961886f0463507cb149a257f5577fdee29afe79cd12fbbd555dd03557280",
+  "hash": "1cfbaf7496a594563a4f42aa8b4c48545ed9d0a4da44fc7569b373cbe40207e4",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/g-skill-trident-z5-rgb-series-ddr5-ram-64gb-6000mhz/": {
-  "hash": "eb3b9124b46890eeb1a6ae064d782cbe5841e9c0432adc4d682580e4361e63d5",
+  "hash": "a90be5e79b2a91f935c6091689e90b3c9cef3750037790399cb61595f2ed4cb5",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/corsair-vengeance-rgb-rs-ddr5-ram-16gb-6000mhz/": {
@@ -128,7 +128,7 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/corsair-vengeance-ddr5-ram-16gb-5200mhz/": {
-  "hash": "6eebf734864cca8bab8b9a287e4bb416b2fc25565f615c7d3a22dd36aeac248d",
+  "hash": "d4ce39f1b78979c58590678dace7bc2f1a0f7d09f05fb1c5ada11b02500383d4",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/corsair-vengeance-ddr5-ram-16gb-6000mhz/": {
@@ -136,15 +136,15 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/patriot-memory-viper-venom-ddr5-ram-16gb-6000mhz/": {
-  "hash": "d4fc10459b9e33ec2f6955d5ea3d353a9fac023f16b5cad963a156a3bf0a9392",
+  "hash": "78e9f9ad58abf212f94c272656da23de59c211d40aee6ce47a2dfb5feab988d8",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/patriot-viper-elite-5-ddr5-ram-16gb-6000mhz/": {
-  "hash": "d3589286522abbb56f493d4e8c66134ba6162ac73ccac12726adb4a55ec11596",
+  "hash": "c033b0256f1e5ca142371e39a32c777799869a59b11436b21ea4a16d3f2c8055",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/patriot-viper-venom-ddr5-ram-16gb-6000mhz/": {
-  "hash": "8346389b4d6ac4805891cd6c2f91c20d1d4467d0f2eb735c69e560750ec9ddc6",
+  "hash": "a92d3d6eb62ca14d9da2c5ee1f147e99a935c4f5ac81f2f3183f1b8691d4b200",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/corsair-vengeance-rgb-rs-ddr5-16gb-6000mhz/": {
@@ -152,35 +152,35 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/corsair-vengeance-rgb-ddr5-ram-16gb-5200mhz/": {
-  "hash": "d00b17518d3b9c25c68ceaa681382eebe4fac0237e84bff70c2253f2105bcdc9",
+  "hash": "8dfea30fc30fa0e98cfcedcd9cc18524b24fee4069a018d32f128f27ea4dc843",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/corsair-vengeance-rgb-rs-ddr5-ram-16gb-5200mhz/": {
-  "hash": "0d46849a99ff7c3efc7a37ab1e3e94d1e7f2ec3a46458cf872685dab9b781414",
+  "hash": "ecee2063aa244ad59e7ce0f0f6c22482d31cb8b9c31f6af1d31572e1291c600e",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/a-tech-16gb-ddr5-4800mhz-pc5-38400-cl40/": {
-  "hash": "b4cb8cee4ecb52d624344d583a033d3542ec59819b0f5ae253152bc17c5774c4",
+  "hash": "29835d187c6160352180c79c5a8ab9ec15c624442fc61347bd6f9303c8ac5134",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/crucial-16gb-ddr5-ram-5600mhz/": {
-  "hash": "b7cfe96b1fac0e54f969988bb7f3a14de55a5d8786c5c94591881373d8a77235",
+  "hash": "07ef6121cc4146cb903862fc31ed74e2db0216db55eb0439ae0a32f00bac0139",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/crucial-16gb-ddr5-ram-5600mhz-2/": {
-  "hash": "a76cc5d1c7c7d6fe8b906ae0041937201f6c20efcb7a1809f4756dc96d08dc6e",
+  "hash": "58c7367a8a6855b26323b50027103adad6c4028fe1fd85e204fda7b93d77cbd6",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/crucial-16gb-ddr5-ram-4800mhz/": {
-  "hash": "59dd4015f851a8eb6c29be6a83ef4d54cbc59da088466acbdb89804aad05e1e2",
+  "hash": "99b6c818343162079a3d5a518a51428972b228dac4dd098e5df03ffdad6ed94b",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/corsair-vengeance-ddr5-ram-32gb-6000mhz-2/": {
-  "hash": "4279f95bdbe33320c03f6f8e8b7127a4aa1bff0f6c0a00ff231f7f5aa0cfaf9e",
+  "hash": "56ff0da1a34b58e481c7dde45a2cf1a321e6a7f21461cc74e487b6dd18206740",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/lexar-oc-ddr5-ram-1x8gb-6000mhz-cl38/": {
-  "hash": "6e5af854e4f2a7fe81e244b1b10216ad6d17c62c1bb55399a971f205f50c41c3",
+  "hash": "21ac857021956169bc63400a573e478608636d2a13fc968d53d7d137c0ece4da",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/corsair-vengeance-rgb-rs-ddr5-32gb-6000mhz/": {
@@ -188,7 +188,7 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/teamgroup-t-force-delta-rgb-ddr5-ram-32gb-6000mhz-2/": {
-  "hash": "74fdacc5c6409c75e254cc1b190db982d3d10e5970daad2294f718782a990608",
+  "hash": "1aa1a6ad3beef8940f804264369f94aba43bf075b6d6d34cb1ce6863374682fe",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/corsair-vengeance-lpx-ddr4-ram-32gb-3200mhz/": {
@@ -196,7 +196,7 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/g-skill-ripjawsv-series-ddr4-ram-32gb-3200mhz/": {
-  "hash": "bffd722be052901134aef65682ede8d44f0621c4b18f9550222a745c6f9e3050",
+  "hash": "dd57a35c9667ea2f0addf3232b296cec571738a9cd72658cfc13b1fe334bcb69",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/crucial-32gb-ddr4-ram-kit-3200mhz/": {
@@ -212,7 +212,7 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/puskill-32gb-kit-3200mhz/": {
-  "hash": "67823610b7f7d69f88b30ec99e3f21e48a6033b8c32afcdbf991798905069c03",
+  "hash": "6dc3a06f2b598779b4cafcb5b1c4297e6abcdd8ccd889804d3aaadc83cbad62d",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/puskill-ddr4-32gb-3200mhz/": {
@@ -224,7 +224,7 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/g-skill-trident-z-rgb-series-ddr4-ram-32gb-3600mhz/": {
-  "hash": "496fbae40652f8c73144096f7230c971689a656632c4ba9a1d78b7bb7617136c",
+  "hash": "ed45a56972509bc56ef6602153798b7a1c1c283f6fc00182d90abe06a65441ae",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/teamgroup-elite-ddr4-32gb-kit-3200mhz/": {
@@ -248,7 +248,7 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/a-tech-32gb-3200mhz/": {
-  "hash": "91bf0c6e78fc59c1e537964157136e03911a4c26986c723d48daa5fc5d6dcf0e",
+  "hash": "3894fd86007cc7671aa55c5ee4b2108d621f542a930c55998cdaf80cdb7b5280",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/timetec-32gb-kit-3200mhz/": {
@@ -256,23 +256,23 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/a-tech-16gb-3200mhz/": {
-  "hash": "1bf2e930670944d0b3d8be0ccdda4c8eb27201e1ee3df3bfc826b7a8bb7204d7",
+  "hash": "a4089b5807d6e04934facbf116e68332561d3e75f48c36f984ab95923ce8a131",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/a-tech-16gb-ddr4-3200-mhz-sodimm-pc4-25600/": {
-  "hash": "3a5e4c6e7270cabdbf7f8a836590b1609fb09608fcdcc862fecc00b0bb0c7a72",
+  "hash": "2cd788393fbfa25eef9d273b8457c06185af9190af87f7cde43d4ef9a586fb75",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/g-skill-ripjawsv-series-ddr4-ram-16gb-3200mhz/": {
-  "hash": "5336a97ba5308d37ed11419067116b79e519b94daf747704ef2d0ffe358ea56e",
+  "hash": "8a547200019711fdc013ed84057a82ed806633bff074fae0b7f986f140e9d4c5",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/corsair-vengeance-lpx-ddr4-ram-16gb-3200mhz/": {
-  "hash": "10b2dce8845636e551d0d4f9e1927f07e3995dee2b99a7572a62bb55afd946c1",
+  "hash": "4a06a8ef1e12660ef7cc1b7a5ed1ac495e99b86d1fb605928005a1cc11d4b69f",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/teamgroup-t-force-vulcan-z-ddr4-dram-16gb-3200mhz/": {
-  "hash": "0177046f125477799cf9cbc1441ba3439807ec0ddb4f70e74766e4ef88169767",
+  "hash": "a9aa037192dd324f352684d07fd2d79fb8c0dbfb4a206d60bff9f9367af1f553",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/a-tech-16gb-ddr4-2666-mhz-udimm-pc4-21300/": {
@@ -284,15 +284,15 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/silicon-power-ddr4-16gb-kit-3200mhz/": {
-  "hash": "b4ad3bdaa9ee72bef957796f1f9c983bf513a04aef4deb0b31cceb850d04a82e",
+  "hash": "7883566c555af7ce9682aa9cba45c4ea79b9dbc4d8ab4cc614e26200760f7c1d",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/crucial-16gb-ddr4-ram-3200mhz/": {
-  "hash": "d6c32a64d52e9ad57b55512de0ba07acfb88761b10f8ff03cf8611f0d83fc0dc",
+  "hash": "385a667751ae8cc9160d8e07816d1b7daf9ddaf63cba6aefcc93c686ba32855a",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/patriot-viper-steel-ddr4-ram-16gb-3200mhz/": {
-  "hash": "fd5404c9aca1e2c08972b8d907f23a95ad6074de3a21e49854e2f41000f08642",
+  "hash": "2aca3a437a7704faf905a6ffedd1db1a79f25c5000b1a67208e3767425293cd0",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/nemix-ram-16gb-2666mhz/": {
@@ -304,11 +304,11 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/ddr4-ram-16gb-3200mhz/": {
-  "hash": "c3797331a8de518449eb353c9bf355b5d5f2ea79fa21c9458c51c9743e638546",
+  "hash": "f5d5fc738ee71abd91807abb188561656e0e528b7be47afc27e84aff4bcd030a",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/g-skill-ripjawsv-series-ddr4-ram-16gb-3200mhz-2/": {
-  "hash": "2eb1f8ba205e4f3c4de3c47f83164cff6e81e44ea6802b7db7ce0f722a82d3d1",
+  "hash": "eae9145698537210f33272f3151d3ed2de6142330ad708481236863c2d6422f1",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/16gb-1x16gb-ddr4-2666mhz-pc4-21300-2rx8/": {
@@ -316,11 +316,11 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/teamgroup-t-force-vulcan-z-ddr4-16gb-kit-3200mhz/": {
-  "hash": "81930c11cb981f015b4ed79cd1104bd72b3709025eeb9e6a7fe89c01b3480eb6",
+  "hash": "116536d5e3eb5eb16544a3f81781f9d9f2def4670d0272a5ddd3ae73b4daf82a",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/g-skill-trident-z-rgb-series-ddr4-ram-16gb-3600mhz/": {
-  "hash": "a56454cd4770d3a6722e24f0b942d2da2ca03e48332d0e7be1feb36024c96ac3",
+  "hash": "48a3fb9efd2b2a7171f16ee874654d3fa25843fc3db20727975be1a9d44cec2f",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/a-tech-16gb-ddr4-2400-mhz-udimm-pc4-19200/": {
@@ -328,7 +328,7 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/silicon-power-value-gaming-ddr4-ram-16gb-3200mhz/": {
-  "hash": "53e1765559f2ece761a3621e9a90decc12fcac5c1f856b571defd543df19759f",
+  "hash": "ab89fa8551805cd74d8be85876dd8ac223e39d4065dfb6b0c6f2c854b5fad314",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz-4/": {
@@ -336,11 +336,11 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/corsair-vengeance-rgb-ddr5-ram-32gb-6400mhz/": {
-  "hash": "12756abf440a42508406f1cbb1c2c662f8fb42c70fd8d9f57fb0f23af92d3b05",
+  "hash": "0481e841e6c57f41fd732f6746113e8b58a675d1e8cb14488dff7d26bb0318bb",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/corsair-vengeance-ddr5-ram-32gb-6400mhz/": {
-  "hash": "7df027886d3e7b3cf041ff752d17b63fd9c545a1f225a8026198cbebaac364e2",
+  "hash": "948fb738bac42ab81ed130ddc4df29b3111794a5b6a0544ce6e579b9fba86c42",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-32gb-6000mhz/": {
@@ -348,7 +348,7 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/g-skill-trident-z5-rgb-series-ddr5-ram-32gb-6000mhz/": {
-  "hash": "6f626fd41fe63bd963cc669ee3d672dbccfc58c5f9d43f9cd450a95d78c676a3",
+  "hash": "6bcdae71158958b883a14e3a2aa5afe319ea9b3aed93f40a8533e9319673e25f",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-32gb-6000mhz-2/": {
@@ -356,31 +356,31 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/g-skill-trident-z5-rgb-series-ddr5-ram-32gb-6000mhz-2/": {
-  "hash": "16bf5858ba1f409fa1993438ea12e3a799adcfd160e7c313bd9fd6bf28d7dc35",
+  "hash": "2c287ed976134b6a147d68c1d81bb334842f8da860598f79e6ac8795bbef4f9e",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/g-skill-trident-z5-royal-neo-series-ddr5-32gb-6000mhz/": {
-  "hash": "d27d15a598f902975f554641d485084572d7de5538e3a239138fa266136d7b85",
+  "hash": "6869743c54b4f2fcf0875655939d92ff657267e62d0cfc1995e0d2b0c46bf2b3",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/g-skill-trident-z5-rgb-series-ddr5-ram-32gb-6400mhz/": {
-  "hash": "50be7c26e91944b951ba51d9346cedb4e3ebf9734637a3e6bfd31fed08020364",
+  "hash": "921adca14af1d577f7e127217ec5397f64efb7bd893e1572d1d270a13c872569",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/g-skill-trident-z5-rgb-series-ddr5-ram-16gb-6000mhz/": {
-  "hash": "2473365bb83b521fb66b5b9d49dc3660947ac099f3e610d125351703fc2f0354",
+  "hash": "5a8a76a0f7de5884296549f11290447088cc51c7a13c85b94343aceb4d3abfc6",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/g-skill-trident-z5-rgb-32gb-2-x-16gb/": {
-  "hash": "cbd5a6eb3b0a7873c68a605938122d284a49c3cd7d808bc0f62df8c5e4a1ba70",
+  "hash": "b06494c04763f0acba7ef9a70c268ad7536ffab8d776170004997d38fdbab1e4",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/g-skill-trident-z5-rgb-series-ddr5-ram-64gb-6400mhz/": {
-  "hash": "39dc00e3076089ed53eb984bc8c646920b8dfbea1b7bea9b777b9c9aac1f5a63",
+  "hash": "119142d9fcc657995cb9ec41b407a8e86ea420886c8c72e11b0c5a91b4a3fa72",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-64gb-6000mhz-3/": {
-  "hash": "e80554712ca52c3a1d131c1bdad56e61434fd7c8642367e565a50b398b8ccdc7",
+  "hash": "5e9d552b5a3c83a7347c9d7ae00c9c3c4677799da6543a26cf42f4996b625215",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-32gb-6000mhz-3/": {
@@ -392,15 +392,15 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/pro-ddr5-ram-32gb-kit-6400mhz/": {
-  "hash": "110a2247b6a97a896b70b8c6af9e6613b558f8e0f07eea580c4c0f65decff3f9",
+  "hash": "d8f45f22e9e9703b5169ce9cc5a8c47be2957b7b038d5bc81ce311ab2dd2f2f6",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/crucial-96gb-ddr5-5600mhz-laptop-memory/": {
-  "hash": "1f1bb4ae51b23816b07ff72d8c46bc0817cf7ad30e5444d38500779fb6eaa749",
+  "hash": "e96d4dbe858e1fd54802063c931afb804af6000ed18b84e557f140ca05f5e9fd",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/crucial-ram-16gb-ddr5-5200mhz/": {
-  "hash": "b6c566e4b90602b51b391651b540c3cb4ff19916d76a5b7a40db42310c8536c3",
+  "hash": "76544f0e93b035dc4a0d4c9c1d6114b0ea7e5d230db6b028d98fd75a7197f69f",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/kingston-fury-beast-rgb-32gb-6000mhz/": {
@@ -408,7 +408,7 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/kingston-fury-beast-rgb-16gb-6000mt-s/": {
-  "hash": "73a66e2c64fca228da27b5f56a70779186a9d423f00d127607207bdb1935ac73",
+  "hash": "509935b32df133dd49cd86e663110c2264614502ea80b232df6543215808d060",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/kingston-fury-beast-32gb-6000mhz/": {
@@ -416,11 +416,11 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/kingston-fury-beast-32gb-6000mt-s-ddr5/": {
-  "hash": "76cd2a5aeb48291e94d7ca84ad0ccbdacf5eeca47529d8c590cf48683ae2647d",
+  "hash": "d0947e7571fc8d9875002f2b5fbb8e8191d42b3e38fe9b787ab4d1d8b5801337",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/kingston-fury-beast-rgb-64gb-6400mhz/": {
-  "hash": "074da6ccd1c9675e5c37095816f629460d61f6b99f2b27838a7bf76bd53e807c",
+  "hash": "7aca75dafa46b3c75e6c5e706907969eab695553c48c2fc72b8e9cf9c23cb876",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/kingston-fury-impact-32gb-5600mhz/": {
@@ -428,15 +428,15 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/kingston-fury-beast-16gb-6000mt-s-ddr5/": {
-  "hash": "499528e005fc18c789334e524c59980744aa4e851ebb52b7b0d80b09dee77941",
+  "hash": "5d457f864c149185ddbae564ac8ad5987cc35c37c619ef10da9451b48b126ae0",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/kingston-fury-beast-16gb-5200mhz/": {
-  "hash": "3bc384ba37ed9aefb5e5a073f99259827a270cd62e7ed155a1fd65022a8c4c1c",
+  "hash": "b45118c0c6e676fc80cd76ecb5b35fa6833203c3337482de9431c426b043d290",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/kingston-fury-beast-32gb-5200mhz/": {
-  "hash": "ed4bcfcfc153a5bf70e2732feec2e0be6cdd139f216f5629d29f32ae7dd220b8",
+  "hash": "73568e1aa3402c0743f9725fe33b2391cd5c259ae97f453a5e0f1b83d666d396",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/kingston-fury-beast-white-rgb-32gb-5600mhz/": {
@@ -444,11 +444,11 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/kingston-fury-renegade-white-rgb-16gb-6400mhz/": {
-  "hash": "0c4f93ad7fcea77bb3cadf3f5d37bd65f5cea0c819513c3b2f807379639a1185",
+  "hash": "b81bc26142f5ae47e4848bc9965ece48dfdf57ad5bbd3e6e50c20972252c1e0f",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/kingston-fury-impact-64gb-5600mhz/": {
-  "hash": "5dcc2c7e7f2890ebb75241aaa95404244fe9b9e7aef6731daee45ca810835fd7",
+  "hash": "8fab2fcfc3801ca4505a739b75cfc6af443a1c7f977200c9b35674359afca43a",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/kingston-fury-beast-32gb-5600mhz/": {
@@ -456,23 +456,23 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/kingston-fury-beast-rgb-8gb-6000mt-s-ddr5/": {
-  "hash": "cf31414dd83a216eaac0a004afe24406568e22bf3d646a1003a7dd650b9c166e",
+  "hash": "531a05653ca5933857bd043e7c4b82b74138da3426c096cd248039539dbe5166",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/kingston-fury-impact-16gb-6400mt-s-cl38/": {
-  "hash": "d5f20c10f18a3c08a308f9026c9351a9e41e9417e720ae171ce1e7aa0a2b05ef",
+  "hash": "3858d2665da16bcd78255510d3e0e327ea4204623d92288a2c70827babe30780",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/kingston-fury-renegade-white-rgb-32gb-6400mhz/": {
-  "hash": "b150d5b892a9e1b443cb5118b5b4e6bfeb308bf256ab78e9c18fd2868359d2c1",
+  "hash": "0b261ad990f8ce4fbae471ba235ddc6fb8df6f6f308f12be5fa5d06dc324a374",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/kingston-fury-beast-64gb-5600mhz/": {
-  "hash": "7e5bcdcc4615a7c85ec6e29e56203426a4eee73515ac5562ad285524396f5e0b",
+  "hash": "91174cb4aa6a62fe2216b9fde7f43be9990b96b060f34d008e41c9df1e13c75e",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/16gb-2x8gb-ddr5-4800mhz-pc5-38400-1rx8/": {
-  "hash": "0ec017b394b5826e659466b78cfe7cb545ddf2f5358d5b67da814685e568e0b3",
+  "hash": "0077bee4e009d391e848b9ae8f131649cd5458c193cd2b69c750166267b71ec6",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/six-x4000-1tb-m-2-ssd-pcie-gen3x4-nvme/": {
@@ -480,23 +480,23 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/fanxiang-1tb-nvme-ssd-pcie-gen-4-gaming/": {
-  "hash": "056e34437a9cab1ca0cbd1bf6931546da5d6a5881a07ef9c5995ac71d26a10b8",
+  "hash": "234a530ef3890d4cb611c9fa5960e4948e77e81a820ec947593351ced5fdf6b1",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/crucial-p310-1tb-ssd/": {
-  "hash": "bc527ae5e7fa545e61b478b0b0308a45d96097a28b9e48ee2dc0edc9d9dd6d20",
+  "hash": "f6698459f74f6e0d9abdc34b2988da9ad074aa4b6340b059b5ab0b116997c929",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/kingston-nv3-1tb-m-2-2280-nvme-ssd/": {
-  "hash": "e8d0f160e91accbfa2b31f2a8ec4fbabf680a0ee336737ddde8c299f258438f0",
+  "hash": "8ee300bb8700b329f93feed6c52d6cdb6d6fe8d967a7b7871654be07a24dc1d9",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/western-digital-wd-black-sn7100-1tb-nvme/": {
-  "hash": "702c07fe92fb5ed0cd546293b91d46f93a1a1606271410cc585389fbb154c22e",
+  "hash": "d4a8afaab381f94fe0db26580630b96c495101d8d5c53af10cd188dbfc50338b",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/acer-predator-gm7-1tb-ssd-m-2-2280-pcie/": {
-  "hash": "39d526c4aceab2f9d57d9797a495c2fca9ae5909c9afa9b68ffd0e5ddaad73b6",
+  "hash": "3121e3f0468764fb59d6522441735db58a10f2a43fa0117ebac1c5635cf97dea",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/bestoss-1tb-nvme-m-2-ssd-pcie-3-0-2280/": {
@@ -504,11 +504,11 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/samsung-ssd-990-pro-1tb/": {
-  "hash": "c63b42a0678d320a8fa92c272348a4076e516fcc08b6467d91a23f3b7711f27a",
+  "hash": "1740fdd98c4031f4eaadfed8357943439c3034837baa19b9d96d1be8f96d6618",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/silicon-power-1tb-nvme-m-2-pcie-gen3x4/": {
-  "hash": "9c8caf1dbc524f666b195f6eed2de8f591f0b24d9190a7acc43a7b3ffdca3839",
+  "hash": "57c8af90ba5c302810b51fb23c491ead89df447bd169794fe2af25e359dda984",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/timetec-1tb-ssd-nvme-pcie-gen3x4-8gb-s-m-2/": {
@@ -528,11 +528,11 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/fanxiang-1tb-nvme-ssd-pcie-gen4-m-2/": {
-  "hash": "8f2aacb45740758825bd69b738d04dc6606ab19ba2e1a7521e9f5e030e4d15cb",
+  "hash": "205becf75c56ecfe05b1ff3f8db3f9bac376b583735aa15c14641172f0aec5e0",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/six-nvme-m-2-ssd-pcie-4-0-1tb-m-2-2280/": {
-  "hash": "d572db09f4e990854c0eff3ebc03bb03d5a95cbb3bb0707f2cf9254bdde4dac9",
+  "hash": "5ffd0ae0dd1f510824dcd6d973d55aef92c9030fbc126a895d8790852f699003",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/samsung-ssd-9100-pro-1tb/": {
@@ -540,19 +540,19 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/bestoss-1tb-m-2-ssd-nvme-pcie4-0-2280/": {
-  "hash": "183fc28fd559e36b655398c777f7f0407376be429776ff3929c312e9dac9f732",
+  "hash": "99c24ab361fc5a41901fb33be18f6dd5ee84fd2b80c1ed4325e67b119cbcb232",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/western-digital-wd-blue-sn5100-1tb-nvme/": {
-  "hash": "f1895265f415c49c02b0424b699dc3b1104faea31da5af1d84af93a234f152c0",
+  "hash": "29ee1aa4812383b624a929cf3111bf1a9a095cd0f553c3c362e6c7fbc3559d9c",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/intel-660p-series-m-2-2280-1tb-pcie-nvme/": {
-  "hash": "2030140884b61566f310dc23dde8ef99c97d28acfd3749eb6c3782571c86bccf",
+  "hash": "853af4e27e910c78186ed542c10c3ff0e7e142b814b156bae4700e86cd3893ac",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/crucial-p310-1tb-232l-micron-qlc-nand-pcie/": {
-  "hash": "a4413151d77c1ead4a6a1c1a1b0ac6d1b33469e87da8a131b1834675da3967c6",
+  "hash": "30a8ba7f08258dbbc310731a2552d512e21a183840cbaf8e6e655230224573c1",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/gigastone-m-2-ssd-1tb-pcie-4-0-nvme-ssd/": {
@@ -592,7 +592,7 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/western-digital-2tb-wd-green-sn350-nvme/": {
-  "hash": "99058ba780626d253f69dba91de358f535c73e027afcbddffa0b63baadf235bc",
+  "hash": "e5352291716c140221627adfc97d703290e90810cb5de43d2dee445205ae1e81",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/crucial-e100-2tb-m-2-nvme-pcie-gen4/": {
@@ -616,11 +616,11 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/silicon-power-2tb-ud90-nvme-4-0-gen4-pcie/": {
-  "hash": "c990cf824e4d31dd5f5db136125ca2d7775b9ab5f76ace2b899e81596f891225",
+  "hash": "d50115d18386f24b2ba55de07397394ceca636756ad0cea8d2d2a04022964e98",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/western-digital-wd-black-sn850x-2tb-nvme/": {
-  "hash": "624031b7687d712f976bba05e55751118f3c8d7bb4ea8aecb9ef11eff9d62f12",
+  "hash": "65c07d974c9a43708455542cf723378e365be4ad8331fa13584ef37010501a17",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/bestoss-2tb-m-2-ssd-nvme-pcie4-0-2280/": {
@@ -644,79 +644,79 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/samsung-990-evo-plus-ssd-4tb/": {
-  "hash": "d7e9eaa4aa1b245b13c49dfaa7b23974c8dad431360de361dab19335010d8f7d",
+  "hash": "2049e5730423c7cf6137d0572ad3e5eae67a9bbae22ce3e350802dd5c990899d",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/western-digital-4tb-wd-blue-sn5000-nvme/": {
-  "hash": "87f7d939b88f52320cb4dd50e48bfb04f89c341bd0b9664b5546f4c063a8a40e",
+  "hash": "e7ca26ae1db59d33ef272e69ed32a5864b87456aee7f97960c69c3d48fc95259",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/samsung-ssd-990-pro-4tb/": {
-  "hash": "32aeb697adacfcbb292a549d28f50485864bfcb6361d16b87be6aa318da3a6b0",
+  "hash": "c24430c483c7a55e7c79ef1b4fbf7affad7e76f68cc76e565f31f63edbc54321",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/western-digital-wd-black-sn8100-4tb-nvme/": {
-  "hash": "888c61fb1b472ceb2fff9822c9e585e032324d10a3494cc857cd8d89ac6c6594",
+  "hash": "e0b6ac3a718a215a66898fcb2758db5c22726f88ff06c8d3af642fe1ad2c0de7",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/acer-predator-gm7-4tb-ssd-m-2-2280-pcie/": {
-  "hash": "4c0e0a683f681f4cdc69b6634be303d7060ff53c67d76620595f8b492836127d",
+  "hash": "86807c89bf89535256a96c760212c92606a7b7b2d1c71de6ff77fd1d5a252d11",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/lexar-4tb-nm790-ssd-pcie-gen4-nvme-m-2/": {
-  "hash": "58b59b51d2783fe6d9c5aaf038e0ea854c22b58632c18b78f639430cb18757a9",
+  "hash": "432d2cae11909f2885d07a594cb5cd726b9b8446ff5bfe97480273646a6e118b",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/western-digital-wd-black-sn850x-4tb-nvme/": {
-  "hash": "aad7465cca6d35cacc7b2be104aaeab6a083290d441f4c4f84cb80e2ae62f791",
+  "hash": "8fa351fcd3d44df97d7f1351d68b0e56c70dfd11b0a493291636b0fb7ad3cd0d",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/biwin-black-opal-nv7400-4tb-ssd-gen4x4/": {
-  "hash": "770de3ba3d3fde04d426222364d12dfa66b73d6b3fdd1c976b6e0647cc212288",
+  "hash": "55688112e9db3bb9fd6b222c89c980ed34def3006ec17421743e49cb8c10cbdb",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/western-digital-wd-black-sn7100-4tb-nvme/": {
-  "hash": "f4a77e3b6adada49164d87a78ff61980f3b90f6a071f25836521b0ea737f31de",
+  "hash": "8c2022b9c7dbd5bab96ad04f1cfe2d5b18f200933aff9f284bdec50d4940491c",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/western-digital-wd-black-sn850x-4tb-nvme-2/": {
-  "hash": "0311389caef35d42241e7a889b9f5a558f2d7289f747368a8c88c740cd32c9d3",
+  "hash": "9669626739deaadda8edebea7c39ac255aa1668a4eb665933b272ded6e8d1aa2",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/western-digital-wd-blue-4tb-sn5100-nvme/": {
-  "hash": "cc4c497f7d62a9be4d52c0564c8bd08eaeecd0843fc4914c7b0b5d2d161d4438",
+  "hash": "53b30ba8442ab558d8fa5d4476a7850db981e0fb6646ffd7a391af6fd3a71a2f",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/fikwot-fn960-4tb-m-2-nvme-ssd-pcie-gen4/": {
-  "hash": "1e5cb57b98fbbe4fad439665b172548a942eb5f0acd9632eaef61fd773297ec7",
+  "hash": "08208f3b8ffb936827d0ad8272f2daf8b2861130a1e9faa11f7041b5cd97eb1c",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/samsung-ssd-9100-pro-4tb/": {
-  "hash": "fe5a7418f95ec62272111ee78bb6663260f39a69c63aca2644d42dea2744e073",
+  "hash": "e285969b505b9cf23bc14abd8c7abbf77f7c611decedc718dc9f7c0cf2318055",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/crucial-p310-4tb-ssd/": {
-  "hash": "2d77152ee1b6c0b4822d19f472aba1b4cf971cad968e79c685f74e3797c46293",
+  "hash": "7b9c7acb3769eaecdfc19ab1c8bae0a4c179a63d69763115811a2b5fc52ece2f",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/silicon-power-4tb-ud90-nvme-4-0-gen4-pcie/": {
-  "hash": "6002390bed76baea941be4aefc1e5852b93ac7a013f12f41340d52dcd887b1d8",
+  "hash": "1abe0ace7005d4c7d55c001603b640766a55fab2b4c486eba3859476a5268036",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/samsung-990-pro-w-heatsink-ssd-2tb/": {
-  "hash": "a9c14f58e633301dcd4157952bedff95b4cd614a9d6081c3a838b1d5932053b7",
+  "hash": "543256118091e91c7a30775bae826d578c0137ce53eb0d6f5e9241544f454b90",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/samsung-990-pro-1tb-pcie-gen-4-0-x4/": {
-  "hash": "071b9591a03405015c355e3437157ba606538d4acb981e496c509d9528157a9b",
+  "hash": "a26ae271cb8ffa7a3434fdbf236dc6127f0145909106ba7d6c915105fcf5ff50",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/samsung-mz-v9p4t0b-am-990-pro-pcie-4-0-4tb/": {
-  "hash": "f57e54d0edbc16386fc8114d836b3911ffe5e50468c683f71d3c02a142c615aa",
+  "hash": "c0392fdf9daae754eaa87593299075ff1b21ff6813f11c10d88f4a19cd58720b",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/samsung-ssd-870-evo-sata-iii-2-5-2tb/": {
-  "hash": "b3c723959fa6b514c6cf001a6b40c004c029f9200914f24630f01f7d6e3f542f",
+  "hash": "3958535f2c8d9f5786ec99be7da1d5688755b558382dd3708e3fdbc69224bfb6",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/samsung-990-pro-2tb-pcie-gen-4-0-x4/": {
@@ -728,7 +728,7 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/samsung-mz-v9p4t0b-am-990-pro-pcie-4-0-4tb-2/": {
-  "hash": "960d67ff8bf2f2adf7e5eed81c659464b767caa2bbc5e27d2eb6a94a8c1ce550",
+  "hash": "797009b2b78635d1b4f08dca0355c40e28c8db387154bd5a85a0175467c42a1d",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/samsung-990-pro-w-heatsink-ssd-1tb-pcie/": {
@@ -736,15 +736,15 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/samsung-990-pro-4tb-pcie-gen-4-0-x4/": {
-  "hash": "084c611c059bfdebdb717e7d49d221cc597920b632627fc5d4e47647d2133233",
+  "hash": "869d8e313a91d8767d9a36d801d71c81694eb1e434dbb05bcaadf2adabb9bfd1",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/western-digital-wd-black-sn850x-1tb-nvme/": {
-  "hash": "c017769736b0e65eef1bb4f09201be87b1383f311a3cc0dcfe24f1b66b2eeebe",
+  "hash": "90a929aaeb1bb555dd7cf9f25a7b9bc90445d2603dd16e83c5a9cab21ae4aff5",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/1tb-sn850p-nvme-m-2-ssd-officially/": {
-  "hash": "9a03691ed091a14d0f128369916051dce53e1078cfc442ae3631e30962d5379b",
+  "hash": "667b3cc8a8e3f5b5330e473588f0e2573cf7fd27ca78d504a74eb7d286a6cabc",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/western-digital-wd-black-sn850x-nvme-ssd-1tb/": {
@@ -760,7 +760,7 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/western-digital-wd-black-sn850x-4tb-nvme-3/": {
-  "hash": "870994f8cf356828fbe9f3eba422e86e8f72512339444315993a9f254706a5ef",
+  "hash": "3632c9676b1fc5c6fbe795210ae3a06a3e5aa72d8c23c4d7d56a6dafea281686",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/western-digital-wd-black-sn770m-1tb/": {
@@ -768,19 +768,19 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/crucial-t500-pcie-gen4-nvme-1tb-ssd/": {
-  "hash": "db55207446d7c6abc907e603ba77601a72520a1c5e1e9265912468ce7b9b5316",
+  "hash": "3fa2a76336a87053a21c7b0f053ff3e98ed56ebfd0fdf5658b721145361549a2",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/crucial-t500-2tb-pcie-gen4-nvme-gaming-ps5/": {
-  "hash": "560f8e203811741654ff65e0e66c9909a321f329532f66af155b3bd8f5a53410",
+  "hash": "ac4dfcd8bc0ecd9079b2c36ed20e0f73bca481701b7156eb06d877c6a9f3b3ad",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/crucial-t500-pcie-gen4-nvme-4tb-ssd/": {
-  "hash": "6154b373da048a7572aaf462cef77da5ed7313aeed658094309e5c2087aece71",
+  "hash": "8e1c94b31b129bb49ac9ada25d88a1cff1cc399fe2618783638701b06bfd8fe1",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/crucial-t500-4tb-pcie-gen4-nvme-gaming-ps5/": {
-  "hash": "84cc9e88fabb2246329724569836ff159199c987dfabfc09449f4466bad96696",
+  "hash": "99667c38734c4569f5575616830d1fecf9bc5faad72c68d990af1b325ed2c599",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/crucial-t500-pcie-gen4-nvme-500gb-ssd/": {
@@ -792,7 +792,7 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/samsung-870-evo-sata-ssd-500gb-2-5/": {
-  "hash": "0bc47feeb655a9f6822f98b67e2a285f54db788bc024f9c01e9af9b5ee454bd9",
+  "hash": "4de0b5fe9f124d06671bece82a54def66bce301b11e5fb136c450120d9d66ab7",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/sandisk-ssd-plus-500gb-internal-solid/": {
@@ -812,11 +812,11 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/1tb-sata-ssd-2-5-ssd-sata-iii-6/": {
-  "hash": "29a4249fe01190b29631ae2e5e42c48059bc316e1ce89db9892d31207d5aa651",
+  "hash": "cc41aa8ed606df99ad59756fbd9f9ad378a98c7da28ae43882527bed9e6256f4",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/crucial-p510-pcie-gen5-nvme-1tb-ssd/": {
-  "hash": "283a036f19a97ea82a3d25ce302ceb24f83cb2371ae24fab4c7ca777f1575d9a",
+  "hash": "cd886dadba67a2573b67c7aa4292f7f730dad4c684e358a3fa34908f469024ba",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/fikwot-fs810-2tb-ssd/": {
@@ -824,7 +824,7 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/fikwot-fx815-1tb-ssd/": {
-  "hash": "c0cc39919cb9fbe1c1c78d0462168571526bd470119c52428ffca07741dfdf08",
+  "hash": "890845c78993daa9edb0a85ad4f228fa6887a4ccb2e993aa02077c79ff076fc8",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/silicon-power-2tb-ssd-3d-nand-a55-slc/": {
@@ -832,7 +832,7 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/western-digital-2tb-wd-blue-sa510-sata/": {
-  "hash": "f8db73875e55b2e1ad19e91a5a2f753880bc2832db60fe2fa3d67908a7dd056d",
+  "hash": "89302edd27362d0497ef078df0acc111ac987e3dc31356435c61e24e7e95defd",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/fanxiang-2tb-sata-ssd-2-5-ssd-sata-iii/": {
@@ -840,7 +840,7 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/kingspec-2tb-2-5-inch-sata-iii-internal/": {
-  "hash": "911f4305c4f33ee6db357e26888b9473b050175c22db358378c24b779fae955f",
+  "hash": "2d680d0a9af60e64a864adea2a4698e8d112da645b7db2cfee6b032395244646",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/fanxiang-ssd-2tb-internal-solid-state/": {
@@ -848,11 +848,11 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/teamgroup-t-force-vulcan-z-2tb-slc-cache/": {
-  "hash": "e06277a503dee6b70aef75b1b62fd92c646b2357df4da9df22a367e82452b5aa",
+  "hash": "f27ed52c8677ca086422b7e9c5382dd973ceb44f5aea4516bb9b7144d832280c",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/crucial-bx500-sata-ssd-2tb/": {
-  "hash": "5703c845dfd2f62b8529e11c429d83f630f52313d10f0eb08fa28e3be6fb14b5",
+  "hash": "b290047b00388c7f8a2ce276d5b48713aae7128340dc3c42cc085b6556cfea35",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/teamgroup-t-force-vulcan-z-2tb-slc-cache-2/": {
@@ -860,11 +860,11 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/centon-2tb-ssd-internal-solid-state-drive/": {
-  "hash": "7c5343ade75ab8e3da0e0d19780a6f35829ba10725a40d2c0f4e667395646b00",
+  "hash": "f56f96319ff73c7cb289dd9543c00fd8532bfb38b09011ac88da8b6bc1636b85",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/bestoss-2tb-sata-ssd-2-5-inch-internal/": {
-  "hash": "56805f19a8c7be11da66ea492d96327247d614e4fce21171aef752be2fc2974d",
+  "hash": "817446c5d07839cc6428c046400f91dc5c65c666146d59586bc66cb69d9e5f17",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/kingspec-oneboom-2tb-internal-ssd-2-5/": {
@@ -872,27 +872,27 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/teamgroup-qx-2tb-3d-nand-qlc-2-5-inch/": {
-  "hash": "9e58905d16edb5467841dcf7771242390403d69bf1cde2bc2debbbafbfd18e63",
+  "hash": "b71ee731c245844f2f554cc0f4ce2b2fa071d6ca3c8a96fb926f28513e9fc171",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/samsung-ssd-860-evo-2tb-2-5-inch-sata/": {
-  "hash": "9263c3ef137daf94608f298d2cc062874746c96e0c829917167222bbee36fa03",
+  "hash": "4f08223603c123e76d4addd63b5c0c51602fe632817da14ff81935db06da84fd",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/samsung-ssd-870-evo-sata-iii-2-5-1tb/": {
-  "hash": "ee4da71753741c718fc4e3479cde68877db9e378bd2ce81d3b05d2a6d84b36c8",
+  "hash": "0884d99b455649bedb5515e82beff2e1327fbc30e588568c2dd12587a07838eb",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/samsung-870-qvo-sata-iii-ssd-2tb-2-5/": {
-  "hash": "26d5cb49d8135929b87474a068aebd44aa375bc776aacd3079aa93bd37ce3446",
+  "hash": "c4051082ddef2f2105674cf9d77c2dd8b9f1e118bf79e77f4cd4c48278528e64",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/samsung-ssd-860-pro-2tb-2-5-inch-sata/": {
-  "hash": "10f62065b96737809d0880b1553f207a9a1c1ef9bc02bde43466d18907983393",
+  "hash": "2a2693beb95c257d1c8cd8808e1b474665419dd78b0a97b1fa9ce1df1cd9f3b7",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/pny-cs900-2tb-3d-nand-2-5-sata-iii/": {
-  "hash": "e3ae1f84493bf10e7a49091a6b40fe76a4e30b602bd1a61da7321ca09ffff014",
+  "hash": "35b2d4f93c71e7fd25f2ab57f9f077ff8a86059a9531c962487b2c79d2007fa1",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/fikwot-fn203-m-2-sata-ssd-slc-cache-1tb/": {
@@ -900,39 +900,39 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/samsung-870-evo-4tb-2-5-inch-sata-iii/": {
-  "hash": "168d3663f095c6f15c8b20780faeed6ae69095db0d773c0e0fb576acd3073cba",
+  "hash": "20c054fade0c2c6d9cd0843f94badc63690be9d9e5818966644eb03d1dff870c",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/samsung-870-evo-sata-ssd-250gb-2-5/": {
-  "hash": "b2a035caab7f5a95e0e3e1acb200919dca1cf695d01c1f6b4c1beec1ef68a769",
+  "hash": "1d3b8b7ef4960f89300a373a19cb0f747b6efe5e421ee6cf223f8330bd2ef7d6",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/samsung-870-qvo-sata-iii-ssd-8tb-2-5/": {
-  "hash": "2f34cf6ed8cfc229cb3f15e040ff7de031f90d522ee38913b17fb7d816035e82",
+  "hash": "e5cf97b8a45575a2910d8f57397430b2d09899f57f13ed66947367bea08c2c34",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/samsung-ssd-870-evo-sata-iii-2-5-8tb/": {
-  "hash": "fcd0ce3efb3f88e6c03db993b5ef6a9c24195ea2749810a5b1cd05dfb2b1b4de",
+  "hash": "41b761decf72aa4f777d524f5b0345276d53fed5f11bb1821a8e5e60d2160677",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/samsung-ssd-870-evo-500gb/": {
-  "hash": "98506b5126409433b691b2aa0ec7bfb2ebaa5f5ef33dc1f66b2cbfe2e04d36d2",
+  "hash": "94a210235cc96352893578fd79691e195f395e5db90432e0419f3e2f47f8e6f9",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/samsung-870-evo-1tb-2-5in-sata-iii/": {
-  "hash": "d69c16227214f5a48622bee32a8f3421f6d340e5ba356ac8e5e3ed924a0ab591",
+  "hash": "f3291c8c36a8d81a5bdb77acac2128158b367f51f646961d787fc5e50b1f8052",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/samsung-870-evo-1tb-sata-2-5-internal/": {
-  "hash": "fbb708a9e1d0ad2a78f7828e1563f39c80ec3a06b7621bfe93b6978ddd394903",
+  "hash": "062f0dd53931cad2671a84ec38412895ef819ab45c5eb15c2cf42dd45fd64871",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/samsung-870-evo-2tb-sata-2-5-internal-ssd/": {
-  "hash": "8d2a6f3c6e2025b70424822c034c4eba858b98c45c869b67cac39c0acfb21497",
+  "hash": "5fe48fc728e20d02b17e62fe1a83f577b70b2eae6260cb352bf4430ff4565df0",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/samsung-870-evo-250gb-sata-2-5/": {
-  "hash": "a48717c564b7e2b0d26352aaed974d00a1d1728f790c9e5b80fb49d149d6f473",
+  "hash": "43e25a97507629bfef3f7643be68cdb9fdf0da10d34d57a8b14b4322af11abd1",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/samsung-960-evo-series-250gb-pcie-nvme/": {
@@ -940,15 +940,15 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/": {
-  "hash": "7d401b20586db6bdc4e9bb52bd722c666b7d10ff6ad93b4b56ec0c8286e3a444",
+  "hash": "3854e0a3a843ec87eecc7fb962bf315cf6272fe8ba7a1155ddb3de7759874d40",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ram/": {
-  "hash": "f127f2a6db012492df186c8fd45d12842c319640a5af1b987ba23226b2d6d942",
+  "hash": "fef0f9016be82f5c89bc4f094c0d9947f440222d880d431ba4ba3b894a1e1a7b",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/ssd/": {
-  "hash": "37adfc49b564d5c0c66388ebf1f2f17a54c15006811142af28ddc57be5c703dc",
+  "hash": "6fb37f38efbb05014e1f3b7f820c0e636493ac0320015a1d2d877785d6202b1a",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/about.html": {
@@ -976,15 +976,15 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/guides/should-i-buy-ram-now/": {
-  "hash": "df5d39e0d55da5afe85fbb14c8cefe27152c7cc8963403fe98e1e18c0581c757",
+  "hash": "20695911e4170d24c10062d521fef946694d91db8b2b628dfc84453468001391",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/guides/should-i-buy-an-ssd-now/": {
-  "hash": "1be18026c614c34d3a8fafcbf1579fa28b39c26d771c2459793f007af89b2886",
+  "hash": "55c575f1f777b9aab6cdc1ee1b6b632b96f807349deca96690ecff32b44475ca",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/price-index/": {
-  "hash": "18313466d08c8d53eece82bd84e495efb31b1ad188b86bcbc4c4efb24a2082ba",
+  "hash": "98ca30f2718d285a09ece6c2e0d6b56696c22dbe63533d12a5ce3b3c9f5ffc17",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/faq/": {
@@ -996,7 +996,7 @@
   "lastmod": "2026-09-15"
  },
  "https://memradar.com/blog/why-ram-prices-are-so-high/": {
-  "hash": "8d5194a975f361d462737d7ad1d077e876dee67abd6dae3f7bb0d15980024226",
+  "hash": "a7c81ff7f279d58ce2dc87ef667245f702f1cf3a891bc0242bc1203a8919d067",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/glossary/": {
@@ -1004,11 +1004,11 @@
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/methodology/": {
-  "hash": "4174d3da4f684fb34e35b0a6e0c466e5a215064b086701ba9c09e9167aa52577",
+  "hash": "bf0adcd2b6423706dbcd7844dc0dad75e83451afe339a5914f12a5512803daa0",
   "lastmod": "2026-09-19"
  },
  "https://memradar.com/data/": {
-  "hash": "e86e216ba62f876f59e469907aa0d90caa184076cdb1b8a52362685c01f17a81",
+  "hash": "287bc13c26fc6df588137eb020734e5ddccfb77306a2201673e2e54229b1ce6c",
   "lastmod": "2026-09-19"
  }
 }
