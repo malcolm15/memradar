@@ -107,7 +107,7 @@
     <div class="content-page">
       <div class="page-header">
         <h1>Privacy Policy</h1>
-        <p class="updated">Last updated: May 17, 2026</p>
+        <p class="updated">Last updated: September 19, 2026</p>
       </div>
 
       <p>MemRadar is straightforward about data. Here's exactly what we collect, why, and what we do with it.</p>
@@ -119,7 +119,7 @@
       </ul>
 
       <h2>How we use your email</h2>
-      <p>Solely to send the price alert you requested. Once an alert triggers, your email is no longer needed for that alert. We do not send marketing emails, we do not sell your email address, and we do not share it with third parties.</p>
+      <p>Solely to send the price alert you requested. Once an alert triggers, your email is no longer needed for that alert. We do not send marketing emails, and we do not sell your email address or share it with anyone for their own use. It is handled only by the services that store it and deliver our emails to you, listed under Third-party services below.</p>
 
       <h2>Data retention</h2>
       <p>Alert email addresses are deleted after the alert is triggered or after 12 months of inactivity, whichever comes first. You can also request deletion at any time by emailing <a href="mailto:hello@memradar.com">hello@memradar.com</a>.</p>
@@ -132,6 +132,9 @@
         <li><strong>Keepa</strong>: we source Amazon price and product data from Keepa, a third-party price-data provider. Your use of MemRadar does not create any relationship between you and Amazon.</li>
         <li><strong>Rakuten Advertising</strong>: Newegg product links on MemRadar are affiliate links routed through Rakuten Advertising, Newegg's affiliate network. If you click one, Rakuten may set cookies to attribute your purchase to MemRadar. MemRadar does not run Rakuten scripts or tracking on its own pages.</li>
         <li><strong>Supabase</strong>: our database, hosted in the United States. Email addresses for alerts are stored here.</li>
+        <li><strong>Cloudflare Turnstile</strong>: loads on pages that carry the price-alert form and checks that the person submitting it is not an automated bot. Turnstile is a Cloudflare service, and it collects browser and interaction signals for that check.</li>
+        <li><strong>Resend</strong>: the service that delivers our confirmation and price-drop emails. It receives your email address in order to deliver the message, and keeps it in its own delivery logs under its own retention policy.</li>
+        <li><strong>Vercel</strong>: hosts the service behind the alert form (signing up, confirming and unsubscribing), so alert requests, including your email address, pass through it. Our own logs there record only a masked form of your address, such as ma***@gmail.com.</li>
       </ul>
 
       <h2>Cookies and analytics</h2>

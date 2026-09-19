@@ -3613,6 +3613,38 @@ function resolveLastmod(prevManifest, nextManifest, url, hash, fallbackDate) {
   nextManifest[url] = { hash, lastmod };
   return lastmod;
 }
+// "Last updated" on the privacy policy and terms, derived rather than typed
+// (both said May 17, 2026 for four months while their text changed). The
+// date tracks the POLICY TEXT, not the file: the manifest's own lastmod for
+// /privacy.html hashes the whole page, so the 2026-09-15 footer regroup would
+// have re-dated a policy untouched since August. Only <main> is hashed, and
+// contentHash already normalises the "Last updated" line out, so stamping the
+// date can never change the hash it was derived from. Stored under its own
+// manifest key, so the page's sitemap lastmod is unaffected. A new or edited
+// policy takes the build date of the first regen that sees it: run the
+// generator in the commit that edits the policy, or the daily regen dates it
+// the next morning.
+// terms.html was seeded with 2026-08-13 (its text's last real change, the
+// Newegg data-source sentence in 3eedb89f), not the date it joined this list.
+const POLICY_DATED = [
+  { file: 'privacy.html', key: 'policy:/privacy.html' },
+  { file: 'terms.html', key: 'policy:/terms.html' },
+];
+const POLICY_DATE_RE = /(<p class="updated">Last updated: )[^<]*(<\/p>)/;
+function stampPolicyDates(prevManifest, nextManifest, buildDate) {
+  for (const { file, key } of POLICY_DATED) {
+    const p = path.join(FRONTEND, file);
+    const html = fs.readFileSync(p, 'utf8');
+    const main = /<main>[\s\S]*<\/main>/.exec(html);
+    // Throws; the caller turns that into a loud skip. A policy whose date
+    // silently stops updating is the exact failure this exists to remove.
+    if (!main || !POLICY_DATE_RE.test(main[0])) throw new Error(`${file}: <main> or its "Last updated" line not found`);
+    const iso = resolveLastmod(prevManifest, nextManifest, key, contentHash(main[0]), buildDate);
+    const next = html.replace(POLICY_DATE_RE, `$1${longDate(iso)}$2`);
+    if (next !== html) fs.writeFileSync(p, next);
+    log(`Policy date: /${file} last updated ${iso}${next !== html ? ' (restamped)' : ''}`);
+  }
+}
 function staticFileFor(loc) {
   const rel = loc.replace(SITE, '') || '/';
   return path.join(FRONTEND, rel.endsWith('/') ? rel + 'index.html' : rel);
@@ -4380,6 +4412,15 @@ async function run() {
     const u = `${SITE}/${p.category}/${p.finalSlug}/`;
     return { url: u, lastmod: lastmodByUrl.get(u) || buildDate };
   });
+  // Same skip-rather-than-fail rule as the content builds: a broken date
+  // anchor must not block a day's prices. The previous entry is carried
+  // forward, or the next good run would re-seed the date to its build date.
+  try {
+    stampPolicyDates(prevManifest, manifest, buildDate);
+  } catch (e) {
+    for (const { key } of POLICY_DATED) if (prevManifest[key] && !manifest[key]) manifest[key] = prevManifest[key];
+    log(`⚠ policy "Last updated" NOT stamped: ${e.message}`);
+  }
   fs.writeFileSync(SITEMAP_PATH, buildSitemap(existingXml, productEntries, prevManifest, manifest));
   // Counted, not hardcoded: the old literal "11 static" went stale the moment
   // the guides and the price index were added, and a log line that quietly
