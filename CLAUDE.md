@@ -862,6 +862,27 @@ RSS 2.0 over the site's **editorial** content: both guides, the explainer, the P
 
 First build: 7 items. Validated locally against the RSS 2.0 requirements including the one people miss, that `image/title` and `image/link` must match the channel's.
 
+## Monthly CSV (`/data/memradar-price-index-monthly.csv`, 2026-09-19)
+
+Monthly price LEVELS per segment for anyone who wants to chart the data: `segment, month, median_price_usd, median_usd_per_gb, product_count`. Built by `buildMonthlyCsv()` in the daily regen, linked from exactly two places (`/data/` and the `/price-index/` citation block, both with `download`), excluded from the sitemap. 244 rows and ~10KB on first build.
+
+**Every design decision was measured in a read-only audit first, and three alternatives were rejected on data, not preference:**
+- **Fixed cohort (the same products throughout): impossible.** Products present in every month of the usable span: DDR5 1, DDR4 0, NVMe 2, SATA 3.
+- **Chain-linked matched index: tested and rejected.** It got closer to the Price Index on DDR5 and NVMe but drifted 26pp away on DDR4 and SATA, because with 20 to 26 matched products per link, twelve chained ratios of medians compound noise instead of cancelling it. **Do not re-propose it without a larger catalog.**
+- **So: all products tracked each month, with the count published** so a reader can apply a stricter bar than the floor.
+
+**THE FILE DISAGREES WITH THE PRICE INDEX BY DESIGN, and its header says so.** The index compares each product with itself a year ago; this file compares whichever products were tracked in each month. Measured 2026-09-18, a DDR5 year-over-year change computed from the monthly rows was +314.1% against the index's +358.3%, a 44pp gap. The header states this, dated, so it cannot drift, and it is registered as `monitorable: false`.
+
+**The notes are `#` comment lines IN the file, not a separate README, deliberately, and this does break some parsers at their defaults.** Tested in a scratch venv: **DuckDB reads it cleanly by default**; **pandas raises a loud `ParserError` by default** and reads it cleanly with `comment='#'`; Python's stdlib `csv` returns the comment lines as rows; R's `read.csv` defaults to `comment.char=""` per its documentation (not tested). Line 1 of the file gives the pandas and R arguments. The reason for accepting that cost: the warnings matter most to someone who computes a year-over-year change and quotes it against our index, and that reader opens the file in Excel or Sheets, where the `#` lines appear as visible text rows. They would never see a README. The default failure is loud, never silently wrong data.
+
+**The floor is 10 products, applied as a START rule, not a per-row filter.** Each segment begins at the first month from which it never falls below 10, which is where the audit said each series can honestly begin: DDR5 2022-06, DDR4 2019-11, NVMe 2022-08, SATA 2021-07. A per-row filter would publish a scatter of early rows with holes between them, and charting tools draw straight lines across holes as though they were data. Contiguity and the floor are both ASSERTED, and a calendar-continuity check catches a month with zero products, which has no key at all and would otherwise be walked past.
+
+**Each product contributes ONE value per month** (the median of its daily prices) before the cross-product median. The live fetch runs six times a day where the backfill kept one reading, so without this a product watched since July 2026 would outvote one tracked for a decade. **The current month is excluded entirely** rather than published as a moving row, since a partial month is a trap for anyone charting the file. The output is **ASCII only** (asserted), so it reads identically whatever charset GitHub Pages announces.
+
+**Known noise, published rather than smoothed.** Early rows at 10 or 11 products swing: DDR5's first three months read $271, $320, $239 in price while $/GB moves smoothly at 6.99, 6.73, 6.56, which is the case for carrying both columns. $/GB cancels capacity mix but not every composition change: SATA's $/GB falls 24% from June to July 2026 while its median price is flat, as four products join. The product_count column is how a reader sees that coming.
+
+**CACHING DIFFERS FROM EVERY OTHER GENERATED FILE.** Cloudflare treats `.csv` as a cacheable extension (a probe of the path returned `cf-cache-status: MISS`), where the HTML, XML and JSON files are all `DYNAMIC` and never edge-cached. So a regenerated CSV can be served stale for as long as GitHub Pages' cache header allows. For daily data that is acceptable; a Cloudflare cache rule bypassing `/data/*.csv` would remove it.
+
 ## Retailer & Affiliate Program Status
 
 Current queue (as of 2026-08-23):

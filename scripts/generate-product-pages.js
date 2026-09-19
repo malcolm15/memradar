@@ -2937,6 +2937,123 @@ ${body}
   return { xml, items };
 }
 
+// ------------------------------------------- /data/memradar-price-index-monthly.csv
+// Monthly price LEVELS per segment, for journalists and researchers who want to
+// chart the data themselves. Designed from a read-only audit (2026-09-18); the
+// decisions below are all measured, and the reasons matter more than the code.
+//
+// ALL PRODUCTS EACH MONTH, WITH THE COUNT. The alternatives were tested and
+// rejected on data, not preference. A fixed cohort tracked across the whole
+// span holds 0 to 3 products per segment, which is not a median. A chain-linked
+// matched index (each month compared only with products also present the month
+// before) got CLOSER to the Price Index on DDR5 and NVMe but drifted 26pp away
+// on DDR4 and SATA: with 20 to 26 matched products per link, twelve chained
+// ratios of medians compound noise instead of cancelling it.
+//
+// THIS FILE DISAGREES WITH THE PRICE INDEX, BY DESIGN, and says so in its own
+// header. The index compares each product with itself a year ago; this file
+// compares whichever products were tracked in each month. A change computed
+// between two rows here differed from the index's 1Y figure by 44pp on DDR5
+// when measured. Neither is wrong, but a reader quoting one against the other
+// would print two contradictory numbers from us, so the warning travels WITH
+// the data rather than in a separate README that an Excel user never sees.
+//
+// PRICE PER GB IS A COLUMN because the typical DDR4 product flips between 16GB
+// and 32GB from month to month, which moves the median price with no real
+// price change. Capacity cancels out of $/GB.
+//
+// Reuses buildDailySeries (via p.series, so the in_stock=false copies are
+// already gone), classifySegment (via p.segment, same rules as the index) and
+// totalCapacityGB. Deliberately NOT historyRows (per-product, a mean, and it
+// kept the copies) or downsampleForChart (last point per week or month beyond a
+// year, so it discards readings).
+const CSV_PATH = ['data', 'memradar-price-index-monthly.csv'];
+const CSV_MIN_PRODUCTS = 10;
+const CSV_SEGMENTS = ['ddr5', 'ddr4', 'nvme_ssd', 'sata_ssd'];
+
+function buildMonthlyCsv(products, buildDate) {
+  const thisMonth = buildDate.slice(0, 7);
+  const median = (a) => { const s = [...a].sort((x, y) => x - y), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+  // One value per product per month FIRST: the median of that product's own
+  // daily prices. The live fetch runs six times a day where the backfill kept
+  // one reading, so without this a product watched since July 2026 would
+  // outvote one tracked for a decade.
+  const cells = new Map(); // segment|month -> [{price, perGb}]
+  for (const p of products) {
+    if (!CSV_SEGMENTS.includes(p.segment) || !p.series || !p.series.length) continue;
+    const cap = totalCapacityGB(p.name);
+    const byMonth = new Map();
+    for (const pt of p.series) {
+      const m = pt.day.slice(0, 7);
+      if (m >= thisMonth) continue; // the current month is excluded until complete
+      (byMonth.get(m) || byMonth.set(m, []).get(m)).push(pt.price);
+    }
+    for (const [m, prices] of byMonth) {
+      const price = median(prices);
+      const k = `${p.segment}|${m}`;
+      (cells.get(k) || cells.set(k, []).get(k)).push({ price, perGb: cap ? price / cap : null });
+    }
+  }
+  const rows = [];
+  const starts = {};
+  for (const seg of CSV_SEGMENTS) {
+    const months = [...cells.keys()].filter((k) => k.startsWith(seg + '|')).map((k) => k.split('|')[1]).sort();
+    // Each segment begins at the first month from which it never again falls
+    // below the floor. A plain per-row floor would publish a scatter of early
+    // rows with holes between them, and a charting tool will happily draw a
+    // straight line across a two-year hole as though it were data.
+    // Walking back from the newest month. A month with NO products has no key
+    // at all, so it would be skipped rather than seen as a break; the calendar
+    // check below catches it.
+    const nextMonth = (m) => { const [y, mo] = m.split('-').map(Number); return mo === 12 ? `${y + 1}-01` : `${y}-${String(mo + 1).padStart(2, '0')}`; };
+    let start = null;
+    for (let i = months.length - 1; i >= 0; i--) {
+      const contiguous = i === months.length - 1 || nextMonth(months[i]) === months[i + 1];
+      if (contiguous && cells.get(`${seg}|${months[i]}`).length >= CSV_MIN_PRODUCTS) start = months[i]; else break;
+    }
+    if (!start) throw new Error(`monthly CSV: ${seg} has no run of months at ${CSV_MIN_PRODUCTS}+ products`);
+    starts[seg] = start;
+    for (const m of months) {
+      if (m < start) continue;
+      const c = cells.get(`${seg}|${m}`);
+      const gb = c.map((x) => x.perGb).filter((x) => x != null);
+      rows.push([seg, m, median(c.map((x) => x.price)).toFixed(2), gb.length ? median(gb).toFixed(4) : '', String(c.length)]);
+    }
+    // Every published series is contiguous and above the floor, by construction.
+    // Asserted, because a hole here is exactly the trap the start rule exists
+    // to prevent, and a silent one would be charted as a straight line.
+    const mine = rows.filter((r) => r[0] === seg);
+    for (let i = 1; i < mine.length; i++) {
+      if (nextMonth(mine[i - 1][1]) !== mine[i][1]) throw new Error(`monthly CSV: ${seg} has a hole between ${mine[i - 1][1]} and ${mine[i][1]}`);
+    }
+    if (mine.some((r) => Number(r[4]) < CSV_MIN_PRODUCTS)) throw new Error(`monthly CSV: ${seg} published a row under ${CSV_MIN_PRODUCTS} products`);
+  }
+  const header = [
+    '# MemRadar Price Index: monthly price levels by segment',
+    "# Lines starting with # are notes, not data. pandas: read_csv(url, comment='#'). R: read.csv(url, comment.char='#'). DuckDB reads the file as is. Spreadsheets show these lines as text rows above the data.",
+    '#',
+    '# WHAT THIS IS: one row per segment per month. median_price_usd is the median retail price across the products MemRadar tracked that month. median_usd_per_gb is the median of each product\'s price divided by its total capacity (a 2x16GB kit is 32GB). product_count is how many products the row is computed over.',
+    '#',
+    '# THESE ARE MONTHLY PRICE LEVELS, NOT A MEASURE OF CHANGE. A change computed between two rows of this file will NOT equal the MemRadar Price Index for the same period, and when measured in September 2026 it differed from the index by as much as 44 percentage points. The Price Index compares each product with itself; this file compares whichever products were tracked in each month. For how much prices changed over a period, cite the Price Index at memradar.com/price-index/',
+    '#',
+    '# SURVIVORSHIP: the tracked catalog was assembled in July 2026, so historical rows contain only products still sold in 2026. They describe those products, not the whole market as it stood at the time.',
+    '#',
+    `# METHOD: only real price observations are used; days a product had no offer are excluded. Each product contributes one value per month (the median of its daily prices), so products observed more often do not outweigh the rest. A segment's series begins at the first month from which it never falls below ${CSV_MIN_PRODUCTS} products; use product_count to apply a stricter bar. The current month is excluded until it is complete. Full methodology: memradar.com/methodology/`,
+    '#',
+    '# SEGMENTS: ddr5 and ddr4 are memory kits and modules; nvme_ssd and sata_ssd are solid state drives. A drive is classed as SATA first, so an M.2 SATA drive counts as sata_ssd.',
+    '#',
+    '# SOURCES: Amazon price history licensed from Keepa. These figures are medians computed by MemRadar from that history, not the raw licensed data. Newegg prices are not included: MemRadar records Newegg as a current price only and holds no Newegg history.',
+    '#',
+    `# Generated ${buildDate}. Regenerated daily.`,
+    '# Source: MemRadar Memory Price Index, memradar.com/price-index/',
+  ];
+  const csv = header.join('\n') + '\n' + 'segment,month,median_price_usd,median_usd_per_gb,product_count\n' + rows.map((r) => r.join(',')).join('\n') + '\n';
+  // ASCII only, so the file reads identically whatever charset the server
+  // announces. GitHub Pages cannot be told which one to send.
+  if (/[^\x00-\x7f]/.test(csv)) throw new Error('monthly CSV contains a non-ASCII character');
+  return { csv, rows, starts };
+}
+
 // -------------------------------------------------------------- /data/
 // The page outreach pitches link to. A journalist may lift a findings sentence
 // VERBATIM, which sets the bar: each one has to read correctly in isolation,
@@ -4111,6 +4228,20 @@ async function run() {
       log(`Data page written: /data/ (${d.findings.length} findings, ${d.findings.filter((f) => f.floorPct != null).length} floored; earliest ${d.earliest})`);
     } catch (e) {
       log(`⚠ /data/ NOT regenerated: ${e.message}`);
+    }
+  }
+
+  // 2c-quater) The monthly CSV. Written beside /data/, which links it.
+  // Independently skippable: a failure leaves yesterday's file in place, and
+  // yesterday's file is still a correct description of every complete month.
+  if (!IS_SAMPLE) {
+    try {
+      const m = buildMonthlyCsv(generable, buildDate);
+      fs.mkdirSync(path.join(FRONTEND, CSV_PATH[0]), { recursive: true });
+      fs.writeFileSync(path.join(FRONTEND, ...CSV_PATH), m.csv);
+      log(`Monthly CSV written: /${CSV_PATH.join('/')} (${m.rows.length} rows, ${Buffer.byteLength(m.csv)} bytes; starts ${Object.entries(m.starts).map(([k, v]) => `${k} ${v}`).join(', ')})`);
+    } catch (e) {
+      log(`⚠ /${CSV_PATH.join('/')} NOT regenerated: ${e.message}`);
     }
   }
 

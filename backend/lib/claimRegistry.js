@@ -289,6 +289,13 @@ const CLAIM_REGISTRY = [
     reason: 'no market_stats figure can falsify it. The price SOURCE (Keepa AMAZON series vs NEW marketplace series) is not stored anywhere in our database; only the resulting price is. Recomputing it costs one Keepa token per product (235) and needs a live stats call, so it cannot ride a stats run. RECOMPUTE WITH: node scripts/output/marketplace-share.js. Measured 2026-09-08: 165 of 225 priced products, 73.3%, and 165 of all 235 tracked, 70.2%, so the claim holds on either denominator with roughly 4pp and 7pp of headroom. The author\'s draft said "roughly two thirds", which understated the measured value; it was reworded UP to a magnitude that is both true and robust rather than pinned to a number that would need a Keepa call to re-verify.',
   },
   {
+    id: 'csv-header-44pp-divergence',
+    page: '/data/memradar-price-index-monthly.csv',
+    sentence: 'A change computed between two rows of this file will NOT equal the MemRadar Price Index for the same period, and when measured in September 2026 it differed from the index by as much as 44 percentage points.',
+    monitorable: false,
+    reason: 'historical and dated. Measured 2026-09-18: DDR5 September 2025 to September 2026 from the monthly medians was +314.1% against the index 1Y of +358.3%. The sentence is pinned to that measurement ("when measured in September 2026") precisely so it cannot drift: a later, larger or smaller divergence does not falsify a dated past observation. It compares two MemRadar computations with each other, so no market_stats figure could floor it anyway. The warning it carries is structural, not numerical: the file and the index use different product sets and will always disagree.',
+  },
+  {
     id: 'explainer-atl-multiple-counts',
     page: '/blog/why-ram-prices-are-so-high/',
     sentence: 'N of the M products MemRadar tracks are priced at least one and a half times their all-time low, and K are at more than triple it',
