@@ -19,6 +19,23 @@ MemRadar tracks Amazon prices on RAM and SSDs via the Keepa API (licensed price-
 | Data source | Keepa API — Amazon price history (launch). Best Buy client dormant (never approved) |
 | Cron | GitHub Actions — **every 4 hours**: 00/04/08/12/16/20 UTC (`.github/workflows/price-fetch.yml`) |
 
+## Data licensing (Keepa) — READ THIS BEFORE EXTENDING ANY PUBLIC DATA FILE
+
+**The price history on this site is licensed, not ours to republish freely.** The governing clause is **Keepa API terms Section 18(7)**, which otherwise prohibits making retrieved data available to third parties or using it as an input to a product or service we supply. Everything we publish that touches price history exists under one of the two written consents below. **The clause text and both emails are recorded here as reported by Malcolm; they are not in the repo, and the terms themselves sit behind Keepa's JS app where this session could not fetch them.** The mailbox is `info@keepa.com`.
+
+**CONSENT 1, July 2026 (info@keepa.com): the site's own use.** Confirmed scope: *retrieving price history and displaying charts and statistics on memradar.com*. This is what every PDP chart, the price-history table, the milestones, the guides and the Price Index run on.
+
+**CONSENT 2, 2026-09-20, Marius (info@keepa.com): the extension file.** Approved scope, **verbatim**:
+
+> providing a public downsampled JSON file (one data point per month) for use with your extension
+
+**THE BOUNDARY, STATED SO IT CANNOT BE ASSUMED WIDER THAN IT IS:**
+- **Monthly points only.** One data point per month is the granularity that was approved. **Weekly or daily points in a public file are NOT covered** — the PDPs' full daily series is covered by consent 1 because it is displayed on memradar.com, not handed over as a file.
+- **For the extension.** Consent 2 names the extension as the consumer. A general public API, a bulk download, a partner feed, or a second client is **not** covered.
+- **Anything else requires asking again**, and the answer gets a new entry here with its date, who replied, and the scope quoted verbatim. Do not extend `/data/raycast-v1-*.json` with finer history, and do not add a new consumer, on the strength of these two emails.
+
+**Why the CSV and the chart images are a different case:** both publish MemRadar-computed **aggregate medians across products**, and each says so in its own header or source line ("These figures are medians computed by MemRadar from that history, not the raw licensed data"). The per-product monthly JSON is the first file that hands over per-product history, which is exactly why consent 2 was sought before building it.
+
 ## Directory Structure
 
 ```
@@ -909,7 +926,7 @@ Five PNGs for journalists to drop into articles, drawn from the monthly CSV's ro
 
 ## Raycast JSON (`/data/raycast-v1-*.json`, 2026-09-21)
 
-Two static files a Raycast extension (or any client) can consume, written by the daily regen beside the CSV and the charts, linked from `/data/`, excluded from the sitemap by construction. **Built before any extension code exists**, so the data contract is settled first and the artifact stands on its own if the extension never ships.
+Two static files for the Raycast extension, written by the daily regen beside the CSV and the charts, excluded from the sitemap by construction. **THE PER-PRODUCT FILE IS DELIBERATELY NOT LINKED FROM `/data/` OR ANYWHERE ELSE**: Keepa's consent covers a monthly file for the extension, and publishing it as a general download would widen distribution past what was approved (see **Data licensing**, which must be read before changing granularity or adding a consumer). Only the market file is linked, beside the CSV. **Built before any extension code exists**, so the data contract is settled first and the artifact stands on its own if the extension never ships.
 
 **STATIC FILES, NOT THE ANON SUPABASE KEY, and the reason is installed clients.** The publishable key is already public in the site's JS and RLS-restricted to reads, so shipping it exposes nothing new. What it WOULD do is pin every installed copy of an extension to our table schema: a renamed column breaks users who never update, and you cannot push them a fix. A generated file is a contract we control. Measured in the audit: full daily history for the catalogue is ~0.9MB, monthly is ~170KB, which is why history is monthly. (RamRadar's Raycast extension reached the same conclusion independently: it calls one purpose-built endpoint at `ramradar.app/api/market-trends`, six months of daily DDR4/DDR5 averages, no database.)
 
@@ -921,7 +938,9 @@ Two static files a Raycast extension (or any client) can consume, written by the
 
 **THE PER-PERIOD CURRENT MEDIAN IS DELIBERATELY NOT PUBLISHED.** Each window computes over its own matched subset, so one segment legitimately shows a different "current" median at 1m and 1y (DDR4 on 2026-09-21: $157.26 vs $139.99). The site shows `pct_change` alone for exactly this reason, and a public file that invites "so which is the real price?" is worse than one that never raises it. Segment level is `median_usd_per_gb`, which has a single definition. The shared `market_stats` select does not even fetch `current_avg_price`; that is not an oversight to fix here.
 
-**Sizes on first build: market 2.2KB, products 270.8KB** (53KB gzipped as served), 231 indexable products, monthly history median 30 points and max 129. **The 300KB budget is asserted in the log**: past it, downsample further rather than ship a slow fetch.
+**Both carry a Keepa attribution string** naming the source, the monthly granularity and the written permission it rests on. **History being exactly one point per month is ASSERTED, not assumed** (a non-monthly key or two points in one month throws), because the granularity is the licensing boundary rather than a size choice: verified 8,217 points across 231 products, 131 distinct months, 2015-11 to 2026-09, zero violations. **Segment level is published once per segment, never per period** (`median_price_usd` and `median_usd_per_gb`, both medians over the segment's tracked products): `market_stats` computes a different "current" median per window, so four of them in one file would invite "which is the real price?".
+
+**Sizes: market 2.7KB, products 271KB** (53KB gzipped as served), 231 indexable products, monthly history median 30 points and max 129. **The 300KB budget is asserted in the log**: past it, downsample further rather than ship a slow fetch.
 
 ## IndexNow (Bing, 2026-09-20)
 

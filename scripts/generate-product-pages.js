@@ -3670,8 +3670,14 @@ const RAYCAST_MARKET_PATH = ['data', 'raycast-v1-market.json'];
 const RAYCAST_PRODUCTS_PATH = ['data', 'raycast-v1-products.json'];
 const RAYCAST_NOTICE = 'Regenerated once a day. memradar.com refreshes prices six times a day, so these figures can be up to 24 hours behind the site. This is not a live feed.';
 const SEGMENT_LABELS = { ddr5: 'DDR5 memory', ddr4: 'DDR4 memory', nvme_ssd: 'NVMe SSDs', sata_ssd: 'SATA SSDs' };
+// LICENSING: the per-product monthly history in the products file exists under
+// Keepa's written consent of 2026-09-20, which approved "a public downsampled
+// JSON file (one data point per month) for use with your extension" and
+// nothing wider. Read the Data licensing section in CLAUDE.md before changing
+// the granularity, adding a consumer, or linking the products file anywhere.
+const KEEPA_ATTRIBUTION = 'Price history is sourced from Keepa (keepa.com) under licence and published here at one point per month with Keepa\'s written permission. Figures computed by MemRadar from that history. Credit MemRadar and Keepa if you republish.';
 
-function buildRaycastMarket(msRows, segPerGb, buildDate) {
+function buildRaycastMarket(msRows, segPerGb, segPrice, buildDate) {
   const computedAt = msRows.map((r) => r.computed_at).sort().pop();
   const segments = [];
   for (const seg of CSV_SEGMENTS) {
@@ -3679,6 +3685,12 @@ function buildRaycastMarket(msRows, segPerGb, buildDate) {
     if (!rows.length) continue;
     const entry = { segment: seg, label: SEGMENT_LABELS[seg], periods: {} };
     // Omitted rather than nulled when a segment has no capacity-parseable products.
+    // ONE definition each, computed across the segment's tracked products from
+    // current prices. NOT the per-period "current median" in market_stats:
+    // each window computes over its own matched subset, so that figure
+    // legitimately differs between 1m and 1y (DDR4, 2026-09-21: $157.26 vs
+    // $139.99) and publishing four of them invites "which is the real price?".
+    if (segPrice[seg] != null) entry.median_price_usd = round2(segPrice[seg]);
     if (segPerGb[seg] != null) entry.median_usd_per_gb = round2(segPerGb[seg]);
     for (const period of ['1m', '3m', '6m', '1y']) {
       const r = rows.find((x) => x.period === period);
@@ -3702,7 +3714,8 @@ function buildRaycastMarket(msRows, segPerGb, buildDate) {
     computed_at: computedAt,
     update_frequency: 'daily',
     notice: RAYCAST_NOTICE,
-    method: 'Every figure is a median, never a mean: a single expensive kit would drag an average. Each period compares the same products with themselves across that window, so product_count is the size of that matched set and the periods are not directly comparable with each other. median_usd_per_gb is the median across every tracked product in the segment whose capacity we can parse, from current prices.',
+    method: 'Every figure is a median, never a mean: a single expensive kit would drag an average. pct_change compares the same products with themselves across that window, so product_count is the size of that matched set and the periods are not directly comparable with each other. median_price_usd is the median current price across every tracked product in the segment; median_usd_per_gb is the same median over those whose capacity we can parse. Neither is a per-period figure.',
+    attribution: KEEPA_ATTRIBUTION,
     source: `${SITE}/price-index/`,
     methodology: `${SITE}/methodology/`,
     segments,
@@ -3737,11 +3750,20 @@ function buildRaycastProducts(indexable, buildDate) {
     if (byMonth.size) e.history_monthly = [...byMonth].map(([m, v]) => [m, v]);
     return e;
   });
+  // EXACTLY ONE POINT PER MONTH, asserted rather than assumed: the granularity
+  // is the licensing boundary (CLAUDE.md, Data licensing), not a size choice.
+  for (const e of products) {
+    if (!e.history_monthly) continue;
+    const months = e.history_monthly.map(([m]) => m);
+    if (months.some((m) => !/^\d{4}-\d{2}$/.test(m))) throw new Error(`raycast products: ${e.sku} has a non-monthly history key`);
+    if (new Set(months).size !== months.length) throw new Error(`raycast products: ${e.sku} has more than one point in a month`);
+  }
   return {
     version: 1,
     generated: buildDate,
     update_frequency: 'daily',
     notice: RAYCAST_NOTICE,
+    attribution: KEEPA_ATTRIBUTION,
     fields: 'price_usd is the last recorded price. buy_state is good, typical or elevated, comparing price_usd against avg_90d_usd. history_monthly is [month, price], one point per month, the last recorded price in that month. A field whose value is unknown is omitted rather than sent as null.',
     source: SITE,
     methodology: `${SITE}/methodology/`,
@@ -3970,6 +3992,14 @@ async function run() {
       .filter((p) => p.segment === seg && p.stats && totalCapacityGB(p.name))
       .map((p) => p.stats.current / totalCapacityGB(p.name));
     segPerGb[seg] = vals.length ? median(vals) : null;
+  }
+
+  // Segment median CURRENT PRICE, same cohort rule minus the capacity parse:
+  // one definition, used by the Raycast market file.
+  const segPrice = {};
+  for (const seg of ['ddr5', 'ddr4', 'nvme_ssd', 'sata_ssd']) {
+    const vals = products.filter((p) => p.segment === seg && p.stats).map((p) => p.stats.current);
+    segPrice[seg] = vals.length ? median(vals) : null;
   }
 
   // Slugs: stored wins (covenant); compute for the rest; dedupe per category.
@@ -4649,7 +4679,7 @@ async function run() {
     try {
       if (!msErr && msRows && msRows.length) {
         const f = path.join(FRONTEND, ...RAYCAST_MARKET_PATH);
-        fs.writeFileSync(f, JSON.stringify(buildRaycastMarket(msRows, segPerGb, buildDate), null, 1) + '\n');
+        fs.writeFileSync(f, JSON.stringify(buildRaycastMarket(msRows, segPerGb, segPrice, buildDate), null, 1) + '\n');
         log(`Raycast market JSON written: /${RAYCAST_MARKET_PATH.join('/')} (${kb(f)}KB)`);
       } else {
         log('⚠ /data/raycast-v1-market.json NOT regenerated: no market_stats rows');
