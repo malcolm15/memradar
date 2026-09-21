@@ -21,6 +21,17 @@ MemRadar tracks retail prices for 235 RAM and SSD products and keeps the history
 - Product pages with under 30 days of tracked history carry noindex and are excluded from the sitemap; they hold too little history to be worth citing.
 - Amazon and Newegg links are affiliate links. Price history is Amazon data licensed from Keepa. Newegg data comes from Rakuten Advertising.
 
+## Data for developers
+
+Two files are public and free to use with attribution:
+
+- /data/raycast-v1-market.json - median price and median price per gigabyte for each segment (DDR5, DDR4, NVMe, SATA), with the change over one month, three months, six months and a year and the number of products each was measured across. Regenerated daily and carries the date it was computed. The version sits in the path, so this file keeps its shape and any change ships as a new version beside it.
+- /data/memradar-price-index-monthly.csv - monthly price levels per segment, back to November 2019 on the longest series, with the product count behind every row. Regenerated daily. Read the # comment lines at the top of the file before computing any change from it, because a change computed between two rows is not the same measure as the Price Index.
+
+Attribution to MemRadar is required when you use either file: Source: MemRadar Memory Price Index, memradar.com/price-index/
+
+Per-product price history is not available for third-party use. The history behind these figures is licensed from Keepa, and only these aggregate files are published for reuse.
+
 ## Citation
 
 Source: MemRadar Memory Price Index, memradar.com/price-index/
