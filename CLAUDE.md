@@ -948,6 +948,8 @@ Two static files for the Raycast extension, written by the daily regen beside th
 
 **VERSIONED IN THE PATH.** A shape change ships as `raycast-v2-*.json` with v1 left in place; installed clients cannot be migrated.
 
+**`name` IS THE PDP's OWN h1 (`_titleName`), NEVER the raw Amazon title.** R1 demoted the merchant's listing title out of the site's headings as the visible signature of the thin-affiliate pattern, and the P1 pass deleted it from the pages entirely; shipping it in a public file would have put that copy back on our name for the product. Reading the same field the page renders means the two cannot drift, and it carries the hand-curated title overrides and sibling disambiguation with it. Measured after the change: 231 names, longest 56 characters, median 38, zero duplicates, and every product that has a `brand` has a name starting with it.
+
 **NO FIELD IS DECLARED AND NULL.** An unknown value means the key is OMITTED (51 products carry no brand, 1 no 90-day average, 1 no buy state), so a present key is always a real number. This is a direct lesson from the competitor endpoint, which declares `medianPricePerGb` and serves null.
 
 **NEVER PRESENTED AS LIVE.** The site hydrates 6x a day and these are written once, so both payloads carry `generated`, `update_frequency: daily`, and a `notice` saying plainly they can be 24h behind. The market file also carries `computed_at` from `market_stats`, which is a different date from the build date.

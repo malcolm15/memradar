@@ -3729,7 +3729,14 @@ function buildRaycastProducts(indexable, buildDate) {
     const s = p.stats;
     const e = {
       sku: p.sku,
-      name: p.name,
+      // The PDP's own h1 (`_titleName`), NOT `p.name`, which is the raw Amazon
+      // listing title. R1 demoted that title out of the site's headings as the
+      // visible signature of the thin-affiliate pattern, and the P1 pass deleted
+      // it from the pages entirely; shipping it in a public file would put the
+      // merchant's marketing copy back on our name for the product. Same field
+      // the page renders, so the two cannot drift, and it carries the
+      // hand-curated title overrides and sibling disambiguation with it.
+      name: p._titleName,
       slug: p.finalSlug,
       category: p.category,
       url: `${SITE}/${p.category}/${p.finalSlug}/`,
