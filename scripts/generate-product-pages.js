@@ -3675,7 +3675,15 @@ const SEGMENT_LABELS = { ddr5: 'DDR5 memory', ddr4: 'DDR4 memory', nvme_ssd: 'NV
 // JSON file (one data point per month) for use with your extension" and
 // nothing wider. Read the Data licensing section in CLAUDE.md before changing
 // the granularity, adding a consumer, or linking the products file anywhere.
-const KEEPA_ATTRIBUTION = 'Price history is sourced from Keepa (keepa.com) under licence and published here at one point per month with Keepa\'s written permission. Figures computed by MemRadar from that history. Credit MemRadar and Keepa if you republish.';
+// TWO WORDINGS, AND THE DIFFERENCE IS THE LICENCE, NOT STYLE.
+// The market file carries OUR aggregate medians across products, so inviting
+// republication with credit is ours to invite. The products file carries
+// per-product history derived from licensed data, where consent covers monthly
+// points for use with the extension and NOT onward republication; an invitation
+// to republish there would read as granting a sublicence, which Section 18(7)(c)
+// prohibits. Do not merge these two strings.
+const KEEPA_ATTRIBUTION_AGGREGATE = 'Price history is sourced from Keepa (keepa.com) under licence. These figures are medians computed by MemRadar from that history, not the raw licensed data. Credit MemRadar and Keepa if you republish.';
+const KEEPA_ATTRIBUTION_PER_PRODUCT = 'Price history is sourced from Keepa (keepa.com) under licence and published here at one point per month with Keepa\'s written permission. Figures computed by MemRadar from that history. This file is provided for use with the MemRadar Raycast extension; it does not carry a right to redistribute the price history.';
 
 function buildRaycastMarket(msRows, segPerGb, segPrice, buildDate) {
   const computedAt = msRows.map((r) => r.computed_at).sort().pop();
@@ -3715,7 +3723,7 @@ function buildRaycastMarket(msRows, segPerGb, segPrice, buildDate) {
     update_frequency: 'daily',
     notice: RAYCAST_NOTICE,
     method: 'Every figure is a median, never a mean: a single expensive kit would drag an average. pct_change compares the same products with themselves across that window, so product_count is the size of that matched set and the periods are not directly comparable with each other. median_price_usd is the median current price across every tracked product in the segment; median_usd_per_gb is the same median over those whose capacity we can parse. Neither is a per-period figure.',
-    attribution: KEEPA_ATTRIBUTION,
+    attribution: KEEPA_ATTRIBUTION_AGGREGATE,
     source: `${SITE}/price-index/`,
     methodology: `${SITE}/methodology/`,
     segments,
@@ -3770,7 +3778,7 @@ function buildRaycastProducts(indexable, buildDate) {
     generated: buildDate,
     update_frequency: 'daily',
     notice: RAYCAST_NOTICE,
-    attribution: KEEPA_ATTRIBUTION,
+    attribution: KEEPA_ATTRIBUTION_PER_PRODUCT,
     fields: 'price_usd is the last recorded price. buy_state is good, typical or elevated, comparing price_usd against avg_90d_usd. history_monthly is [month, price], one point per month, the last recorded price in that month. A field whose value is unknown is omitted rather than sent as null.',
     source: SITE,
     methodology: `${SITE}/methodology/`,

@@ -5,7 +5,7 @@
  "update_frequency": "daily",
  "notice": "Regenerated once a day. memradar.com refreshes prices six times a day, so these figures can be up to 24 hours behind the site. This is not a live feed.",
  "method": "Every figure is a median, never a mean: a single expensive kit would drag an average. pct_change compares the same products with themselves across that window, so product_count is the size of that matched set and the periods are not directly comparable with each other. median_price_usd is the median current price across every tracked product in the segment; median_usd_per_gb is the same median over those whose capacity we can parse. Neither is a per-period figure.",
- "attribution": "Price history is sourced from Keepa (keepa.com) under licence and published here at one point per month with Keepa's written permission. Figures computed by MemRadar from that history. Credit MemRadar and Keepa if you republish.",
+ "attribution": "Price history is sourced from Keepa (keepa.com) under licence. These figures are medians computed by MemRadar from that history, not the raw licensed data. Credit MemRadar and Keepa if you republish.",
  "source": "https://memradar.com/price-index/",
  "methodology": "https://memradar.com/methodology/",
  "segments": [
