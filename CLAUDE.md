@@ -36,6 +36,18 @@ MemRadar tracks Amazon prices on RAM and SSDs via the Keepa API (licensed price-
 
 **Why the CSV and the chart images are a different case:** both publish MemRadar-computed **aggregate medians across products**, and each says so in its own header or source line ("These figures are medians computed by MemRadar from that history, not the raw licensed data"). The per-product monthly JSON is the first file that hands over per-product history, which is exactly why consent 2 was sought before building it.
 
+## Cloudflare Cache Rule: "Raycast data files" (2026-09-21) — LIVES IN THE DASHBOARD, NOT THE REPO
+
+**Match:** URI Path wildcard `/data/raycast-v1-*.json` · **Action:** Eligible for cache · **Edge TTL:** 4 hours, ignoring the origin's `cache-control`.
+
+**Why it exists:** Cloudflare's default cacheable-extension list covers `.csv` and `.png` but NOT `.json`, and that is decided by EXTENSION, not directory, so `/data/raycast-v1-*.json` was `DYNAMIC` and hitting GitHub Pages on every request while the CSV and the chart PNGs beside it were edge-cached. Nothing in the repo could change that: Pages sets the header (`max-age=600`) and Cloudflare decides eligibility.
+
+**Verified after the rule landed (2026-09-21):** both files return `cache-control: max-age=14400` with `cf-cache-status: MISS` then `HIT` on a second request. Scope checked at the same time and unchanged: `/data/` , `/search-index.json` and a PDP all still `DYNAMIC`; the CSV still cached on its own default.
+
+**The 4-hour TTL means a regenerated file can serve the PREVIOUS DAY'S version for up to 4 hours after the 09:00 UTC regen.** That is acceptable and deliberate: the data is daily, both payloads carry their own `generated` date, and both say in `notice` that they can be up to 24h behind the site. A consumer reading the date sees exactly what it has. If that ever stops being acceptable, purge the two paths after the regen rather than shortening the TTL, because the TTL is what keeps origin load off Pages.
+
+**THE RULE IS NOT IN THIS REPO.** It is Cloudflare dashboard state, so nothing here enforces it and no commit will update it. **Renaming or moving these files (for example shipping `raycast-v2-*.json` under a different path) requires editing the rule in the dashboard in the same change**, or the new paths silently fall back to `DYNAMIC` with no error anywhere. Same class of hazard as the supervisor's config array: the workflow ships through git and the watcher does not.
+
 ## Directory Structure
 
 ```
