@@ -30,8 +30,8 @@
      "product_count": 60
     }
    },
-   "median_price_usd": 539.99,
-   "median_usd_per_gb": 17.47
+   "median_price_usd": 554.99,
+   "median_usd_per_gb": 17.5
   },
   {
    "segment": "ddr4",
@@ -102,7 +102,7 @@
      "product_count": 27
     }
    },
-   "median_price_usd": 232.48,
+   "median_price_usd": 229.99,
    "median_usd_per_gb": 0.17
   }
  ]
