@@ -23,6 +23,14 @@ const HOST = 'memradar.com';
 const FRONTEND = path.join(__dirname, '..', 'frontend');
 const URLS_PATH = path.join(__dirname, 'output', 'indexnow-urls.json');
 const MAX_URLS = 10000; // protocol limit per request
+// Drift alarm. The 2026-09-20 audit measured the material set at 30-60 URLs a
+// day (price moves, all-time low/high changes, buy-state flips) against ~235
+// from the manifest hash diff. 100 is set above a volatile day rather than at
+// the top of that range, so it cannot cry wolf when memory prices lurch; what
+// it catches is the systematic case, where a change to generation quietly
+// widens materiality back toward "everything changed". Tripping it is a
+// prompt to re-measure, not an error: the submission still goes out.
+const DRIFT_ALARM = 100;
 const KEY_RE = /^[a-f0-9]{32}\.txt$/;
 
 function out(o) { console.log('INDEXNOW ' + JSON.stringify(o)); }
@@ -52,6 +60,12 @@ function findKey() {
   if (k.error) { out({ submitted: 0, status: null, skipped: k.error }); return; }
 
   const urlList = items.map((i) => i.url).slice(0, MAX_URLS);
+  const drift = urlList.length > DRIFT_ALARM;
+  if (drift) {
+    console.log(`*** INDEXNOW DRIFT: ${urlList.length} URLs in one run, above the ${DRIFT_ALARM} alarm line.`);
+    console.log('*** The 2026-09-20 audit measured 30-60 material URLs/day; ~235/day is the hash diff this rule exists to avoid.');
+    console.log('*** Re-measure indexNowMaterial() in scripts/generate-product-pages.js before this earns a 429.');
+  }
   if (items.length > MAX_URLS) console.log(`INDEXNOW truncated ${items.length} to ${MAX_URLS} (protocol limit)`);
   const payload = { host: HOST, key: k.key, keyLocation: k.keyLocation, urlList };
 
@@ -59,7 +73,7 @@ function findKey() {
     console.log(`DRY RUN (pass --confirm to submit). Would POST ${urlList.length} URLs to ${ENDPOINT}`);
     items.slice(0, 20).forEach((i) => console.log(`   ${i.url} (${i.reasons.join('; ')})`));
     if (items.length > 20) console.log(`   ... and ${items.length - 20} more`);
-    out({ submitted: 0, status: null, skipped: 'dry run', would_submit: urlList.length });
+    out({ submitted: 0, status: null, skipped: 'dry run', would_submit: urlList.length, drift });
     return;
   }
 
@@ -77,9 +91,9 @@ function findKey() {
     } else if (res.status >= 400) {
       console.log(`*** INDEXNOW ${res.status}: submission rejected. 403 = key file not reachable or mismatched, 422 = URL not on ${HOST}.`);
     }
-    out({ submitted: urlList.length, status: res.status, skipped: null });
+    out({ submitted: urlList.length, status: res.status, skipped: null, drift });
   } catch (e) {
     // Network failure is not a regen failure.
-    out({ submitted: 0, status: null, skipped: `request failed: ${e.message}` });
+    out({ submitted: 0, status: null, skipped: `request failed: ${e.message}`, drift });
   }
 })();
