@@ -3645,6 +3645,68 @@ function stampPolicyDates(prevManifest, nextManifest, buildDate) {
     log(`Policy date: /${file} last updated ${iso}${next !== html ? ' (restamped)' : ''}`);
   }
 }
+// ---------------------------------------------------------- IndexNow
+// WHAT CHANGED MATERIALLY, computed here rather than inferred afterwards.
+// The manifest's hash diff says ~235 pages changed every day, but measured
+// over 2026-09-14..20 only ~32/day moved a price: the rest differ because the
+// 90-day average is a ROLLING window and the chart downsampler re-buckets
+// history as the day boundary moves. Submitting all 235 daily is exactly what
+// IndexNow's 429 "potential Spam" exists for, so only these count as material:
+// the page's own price changed, its all-time low or high changed, or its
+// buy-indicator state flipped. Static pages qualify when new, or when their
+// text changes with the per-build date stamps normalised out.
+//
+// STATE IS "LAST GENERATED", NOT "LAST SUBMITTED". A failed submission is not
+// retried tomorrow; the URL simply waits for an ordinary crawl. Retrying would
+// mean writing state from the submitting step, which is the step allowed to
+// fail, and a submission queue is a worse thing to own than a missed ping.
+const INDEXNOW_STATE_PATH = path.join(__dirname, 'indexnow-state.json');
+const INDEXNOW_URLS_PATH = path.join(__dirname, 'output', 'indexnow-urls.json');
+function materialHash(html) {
+  return contentHash(html
+    .replace(/Page last regenerated: [^<.]*/g, 'Page last regenerated: ')
+    .replace(/computed [A-Z][a-z]+ \d{1,2}, \d{4}/g, 'computed ')
+    .replace(/"dateModified": "[^"]*"/g, '"dateModified": ""'));
+}
+// productState: Map<url, {price, atl, ath, buy}>. Returns the material URLs
+// FILTERED TO THE SITEMAP: a noindex page, the relisting duplicate and the
+// policy-date keys are all in the manifest, and asking Bing to crawl a URL we
+// tell it not to index is incoherent.
+function indexNowMaterial(prevState, productState, sitemapXml) {
+  const inSitemap = new Set([...sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]));
+  const nextState = {};
+  // NO STATE = SEED, NEVER SUBMIT EVERYTHING. An absent or emptied state file
+  // would otherwise make every URL "new" and fire the whole sitemap at
+  // IndexNow in one request, which is the 429 case this design exists to
+  // avoid. Seed silently and let tomorrow's run report real changes.
+  const seeding = Object.keys(prevState).length === 0;
+  const items = [];
+  const money = (v) => (v == null ? 'none' : `$${Number(v).toFixed(2)}`);
+  for (const [url, s] of productState) {
+    nextState[url] = s;
+    if (!inSitemap.has(url)) continue;
+    const was = prevState[url];
+    const reasons = [];
+    if (!was) reasons.push('new page');
+    else {
+      if (was.price !== s.price) reasons.push(`price ${money(was.price)} to ${money(s.price)}`);
+      if (was.atl !== s.atl) reasons.push(`all-time low ${money(was.atl)} to ${money(s.atl)}`);
+      if (was.ath !== s.ath) reasons.push(`all-time high ${money(was.ath)} to ${money(s.ath)}`);
+      if (was.buy !== s.buy) reasons.push(`buy state ${was.buy || 'none'} to ${s.buy || 'none'}`);
+    }
+    if (reasons.length) items.push({ url, reasons });
+  }
+  for (const loc of inSitemap) {
+    if (productState.has(loc)) continue;
+    let hash;
+    try { hash = materialHash(fs.readFileSync(staticFileFor(loc), 'utf8')); } catch (e) { continue; }
+    nextState[loc] = { hash };
+    const was = prevState[loc];
+    if (!was) items.push({ url: loc, reasons: ['new page'] });
+    else if (was.hash !== hash) items.push({ url: loc, reasons: ['page text changed'] });
+  }
+  return { items: seeding ? [] : items, nextState, seeding };
+}
 function staticFileFor(loc) {
   const rel = loc.replace(SITE, '') || '/';
   return path.join(FRONTEND, rel.endsWith('/') ? rel + 'index.html' : rel);
@@ -4097,6 +4159,7 @@ async function run() {
   const prevManifest = loadLastmodManifest();
   const manifest = {};
   const lastmodByUrl = new Map();
+  const materialState = new Map();
   for (const p of generable) {
     if (IS_SAMPLE && !SAMPLE_SLUGS.includes(p.finalSlug)) continue;
     try {
@@ -4130,6 +4193,12 @@ async function run() {
       fs.mkdirSync(dir, { recursive: true });
       fs.writeFileSync(path.join(dir, 'index.html'), html);
       lastmodByUrl.set(url, resolveLastmod(prevManifest, manifest, url, contentHash(html), buildDate));
+      materialState.set(url, {
+        price: p.stats.current,
+        atl: p.stats.atl ? p.stats.atl.price : null,
+        ath: p.stats.ath ? p.stats.ath.price : null,
+        buy: buyState(p.stats.current, p.stats.avg90),
+      });
       written++;
     } catch (err) {
       failures.push({ sku: p.sku, error: err.message });
@@ -4427,6 +4496,28 @@ async function run() {
   // lies is how you stop trusting the log.
   const staticCount = (fs.readFileSync(SITEMAP_PATH, 'utf8').match(/<loc>/g) || []).length - productEntries.length;
   fs.writeFileSync(LASTMOD_MANIFEST_PATH, JSON.stringify(manifest, null, 1) + '\n');
+
+  // IndexNow material list. Written AFTER the sitemap, because the sitemap is
+  // the filter. The URL list goes to gitignored scripts/output/ (it is a
+  // per-run artifact for the submitting step, not site content); the state
+  // file is committed, or every run would rediscover the same changes.
+  if (!IS_SAMPLE) {
+    try {
+      const prevState = (() => { try { return JSON.parse(fs.readFileSync(INDEXNOW_STATE_PATH, 'utf8')); } catch (e) { return {}; } })();
+      const { items, nextState, seeding } = indexNowMaterial(prevState, materialState, fs.readFileSync(SITEMAP_PATH, 'utf8'));
+      if (seeding) log('IndexNow: no prior state, BASELINE SEEDED; nothing will be submitted this run');
+      fs.writeFileSync(INDEXNOW_STATE_PATH, JSON.stringify(nextState, null, 1) + '\n');
+      fs.mkdirSync(path.dirname(INDEXNOW_URLS_PATH), { recursive: true });
+      fs.writeFileSync(INDEXNOW_URLS_PATH, JSON.stringify(items, null, 1) + '\n');
+      const byReason = {};
+      for (const it of items) for (const r of it.reasons) { const k = r.split(' $')[0].replace(/ [A-Za-z-]+ to .*/, ''); byReason[k] = (byReason[k] || 0) + 1; }
+      log(`IndexNow: ${items.length} material URLs of ${Object.keys(nextState).length} tracked (${Object.entries(byReason).map(([k, v]) => `${k}=${v}`).join(', ') || 'none'})`);
+      items.slice(0, 12).forEach((it) => log(`   ${it.url} (${it.reasons.join('; ')})`));
+      if (items.length > 12) log(`   ... and ${items.length - 12} more`);
+    } catch (e) {
+      log(`⚠ IndexNow material list NOT written: ${e.message}`);
+    }
+  }
   log(`Sitemap regenerated: ${staticCount} static + ${productEntries.length} indexable product URLs (${nonIndexable.length} noindex + ${relistings.length} relisting excluded) (lastmod manifest: ${Object.keys(manifest).length} entries)`);
 
   // 5) Search index — one lean entry per product for the site-wide typeahead

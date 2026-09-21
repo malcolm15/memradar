@@ -126,7 +126,7 @@ jobs:
           # (hash diff vs HEAD), NOT from `git status`, which would also count
           # files dirty only because the shared ?v= stamp moved - exactly the
           # churn contentHash normalises away.
-          CHANGED=$(git status --porcelain frontend/ scripts/lastmod-manifest.json | wc -l | tr -d ' ')
+          CHANGED=$(git status --porcelain frontend/ scripts/lastmod-manifest.json scripts/indexnow-state.json | wc -l | tr -d ' ')
           PAGES=$(node scripts/count-content-changes.js)
           if [ "$CHANGED" = "0" ]; then
             echo "committed=false" >> "$GITHUB_OUTPUT"
@@ -135,7 +135,7 @@ jobs:
           else
             git config user.name "MemRadar"
             git config user.email "malcolmkonner@gmail.com"
-            git add -A frontend/ scripts/lastmod-manifest.json
+            git add -A frontend/ scripts/lastmod-manifest.json scripts/indexnow-state.json
             git commit -q -m "chore: daily page regeneration ($PAGES pages with content changes)"
             git push -q
             echo "committed=true" >> "$GITHUB_OUTPUT"
@@ -144,6 +144,7 @@ jobs:
           fi
 
       - name: Trigger the Pages deploy
+        id: deploy
         if: steps.commit.outputs.committed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -157,7 +158,60 @@ jobs:
           # GITHUB_TOKEN CAN trigger.
           gh workflow run deploy-frontend.yml -R "${{ github.repository }}"
           echo "Deploy dispatched."
+          # For the IndexNow wait below: find THIS deploy run, not a previous one.
+          echo "dispatched_at=$(date -u +%s)" >> "$GITHUB_OUTPUT"
+
+      # IndexNow submits AFTER the deploy publishes: pinging a URL whose new
+      # HTML is not live yet invites a crawl of the old page. Bounded wait, and
+      # nothing here may fail the job - the pages are already committed and
+      # deployed by this point, and a red job would also read to the supervisor
+      # as "the regen did not run".
+      - name: Wait for the Pages deploy to publish
+        id: deploywait
+        if: steps.commit.outputs.committed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DISPATCHED_AT: ${{ steps.deploy.outputs.dispatched_at }}
+        run: |
+          set -uo pipefail   # deliberately not -e
+          state=timeout
+          deadline=$(( $(date -u +%s) + 600 ))
+          run_id=""
+          while [ -z "$run_id" ] && [ "$(date -u +%s)" -lt "$deadline" ]; do
+            run_id=$(gh run list --workflow deploy-frontend.yml -R "$GITHUB_REPOSITORY" --limit 5 \
+              --json databaseId,createdAt \
+              --jq "[.[] | select((.createdAt | fromdateiso8601) >= ($DISPATCHED_AT - 60))] | last | .databaseId // empty") || true
+            [ -z "$run_id" ] && sleep 10
+          done
+          if [ -n "$run_id" ]; then
+            timeout $(( deadline - $(date -u +%s) )) gh run watch "$run_id" -R "$GITHUB_REPOSITORY" --exit-status >/dev/null 2>&1 || true
+            state=$(gh run view "$run_id" -R "$GITHUB_REPOSITORY" --json status,conclusion --jq 'if .status != "completed" then "timeout" else .conclusion end' 2>/dev/null || echo unknown)
+          fi
+          echo "deploy_state=$state" >> "$GITHUB_OUTPUT"
+          echo "Deploy run ${run_id:-none}: $state"
+
+      - name: Submit materially changed URLs to IndexNow
+        id: indexnow
+        if: steps.commit.outputs.committed == 'true'
+        env:
+          # Through env, never interpolated into the script body: the house rule
+          # from the 2026-09-19 audit, applied to our own values too.
+          DEPLOY_STATE: ${{ steps.deploywait.outputs.deploy_state }}
+        run: |
+          set -uo pipefail   # deliberately not -e: a Bing outage is not a regen failure
+          if [ "$DEPLOY_STATE" != "success" ]; then
+            echo "Deploy did not publish ($DEPLOY_STATE); submitting nothing."
+            echo 'result={"submitted":0,"status":null,"skipped":"deploy not published"}' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          node scripts/indexnow-submit.js --confirm 2>&1 | tee /tmp/indexnow.log || true
+          line=$(grep '^INDEXNOW {' /tmp/indexnow.log | tail -1 | sed 's/^INDEXNOW //')
+          if [ -z "$line" ]; then line='{"submitted":0,"status":null,"skipped":"no result line"}'; fi
+          echo "result=$line" >> "$GITHUB_OUTPUT"
+          exit 0
 
       - name: Summary
+        env:
+          INDEXNOW: ${{ steps.indexnow.outputs.result }}
         run: |
-          echo "SUMMARY {\"job\":\"regenerate-pages\",\"committed\":${{ steps.commit.outputs.committed }},\"pages_changed\":${{ steps.commit.outputs.pages_changed }}}"
+          echo "SUMMARY {\"job\":\"regenerate-pages\",\"committed\":${{ steps.commit.outputs.committed }},\"pages_changed\":${{ steps.commit.outputs.pages_changed }},\"indexnow\":${INDEXNOW:-null}}"
