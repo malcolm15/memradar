@@ -3680,10 +3680,10 @@ const SEGMENT_LABELS = { ddr5: 'DDR5 memory', ddr4: 'DDR4 memory', nvme_ssd: 'NV
 // republication with credit is ours to invite. The products file carries
 // per-product history derived from licensed data, where consent covers monthly
 // points for use with the extension and NOT onward republication; an invitation
-// to republish there would read as granting a sublicence, which Section 18(7)(c)
+// to republish there would read as granting a sublicense, which Section 18(7)(c)
 // prohibits. Do not merge these two strings.
-const KEEPA_ATTRIBUTION_AGGREGATE = 'Price history is sourced from Keepa (keepa.com) under licence. These figures are medians computed by MemRadar from that history, not the raw licensed data. Credit MemRadar and Keepa if you republish.';
-const KEEPA_ATTRIBUTION_PER_PRODUCT = 'Price history is sourced from Keepa (keepa.com) under licence and published here at one point per month with Keepa\'s written permission. Figures computed by MemRadar from that history. This file is provided for use with the MemRadar Raycast extension; it does not carry a right to redistribute the price history.';
+const KEEPA_ATTRIBUTION_AGGREGATE = 'Price history is sourced from Keepa (keepa.com) under license. These figures are medians computed by MemRadar from that history, not the raw licensed data. Credit MemRadar and Keepa if you republish.';
+const KEEPA_ATTRIBUTION_PER_PRODUCT = 'Price history is sourced from Keepa (keepa.com) under license and published here at one point per month with Keepa\'s written permission. Figures computed by MemRadar from that history. This data is provided for use with the MemRadar Raycast extension; it does not carry a right to redistribute the price history.';
 
 function buildRaycastMarket(msRows, segPerGb, segPrice, buildDate) {
   const computedAt = msRows.map((r) => r.computed_at).sort().pop();
