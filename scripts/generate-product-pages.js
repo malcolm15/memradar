@@ -3645,6 +3645,111 @@ function stampPolicyDates(prevManifest, nextManifest, buildDate) {
     log(`Policy date: /${file} last updated ${iso}${next !== html ? ' (restamped)' : ''}`);
   }
 }
+// ------------------------------------------------- Raycast JSON (v1)
+// Two static files for a Raycast extension (or any client) to consume,
+// generated in the daily regen beside the CSV and the chart images.
+//
+// WHY STATIC FILES AND NOT THE ANON SUPABASE KEY: an installed extension runs
+// whatever version its user installed, so a client reading our tables directly
+// is pinned to our schema forever and breaks silently the day a column moves.
+// A file we generate is a contract we control. (RamRadar's Raycast extension
+// reached the same conclusion: it calls one purpose-built endpoint.)
+//
+// VERSIONED IN THE PATH, v1. A shape change ships as raycast-v2-*.json with
+// v1 left in place, because installed clients cannot be migrated.
+//
+// NO FIELD IS DECLARED AND NULL. A key whose value is unknown is OMITTED, so a
+// consumer can trust that a present key carries a real number. (The competitor
+// endpoint declares medianPricePerGb and serves null: that is the shape this
+// rule exists to prevent.)
+//
+// NEVER PRESENTED AS LIVE. The site hydrates six times a day; these files are
+// written once, so they can be 24h behind. Every payload says so in `notice`
+// and carries the date its data was computed.
+const RAYCAST_MARKET_PATH = ['data', 'raycast-v1-market.json'];
+const RAYCAST_PRODUCTS_PATH = ['data', 'raycast-v1-products.json'];
+const RAYCAST_NOTICE = 'Regenerated once a day. memradar.com refreshes prices six times a day, so these figures can be up to 24 hours behind the site. This is not a live feed.';
+const SEGMENT_LABELS = { ddr5: 'DDR5 memory', ddr4: 'DDR4 memory', nvme_ssd: 'NVMe SSDs', sata_ssd: 'SATA SSDs' };
+
+function buildRaycastMarket(msRows, segPerGb, buildDate) {
+  const computedAt = msRows.map((r) => r.computed_at).sort().pop();
+  const segments = [];
+  for (const seg of CSV_SEGMENTS) {
+    const rows = msRows.filter((r) => r.segment === seg);
+    if (!rows.length) continue;
+    const entry = { segment: seg, label: SEGMENT_LABELS[seg], periods: {} };
+    // Omitted rather than nulled when a segment has no capacity-parseable products.
+    if (segPerGb[seg] != null) entry.median_usd_per_gb = round2(segPerGb[seg]);
+    for (const period of ['1m', '3m', '6m', '1y']) {
+      const r = rows.find((x) => x.period === period);
+      if (!r || r.pct_change == null) continue;
+      // pct_change and the matched-set size ONLY. The per-period current
+      // median is deliberately not published: each window computes over its
+      // own matched subset, so the same segment legitimately shows a
+      // different "current" median at 1m and 1y (DDR4: $157.26 vs $139.99 on
+      // 2026-09-21). The site shows pct_change alone for exactly that reason,
+      // and a public file inviting "which of these is the real price?" would
+      // be worse than one that never offers the question. Segment level lives
+      // in median_usd_per_gb, which has one definition.
+      entry.periods[period] = { pct_change: Number(r.pct_change), product_count: r.product_count };
+    }
+    if (Object.keys(entry.periods).length) segments.push(entry);
+  }
+  if (!segments.length) throw new Error('raycast market: no segments with figures');
+  return {
+    version: 1,
+    generated: buildDate,
+    computed_at: computedAt,
+    update_frequency: 'daily',
+    notice: RAYCAST_NOTICE,
+    method: 'Every figure is a median, never a mean: a single expensive kit would drag an average. Each period compares the same products with themselves across that window, so product_count is the size of that matched set and the periods are not directly comparable with each other. median_usd_per_gb is the median across every tracked product in the segment whose capacity we can parse, from current prices.',
+    source: `${SITE}/price-index/`,
+    methodology: `${SITE}/methodology/`,
+    segments,
+  };
+}
+
+// One entry per INDEXABLE product: the same set the sitemap and search index
+// carry, so a client never links to a page we tell search engines to skip.
+function buildRaycastProducts(indexable, buildDate) {
+  const products = indexable.map((p) => {
+    const s = p.stats;
+    const e = {
+      sku: p.sku,
+      name: p.name,
+      slug: p.finalSlug,
+      category: p.category,
+      url: `${SITE}/${p.category}/${p.finalSlug}/`,
+      price_usd: s.current,
+      tracked_days: s.days,
+    };
+    if (p.brand) e.brand = p.brand;
+    if (s.atl) e.all_time_low = { price_usd: s.atl.price, date: s.atl.day };
+    if (s.ath) e.all_time_high = { price_usd: s.ath.price, date: s.ath.day };
+    if (s.avg90 != null) e.avg_90d_usd = round2(s.avg90);
+    const buy = buyState(s.current, s.avg90);
+    if (buy) e.buy_state = buy;
+    // One point per month: the last recorded price in that month. Full daily
+    // history is ~0.9MB across the catalogue; monthly is ~170KB and still
+    // shows a decade of shape.
+    const byMonth = new Map();
+    for (const pt of p.series) byMonth.set(pt.day.slice(0, 7), pt.price);
+    if (byMonth.size) e.history_monthly = [...byMonth].map(([m, v]) => [m, v]);
+    return e;
+  });
+  return {
+    version: 1,
+    generated: buildDate,
+    update_frequency: 'daily',
+    notice: RAYCAST_NOTICE,
+    fields: 'price_usd is the last recorded price. buy_state is good, typical or elevated, comparing price_usd against avg_90d_usd. history_monthly is [month, price], one point per month, the last recorded price in that month. A field whose value is unknown is omitted rather than sent as null.',
+    source: SITE,
+    methodology: `${SITE}/methodology/`,
+    count: products.length,
+    products,
+  };
+}
+
 // ---------------------------------------------------------- IndexNow
 // WHAT CHANGED MATERIALLY, computed here rather than inferred afterwards.
 // The manifest's hash diff says ~235 pages changed every day, but measured
@@ -4535,6 +4640,35 @@ async function run() {
   }));
   fs.writeFileSync(SEARCH_INDEX_PATH, JSON.stringify(searchIndex));
   log(`Search index written: ${searchIndex.length} entries, ${Math.round(fs.statSync(SEARCH_INDEX_PATH).size / 1024)}KB`);
+
+  // 5b) Raycast JSON (v1). Independently skippable like the CSV: a failure
+  // leaves yesterday's files in place, and yesterday's file is still a correct
+  // description of yesterday, which is what its own `generated` date says.
+  if (!IS_SAMPLE) {
+    const kb = (f) => Math.round(fs.statSync(f).size / 1024);
+    try {
+      if (!msErr && msRows && msRows.length) {
+        const f = path.join(FRONTEND, ...RAYCAST_MARKET_PATH);
+        fs.writeFileSync(f, JSON.stringify(buildRaycastMarket(msRows, segPerGb, buildDate), null, 1) + '\n');
+        log(`Raycast market JSON written: /${RAYCAST_MARKET_PATH.join('/')} (${kb(f)}KB)`);
+      } else {
+        log('⚠ /data/raycast-v1-market.json NOT regenerated: no market_stats rows');
+      }
+    } catch (e) {
+      log(`⚠ /${RAYCAST_MARKET_PATH.join('/')} NOT regenerated: ${e.message}`);
+    }
+    try {
+      const f = path.join(FRONTEND, ...RAYCAST_PRODUCTS_PATH);
+      const payload = buildRaycastProducts(indexable, buildDate);
+      fs.writeFileSync(f, JSON.stringify(payload) + '\n');
+      // The size budget is the reason history is monthly. If this ever goes
+      // past ~300KB, downsample further rather than shipping a slow fetch.
+      log(`Raycast products JSON written: /${RAYCAST_PRODUCTS_PATH.join('/')} (${payload.count} products, ${kb(f)}KB)`);
+      if (kb(f) > 300) log(`⚠ Raycast products JSON is ${kb(f)}KB, past the 300KB budget: downsample history further`);
+    } catch (e) {
+      log(`⚠ /${RAYCAST_PRODUCTS_PATH.join('/')} NOT regenerated: ${e.message}`);
+    }
+  }
   if (relistings.length) {
     relistings.forEach((p) => log(`RELISTING: /${p.category}/${p.finalSlug}/ -> canonical /${p._relistingOf.category}/${p._relistingOf.finalSlug}/ (excluded from sitemap, page live)`));
   }

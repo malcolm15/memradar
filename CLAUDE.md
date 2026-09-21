@@ -907,6 +907,22 @@ Five PNGs for journalists to drop into articles, drawn from the monthly CSV's ro
 
 **Caching:** PNG is a Cloudflare-cacheable extension (`max-age=14400`), unlike the HTML. Irrelevant for dated files, which never change; `-latest` can be up to 4 hours stale after the monthly rollover.
 
+## Raycast JSON (`/data/raycast-v1-*.json`, 2026-09-21)
+
+Two static files a Raycast extension (or any client) can consume, written by the daily regen beside the CSV and the charts, linked from `/data/`, excluded from the sitemap by construction. **Built before any extension code exists**, so the data contract is settled first and the artifact stands on its own if the extension never ships.
+
+**STATIC FILES, NOT THE ANON SUPABASE KEY, and the reason is installed clients.** The publishable key is already public in the site's JS and RLS-restricted to reads, so shipping it exposes nothing new. What it WOULD do is pin every installed copy of an extension to our table schema: a renamed column breaks users who never update, and you cannot push them a fix. A generated file is a contract we control. Measured in the audit: full daily history for the catalogue is ~0.9MB, monthly is ~170KB, which is why history is monthly. (RamRadar's Raycast extension reached the same conclusion independently: it calls one purpose-built endpoint at `ramradar.app/api/market-trends`, six months of daily DDR4/DDR5 averages, no database.)
+
+**VERSIONED IN THE PATH.** A shape change ships as `raycast-v2-*.json` with v1 left in place; installed clients cannot be migrated.
+
+**NO FIELD IS DECLARED AND NULL.** An unknown value means the key is OMITTED (51 products carry no brand, 1 no 90-day average, 1 no buy state), so a present key is always a real number. This is a direct lesson from the competitor endpoint, which declares `medianPricePerGb` and serves null.
+
+**NEVER PRESENTED AS LIVE.** The site hydrates 6x a day and these are written once, so both payloads carry `generated`, `update_frequency: daily`, and a `notice` saying plainly they can be 24h behind. The market file also carries `computed_at` from `market_stats`, which is a different date from the build date.
+
+**THE PER-PERIOD CURRENT MEDIAN IS DELIBERATELY NOT PUBLISHED.** Each window computes over its own matched subset, so one segment legitimately shows a different "current" median at 1m and 1y (DDR4 on 2026-09-21: $157.26 vs $139.99). The site shows `pct_change` alone for exactly this reason, and a public file that invites "so which is the real price?" is worse than one that never raises it. Segment level is `median_usd_per_gb`, which has a single definition. The shared `market_stats` select does not even fetch `current_avg_price`; that is not an oversight to fix here.
+
+**Sizes on first build: market 2.2KB, products 270.8KB** (53KB gzipped as served), 231 indexable products, monthly history median 30 points and max 129. **The 300KB budget is asserted in the log**: past it, downsample further rather than ship a slow fetch.
+
 ## IndexNow (Bing, 2026-09-20)
 
 Pings IndexNow from the daily regen with the URLs that **materially** changed. Google does not consume IndexNow, so this reaches Bing, Yandex, Seznam and Naver only: a side channel, not a lever on the Google recovery.
