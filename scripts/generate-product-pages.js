@@ -3770,7 +3770,9 @@ function buildRaycastProducts(indexable, buildDate) {
   for (const e of products) {
     if (!e.history_monthly) continue;
     const months = e.history_monthly.map(([m]) => m);
-    if (months.some((m) => !/^\d{4}-\d{2}$/.test(m))) throw new Error(`raycast products: ${e.sku} has a non-monthly history key`);
+    // 01 to 12, not any two digits: "2026-13" is not a month, and this
+    // assertion is the licensing boundary rather than a format preference.
+    if (months.some((m) => !/^\d{4}-(0[1-9]|1[0-2])$/.test(m))) throw new Error(`raycast products: ${e.sku} has a non-monthly history key`);
     if (new Set(months).size !== months.length) throw new Error(`raycast products: ${e.sku} has more than one point in a month`);
   }
   return {
