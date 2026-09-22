@@ -1021,14 +1021,41 @@ function milestones(series, stats) {
     out.push({ k: 'ath', label: 'All-time high', value: `${money(stats.ath.price)} on ${longDate(stats.ath.day)}` });
   }
 
-  // Biggest single-day drop, measured between consecutive RECORDED days.
+  // Biggest drop between consecutive RECORDED days, WHICH IS OFTEN NOT ONE DAY.
+  //
+  // Out of stock writes no price_history row, so buildDailySeries holds only
+  // the days it has and the two observations either side of an out-of-stock
+  // window sit adjacent in this array. Measured 2026-09-22 across all 105,422
+  // rows: 131 of the 231 pages carrying this milestone, 56.7%, had their
+  // biggest recorded move span MORE than one calendar day, with a tail to 145
+  // days. The worst read "$1,001.14 (75%) on September 21, 2026" for a move
+  // that actually ran from 2026-09-11 to 2026-09-21. The figure was right and
+  // the label was false.
+  //
+  // THE SELECTED MOVE DOES NOT CHANGE. Only the label does, and only when the
+  // two days are not adjacent: requiring adjacency would silently drop the
+  // milestone from 131 pages rather than tell the truth on them.
   let drop = null;
   for (let i = 1; i < series.length; i++) {
     const d = series[i].price - series[i - 1].price;
-    if (d < 0 && (!drop || d < drop.delta)) drop = { delta: d, pct: (d / series[i - 1].price) * 100, day: series[i].day };
+    if (d < 0 && (!drop || d < drop.delta)) {
+      drop = { delta: d, pct: (d / series[i - 1].price) * 100, day: series[i].day, prevDay: series[i - 1].day };
+    }
   }
   if (drop && Math.abs(drop.pct) >= 1) {
-    out.push({ k: 'drop', label: 'Biggest single-day drop', value: `${money(Math.abs(drop.delta))} (${Math.abs(Math.round(drop.pct))}%) on ${longDate(drop.day)}` });
+    const amount = `${money(Math.abs(drop.delta))} (${Math.abs(Math.round(drop.pct))}%)`;
+    const gapDays = Math.round((new Date(drop.day) - new Date(drop.prevDay)) / DAY_MS);
+    if (gapDays <= 1) {
+      out.push({ k: 'drop', label: 'Biggest single-day drop', value: `${amount} on ${longDate(drop.day)}` });
+    } else {
+      // The count is the days with NO in-stock observation, which is the gap
+      // MINUS ONE: both endpoints are observed days. Saying "10 days with no
+      // observation" for a 2026-09-11 to 2026-09-21 move would be wrong by one
+      // in a sentence whose whole purpose is to stop being wrong.
+      const blind = gapDays - 1;
+      out.push({ k: 'drop', label: 'Biggest drop across a tracking gap',
+        value: `${amount} between ${longDate(drop.prevDay)} and ${longDate(drop.day)} (${blind} day${blind === 1 ? '' : 's'} with no in-stock observation)` });
+    }
   }
 
   // Longest run where the price never moved more than FLAT_TOLERANCE from the
@@ -1052,6 +1079,10 @@ function milestones(series, stats) {
   // Also do not break runs on long gaps between readings in general: Keepa
   // records a price only when it CHANGES, so a long gap in backfilled history
   // usually means the price held, which is the thing this line measures.
+  //
+  // THE DROP MILESTONE ABOVE TAKES THE OPPOSITE RULE, and the two are both
+  // right: it states a DURATION ("single-day"), which a gap falsifies, whereas
+  // this line states only that the price did not move, which a gap does not.
   let bs = 0, best = null;
   for (let i = 1; i <= series.length; i++) {
     const broke = i === series.length || Math.abs(series[i].price - series[bs].price) / series[bs].price > FLAT_TOLERANCE;
