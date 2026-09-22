@@ -437,6 +437,25 @@ All queries paginate at PostgREST's 1000-row cap. At ~120 products/page this is 
 - Sitemap: regenerated on each run — static URLs preserved, product URLs replaced (priority 0.6, changefreq daily, lastmod = build date).
 - Listing cards link to PDPs (whole card + name link; the Amazon button stays a direct affiliate link via stopPropagation). `slug` is included in the listing page query.
 
+## Search performance baselines (Google 2026-09-01, Bing 2026-09-22)
+
+**Two channels, recorded together because the comparison is the finding.** Neither export is committed; both were read from the Webmaster Tools / Search Console CSVs in `~/Downloads` (`memradar.com-Performance-on-Search-2026-09-01.zip`, `memradar.com_SearchPerformanceOverview_All_9_22_2026.csv`, `..._PageTrafficReport_...`, `..._KeywordReport_...`) and every figure below was recomputed from the rows rather than copied off a dashboard tile.
+
+**GOOGLE (Search Console, 92 days to 2026-09-01): 38 clicks, 6,897 impressions, and 65.7% of impressions from PDPs** (4,534 impressions across 229 product URLs, 15 of the 38 clicks). That is the pre-collapse shape: the catalog carried the channel. The 96% collapse on 2026-08-23 and the response to it are the R1 section immediately below.
+
+**BING (Webmaster Tools, 2026-06-22 to 2026-09-20, 91 days): 96 clicks, 5,465 impressions.**
+
+- **Impressions per day by month:** June (from the 22nd) 19.9, July 31.1, August 49.4, **September 1-20 139.6**.
+- **Split at the rebuild:** 2026-06-22 to 09-01 averaged **38.0 impressions and 0.81 clicks per day**; 2026-09-04 to 09-20 averaged **123.0 impressions and 2.00 clicks per day**. 2026-09-03 is excluded from the post-rebuild window as an outlier (536 impressions, over 3x the next highest day, 161 on 09-14). **THE ALIGNMENT WITH R1/R2/P1 IS TIMING ONLY. CAUSATION IS NOT ESTABLISHED** and must not be written up as though it were: nothing was held back as a control, Bing shipped its own changes over the same weeks, and a market that was itself moving lifts impressions for this term set regardless of what the site did.
+- **THE PAGE MIX IS INVERTED VERSUS GOOGLE, AND THE INVERSION IS THE POINT.** 97.2% of impressions and 97.9% of clicks came from **7 category and editorial URLs**, while the **30 product pages that surfaced at all drew 2.8% of impressions and 2 clicks**. Against Google's 65.7% PDP share, the two engines read this site as two different things: Bing ranks the aggregations, Google ranked the catalog. Any plan that says "traffic" without naming the engine is ambiguous about which pages it is talking about.
+- **Top pages** (impressions / average position / CTR): `/ram/` 1,489 / 7.30 / 1.95%. `/ssd/` 1,106 / 6.59 / 2.98%. `/blog/why-ram-prices-are-so-high/` 831 / 5.89 / 0.24%. `/price-index/` 786 / 7.18 / 2.16%. `/` 783 / 6.90 / 1.66%.
+- **Head term: "ram price tracker", 274 impressions, 5 clicks, average position 6.45.** The largest single query by a wide margin, across **725 distinct queries**.
+- **Intent mix: history/graph/trend/"how much" phrasings 836 impressions against tracker/monitor/index/alert 618.** The demand is more for what a price WAS than for a tool to watch it. The split is pattern-matched over query strings rather than a taxonomy, so a different pattern set moves both totals by a few dozen impressions; the direction is what holds, not the two numbers.
+
+**OPEN QUESTION, AND NO FIX BEFORE IT IS CHECKED: the explainer ranks 5.89 and converts 0.24%** (2 clicks on 831 impressions), while every other top page converts 1.66% to 2.98% from a WORSE average position. Working hypothesis: **a Bing AI answer is absorbing the clicks**, quoting the article in the SERP so the reader never needs to arrive. **Verify that on the live Bing SERP first.** If it holds, a title or meta rewrite addresses nothing, because the impression is being satisfied above the link rather than lost to a weak snippet, and the page would be doing its job while reading as a failure.
+
+**BING HAS BEEN THE SITE'S LARGER SEARCH CHANNEL BY CLICKS THROUGHOUT: 96 clicks against Google's 38 over comparable three-month windows. THIS WAS NOT RECOGNISED UNTIL 2026-09-21**, because attention followed the collapse and the collapse was Google's. Two standing consequences: IndexNow (see that section) reaches the channel that actually converts, so it is not the side channel it was framed as; and Bing's own numbers are worth pulling on their own schedule rather than as a footnote to a Search Console check.
+
 ## Recovery Build R1 (2026-09-01, after the August 2026 spam update)
 
 Impressions collapsed 96% on 2026-08-23 (rollout Aug 18-21); indexing and crawling were unaffected, which points at **thin affiliation + scaled content**, not a technical fault. A sizing pass found the pattern was **site-wide, not thin-page-specific**: 0% of Price Analysis sentences were unique across a 20-page sample, 85% of h1s were raw Amazon titles over 100 characters (median 150), and ~28 pages were duplicates or slug collisions. R1 fixes the structural pattern.
