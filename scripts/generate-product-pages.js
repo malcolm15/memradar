@@ -2457,10 +2457,19 @@ function buildGuideSsdNow(ctx) {
   // most cohort-sensitive number in the table (it moves ~30pp on cohort
   // choice), so the description states a magnitude that survives the swing,
   // the same defence the Price Index uses for its "up more than N%" line.
+  // WORSE OF THE TWO COHORTS, like the other three generated tens-floors.
+  // This site floored on the FULL cohort alone until 2026-09-22, which made it
+  // the one generated magnitude on the site not held to the cohort rule every
+  // other one passes. It also had no claim-registry entry, so nothing would
+  // have reported it going false. Both are fixed together, because a floor
+  // nobody monitors is only half a floor.
   const oneYr = ['nvme_ssd', 'sata_ssd']
     .map((k) => bySegPeriod.get(k + '|1y'))
     .filter((r) => r && r.pct_change != null)
-    .map((r) => Number(r.pct_change));
+    .map((r) => {
+      const stable = stablePctOf(r);
+      return stable == null ? Number(r.pct_change) : Math.min(Number(r.pct_change), stable);
+    });
   // Same 5pp headroom rule as the other two tens-floors (see the Price Index
   // notables builder). This site was found carrying "more than 130%" on
   // 2026-09-22 while the other two had already stepped to 120, because it was

@@ -14,6 +14,7 @@
 // differ between periods (a 1y window can only include products we were
 // already tracking a year ago).
 const { checkClaimFloors, logClaimFloors } = require('./claimRegistry');
+const { stableFigureOf } = require('./stableFigure');
 
 const PERIODS = [
   { key: '1m', target: 30, min: 25, max: 35 },
@@ -357,9 +358,12 @@ async function computeMarketStats(supabase, batchTimestamp, log = () => {}) {
 // that knows the sign convention, so no caller has to remember it.
 // Returns null when the delta is absent, which callers must treat as "unknown",
 // never as "equal to the full cohort".
-function stablePctOf(row) {
-  if (row == null || row.pct_change == null || row.stability_delta_pp == null) return null;
-  return Math.round((Number(row.pct_change) - Number(row.stability_delta_pp)) * 10) / 10;
+// Thin wrapper over the single selection rule in ./stableFigure, kept as an
+// export because three generator call sites already import this name. The rule
+// itself lives in exactly one file; see the comment there for why the tripwire
+// does not come through it.
+function stablePctOf(row, onFallback) {
+  return stableFigureOf(row, onFallback);
 }
 
 module.exports = { computeMarketStats, classifySegment, SEGMENTS, PERIODS, STABILITY_FLAG_PP, STABILITY_SEVERE_PP, stablePctOf };

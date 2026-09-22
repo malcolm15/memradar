@@ -28,6 +28,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { stableFigureOf, stableMeasureOf } = require('./stableFigure');
 
 // Floors are stated as RATIOS because that is how the sentences read ("triple",
 // "double", "well over 150%"), then converted to the percent-change units
@@ -79,6 +80,16 @@ const bakedFindingFloor = (claimId) => () => bakedFloor(
   new RegExp(`data-claim="${claimId}"[^>]*data-floor-pct="(\\d+)"`),
   '/data/', `the "${claimId}" finding`);
 
+// The SSD guide's META DESCRIPTION carries its own generated tens-floor, which
+// feeds <meta name="description">, Open Graph, Twitter, the JSON-LD description
+// and feed.xml. It is not visible prose, which is precisely why it went
+// unregistered until 2026-09-22 and was found only by noticing it still said
+// 130% after the visible floors had stepped to 120%.
+const bakedSsdGuideMetaFloor = () => bakedFloor(
+  PAGE('guides', 'should-i-buy-an-ssd-now', 'index.html'),
+  /SSD prices are up more than (\d+)% year over year/,
+  '/guides/should-i-buy-an-ssd-now/', 'the SSD guide meta description floor');
+
 const bakedListingFloor = (cat) => () => bakedFloor(
   PAGE(cat, 'index.html'),
   /are up more than (\d+)% year over year/,
@@ -102,6 +113,12 @@ const CLAIM_REGISTRY = [
     // at 1.7x under a standing rule: a DDR4 magnitude claim carries at least
     // 25pp of headroom on min(full, stable) or it becomes directional with no
     // magnitude. 70% leaves 28.7pp on the stable cohort and 63.4pp on the full.
+    // NOTE, 2026-09-22: the +98.7% was the RATIO OF MEDIANS on the stable
+    // cohort, the measure this check used until that date. On the paired median
+    // the same run read +145.1% and these sentences never breached at all. The
+    // floor is left at 1.7x regardless: it was set from the worse reading, and
+    // lowering a floor because the measurement improved would spend the
+    // headroom the rule exists to keep.
     // The id keeps its original name on purpose: it is an identifier that
     // reporting and any future issue dedup key on, not a description.
     id: 'explainer-verdict-ddr4-more-than-doubled',
@@ -128,6 +145,12 @@ const CLAIM_REGISTRY = [
     // at 1.7x under a standing rule: a DDR4 magnitude claim carries at least
     // 25pp of headroom on min(full, stable) or it becomes directional with no
     // magnitude. 70% leaves 28.7pp on the stable cohort and 63.4pp on the full.
+    // NOTE, 2026-09-22: the +98.7% was the RATIO OF MEDIANS on the stable
+    // cohort, the measure this check used until that date. On the paired median
+    // the same run read +145.1% and these sentences never breached at all. The
+    // floor is left at 1.7x regardless: it was set from the worse reading, and
+    // lowering a floor because the measurement improved would spend the
+    // headroom the rule exists to keep.
     // The id keeps its original name on purpose: it is an identifier that
     // reporting and any future issue dedup key on, not a description.
     id: 'explainer-ddr4-well-over-double',
@@ -153,6 +176,12 @@ const CLAIM_REGISTRY = [
     // at 1.7x under a standing rule: a DDR4 magnitude claim carries at least
     // 25pp of headroom on min(full, stable) or it becomes directional with no
     // magnitude. 70% leaves 28.7pp on the stable cohort and 63.4pp on the full.
+    // NOTE, 2026-09-22: the +98.7% was the RATIO OF MEDIANS on the stable
+    // cohort, the measure this check used until that date. On the paired median
+    // the same run read +145.1% and these sentences never breached at all. The
+    // floor is left at 1.7x regardless: it was set from the worse reading, and
+    // lowering a floor because the measurement improved would spend the
+    // headroom the rule exists to keep.
     // The id keeps its original name on purpose: it is an identifier that
     // reporting and any future issue dedup key on, not a description.
     id: 'ram-guide-ddr4-more-than-doubled',
@@ -201,6 +230,20 @@ const CLAIM_REGISTRY = [
     ],
     resolveFloor: bakedPriceIndexFloor,
     floorLabel: 'the tens-floor baked into the page',
+  },
+
+  {
+    // Registered 2026-09-22, with the fix that brought its floor under the
+    // cohort rule. A magnitude claim in a meta description is still a published
+    // magnitude claim: it is what a search result shows and what feed readers
+    // syndicate, and the registry is meant to be a COMPLETE inventory.
+    id: 'ssd-guide-meta-both-up',
+    page: '/guides/should-i-buy-an-ssd-now/',
+    where: 'meta description, Open Graph, Twitter, JSON-LD and feed.xml',
+    sentence: 'SSD prices are up more than N% year over year.',
+    requires: [{ segment: 'nvme_ssd', period: '1y' }, { segment: 'sata_ssd', period: '1y' }],
+    resolveFloor: bakedSsdGuideMetaFloor,
+    floorLabel: 'the tens-floor baked into the SSD guide meta description',
   },
 
   // --------------------------------------------------------- listing pages
@@ -260,7 +303,7 @@ const CLAIM_REGISTRY = [
     // finding and logs it, and this entry reports WITHDRAWN rather than
     // UNRESOLVED until the finding returns with its floor.
     withdrawable: true,
-    withdrawnMeans: 'the generator did not emit this finding because DDR4 no longer clears the magnitude it states. Nothing to reword. It returns on its own when the data supports it. Withdrawn 2026-09-21 at +98.7% on the stable cohort.',
+    withdrawnMeans: 'the generator did not emit this finding because DDR4 no longer clears the magnitude it states. Nothing to reword. It returns on its own when the data supports it. Withdrawn 2026-09-21 at +98.7% on the stable cohort, measured as a ratio of medians; on the paired median used since 2026-09-22 the same data read +145.1% and this finding would not have been withdrawn.',
   },
   {
     id: 'data-ssd-1y',
@@ -352,11 +395,18 @@ const CLAIM_REGISTRY = [
 
 // Checks every monitorable entry against a stats run, on BOTH cohorts.
 //
-// stats: the in-memory rows from computeMarketStats, which carry
-// stable_pct_change alongside pct_change. The stable figure is the whole point:
-// a claim that holds on the full cohort but not on the products present in
-// every window is a claim that survives only because of who happens to qualify
-// this week, and it is not safe to leave in prose.
+// stats: the in-memory rows from computeMarketStats. The stable figure is the
+// whole point: a claim that holds on the full cohort but not on the products
+// present in every window is a claim that survives only because of who happens
+// to qualify this week, and it is not safe to leave in prose.
+//
+// SINCE 2026-09-22 THE STABLE FIGURE HERE IS `stable_paired_pct`, the median of
+// per-product ratios, not `stable_pct_change`, the ratio of medians. Both are
+// computed every run and both ride the summary; the tripwire keeps the ratio of
+// medians, because its job is to vary the population with the statistic held
+// fixed. This check has the opposite need: it asks whether a published sentence
+// is still true, and a statistic that lurches 63pp when three products age out
+// of a window answers that question wrongly. See stableFigure() below.
 function checkClaimFloors(stats) {
   const by = new Map(stats.map((s) => [`${s.segment}|${s.period}`, s]));
   const breached = [];
@@ -399,14 +449,16 @@ function checkClaimFloors(stats) {
     for (const req of entry.requires) {
       const s = by.get(`${req.segment}|${req.period}`);
       if (!s || s.pct_change == null) { missing = `${req.segment} [${req.period}] has no figure this run`; break; }
-      if (s.stable_pct_change == null) { missing = `${req.segment} [${req.period}] has no stable-cohort figure (stable n=0)`; break; }
+      const stable = stableFigureOf(s);
+      if (stable == null) { missing = `${req.segment} [${req.period}] has no stable-cohort figure (stable n=0)`; break; }
       figures.push({
         segment: req.segment,
         period: req.period,
         full_pct: s.pct_change,
-        stable_pct: s.stable_pct_change,
+        stable_pct: stable,
+        stable_measure: stableMeasureOf(s),
         full_margin_pp: round1(s.pct_change - floorPct),
-        stable_margin_pp: round1(s.stable_pct_change - floorPct),
+        stable_margin_pp: round1(stable - floorPct),
         n: s.product_count,
         stable_n: s.stable_count,
       });
@@ -425,7 +477,7 @@ function checkClaimFloors(stats) {
         breached_on: failing.map((f) => {
           const which = [];
           if (f.full_pct < floorPct) which.push(`full ${f.full_pct}%`);
-          if (f.stable_pct < floorPct) which.push(`stable ${f.stable_pct}%`);
+          if (f.stable_pct < floorPct) which.push(`stable ${f.stable_pct}% (${f.stable_measure})`);
           return `${f.segment} [${f.period}] ${which.join(' and ')} vs floor ${floorPct}%`;
         }),
       });
