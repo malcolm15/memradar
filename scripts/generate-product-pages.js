@@ -1007,6 +1007,9 @@ function buildHistoryTable(ctx) {
 // Only events that EXIST render, so the list length tracks how much history a
 // product has. The all-time-low/high sentence deleted from Price Analysis in R1
 // lives here, as a dated fact rather than a sentence on every page.
+// See the tens-floor comment in the Price Index notables builder.
+const GENERATED_FLOOR_HEADROOM_PP = 5;
+
 const MILESTONE_MIN = 2;
 const FLAT_TOLERANCE = 0.02; // "within 2%" counts as unchanged
 const RECENT_ATL_MONTHS = 12;
@@ -2183,7 +2186,21 @@ function buildPriceIndex(ctx) {
         log(`⚠ price index tens-floor: no stable-cohort figure for ${noStable.join(', ')} - that segment is floored on the full cohort ALONE and the sentence is not cohort-verified`);
       }
       const weakest = Math.min(...worst.map((w) => w.pct));
-      const floorPct = Math.floor(weakest / 10) * 10;
+      // GENERATED TENS-FLOORS CARRY AT LEAST 5pp OF HEADROOM: floor10(worst - 5),
+      // not floor10(worst).
+      //
+      // Hand-written prose gets 25pp because a human sentence cannot step down on its
+      // own: it sits there being false until someone edits it. Generated prose
+      // re-derives its own number every regen, so it only needs enough headroom to
+      // survive what can move the figure BETWEEN a regen and the next stats run: a
+      // baseline sliding out of its window, or a forced recompute.
+      //
+      // MEASURED 2026-09-22, which is why this exists. floor10(worst) baked 130 from
+      // a worst of 133.3, and a forced stats run seven hours later put DDR4's full
+      // cohort at 129.5. The published sentence was false by 0.5pp the same day, on
+      // /price-index/, /ram/ and /ssd/ at once. floor10(worst - 5) would have baked
+      // 120 and survived it.
+      const floorPct = Math.floor((weakest - GENERATED_FLOOR_HEADROOM_PP) / 10) * 10;
       notables.push(`<strong>Every segment is up more than ${floorPct}% year over year.</strong> The memory and storage market has not returned to its pre-2026 pricing.`);
     }
   }
@@ -2444,7 +2461,11 @@ function buildGuideSsdNow(ctx) {
     .map((k) => bySegPeriod.get(k + '|1y'))
     .filter((r) => r && r.pct_change != null)
     .map((r) => Number(r.pct_change));
-  const floorPct = oneYr.length ? Math.floor(Math.min(...oneYr) / 10) * 10 : null;
+  // Same 5pp headroom rule as the other two tens-floors (see the Price Index
+  // notables builder). This site was found carrying "more than 130%" on
+  // 2026-09-22 while the other two had already stepped to 120, because it was
+  // the one generated floor nobody had listed.
+  const floorPct = oneYr.length ? Math.floor((Math.min(...oneYr) - GENERATED_FLOOR_HEADROOM_PP) / 10) * 10 : null;
   const metaDesc = esc(floorPct != null
     ? `SSD prices are up more than ${floorPct}% year over year. What a decade of tracked price history says about waiting, and how to spot a fair drive price today.`
     : 'What a decade of tracked SSD price history says about waiting, and how to spot a fair drive price today.');
@@ -3392,7 +3413,8 @@ function listingIntro(category, msRows) {
     const stable = stablePctOf(r);
     worst.push(stable == null ? Number(r.pct_change) : Math.min(Number(r.pct_change), stable));
   }
-  const floorPct = Math.floor(Math.min(...worst) / 10) * 10;
+  // Same 5pp headroom rule as the Price Index tens-floor; see the comment there.
+  const floorPct = Math.floor((Math.min(...worst) - GENERATED_FLOOR_HEADROOM_PP) / 10) * 10;
   if (floorPct < 10) return { html: '', floorPct: null }; // nothing striking to say
   const noun = category === 'ram' ? 'RAM' : 'SSD';
   // RAM is a mass noun and SSD is a count noun, so the same sentence frame does
