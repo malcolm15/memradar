@@ -3116,11 +3116,16 @@ const NUMBER_WORD = { 4: 'four', 5: 'five', 6: 'six', 7: 'seven', 8: 'eight', 9:
 // The magnitude is DERIVED, never chosen. Take the worse of the two cohorts,
 // find the largest whole multiple it clears, and phrase that. A hand-picked
 // word would need re-picking every time the data moved; this follows it.
+// Split out so a WITHDRAWAL can report the figure that caused it. magnitudeOf
+// returns null when nothing is striking enough to state, which throws away the
+// number the decision was made on, and that number is the whole message.
+const worstCohortPct = (rows) => Math.min(...rows.map((r) => {
+  const st = stablePctOf(r);
+  return st == null ? Number(r.pct_change) : Math.min(Number(r.pct_change), st);
+}));
+
 function magnitudeOf(rows) {
-  const worst = Math.min(...rows.map((r) => {
-    const st = stablePctOf(r);
-    return st == null ? Number(r.pct_change) : Math.min(Number(r.pct_change), st);
-  }));
+  const worst = worstCohortPct(rows);
   const n = Math.floor(1 + worst / 100);
   if (n < 2) return null;                       // nothing striking enough to state
   return { n, floorPct: (n - 1) * 100, worst, phrase: MULTIPLE_WORD[n] || `more than ${NUMBER_WORD[n] || n} times` };
@@ -3143,17 +3148,35 @@ function buildFindings(ctx) {
   const row = (seg) => marketStats.find((r) => r.segment === seg && r.period === '1y' && r.pct_change != null);
   const items = [];
 
-  const ddr5 = row('ddr5') && magnitudeOf([row('ddr5')]);
+  // A segment whose rows are present but whose worse cohort no longer clears 2x
+  // has had its finding WITHDRAWN. That is the generator working, not a fault:
+  // the magnitude stopped being true, so the sentence is gone rather than
+  // wrong. It is recorded here so the build says so out loud, and so
+  // claimRegistry.js can report it as withdrawn instead of unresolved.
+  const withdrawn = [];
+  const noteWithdrawn = (id, rows, mag) => {
+    if (rows.every(Boolean) && !mag) {
+      withdrawn.push({ id, worst: Math.round(worstCohortPct(rows) * 10) / 10 });
+    }
+  };
+
+  const ddr5rows = [row('ddr5')];
+  const ddr5 = ddr5rows.every(Boolean) && magnitudeOf(ddr5rows);
+  noteWithdrawn('data-ddr5-1y', ddr5rows, ddr5);
   if (ddr5) items.push({ id: 'data-ddr5-1y', floorPct: ddr5.floorPct, segs: ['ddr5'], when: whenStats,
     text: ddr5.n >= 4
       ? `The median DDR5 memory kit costs ${ddr5.phrase} what it cost a year ago.`
       : `The median DDR5 memory kit has ${ddr5.phrase} over the past year.` });
 
-  const ddr4 = row('ddr4') && magnitudeOf([row('ddr4')]);
+  const ddr4rows = [row('ddr4')];
+  const ddr4 = ddr4rows.every(Boolean) && magnitudeOf(ddr4rows);
+  noteWithdrawn('data-ddr4-1y', ddr4rows, ddr4);
   if (ddr4) items.push({ id: 'data-ddr4-1y', floorPct: ddr4.floorPct, segs: ['ddr4'], when: whenStats,
     text: `DDR4, the older generation, has ${ddr4.phrase} over the same year.` });
 
-  const ssd = row('nvme_ssd') && row('sata_ssd') && magnitudeOf([row('nvme_ssd'), row('sata_ssd')]);
+  const ssdrows = [row('nvme_ssd'), row('sata_ssd')];
+  const ssd = ssdrows.every(Boolean) && magnitudeOf(ssdrows);
+  noteWithdrawn('data-ssd-1y', ssdrows, ssd);
   if (ssd) items.push({ id: 'data-ssd-1y', floorPct: ssd.floorPct, segs: ['nvme_ssd', 'sata_ssd'], when: whenStats,
     text: `Storage followed memory up: NVMe and SATA solid state drives have both ${ssd.phrase} year over year.` });
 
@@ -3167,7 +3190,24 @@ function buildFindings(ctx) {
     items.push({ id: 'data-atl-3x', floorPct: null, segs: [], when: whenBuild,
       text: `${dist.gt3} of the ${dist.total} tracked products sell for more than three times their lowest recorded price.` });
   }
-  if (items.length < 4) throw new Error(`findings: only ${items.length} items, need at least 4`);
+  // FAIL CLOSED ON A BROKEN BUILD, WARN ON A WITHDRAWN FINDING. The old
+  // `items.length < 4` guard could not tell those apart, so a market move that
+  // legitimately withdrew one segment sentence would have failed the whole
+  // regen, and one withdrawal left the build a single item from failing. Zero
+  // segment findings means the market_stats rows are missing or unreadable;
+  // absent ATL counts mean atlMultipleDistribution never computed. Both are
+  // build faults and stop the run. One segment stepping out is the market.
+  const segmentFindings = items.filter((it) => it.floorPct != null);
+  const countFindings = items.filter((it) => it.floorPct == null);
+  if (!segmentFindings.length) {
+    throw new Error('findings: no segment finding cleared its floor, which means the market_stats rows are missing or unreadable rather than that every segment moved at once');
+  }
+  if (countFindings.length < 2) {
+    throw new Error(`findings: ${countFindings.length} of 2 all-time-low counts present (atlMultipleDistribution did not compute)`);
+  }
+  for (const w of withdrawn) {
+    log(`⚠ FINDING WITHDRAWN: ${w.id} is NOT on /data/ this build - its worse cohort is ${w.worst}%, under the 2x the sentence needs. The claim registry logs this as withdrawn, not breached.`);
+  }
 
   const lis = items.map((it) =>
     `        <li${it.floorPct == null ? '' : ` data-claim="${it.id}" data-floor-pct="${it.floorPct}"`}>${esc(it.text)} <span class="data-finding-date">Computed ${it.when}.</span></li>`

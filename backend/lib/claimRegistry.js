@@ -52,10 +52,14 @@ function bakedFloor(file, re, url, what) {
   }
   const m = re.exec(html);
   if (!m) {
-    // The sentence was reworded or dropped without updating this entry, which
-    // is exactly the drift the registry rule exists to prevent. Unresolved, and
-    // reported as loudly as a breach.
-    throw new Error(`the ${what} sentence is no longer on ${url}`);
+    // TWO DIFFERENT EVENTS ARRIVE HERE and the caller has to tell them apart.
+    // For hand-written prose, an absent sentence is the drift the registry rule
+    // exists to prevent. For a GENERATED finding it is a decision the generator
+    // made and logged, because the magnitude stopped being true. The code says
+    // which; `withdrawable` on the entry says which reading applies.
+    const err = new Error(`${what} is no longer on ${url}`);
+    err.code = 'CLAIM_TEXT_ABSENT';
+    throw err;
   }
   return { floorPct: Number(m[1]), source: `baked into ${url} as ${m[1]}%` };
 }
@@ -92,13 +96,21 @@ const CLAIM_REGISTRY = [
     floorLabel: '3.0x ("several times" reads as three or more)',
   },
   {
+    // REWORDED 2026-09-21, from "more than doubled" / "well over double".
+    // ddr4 1y fell to +98.7% on the stable cohort against a 2.0x floor, so all
+    // three of these sentences BREACHED in the 2026-09-20 stats run. Refloored
+    // at 1.7x under a standing rule: a DDR4 magnitude claim carries at least
+    // 25pp of headroom on min(full, stable) or it becomes directional with no
+    // magnitude. 70% leaves 28.7pp on the stable cohort and 63.4pp on the full.
+    // The id keeps its original name on purpose: it is an identifier that
+    // reporting and any future issue dedup key on, not a description.
     id: 'explainer-verdict-ddr4-more-than-doubled',
     page: '/blog/why-ram-prices-are-so-high/',
     where: 'verdict box',
-    sentence: 'and DDR4 more than doubled',
+    sentence: 'and DDR4 is up more than 70%',
     requires: [{ segment: 'ddr4', period: '1y' }],
-    floorRatio: 2.0,
-    floorLabel: '2.0x',
+    floorRatio: 1.7,
+    floorLabel: '1.7x ("more than 70%")',
   },
   {
     id: 'explainer-ddr5-well-over-triple',
@@ -110,13 +122,21 @@ const CLAIM_REGISTRY = [
     floorLabel: '3.0x',
   },
   {
+    // REWORDED 2026-09-21, from "more than doubled" / "well over double".
+    // ddr4 1y fell to +98.7% on the stable cohort against a 2.0x floor, so all
+    // three of these sentences BREACHED in the 2026-09-20 stats run. Refloored
+    // at 1.7x under a standing rule: a DDR4 magnitude claim carries at least
+    // 25pp of headroom on min(full, stable) or it becomes directional with no
+    // magnitude. 70% leaves 28.7pp on the stable cohort and 63.4pp on the full.
+    // The id keeps its original name on purpose: it is an identifier that
+    // reporting and any future issue dedup key on, not a description.
     id: 'explainer-ddr4-well-over-double',
     page: '/blog/why-ram-prices-are-so-high/',
     where: 'section 1',
-    sentence: 'DDR4 is well over double.',
+    sentence: 'DDR4 is up more than 70%.',
     requires: [{ segment: 'ddr4', period: '1y' }],
-    floorRatio: 2.0,
-    floorLabel: '2.0x',
+    floorRatio: 1.7,
+    floorLabel: '1.7x ("more than 70%")',
   },
 
   // --------------------------------------------------------------- RAM guide
@@ -127,13 +147,21 @@ const CLAIM_REGISTRY = [
     // in any week's data. "More than doubled" says the same thing rhetorically
     // and clears its floor by roughly 50pp. It also reads true whether the
     // reader takes it as the peak or as today, which the 150% version did not.
+    // REWORDED 2026-09-21, from "more than doubled" / "well over double".
+    // ddr4 1y fell to +98.7% on the stable cohort against a 2.0x floor, so all
+    // three of these sentences BREACHED in the 2026-09-20 stats run. Refloored
+    // at 1.7x under a standing rule: a DDR4 magnitude claim carries at least
+    // 25pp of headroom on min(full, stable) or it becomes directional with no
+    // magnitude. 70% leaves 28.7pp on the stable cohort and 63.4pp on the full.
+    // The id keeps its original name on purpose: it is an identifier that
+    // reporting and any future issue dedup key on, not a description.
     id: 'ram-guide-ddr4-more-than-doubled',
     page: '/guides/should-i-buy-ram-now/',
     where: 'what actually happened',
-    sentence: 'DDR4 more than doubled',
+    sentence: 'DDR4 up more than 70% even now',
     requires: [{ segment: 'ddr4', period: '1y' }],
-    floorRatio: 2.0,
-    floorLabel: '2.0x',
+    floorRatio: 1.7,
+    floorLabel: '1.7x ("more than 70%")',
   },
 
   // --------------------------------------------------------------- SSD guide
@@ -212,6 +240,12 @@ const CLAIM_REGISTRY = [
     requires: [{ segment: 'ddr5', period: '1y' }],
     resolveFloor: bakedFindingFloor('data-ddr5-1y'),
     floorLabel: 'the multiple baked into /data/',
+    // Generator-emitted, so an absent <li> is a DECISION, not drift: when the
+    // worse cohort stops clearing the magnitude, buildFindings() withdraws the
+    // finding and logs it, and this entry reports WITHDRAWN rather than
+    // UNRESOLVED until the finding returns with its floor.
+    withdrawable: true,
+    withdrawnMeans: 'the generator did not emit this finding because DDR5 no longer clears the magnitude it states. Nothing to reword. It returns on its own when the data supports it.',
   },
   {
     id: 'data-ddr4-1y',
@@ -221,6 +255,12 @@ const CLAIM_REGISTRY = [
     requires: [{ segment: 'ddr4', period: '1y' }],
     resolveFloor: bakedFindingFloor('data-ddr4-1y'),
     floorLabel: 'the multiple baked into /data/',
+    // Generator-emitted, so an absent <li> is a DECISION, not drift: when the
+    // worse cohort stops clearing the magnitude, buildFindings() withdraws the
+    // finding and logs it, and this entry reports WITHDRAWN rather than
+    // UNRESOLVED until the finding returns with its floor.
+    withdrawable: true,
+    withdrawnMeans: 'the generator did not emit this finding because DDR4 no longer clears the magnitude it states. Nothing to reword. It returns on its own when the data supports it. Withdrawn 2026-09-21 at +98.7% on the stable cohort.',
   },
   {
     id: 'data-ssd-1y',
@@ -230,6 +270,12 @@ const CLAIM_REGISTRY = [
     requires: [{ segment: 'nvme_ssd', period: '1y' }, { segment: 'sata_ssd', period: '1y' }],
     resolveFloor: bakedFindingFloor('data-ssd-1y'),
     floorLabel: 'the multiple baked into /data/, on BOTH drive segments',
+    // Generator-emitted, so an absent <li> is a DECISION, not drift: when the
+    // worse cohort stops clearing the magnitude, buildFindings() withdraws the
+    // finding and logs it, and this entry reports WITHDRAWN rather than
+    // UNRESOLVED until the finding returns with its floor.
+    withdrawable: true,
+    withdrawnMeans: 'the generator did not emit this finding because one of the two drive segments no longer clears the magnitude it states. Nothing to reword. It returns on its own when the data supports it.',
   },
   {
     id: 'data-atl-counts',
@@ -315,6 +361,12 @@ function checkClaimFloors(stats) {
   const by = new Map(stats.map((s) => [`${s.segment}|${s.period}`, s]));
   const breached = [];
   const unresolved = [];
+  // WITHDRAWN is its own state, not a flavour of unresolved. A generated
+  // finding the generator declined to emit has no published sentence to
+  // reword, so it is not breached, and nothing failed to be checked, so it is
+  // not unresolved. Reporting it as UNRESOLVED on every run trains the reader
+  // to ignore the field that also carries real failures.
+  const withdrawn = [];
   const ok = [];
 
   for (const entry of CLAIM_REGISTRY) {
@@ -331,7 +383,14 @@ function checkClaimFloors(stats) {
         floorSource = entry.floorLabel;
       }
     } catch (err) {
-      unresolved.push({ ...summarise(entry), reason: err.message });
+      // Resumes checking BY ITSELF the first build that emits the finding
+      // again: the presence of the sentence on the page is the state, so there
+      // is no file to reset and nothing to remember.
+      if (err.code === 'CLAIM_TEXT_ABSENT' && entry.withdrawable) {
+        withdrawn.push({ ...summarise(entry), reason: err.message, means: entry.withdrawnMeans });
+      } else {
+        unresolved.push({ ...summarise(entry), reason: err.message });
+      }
       continue;
     }
 
@@ -379,11 +438,14 @@ function checkClaimFloors(stats) {
   }
 
   return {
+    // `checked` counts claims that were actually tested. A withdrawn finding
+    // was not tested and must not inflate it.
     checked: breached.length + unresolved.length + ok.length,
     registered: CLAIM_REGISTRY.length,
     unmonitorable: CLAIM_REGISTRY.filter((e) => e.monitorable === false).length,
     breached,
     unresolved,
+    withdrawn,
     ok,
   };
 }
@@ -412,9 +474,14 @@ function logClaimFloors(result, log) {
     log(`⚠ CLAIM FLOOR UNRESOLVED: ${result.unresolved.length} registered claim(s) could NOT be checked - treat as unverified, not as passing:`);
     for (const u of result.unresolved) log(`    ${u.page} "${u.sentence}" - ${u.reason}`);
   }
+  if ((result.withdrawn || []).length) {
+    log(`Claim floors: ${result.withdrawn.length} generated finding(s) WITHDRAWN by the generator - no published sentence to reword, and each resumes checking if its finding returns:`);
+    for (const w of result.withdrawn) log(`    ${w.page} "${w.sentence}" - ${w.means || w.reason}`);
+  }
   if (!result.breached.length && !result.unresolved.length) {
     const tightest = result.ok.slice().sort((a, b) => a.min_margin_pp - b.min_margin_pp)[0];
-    log(`Claim floors: all ${result.ok.length} monitorable claims hold on both cohorts${tightest ? ` (tightest ${tightest.id}, ${tightest.min_margin_pp}pp of headroom)` : ''}`);
+    const wd = (result.withdrawn || []).length;
+    log(`Claim floors: all ${result.ok.length} checked claims hold on both cohorts${tightest ? ` (tightest ${tightest.id}, ${tightest.min_margin_pp}pp of headroom)` : ''}${wd ? `, ${wd} withdrawn` : ''}`);
   }
   if (result.unmonitorable) {
     log(`Claim registry: ${result.registered} claims registered, ${result.unmonitorable} recorded as not floor-checkable (historical or generated).`);

@@ -164,6 +164,9 @@ async function runPriceFetch(opts = {}) {
       claimFloors = {
         breached: c.breached || [],
         unresolved: c.unresolved || [],
+        // Withdrawn findings ride the summary too: "no breaches" must not be
+        // indistinguishable from "a finding quietly stopped being published".
+        withdrawn: c.withdrawn || [],
         checked: c.checked ?? 0,
         registered: c.registered ?? 0,
         ...(c.error ? { error: c.error } : {}),
