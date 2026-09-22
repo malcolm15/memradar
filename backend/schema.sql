@@ -109,6 +109,47 @@ ALTER TABLE email_send_log ENABLE ROW LEVEL SECURITY;
 -- Policy: UNRECORDED. Observed behaviour (2026-09-19): service role only.
 
 -- -----------------------------------------------
+-- CLAIM FLOOR RUNS (added 2026-09-22)
+-- One row per stats run that reached the published-claim check, CLEAN RUNS
+-- INCLUDED. That is the point: market_stats is overwritten every run and the
+-- run summary lives only in the job log, so before this table existed the
+-- question "when did this breach start?" had no answer. Because an OK run
+-- writes a row too, a day with NO row means the check did not run at all,
+-- which is its own signal.
+--
+-- ran_at and computed_at are separate on purpose. ran_at is when the check
+-- executed; computed_at is the market_stats run it checked. Their divergence
+-- IS the bug this table was added alongside: on 2026-09-21 the stats step was
+-- skipped and the site served figures computed two days earlier.
+--
+-- status is the run verdict: 'ok' | 'breached' | 'unresolved' | 'error'.
+-- A withdrawal is NOT a status. A run whose only note is a withdrawn finding
+-- is a clean run, and the detail lives in the withdrawn column.
+-- tightest holds only the narrowest passing margin ({id, min_margin_pp,
+-- floor_pct}), not all passing entries: it is the sole part of a clean result
+-- anyone acts on, and it is how a claim creeping toward its floor is visible
+-- before it goes through.
+-- -----------------------------------------------
+CREATE TABLE IF NOT EXISTS claim_floor_runs (
+  id           BIGSERIAL PRIMARY KEY,
+  ran_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),  -- when the check executed
+  computed_at  TIMESTAMPTZ,                         -- the market_stats run it checked
+  status       TEXT NOT NULL,                       -- 'ok' | 'breached' | 'unresolved' | 'error'
+  checked      INTEGER,
+  ok_count     INTEGER,
+  tightest     JSONB,                               -- {id, min_margin_pp, floor_pct}
+  breached     JSONB,
+  unresolved   JSONB,
+  withdrawn    JSONB
+);
+
+-- SERVICE ROLE ONLY. RLS on with NO policy of any kind, which denies every
+-- anon and authenticated request: this table records which published sentences
+-- are currently unsupported by the data, and that is operational, not public.
+-- The frontend anon key must never read it.
+ALTER TABLE claim_floor_runs ENABLE ROW LEVEL SECURITY;
+
+-- -----------------------------------------------
 -- INDEXES
 -- Run these in Supabase SQL Editor after data starts flowing.
 -- These are not created automatically — must be applied manually.
@@ -125,3 +166,6 @@ CREATE INDEX IF NOT EXISTS idx_alerts_product_id ON alerts(product_id);
 -- products: category filter used on RAM and SSD listing pages
 CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
 CREATE INDEX IF NOT EXISTS idx_products_retailer ON products(retailer);
+
+-- claim_floor_runs: every read is "the recent history of this check"
+CREATE INDEX IF NOT EXISTS idx_claim_floor_runs_ran_at ON claim_floor_runs(ran_at DESC);

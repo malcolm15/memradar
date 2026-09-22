@@ -3,14 +3,24 @@
 // Mirrors scripts/run-alert-check.js: thin wrapper, all logic in
 // backend/lib/priceFetch.js.
 //
-// Market stats recompute on the 08:00 UTC slot only (see priceFetch.js);
-// --market-stats / --no-market-stats force it either way for manual runs, and
-// scripts/compute-market-stats.js remains available on demand at any hour.
+// Market stats recompute on the 08:00 UTC slot OR when the stored figures are
+// more than 20h old, and that decision belongs to priceFetch.js because its
+// age half needs the database client (see shouldComputeStats there). This
+// runner used to make the call itself and pass it in, which meant the library's
+// own default was dead code and the fix had to be made in two places.
+// --market-stats / --no-market-stats still force it either way for manual runs,
+// and scripts/compute-market-stats.js remains available on demand at any hour.
+//
+// PRICE_FETCH_SUMMARY_PATH, when set, receives the run summary as JSON. The
+// workflow step that opens claim-floor issues reads it from there: parsing it
+// back out of stdout would break the first time a log line contained the word
+// SUMMARY.
 //
 // Exits nonzero on failure so the Action shows a red run and GitHub emails.
 // A failed run writes nothing further; the next run is at most 4 hours away.
 require('dotenv').config();
-const { runPriceFetch, MARKET_STATS_HOUR_UTC } = require('../backend/lib/priceFetch');
+const fs = require('fs');
+const { runPriceFetch } = require('../backend/lib/priceFetch');
 
 const CONFIRM = process.argv.includes('--confirm');
 const FORCE_STATS = process.argv.includes('--market-stats');
@@ -24,11 +34,28 @@ async function main() {
     process.exit(2);
   }
   const hour = new Date().getUTCHours();
-  const withMarketStats = FORCE_STATS ? true : SKIP_STATS ? false : hour === MARKET_STATS_HOUR_UTC;
-  log(`Price fetch starting (UTC hour ${hour}, market stats ${withMarketStats ? 'ON' : 'off'})`);
+  // Only pass the flag when a human forced it. Omitting it is what lets
+  // priceFetch.js apply hour-or-age; passing a computed value would put the
+  // gate back in two places.
+  const opts = FORCE_STATS ? { withMarketStats: true } : SKIP_STATS ? { withMarketStats: false } : {};
+  log(`Price fetch starting (UTC hour ${hour}, market stats ${FORCE_STATS ? 'FORCED ON' : SKIP_STATS ? 'FORCED off' : 'decided by hour-or-age'})`);
 
-  const summary = await runPriceFetch({ withMarketStats });
+  const summary = await runPriceFetch(opts);
   console.log('SUMMARY ' + JSON.stringify(summary));
+
+  // WRITTEN BEFORE THE ERROR CHECK BELOW, deliberately: a run with per-product
+  // errors still produced a claim-floor result, and the step that opens issues
+  // on a breach must not lose it because an unrelated product failed.
+  const summaryPath = process.env.PRICE_FETCH_SUMMARY_PATH;
+  if (summaryPath) {
+    try {
+      fs.writeFileSync(summaryPath, JSON.stringify(summary));
+      log(`Summary written to ${summaryPath}`);
+    } catch (err) {
+      log(`⚠ could not write the summary to ${summaryPath}: ${err.message}`);
+    }
+  }
+
   if (summary.errors && summary.errors.length) {
     throw new Error(`${summary.errors.length} per-product error(s) during the fetch`);
   }
