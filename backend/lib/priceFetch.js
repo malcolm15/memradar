@@ -24,6 +24,7 @@ const supabase = require('./supabase');
 const keepa = require('./keepa');
 const { computeMarketStats } = require('./marketStats');
 const { checkAlerts } = require('./alertCheck');
+const gitState = require('./gitState');
 const { upsertAmazonOffers, lastKnownPrices } = require('./amazonOffers');
 
 const defaultLog = (msg) => console.log(`[${new Date().toISOString()}] ${msg}`);
@@ -274,6 +275,12 @@ async function runPriceFetch(opts = {}) {
       const { error: cfErr } = await supabase.from('claim_floor_runs').insert({
         ran_at: new Date().toISOString(),
         computed_at: res.computedAt,
+        // WHICH BUILD THE CHECK ACTUALLY READ. The floors are read off baked
+        // HTML on disk, so a verdict without its commit is a verdict about an
+        // unknown page. id 1 of this table is the reason: it recorded a
+        // withdrawal from a tree one commit behind, hours after the regen had
+        // restored the finding. Null when git cannot answer, which is honest.
+        checked_commit: gitState.label(),
         status: cfStatus,
         checked: claimFloors.checked,
         ok_count: okRows.length,

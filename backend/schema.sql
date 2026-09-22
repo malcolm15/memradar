@@ -153,7 +153,14 @@ CREATE TABLE IF NOT EXISTS claim_floor_runs (
   tightest     JSONB,                               -- {id, min_margin_pp, floor_pct}
   breached     JSONB,
   unresolved   JSONB,
-  withdrawn    JSONB
+  withdrawn    JSONB,
+  -- WHICH BUILD THE CHECK READ (added 2026-09-22). The floors are read off
+  -- baked HTML on disk, so a verdict without its commit is a verdict about an
+  -- unknown page. Format: short sha, with '-dirty' and '-behind:N' suffixes
+  -- when they apply. NULL when git could not answer, which is honest: an
+  -- unknown commit is not a clean one. Row id 1 is null for that reason and is
+  -- the incident this column exists for.
+  checked_commit TEXT
 );
 
 -- SERVICE ROLE ONLY. RLS on with NO policy of any kind, which denies every
