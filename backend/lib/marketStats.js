@@ -170,13 +170,49 @@ async function computeMarketStats(supabase, batchTimestamp, log = () => {}) {
       const baselineAvg = median(matchedBaseline);
       const pct = ((currentAvg - baselineAvg) / baselineAvg) * 100;
 
-      // Same figure over the stable cohort. The DELTA is the tripwire: how
-      // much this number depends on which products happen to qualify.
-      const stCur = [], stBase = [];
+      // THREE FIGURES PER SEGMENT-PERIOD, and they answer three questions.
+      //   pct_change          ratio of medians, FULL cohort. What we publish.
+      //   stable_pct_change   the SAME statistic on the stable cohort, which is
+      //                       what makes stability_delta_pp a clean measure of
+      //                       cohort dependence: statistic fixed, population
+      //                       varied. Do not change this one.
+      //   stable_paired_pct   median of per-product ratios on the stable
+      //                       cohort. A like-for-like measure that the claim
+      //                       floors use, because it does not move when the
+      //                       median walks across a gap in the price list.
+      //
+      // Pairs, not two independent arrays. That is the whole point: the
+      // published figure divides two separately sorted lists, so losing members
+      // from one side of a gap moves each median on its own. Measured
+      // 2026-09-22 on ddr4 1y, three products aging out of the 6m window took
+      // the ratio of medians from +98.7% to +162.1% while the paired median
+      // moved 145.1 to 146.9. See CLAUDE.md, Market Pulse Stats.
+      const stPairs = [];
       for (const [productId, seg] of segmentByProduct) {
         if (seg !== segment || !stableIds.has(productId)) continue;
-        stCur.push(currentByProduct.get(productId));
-        stBase.push(baselineByProduct.get(productId).price);
+        stPairs.push({ cur: currentByProduct.get(productId), base: baselineByProduct.get(productId).price });
+      }
+      const stCur = stPairs.map((p) => p.cur), stBase = stPairs.map((p) => p.base);
+      const stablePaired = stPairs.length
+        ? round1((median(stPairs.map((p) => p.cur / p.base)) - 1) * 100)
+        : null;
+
+      // JACKKNIFE of the FULL cohort's published figure: recompute it n times
+      // with one product removed and report the range. STORED, NOT ACTED ON.
+      // It exists because product_count is not a proxy for robustness and the
+      // measurement says so: on 2026-09-22 the n=14 ddr4 1y stable cohort had a
+      // 3.6pp spread while the n=49 nvme 1y cohort had 22.0pp, one product
+      // moving it 18.3pp. Nothing reads this yet; it is here to accumulate
+      // history before anyone sets a threshold on it.
+      let jackknife = null;
+      if (matchedCurrent.length >= 3) {
+        const spreads = [];
+        for (let k = 0; k < matchedCurrent.length; k++) {
+          const c = matchedCurrent.filter((_, i) => i !== k);
+          const b = matchedBaseline.filter((_, i) => i !== k);
+          spreads.push(((median(c) - median(b)) / median(b)) * 100);
+        }
+        jackknife = round1(Math.max(...spreads) - Math.min(...spreads));
       }
       // STORED SIGNED, compared with Math.abs(). It was originally stored
       // absolute, on the reasoning that a "how much does this move" warning does
@@ -208,27 +244,52 @@ async function computeMarketStats(supabase, batchTimestamp, log = () => {}) {
         product_count: matchedCurrent.length,
         stability_delta_pp: stabilityDelta,
         stable_pct_change: stablePct,
+        stable_paired_pct: stablePaired,
+        jackknife_spread_pp: jackknife,
         stable_count: stCur.length,
       });
     }
   }
 
   const computedAt = new Date().toISOString();
-  // stable_count and stable_pct_change are derived context consumed in-process
-  // by the tripwire and the claim floors; neither is a stored column, so both
-  // are stripped before the write. Deliberately NOT persisted: the floors are a
-  // monitoring layer and adding a column would put a pending ALTER TABLE
-  // between them and the run that needs them.
-  const toRow = (s, withStability) => {
-    const { stable_count, stable_pct_change, stability_delta_pp, ...rest } = s;
-    return withStability
-      ? { ...rest, stability_delta_pp, computed_at: computedAt }
-      : { ...rest, computed_at: computedAt };
+  // stable_count and stable_pct_change stay IN-PROCESS ONLY. stable_pct_change
+  // is recoverable from a stored row as `pct_change - stability_delta_pp`, and
+  // stable_count is reportable in the summary; neither needs a column.
+  //
+  // stable_paired_pct and jackknife_spread_pp ARE persisted, because unlike the
+  // other two they cannot be reconstructed from anything stored: the paired
+  // median needs per-product pairs and the jackknife needs the whole cohort.
+  // Before 2026-09-22 the only record of a past run's cohort statistics was the
+  // Actions log line, which expires at 90 days.
+  const toRow = (s, withStability, withNew) => {
+    const { stable_count, stable_pct_change, stability_delta_pp, stable_paired_pct, jackknife_spread_pp, ...rest } = s;
+    const row = { ...rest, computed_at: computedAt };
+    if (withStability) row.stability_delta_pp = stability_delta_pp;
+    if (withNew) { row.stable_paired_pct = stable_paired_pct; row.jackknife_spread_pp = jackknife_spread_pp; }
+    return row;
   };
   let tripwireDisabled = false;
+  let pairedColumnsMissing = false;
   let { error: upsertErr } = await supabase
     .from('market_stats')
-    .upsert(stats.map((s) => toRow(s, true)), { onConflict: 'segment,period' });
+    .upsert(stats.map((s) => toRow(s, true, true)), { onConflict: 'segment,period' });
+  // Same degrade-loudly pattern the tripwire column uses. A pending ALTER must
+  // never fail the run and must never be quiet about it: the claim floors read
+  // stable_paired_pct, so while these columns are missing they fall back to the
+  // old reconstruction and that has to be visible in the log and the summary.
+  if (upsertErr && /stable_paired_pct|jackknife_spread_pp/.test(upsertErr.message)) {
+    pairedColumnsMissing = true;
+    log('*** PAIRED-COHORT COLUMNS MISSING ***');
+    log('    market_stats.stable_paired_pct / jackknife_spread_pp do not exist, so both');
+    log('    are computed and then DISCARDED. The claim floors fall back to the ratio-of-');
+    log('    medians stable figure, which is the measure that moved 63pp on a membership');
+    log('    change on 2026-09-22. Land the ALTER:');
+    log('    ALTER TABLE market_stats ADD COLUMN stable_paired_pct NUMERIC(7,1);');
+    log('    ALTER TABLE market_stats ADD COLUMN jackknife_spread_pp NUMERIC(7,1);');
+    ({ error: upsertErr } = await supabase
+      .from('market_stats')
+      .upsert(stats.map((s) => toRow(s, true, false)), { onConflict: 'segment,period' }));
+  }
   if (upsertErr && /stability_delta_pp/.test(upsertErr.message)) {
     // Column not added yet: write everything else rather than failing the run.
     //
@@ -246,12 +307,17 @@ async function computeMarketStats(supabase, batchTimestamp, log = () => {}) {
     log('    ALTER TABLE market_stats ADD COLUMN stability_delta_pp NUMERIC(6,1);');
     ({ error: upsertErr } = await supabase
       .from('market_stats')
-      .upsert(stats.map((s) => toRow(s, false)), { onConflict: 'segment,period' }));
+      .upsert(stats.map((s) => toRow(s, false, !pairedColumnsMissing)), { onConflict: 'segment,period' }));
   }
   if (upsertErr) throw upsertErr;
 
+  // One line per segment-period carrying all three figures and the spread, so a
+  // run's full cohort picture is readable without opening the summary JSON.
   for (const s of stats) {
-    log(`Market stats ${s.segment} [${s.period}]: current=$${s.current_avg_price} baseline=$${s.baseline_avg_price} change=${s.pct_change}% (n=${s.product_count}, stability ${s.stability_delta_pp == null ? 'n/a' : Math.abs(s.stability_delta_pp) + 'pp'})`);
+    const st = s.stable_pct_change == null ? 'n/a' : `${s.stable_pct_change}%`;
+    const pr = s.stable_paired_pct == null ? 'n/a' : `${s.stable_paired_pct}%`;
+    const jk = s.jackknife_spread_pp == null ? 'n/a' : `${s.jackknife_spread_pp}pp`;
+    log(`Market stats ${s.segment} [${s.period}]: full=${s.pct_change}% (n=${s.product_count}) stable=${st} paired=${pr} (stable n=${s.stable_count}) delta=${s.stability_delta_pp == null ? 'n/a' : Math.abs(s.stability_delta_pp) + 'pp'} jackknife=${jk} | current=$${s.current_avg_price} baseline=$${s.baseline_avg_price}`);
   }
 
   // THE TRIPWIRE ANNOUNCES ITSELF. A figure this cohort-sensitive must not be
@@ -284,7 +350,7 @@ async function computeMarketStats(supabase, batchTimestamp, log = () => {}) {
     claimFloors = { error: err.message };
   }
 
-  return { stats, excluded, computedAt, unstable, severe, tripwireDisabled, claimFloors };
+  return { stats, excluded, computedAt, unstable, severe, tripwireDisabled, pairedColumnsMissing, claimFloors };
 }
 
 // The stable-cohort figure for a STORED market_stats row. The single place

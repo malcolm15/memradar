@@ -75,6 +75,19 @@ CREATE TABLE IF NOT EXISTS market_stats (
   computed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- stable_paired_pct  (added 2026-09-22) median of per-product current/baseline
+--   ratios over the stable cohort. The published pct_change is a ratio of two
+--   INDEPENDENTLY sorted medians, so a membership change moves each median on
+--   its own: on 2026-09-22 three products aging out of the 6m window took ddr4
+--   1y from +98.7% to +162.1% while this figure moved 145.1 to 146.9. The claim
+--   floors read this one. Cannot be reconstructed from any other column.
+-- jackknife_spread_pp (added 2026-09-22) leave-one-out range of the FULL
+--   cohort's pct_change. STORED, NOT ACTED ON: product_count is not a proxy for
+--   robustness (n=14 spread 3.6pp, n=49 spread 22.0pp on the same day), and this
+--   accumulates the history someone will need before setting a threshold on it.
+ALTER TABLE market_stats ADD COLUMN IF NOT EXISTS stable_paired_pct   NUMERIC(7,1);
+ALTER TABLE market_stats ADD COLUMN IF NOT EXISTS jackknife_spread_pp NUMERIC(7,1);
+
 ALTER TABLE market_stats ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Public read market_stats" ON market_stats

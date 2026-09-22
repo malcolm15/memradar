@@ -206,15 +206,20 @@ async function runPriceFetch(opts = {}) {
       // this move" reading and readers of the JSON compare it against the 5/15pp
       // lines. The signed figure it came from is reported as stable_pct, which is
       // the more useful number anyway.
-      const shape = (u) => ({ segment: u.segment, period: u.period, pct_change: u.pct_change, moves_pp: Math.abs(u.stability_delta_pp), stable_pct: u.stable_pct_change });
+      const shape = (u) => ({ segment: u.segment, period: u.period, pct_change: u.pct_change, moves_pp: Math.abs(u.stability_delta_pp), stable_pct: u.stable_pct_change, stable_paired_pct: u.stable_paired_pct, jackknife_spread_pp: u.jackknife_spread_pp });
       unstableFigures = {
         // A DISABLED tripwire is reported as loudly as a firing one: absent
         // this field, "severe: []" is indistinguishable from "we never looked".
         disabled: res.tripwireDisabled === true,
+        // A pending ALTER on the paired columns is reported as loudly as a
+        // disabled tripwire, and for the same reason: while it is true the
+        // claim floors are running on the older, more fragile statistic.
+        paired_columns_missing: res.pairedColumnsMissing === true,
         severe: (res.severe || []).map(shape),
         moderate: (res.unstable || []).filter((u) => !(res.severe || []).includes(u)).map(shape),
       };
       if (res.tripwireDisabled) log('SUMMARY WILL REPORT: unstable_figures.disabled=true (tripwire column missing)');
+      if (res.pairedColumnsMissing) log('SUMMARY WILL REPORT: unstable_figures.paired_columns_missing=true (claim floors are on the ratio-of-medians fallback)');
 
       // PUBLISHED-CLAIM FLOORS ride the summary as their OWN field, not folded
       // into unstable_figures. The two answer different questions - "is this
