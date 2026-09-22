@@ -147,6 +147,12 @@ function perGb(v) {
 function monthYear(iso) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
 }
+// "2019-11" -> "November 2019", for prose that states a coverage bound.
+function longMonth(ym) {
+  const [y, m] = ym.split('-').map(Number);
+  return `${['January','February','March','April','May','June','July','August','September','October','November','December'][m - 1]} ${y}`;
+}
+
 function longDate(iso) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 }
@@ -3159,7 +3165,16 @@ function buildMonthlyCsv(products, buildDate) {
   // ASCII only, so the file reads identically whatever charset the server
   // announces. GitHub Pages cannot be told which one to send.
   if (/[^\x00-\x7f]/.test(csv)) throw new Error('monthly CSV contains a non-ASCII character');
-  return { csv, rows, starts };
+  // CLOSED BOUNDS over every row, the span the file actually covers. Two
+  // consumers need this and must not compute it separately: llms.txt states the
+  // first month in prose, and the shared Dataset JSON-LD declares
+  // temporalCoverage. /price-index/ used to declare 2015-11-12, the first day
+  // of one product's history, which described the raw price_history table
+  // rather than anything a reader could download: three of the four segments
+  // have no row before 2021.
+  const months = rows.map((r) => r[1]).sort();
+  const bounds = months.length ? { first: months[0], last: months[months.length - 1] } : null;
+  return { csv, rows, starts, bounds };
 }
 
 // -------------------------------------------------------------- /data/
@@ -3333,6 +3348,107 @@ function buildDataPage(ctx) {
     .replace(/<!--BUILD_DATE_LONG-->/g, buildDateLong);
   if (/<!--[A-Z_]+-->/.test(html)) throw new Error(`data page: unreplaced anchor ${(/<!--[A-Z_]+-->/.exec(html) || [])[0]}`);
   return { html, desc, title: pageTitle, findings: findings.items, earliest };
+}
+
+// ------------------------------------------------------------- /llms.txt
+// GENERATED, NOT HAND-WRITTEN, since 2026-09-22. It used to be a static file
+// whose every figure was typed by a human and monitored by nobody: the product
+// count, the earliest year and the CSV's first month were correct only for as
+// long as nobody changed the catalog, and it carried no findings at all, so the
+// one file written specifically for machines said less than the page written
+// for journalists.
+//
+// The hand-written prose lives in scripts/llms-template.txt. Only derived
+// values are substituted, and the findings come from the SAME buildFindings()
+// output /data/ uses, so the two cannot disagree. claimRegistry.js checks both
+// locations and treats a difference between them as a breach.
+const LLMS_TEMPLATE_PATH = path.join(__dirname, 'llms-template.txt');
+const LLMS_OUTPUT_PATH = path.join(FRONTEND, 'llms.txt');
+
+// The two products quoted as examples. PINNED, and deliberately so: they are
+// chosen for history depth (the deepest RAM series that is also a current
+// mainstream kit, and the deepest series on the site) and a rotating example
+// would make the file churn daily for no reader benefit. If either ever goes
+// noindex or leaves the sitemap the build FAILS rather than quoting a page we
+// tell crawlers not to index.
+const LLMS_EXAMPLE_SKUS = ['B0CJ8ZHMVF', 'B01LYFKX41'];
+
+// Lifted from the BUILT page, never recomputed. The whole point of an example
+// is that a reader can check it against the page, and a second computation is
+// exactly how the two drift apart: the Corsair's current price moved by a cent
+// between two readings on 2026-09-22 while this was being written.
+function exampleFromBuiltPage(product) {
+  const file = path.join(FRONTEND, product.category, product.slug, 'index.html');
+  let html;
+  try {
+    html = fs.readFileSync(file, 'utf8');
+  } catch (err) {
+    throw new Error(`llms.txt example ${product.sku}: cannot read its built page (${err.code || err.message})`);
+  }
+  if (/<meta name="robots" content="[^"]*noindex/.test(html)) {
+    throw new Error(`llms.txt example ${product.sku} is noindex; it must not be quoted as an example`);
+  }
+  const flat = html.replace(/<script[\s\S]*?<\/script>/g, '').replace(/\s+/g, ' ').replace(/<[^>]+>/g, '|');
+  const pick = (label) => {
+    const m = new RegExp(label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\|+([^|]+)').exec(flat);
+    return m ? m[1].trim() : null;
+  };
+  const h1m = /<h1[^>]*>([\s\S]*?)<\/h1>/.exec(html);
+  const h1 = h1m ? h1m[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim() : null;
+  const priceM = /"price":\s*"?([\d.]+)/.exec(html);
+  const fields = {
+    h1,
+    firstTracked: pick('First tracked'),
+    atl: pick('All-time low'),
+    ath: pick('All-time high'),
+    price: priceM ? priceM[1] : null,
+  };
+  const missing = Object.keys(fields).filter((k) => !fields[k]);
+  if (missing.length) throw new Error(`llms.txt example ${product.sku}: could not read ${missing.join(', ')} from its built page`);
+  return { ...fields, url: `${SITE}/${product.category}/${product.slug}/`, sku: product.sku };
+}
+
+function buildLlmsTxt(ctx) {
+  const { generable, findings, earliestYear, csvFirstMonth, sitemapXml } = ctx;
+
+  const bySku = new Map(generable.map((p) => [p.sku, p]));
+  const inSitemap = new Set([...sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]));
+  const examples = LLMS_EXAMPLE_SKUS.map((sku) => {
+    const p = bySku.get(sku);
+    if (!p) throw new Error(`llms.txt example ${sku} is not in the catalog; pick another or remove it`);
+    const ex = exampleFromBuiltPage(p);
+    if (!inSitemap.has(ex.url)) throw new Error(`llms.txt example ${sku} (${ex.url}) is not in the sitemap; it must not be quoted as an example`);
+    return ex;
+  });
+
+  const exampleText = examples.map((e) => [
+    `- ${e.h1} (${e.sku}), ${e.url}`,
+    `  First tracked ${e.firstTracked}. All-time low ${e.atl}. All-time high ${e.ath}. Current price ${money(Number(e.price))}.`,
+  ].join('\n')).join('\n\n');
+
+  // The findings, as sentences, with their dates. Same items, same order and
+  // the same withdrawal behaviour as /data/: a finding the generator declined
+  // to emit there is absent here too, which is what makes the two comparable.
+  const findingText = findings.map((it) => `- ${it.text} Computed ${it.when}.`).join('\n');
+
+  const tpl = fs.readFileSync(LLMS_TEMPLATE_PATH, 'utf8');
+  const out = tpl
+    .replace(/<!--PRODUCT_COUNT-->/g, String(generable.length))
+    .replace(/<!--EARLIEST_YEAR-->/g, earliestYear)
+    .replace(/<!--CSV_FIRST_MONTH-->/g, csvFirstMonth)
+    .replace(/<!--MIN_DAYS_INDEXABLE-->/g, String(MIN_DAYS_INDEXABLE))
+    .replace('<!--FINDINGS-->', findingText)
+    .replace('<!--EXAMPLES-->', exampleText);
+  if (/<!--[A-Z_]+-->/.test(out)) throw new Error(`llms.txt: unreplaced anchor ${(/<!--[A-Z_]+-->/.exec(out) || [])[0]}`);
+
+  // llms.txt IS NOT A PAGE. It must never enter the sitemap: it is a machine
+  // guide, not a document to index, and adding it would also make it eligible
+  // for IndexNow submission, which asks a search engine to crawl something it
+  // should not rank.
+  if (inSitemap.has(`${SITE}/llms.txt`) || /llms\.txt/.test(sitemapXml)) {
+    throw new Error('llms.txt has entered the sitemap; it is a machine guide, not a page, and must not be indexed or submitted');
+  }
+  return { text: out, examples, findings: findingText.split('\n').length };
 }
 
 // ---------------------------------------------------------- listing pages
@@ -4495,6 +4611,31 @@ async function run() {
     return;
   }
 
+  // MOVED AHEAD OF THE PRICE INDEX 2026-09-22: its bounds feed the shared
+  // Dataset JSON-LD that both /price-index/ and /data/ now emit, so the CSV
+  // has to exist before either page is built. It still lands before /data/,
+  // which links it.
+  // 2c-ter) The monthly CSV and the chart images drawn from it. Written
+  // BEFORE /data/, which links both and lists whichever chart files exist.
+  // Independently skippable: a failure leaves yesterday's file in place, and
+  // yesterday's file is still a correct description of every complete month.
+  let csvRows = null;
+  // Shared by llms.txt (prose) and the Dataset JSON-LD (temporalCoverage), both
+  // of which must state the span the published file actually covers.
+  let csvBounds = null;
+  if (!IS_SAMPLE) {
+    try {
+      const m = buildMonthlyCsv(generable, buildDate);
+      csvRows = m.rows;
+      csvBounds = m.bounds;
+      fs.mkdirSync(path.join(FRONTEND, CSV_PATH[0]), { recursive: true });
+      fs.writeFileSync(path.join(FRONTEND, ...CSV_PATH), m.csv);
+      log(`Monthly CSV written: /${CSV_PATH.join('/')} (${m.rows.length} rows, ${Buffer.byteLength(m.csv)} bytes; starts ${Object.entries(m.starts).map(([k, v]) => `${k} ${v}`).join(', ')})`);
+    } catch (e) {
+      log(`⚠ /${CSV_PATH.join('/')} NOT regenerated: ${e.message}`);
+    }
+  }
+
   // 2b) The Memory Price Index page (generated, so its baked table refreshes
   // with every regeneration; it also hydrates from market_stats on load).
   const { data: msRows, error: msErr } = await supabase
@@ -4546,10 +4687,11 @@ async function run() {
       since: p.series[0].day.slice(0, 4),
     }));
     const computedAt = msRows.map((r) => r.computed_at).sort().pop();
-    const html = buildPriceIndex({ marketStats: msRows, products: generable, statsBySku, flagship, computedAt });
+    const html = buildPriceIndex({ marketStats: msRows, products: generable, statsBySku, flagship, computedAt, csvBounds });
     const outDir = path.join(FRONTEND, 'price-index');
     fs.mkdirSync(outDir, { recursive: true });
     fs.writeFileSync(path.join(outDir, 'index.html'), html);
+
     log(`Price index written: ${msRows.length} market_stats rows, computed ${computedAt.slice(0, 10)}`);
   }
 
@@ -4620,22 +4762,6 @@ async function run() {
     }
   }
 
-  // 2c-ter) The monthly CSV and the chart images drawn from it. Written
-  // BEFORE /data/, which links both and lists whichever chart files exist.
-  // Independently skippable: a failure leaves yesterday's file in place, and
-  // yesterday's file is still a correct description of every complete month.
-  let csvRows = null;
-  if (!IS_SAMPLE) {
-    try {
-      const m = buildMonthlyCsv(generable, buildDate);
-      csvRows = m.rows;
-      fs.mkdirSync(path.join(FRONTEND, CSV_PATH[0]), { recursive: true });
-      fs.writeFileSync(path.join(FRONTEND, ...CSV_PATH), m.csv);
-      log(`Monthly CSV written: /${CSV_PATH.join('/')} (${m.rows.length} rows, ${Buffer.byteLength(m.csv)} bytes; starts ${Object.entries(m.starts).map(([k, v]) => `${k} ${v}`).join(', ')})`);
-    } catch (e) {
-      log(`⚠ /${CSV_PATH.join('/')} NOT regenerated: ${e.message}`);
-    }
-  }
 
   // Charts: dated files are write-once, -latest mirrors the newest dated file,
   // so a normal day writes nothing. A render failure leaves every existing
@@ -4652,14 +4778,21 @@ async function run() {
     }
   }
 
+  let dataFindings = null;
+  let dataEarliestYear = null;
   // 2c-quater) /data/, the press page. Same skip-rather-than-fail rule as the
   // guides: it argues from live figures and prints its own build date.
   if (!IS_SAMPLE && !msErr && msRows && msRows.length) {
     try {
       const computedAt = msRows.map((r) => r.computed_at).sort().pop();
-      const d = buildDataPage({ generable, marketStats: msRows, computedAt, buildDate, buildDateLong, charts: CHART_IMAGES.chartIndex(chartDir) });
+      const d = buildDataPage({ generable, marketStats: msRows, computedAt, buildDate, buildDateLong, charts: CHART_IMAGES.chartIndex(chartDir), csvBounds });
       fs.mkdirSync(path.join(FRONTEND, 'data'), { recursive: true });
       fs.writeFileSync(path.join(FRONTEND, 'data', 'index.html'), d.html);
+      // Held for llms.txt, which is written after the sitemap so its "not in
+      // the sitemap" assertion tests THIS run's sitemap rather than yesterday's.
+      // Same findings objects, so the two files cannot disagree.
+      dataFindings = d.findings;
+      dataEarliestYear = d.earliest;
       log(`Data page written: /data/ (${d.findings.length} findings, ${d.findings.filter((f) => f.floorPct != null).length} floored; earliest ${d.earliest})`);
     } catch (e) {
       log(`⚠ /data/ NOT regenerated: ${e.message}`);
@@ -4750,6 +4883,30 @@ async function run() {
   // lies is how you stop trusting the log.
   const staticCount = (fs.readFileSync(SITEMAP_PATH, 'utf8').match(/<loc>/g) || []).length - productEntries.length;
   fs.writeFileSync(LASTMOD_MANIFEST_PATH, JSON.stringify(manifest, null, 1) + '\n');
+
+  // llms.txt, written AFTER the sitemap so its two sitemap assertions test the
+  // file this run just produced. Skippable like every other content build: a
+  // failure here must not take a day's prices with it, and yesterday's llms.txt
+  // is still an accurate description of the site.
+  if (!IS_SAMPLE) {
+    if (!dataFindings || !csvBounds) {
+      log('⚠ /llms.txt NOT regenerated: it needs the /data/ findings and the monthly CSV bounds, and one of them did not build this run');
+    } else {
+      try {
+        const l = buildLlmsTxt({
+          generable,
+          findings: dataFindings,
+          earliestYear: dataEarliestYear,
+          csvFirstMonth: longMonth(csvBounds.first),
+          sitemapXml: fs.readFileSync(SITEMAP_PATH, 'utf8'),
+        });
+        fs.writeFileSync(LLMS_OUTPUT_PATH, l.text);
+        log(`llms.txt written: ${l.findings} findings, ${l.examples.length} product examples (${l.examples.map((e) => e.sku).join(', ')}), CSV from ${csvBounds.first}`);
+      } catch (e) {
+        log(`⚠ /llms.txt NOT regenerated: ${e.message}`);
+      }
+    }
+  }
 
   // IndexNow material list. Written AFTER the sitemap, because the sitemap is
   // the filter. The URL list goes to gitignored scripts/output/ (it is a

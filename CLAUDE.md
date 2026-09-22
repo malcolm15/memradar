@@ -962,6 +962,31 @@ Everything else checked out: the six-times-daily cadence (`0 */4 * * *` = 00/04/
 
 **FOOTER, NOT THE GUIDES INDEX.** The guides index is where a shopper chooses between editorial arguments, and it already carries an Explainers subheading for the same reason. Methodology is a reference document for a different reader, and filing it beside "Should I Buy RAM Now?" would misdescribe both. It sits in the footer next to Glossary and Price Index, which is where this site's reference material already lives. Links in: About's data paragraph (moved off `/faq/`), the Price Index methodology section, and four FAQ answers that previously restated the data sources.
 
+## llms.txt (GENERATED as of 2026-09-22, do NOT hand-edit)
+
+**`frontend/llms.txt` is generator output.** Edit `scripts/llms-template.txt`, never the served file: a regen overwrites it. The template holds the hand-written prose and four substituted values, all derived rather than typed: the product count, the earliest tracked year, the monthly CSV's first month and `MIN_DAYS_INDEXABLE`. Before this, every one of those was a human-typed number that nothing monitored, correct only for as long as nobody changed the catalog.
+
+**The findings section is the SAME `buildFindings()` items `/data/` renders**, same order, same floors and the same withdrawal behaviour, so the two files cannot drift. The registry enforces that: `bakedFindingFloor` reads the floor from `/data/`'s `data-floor-pct` attribute and then requires the identical sentence in `/llms.txt`. **Absent from both is a withdrawal; present in one only, or worded differently, is a BREACH**, routed through a `CLAIM_LOCATION_MISMATCH` code, because one public location then says something the other does not. The floor itself lives in one place: HTML has somewhere to put a machine-readable attribute and a plain-text file written to be quoted does not, so llms.txt carries the sentence and no scaffolding.
+
+**The two example products are PINNED** (`B0CJ8ZHMVF`, `B01LYFKX41`), chosen for history depth, and their sentences are **lifted from the built PDP, never recomputed**: h1, first tracked, all-time low and high with their dates, and the current price. A second computation is exactly how an example stops matching the page it points at. The build **throws** if either SKU leaves the catalog, goes noindex, or drops out of the sitemap.
+
+**BACKLOG, its own gated item: `indexnow-state.json` advances on GENERATE, not on SUBMIT, so any local regen consumes pending submissions.** State is written by the generator the moment it produces a page, and the submitting step reads it afterwards. A regen run locally therefore marks URLs as seen, and CI's regen the next morning finds nothing to send. It has happened twice and both were caught only because someone looked: **2026-09-21, 4 pages** (the explainer, both guides and /data/) and **2026-09-22, 2 pages** (/data/ and /price-index/ after the Dataset change), all submitted by hand afterwards. Two candidate fixes, and they are not equivalent: **advance the state only on a successful submit**, which makes the state mean "last submitted" and requires owning a retry queue that the current design deliberately refuses, or **make CI the only writer of the state file**, which keeps the semantics and costs a merge conflict whenever a local regen is committed. Decide before the next local regen, not during one.
+
+**llms.txt IS NOT A PAGE.** It is not in the sitemap and must never be, and the generator asserts that on every run. Being in the sitemap would also make it eligible for IndexNow, which would be asking a search engine to crawl something that should not rank.
+
+## Dataset JSON-LD (one node, two pages, 2026-09-22)
+
+**`datasetJsonLd()` emits one node with `@id` `https://memradar.com/data/#dataset`, rendered identically on `/data/` and `/price-index/`**, so the two pages describe the same dataset rather than two. `/data/` is the node's `url` because that is the page hosting the files.
+
+Three things it fixes, all found in the audit of the old inline block:
+- **`temporalCoverage` was `2015-11-12/..`**, the first day of one product's history. That describes the raw `price_history` table, not anything a reader can download: three of four segments have no row before 2021. It is now the monthly CSV's own closed bounds, **`2019-11/2026-08`**, from `buildMonthlyCsv`'s `bounds`, and identical on both pages by construction.
+- **`license` pointed at `/price-index/` itself.** It now points at `https://memradar.com/data/#how-to-cite`, the section that states the terms in prose. **Not `/terms.html`**, which says nothing about reuse of the data files, and **not an SPDX or Creative Commons URL**, which would assert a licence nobody granted.
+- **The description embedded a daily-growing observation count**, which made the page look materially changed to IndexNow every day. It is gone.
+
+**`distribution` declares exactly two files**, the monthly CSV (`text/csv`) and `raycast-v1-market.json` (`application/json`). **`raycast-v1-products.json` must never appear**, and the builder throws if any `contentUrl` matches `/products/i`: Keepa's consent covers a per-product file for the extension, not redistribution, and a distribution entry is an invitation to crawl and reuse.
+
+**BUILD ORDER: the monthly CSV is now built BEFORE the Price Index**, because its bounds feed the Dataset both pages emit. It still lands before `/data/`, which links it.
+
 ## Press page (`/data/`, 2026-09-15)
 
 "Memory Price Data for Journalists and Researchers". The page outreach pitches link to. Generated, sitemap priority 0.6, `WebPage` JSON-LD authored by Malcolm with the Organization as publisher. **Deliberately NOT in the main nav**: it is for someone arriving from a pitch, not a shopper.

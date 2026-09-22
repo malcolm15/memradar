@@ -75,10 +75,7 @@ const bakedPriceIndexFloor = () => bakedFloor(
 // prose stay words ("more than doubled") instead of being bent into a shape a
 // regex can read, while the monitor still reads the exact floor the generator
 // derived. Same principle as the Price Index tens-floor, one level finer.
-const bakedFindingFloor = (claimId) => () => bakedFloor(
-  PAGE('data', 'index.html'),
-  new RegExp(`data-claim="${claimId}"[^>]*data-floor-pct="(\\d+)"`),
-  '/data/', `the "${claimId}" finding`);
+
 
 // The SSD guide's META DESCRIPTION carries its own generated tens-floor, which
 // feeds <meta name="description">, Open Graph, Twitter, the JSON-LD description
@@ -89,6 +86,58 @@ const bakedSsdGuideMetaFloor = () => bakedFloor(
   PAGE('guides', 'should-i-buy-an-ssd-now', 'index.html'),
   /SSD prices are up more than (\d+)% year over year/,
   '/guides/should-i-buy-an-ssd-now/', 'the SSD guide meta description floor');
+
+// EVERY FINDING IS PUBLISHED IN TWO PLACES since 2026-09-22: the <li> on /data/
+// and a line in the generated /llms.txt. Both come from the same
+// buildFindings() items in the same regen, so they can only disagree if someone
+// hand-edits llms.txt or a bug creeps in, and that disagreement is exactly what
+// this is for.
+//
+// THE FLOOR IS CARRIED BY /data/ ALONE, and that is deliberate. It lives in a
+// data-floor-pct attribute, which is machine-readable because HTML has a place
+// to put machine-readable things. llms.txt is plain text read by people and
+// models; bolting a floor token onto a published sentence there would put
+// scaffolding into the one file written to be quoted. So: one floor per entry,
+// read from /data/, and llms.txt is checked for the SAME SENTENCE.
+//
+// Absent from both -> withdrawn, which is the generator declining to emit it.
+// Present in one only, or worded differently -> BREACH, because one of the two
+// public locations is then saying something the other does not.
+const LLMS_PATH = PAGE('llms.txt');
+const unescapeHtml = (t) => t
+  .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+  .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&#x27;/g, "'");
+
+const bakedFindingFloor = (claimId) => () => {
+  const onData = bakedFloor(
+    PAGE('data', 'index.html'),
+    new RegExp(`data-claim="${claimId}"[^>]*data-floor-pct="(\\d+)"`),
+    '/data/', `the "${claimId}" finding`);
+
+  // The sentence itself, from the same <li>, for the cross-location check.
+  let dataSentence = null;
+  try {
+    const html = fs.readFileSync(PAGE('data', 'index.html'), 'utf8');
+    const m = new RegExp(`data-claim="${claimId}"[^>]*>([\\s\\S]*?)<span`).exec(html);
+    if (m) dataSentence = unescapeHtml(m[1].replace(/<[^>]+>/g, '')).replace(/\s+/g, ' ').trim();
+  } catch { /* handled below */ }
+
+  let llms;
+  try {
+    llms = fs.readFileSync(LLMS_PATH, 'utf8');
+  } catch (err) {
+    const e = new Error(`cannot read /llms.txt to cross-check the "${claimId}" finding (${err.code || err.message})`);
+    e.code = 'CLAIM_LOCATION_MISMATCH';
+    throw e;
+  }
+  const inLlms = dataSentence != null && llms.includes(dataSentence);
+  if (!inLlms) {
+    const e = new Error(`the "${claimId}" finding is on /data/ but not in /llms.txt with the same wording; the two published locations disagree`);
+    e.code = 'CLAIM_LOCATION_MISMATCH';
+    throw e;
+  }
+  return { floorPct: onData.floorPct, source: `${onData.source}, and the same sentence in /llms.txt` };
+};
 
 const bakedListingFloor = (cat) => () => bakedFloor(
   PAGE(cat, 'index.html'),
@@ -277,12 +326,12 @@ const CLAIM_REGISTRY = [
   // wording follows the data rather than the other way round.
   {
     id: 'data-ddr5-1y',
-    page: '/data/',
-    where: 'Current findings',
+    page: '/data/ and /llms.txt',
+    where: 'Current findings, published in both locations from one buildFindings() item',
     sentence: 'The median DDR5 memory kit costs more than four times what it cost a year ago.',
     requires: [{ segment: 'ddr5', period: '1y' }],
     resolveFloor: bakedFindingFloor('data-ddr5-1y'),
-    floorLabel: 'the multiple baked into /data/',
+    floorLabel: 'the multiple baked into /data/, cross-checked against /llms.txt',
     // Generator-emitted, so an absent <li> is a DECISION, not drift: when the
     // worse cohort stops clearing the magnitude, buildFindings() withdraws the
     // finding and logs it, and this entry reports WITHDRAWN rather than
@@ -292,12 +341,12 @@ const CLAIM_REGISTRY = [
   },
   {
     id: 'data-ddr4-1y',
-    page: '/data/',
-    where: 'Current findings',
+    page: '/data/ and /llms.txt',
+    where: 'Current findings, published in both locations from one buildFindings() item',
     sentence: 'DDR4, the older generation, has more than doubled over the same year.',
     requires: [{ segment: 'ddr4', period: '1y' }],
     resolveFloor: bakedFindingFloor('data-ddr4-1y'),
-    floorLabel: 'the multiple baked into /data/',
+    floorLabel: 'the multiple baked into /data/, cross-checked against /llms.txt',
     // Generator-emitted, so an absent <li> is a DECISION, not drift: when the
     // worse cohort stops clearing the magnitude, buildFindings() withdraws the
     // finding and logs it, and this entry reports WITHDRAWN rather than
@@ -307,12 +356,12 @@ const CLAIM_REGISTRY = [
   },
   {
     id: 'data-ssd-1y',
-    page: '/data/',
-    where: 'Current findings',
+    page: '/data/ and /llms.txt',
+    where: 'Current findings, published in both locations from one buildFindings() item',
     sentence: 'Storage followed memory up: NVMe and SATA solid state drives have both more than doubled year over year.',
     requires: [{ segment: 'nvme_ssd', period: '1y' }, { segment: 'sata_ssd', period: '1y' }],
     resolveFloor: bakedFindingFloor('data-ssd-1y'),
-    floorLabel: 'the multiple baked into /data/, on BOTH drive segments',
+    floorLabel: 'the multiple baked into /data/, on BOTH drive segments, cross-checked against /llms.txt',
     // Generator-emitted, so an absent <li> is a DECISION, not drift: when the
     // worse cohort stops clearing the magnitude, buildFindings() withdraws the
     // finding and logs it, and this entry reports WITHDRAWN rather than
@@ -436,7 +485,19 @@ function checkClaimFloors(stats) {
       // Resumes checking BY ITSELF the first build that emits the finding
       // again: the presence of the sentence on the page is the state, so there
       // is no file to reset and nothing to remember.
-      if (err.code === 'CLAIM_TEXT_ABSENT' && entry.withdrawable) {
+      if (err.code === 'CLAIM_LOCATION_MISMATCH') {
+        // A BREACH, not an unresolved check. The claim is published in two
+        // places and they no longer say the same thing, so one of them is
+        // wrong and a person has to look. It carries no figures because no
+        // floor could be resolved to compare against.
+        breached.push({
+          ...summarise(entry),
+          floor_pct: null,
+          floor_source: 'both published locations',
+          figures: [],
+          breached_on: [err.message],
+        });
+      } else if (err.code === 'CLAIM_TEXT_ABSENT' && entry.withdrawable) {
         withdrawn.push({ ...summarise(entry), reason: err.message, means: entry.withdrawnMeans });
       } else {
         unresolved.push({ ...summarise(entry), reason: err.message });
@@ -519,7 +580,7 @@ function logClaimFloors(result, log) {
     for (const b of result.breached) {
       log(`    ${b.page} (${b.where})`);
       log(`      "${b.sentence}"`);
-      log(`      needs ${b.floor_source}; ${b.breached_on.join('; ')}`);
+      log(`      needs ${b.floor_source}${b.floor_pct == null ? '' : ` (${b.floor_pct}%)`}; ${b.breached_on.join('; ')}`);
     }
   }
   if (result.unresolved.length) {

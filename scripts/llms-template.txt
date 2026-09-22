@@ -1,14 +1,10 @@
 # MemRadar
 
-MemRadar tracks retail prices for 235 RAM and SSD products and keeps the history, so a shopper can tell a fair price from a bad one instead of guessing. Price history reaches back to 2015 for the longest-tracked products and is licensed from Keepa; current prices are compared across Amazon and Newegg, and the whole catalog is re-checked several times a day. The Memory Price Index aggregates that history into median price changes per segment (DDR5, DDR4, NVMe SSD, SATA SSD) over 1 month, 3 months, 6 months and 1 year, recomputed daily. Everything on the site is derived from recorded observations: there are no review scores, no star ratings, and no editorial claims that the data does not support.
+MemRadar tracks retail prices for <!--PRODUCT_COUNT--> RAM and SSD products and keeps the history, so a shopper can tell a fair price from a bad one instead of guessing. Price history reaches back to <!--EARLIEST_YEAR--> for the longest-tracked products and is licensed from Keepa; current prices are compared across Amazon and Newegg, and the whole catalog is re-checked several times a day. The Memory Price Index aggregates that history into median price changes per segment (DDR5, DDR4, NVMe SSD, SATA SSD) over 1 month, 3 months, 6 months and 1 year, recomputed daily. Everything on the site is derived from recorded observations: there are no review scores, no star ratings, and no editorial claims that the data does not support.
 
 ## Current findings
 
-- The median DDR5 memory kit costs more than four times what it cost a year ago. Computed September 22, 2026.
-- DDR4, the older generation, has more than doubled over the same year. Computed September 22, 2026.
-- Storage followed memory up: NVMe and SATA solid state drives have both more than doubled year over year. Computed September 22, 2026.
-- 206 of the 235 products MemRadar tracks, 88%, currently sell for at least one and a half times their lowest recorded price. Computed September 22, 2026.
-- 156 of the 235 tracked products sell for more than three times their lowest recorded price. Computed September 22, 2026.
+<!--FINDINGS-->
 
 Each figure carries the date it was computed. Figures over longer windows rest on smaller, older product sets, so they are stated as magnitudes rather than to a decimal place. The same findings, with the same wording, are on https://memradar.com/data/.
 
@@ -30,17 +26,13 @@ Each figure carries the date it was computed. Figures over longer windows rest o
 
 These two show what a product page holds. Both are quoted verbatim from the pages themselves.
 
-- CORSAIR Vengeance DDR5 32GB 6000MHz CL36 (B0CJ8ZHMVF), https://memradar.com/ram/corsair-vengeance-ddr5-ram-32gb-6000mhz/
-  First tracked October 6, 2023. All-time low $92.99 on November 23, 2024. All-time high $608.03 on August 2, 2026. Current price $568.00.
-
-- Samsung 960 EVO Series- 250GB PCIe NVMe (B01LYFKX41), https://memradar.com/ssd/samsung-960-evo-series-250gb-pcie-nvme/
-  First tracked November 27, 2016. All-time low $47.99 on August 16, 2022. All-time high $249.11 on February 15, 2019. Current price $213.53.
+<!--EXAMPLES-->
 
 ## Notes for reuse
 
 - Price figures change daily. A page's own "last updated" line states when its figures were computed.
 - Figures over longer windows rest on smaller, older product sets, so quote long-window percentages as magnitudes rather than to a decimal.
-- Product pages with under 30 days of tracked history carry noindex and are excluded from the sitemap; they hold too little history to be worth citing.
+- Product pages with under <!--MIN_DAYS_INDEXABLE--> days of tracked history carry noindex and are excluded from the sitemap; they hold too little history to be worth citing.
 - Amazon and Newegg links are affiliate links. Price history is Amazon data licensed from Keepa. Newegg data comes from Rakuten Advertising.
 
 ## Data for developers
@@ -48,7 +40,7 @@ These two show what a product page holds. Both are quoted verbatim from the page
 Two files are public and free to use with attribution:
 
 - /data/raycast-v1-market.json - median price and median price per gigabyte for each segment (DDR5, DDR4, NVMe, SATA), with the change over one month, three months, six months and a year and the number of products each was measured across. Regenerated daily and carries the date it was computed. The version sits in the path, so this file keeps its shape and any change ships as a new version beside it.
-- /data/memradar-price-index-monthly.csv - monthly price levels per segment, back to November 2019 on the longest series, with the product count behind every row. Regenerated daily. Read the # comment lines at the top of the file before computing any change from it, because a change computed between two rows is not the same measure as the Price Index.
+- /data/memradar-price-index-monthly.csv - monthly price levels per segment, back to <!--CSV_FIRST_MONTH--> on the longest series, with the product count behind every row. Regenerated daily. Read the # comment lines at the top of the file before computing any change from it, because a change computed between two rows is not the same measure as the Price Index.
 
 Attribution to MemRadar is required when you use either file: Source: MemRadar Memory Price Index, memradar.com/price-index/
 
