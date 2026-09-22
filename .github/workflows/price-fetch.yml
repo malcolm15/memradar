@@ -13,6 +13,12 @@
 # Failure surfacing matches newegg-refresh: any error exits nonzero -> red run
 # + GitHub's failure email. A failed run writes nothing further; the next run
 # is at most 4 hours away.
+#
+# The 08:00 slot also recomputes market stats, the stability tripwire and the
+# published-claim floors - or the first slot more than 20h after the last
+# compute, whichever comes first. The exact-hour test alone missed 4 of the 12
+# complete days to 2026-09-21 because GitHub delivers scheduled runs late. See
+# shouldComputeStats() in backend/lib/priceFetch.js.
 name: price-fetch
 
 on:
@@ -29,6 +35,12 @@ jobs:
   fetch-prices:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # issues: write is for the claim-floor step below and nothing else. The
+    # default token would otherwise carry write scopes this job has no use for,
+    # so contents is pinned to read in the same block.
+    permissions:
+      contents: read
+      issues: write
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -42,4 +54,31 @@ jobs:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          # The runner writes its summary here so the next step can read the
+          # claim-floor verdict as JSON instead of parsing it back out of the log.
+          PRICE_FETCH_SUMMARY_PATH: ${{ runner.temp }}/price-fetch-summary.json
         run: node scripts/run-price-fetch.js --confirm
+
+      # OUTCOME-LEVEL CHECK. The rungs below this one ask whether the job ran
+      # and whether it produced output. This one asks whether the verdict
+      # INSIDE the job reached a person: on 2026-09-20 the claim-floor monitor
+      # reported three breached sentences into a green run's log and the site
+      # served them for two more days.
+      #
+      # if: always() so a fetch that failed on some products still routes the
+      # verdict it did produce. continue-on-error so this can never redden the
+      # run: a wrong sentence is a copy problem, and failing the price fetch
+      # over it would trade it for a missing day of prices. The script exits 0
+      # on every path as well, which is belt and braces on purpose.
+      - name: Route claim-floor breaches to issues
+        if: always()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PRICE_FETCH_SUMMARY_PATH: ${{ runner.temp }}/price-fetch-summary.json
+        run: |
+          gh label create claim-floor \
+            --color B60205 \
+            --description "A published magnitude claim is unsupported or withdrawn" \
+            --repo "$GITHUB_REPOSITORY" || true
+          node scripts/claim-floor-issues.js --confirm
