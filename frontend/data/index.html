@@ -53,6 +53,55 @@
       "isAccessibleForFree": true
     },
     {
+      "@type": "Dataset",
+      "@id": "https://memradar.com/data/#dataset",
+      "name": "MemRadar Memory Price Index",
+      "url": "https://memradar.com/data/",
+      "description": "Median retail price levels and median price changes for DDR5, DDR4, NVMe SSD and SATA SSD segments, computed from daily price observations across the RAM and SSD products MemRadar tracks. Monthly levels are published as CSV and current segment medians as JSON.",
+      "creator": {
+        "@type": "Organization",
+        "name": "MemRadar",
+        "url": "https://memradar.com/"
+      },
+      "isAccessibleForFree": true,
+      "license": "https://memradar.com/data/#how-to-cite",
+      "creditText": "MemRadar Memory Price Index, memradar.com/price-index/",
+      "temporalCoverage": "2019-11/2026-08",
+      "variableMeasured": [
+        {
+          "@type": "PropertyValue",
+          "name": "DDR5 median price change"
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "DDR4 median price change"
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "NVMe SSD median price change"
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "SATA SSD median price change"
+        }
+      ],
+      "distribution": [
+        {
+          "@type": "DataDownload",
+          "name": "Monthly price levels by segment (CSV)",
+          "contentUrl": "https://memradar.com/data/memradar-price-index-monthly.csv",
+          "encodingFormat": "text/csv"
+        },
+        {
+          "@type": "DataDownload",
+          "name": "Segment medians and period changes (JSON)",
+          "contentUrl": "https://memradar.com/data/raycast-v1-market.json",
+          "encodingFormat": "application/json"
+        }
+      ],
+      "dateModified": "2026-09-22"
+    },
+    {
       "@type": "BreadcrumbList",
       "itemListElement": [
         {
@@ -182,7 +231,7 @@
         <li>156 of the 235 tracked products sell for more than three times their lowest recorded price. <span class="data-finding-date">Computed September 22, 2026.</span></li>
       </ul>
 
-      <h2>How to cite</h2>
+      <h2 id="how-to-cite">How to cite</h2>
       <p>Suggested attribution:</p>
       <p class="pi-citation">Source: MemRadar Memory Price Index, memradar.com/price-index/</p>
       <p>Please include the date the figure was computed, which appears on every page carrying data. Figures change daily.</p>

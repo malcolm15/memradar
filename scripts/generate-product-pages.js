@@ -2117,6 +2117,65 @@ const PI_SEGMENTS = [
 ];
 const PI_PERIODS = ['1m', '3m', '6m', '1y'];
 
+// ------------------------------------------------------------- Dataset JSON-LD
+// ONE DEFINITION, EMITTED IDENTICALLY ON /data/ AND /price-index/, with a
+// shared @id so the two pages describe the SAME dataset rather than two.
+//
+// It used to live inline on /price-index/ only, and three things were wrong
+// with it. It declared temporalCoverage "2015-11-12/..", the first day of one
+// product's history, which describes the raw price_history table rather than
+// anything a reader can download: three of the four segments have no row
+// before 2021. It pointed `license` at /price-index/ itself rather than at a
+// statement of terms. And its description embedded a daily-growing observation
+// count, which made the page look materially changed to IndexNow every day.
+//
+// The count is gone, the coverage comes from the CSV's own closed bounds, and
+// the licence points at the section that actually states the terms.
+const DATASET_ID = `${SITE}/data/#dataset`;
+const DATASET_LICENSE = `${SITE}/data/#how-to-cite`;
+
+function datasetJsonLd({ csvBounds, buildDate }) {
+  if (!csvBounds) throw new Error('Dataset JSON-LD: no CSV bounds, so temporalCoverage cannot be stated honestly');
+  const distribution = [
+    {
+      '@type': 'DataDownload',
+      name: 'Monthly price levels by segment (CSV)',
+      contentUrl: `${SITE}/data/memradar-price-index-monthly.csv`,
+      encodingFormat: 'text/csv',
+    },
+    {
+      '@type': 'DataDownload',
+      name: 'Segment medians and period changes (JSON)',
+      contentUrl: `${SITE}/data/raycast-v1-market.json`,
+      encodingFormat: 'application/json',
+    },
+  ];
+  // THE PER-PRODUCT FILE IS NOT PUBLISHED AND MUST NEVER BE DECLARED HERE.
+  // Keepa's consent covers a downsampled per-product file FOR THE EXTENSION,
+  // not for redistribution, and a distribution entry in structured data is an
+  // invitation to crawl and reuse. Asserted rather than trusted to review.
+  for (const d of distribution) {
+    if (/products/i.test(d.contentUrl)) {
+      throw new Error(`Dataset JSON-LD: distribution ${d.contentUrl} looks like the per-product file, which must never be declared`);
+    }
+  }
+  return {
+    '@type': 'Dataset',
+    '@id': DATASET_ID,
+    name: 'MemRadar Memory Price Index',
+    url: `${SITE}/data/`,
+    description: 'Median retail price levels and median price changes for DDR5, DDR4, NVMe SSD and SATA SSD segments, computed from daily price observations across the RAM and SSD products MemRadar tracks. Monthly levels are published as CSV and current segment medians as JSON.',
+    creator: { '@type': 'Organization', name: 'MemRadar', url: SITE + '/' },
+    isAccessibleForFree: true,
+    license: DATASET_LICENSE,
+    creditText: 'MemRadar Memory Price Index, memradar.com/price-index/',
+    temporalCoverage: `${csvBounds.first}/${csvBounds.last}`,
+    variableMeasured: PI_SEGMENTS.map((sg) => ({ '@type': 'PropertyValue', name: sg.label + ' median price change' })),
+    distribution,
+    dateModified: buildDate,
+  };
+}
+
 // Same thresholds as the homepage Market Pulse: rising prices are bad for
 // buyers, so >=10% up is red, a small rise is orange, any fall is green.
 function piCellClass(pct) {
@@ -2223,19 +2282,7 @@ function buildPriceIndex(ctx) {
   const jsonld = JSON.stringify({
     '@context': 'https://schema.org',
     '@graph': [
-      {
-        '@type': 'Dataset',
-        name: 'MemRadar Memory Price Index',
-        description: `Median price changes for DDR5, DDR4, NVMe SSD and SATA SSD segments over 1 month, 3 month, 6 month and 1 year periods, computed from ${observations} daily price points across ${products.length} tracked products.`,
-        url: SITE + '/price-index/',
-        creator: { '@type': 'Organization', name: 'MemRadar', url: SITE + '/' },
-        temporalCoverage: `${oldestDay}/..`,
-        isAccessibleForFree: true,
-        license: SITE + '/price-index/',
-        creditText: 'MemRadar Memory Price Index, memradar.com/price-index/',
-        variableMeasured: PI_SEGMENTS.map((sg) => ({ '@type': 'PropertyValue', name: sg.label + ' median price change' })),
-        dateModified: computedAt.slice(0, 10),
-      },
+      datasetJsonLd({ csvBounds: ctx.csvBounds, buildDate: computedAt.slice(0, 10) }),
       { '@type': 'WebPage', name: 'The MemRadar Memory Price Index', url: SITE + '/price-index/' },
       {
         '@type': 'BreadcrumbList',
@@ -3293,6 +3340,7 @@ function buildFindings(ctx) {
 
 function buildDataPage(ctx) {
   const { generable, marketStats, computedAt, buildDate, buildDateLong, charts } = ctx;
+  if (!ctx.csvBounds) throw new Error('data page: no CSV bounds, so its Dataset temporalCoverage cannot be stated');
   if (!marketStats || !marketStats.length) throw new Error('no market_stats rows; refusing to publish a press page with no findings');
   const dist = atlMultipleDistribution(generable);
   const findings = buildFindings({ marketStats, dist, computedAt, buildDate });
@@ -3328,6 +3376,10 @@ function buildDataPage(ctx) {
         publisher: PUBLISHER_ORG,
         isAccessibleForFree: true,
       },
+      // THE SAME Dataset NODE /price-index/ EMITS, same @id, so the two pages
+      // describe one dataset rather than two. This is the page that hosts the
+      // files, which is why the node's url and license point here.
+      datasetJsonLd({ csvBounds: ctx.csvBounds, buildDate }),
       { '@type': 'BreadcrumbList', itemListElement: [
         { '@type': 'ListItem', position: 1, name: 'Home', item: SITE + '/' },
         { '@type': 'ListItem', position: 2, name: 'Data for journalists', item: url },

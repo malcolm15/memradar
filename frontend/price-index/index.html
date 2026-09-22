@@ -32,18 +32,19 @@
   "@graph": [
     {
       "@type": "Dataset",
+      "@id": "https://memradar.com/data/#dataset",
       "name": "MemRadar Memory Price Index",
-      "description": "Median price changes for DDR5, DDR4, NVMe SSD and SATA SSD segments over 1 month, 3 month, 6 month and 1 year periods, computed from 70795 daily price points across 235 tracked products.",
-      "url": "https://memradar.com/price-index/",
+      "url": "https://memradar.com/data/",
+      "description": "Median retail price levels and median price changes for DDR5, DDR4, NVMe SSD and SATA SSD segments, computed from daily price observations across the RAM and SSD products MemRadar tracks. Monthly levels are published as CSV and current segment medians as JSON.",
       "creator": {
         "@type": "Organization",
         "name": "MemRadar",
         "url": "https://memradar.com/"
       },
-      "temporalCoverage": "2015-11-12/..",
       "isAccessibleForFree": true,
-      "license": "https://memradar.com/price-index/",
+      "license": "https://memradar.com/data/#how-to-cite",
       "creditText": "MemRadar Memory Price Index, memradar.com/price-index/",
+      "temporalCoverage": "2019-11/2026-08",
       "variableMeasured": [
         {
           "@type": "PropertyValue",
@@ -60,6 +61,20 @@
         {
           "@type": "PropertyValue",
           "name": "SATA SSD median price change"
+        }
+      ],
+      "distribution": [
+        {
+          "@type": "DataDownload",
+          "name": "Monthly price levels by segment (CSV)",
+          "contentUrl": "https://memradar.com/data/memradar-price-index-monthly.csv",
+          "encodingFormat": "text/csv"
+        },
+        {
+          "@type": "DataDownload",
+          "name": "Segment medians and period changes (JSON)",
+          "contentUrl": "https://memradar.com/data/raycast-v1-market.json",
+          "encodingFormat": "application/json"
         }
       ],
       "dateModified": "2026-09-22"
