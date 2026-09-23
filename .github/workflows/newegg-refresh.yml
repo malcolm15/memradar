@@ -85,6 +85,7 @@ jobs:
     permissions:
       contents: write
       actions: write   # to dispatch the Pages deploy after committing
+      issues: write    # ONLY for "Check the figures this build used" below
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -107,7 +108,27 @@ jobs:
           RAKUTEN_AFFILIATE_ID: ${{ secrets.RAKUTEN_AFFILIATE_ID }}
         run: |
           set -euo pipefail   # any generator error fails the job, committing nothing
-          node scripts/generate-product-pages.js --confirm
+          # Tee'd so the next step can read the generator's own STATS_SOURCE
+          # line. pipefail keeps the generator's exit code through the pipe.
+          node scripts/generate-product-pages.js --confirm | tee "$RUNNER_TEMP/regen.log"
+
+      # DID THE CONSUMER GET TODAY'S FIGURES? The rungs below ask whether the
+      # job ran, whether it produced output, and whether the verdict inside it
+      # reached a human. On 2026-09-23 all three were green while /data/ went
+      # live reading "Computed September 22" under a page stamped September 23.
+      #
+      # It reads the generator's OWN read (STATS_SOURCE), not a fresh query, so
+      # it reports what actually got baked. continue-on-error and a script that
+      # exits 0 on every path: a freshness notice must never redden a regen, and
+      # the build is never blocked, because stale-but-dated pages are the
+      # accepted residual.
+      - name: Check the figures this build used
+        if: always()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REGEN_LOG: ${{ runner.temp }}/regen.log
+        run: node scripts/stats-freshness-issue.js --confirm
 
       - name: Commit the regenerated pages
         id: commit

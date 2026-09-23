@@ -4692,6 +4692,33 @@ async function run() {
   // with every regeneration; it also hydrates from market_stats on load).
   const { data: msRows, error: msErr } = await supabase
     .from('market_stats').select('segment, period, pct_change, product_count, computed_at, stability_delta_pp');
+
+  // WHAT THIS BUILD ACTUALLY READ, emitted machine-readably for the workflow
+  // step that checks whether the consumer got today's figures.
+  //
+  // IT REPORTS THE GENERATOR'S OWN READ, NOT A SEPARATE QUERY, and that is the
+  // whole point. A pre-build check would ask the database a question the
+  // generator answers again twenty seconds later, and the two can differ: it
+  // is THIS read that gets baked into /price-index/, /data/, /llms.txt, both
+  // guides and /methodology/. A check that passes while the build used
+  // something else is the exact shape of a check that passes for the wrong
+  // reason.
+  //
+  // computed_at is null when market_stats was unreadable or empty, which is a
+  // different and worse state than "yesterday's figures" and the consumer of
+  // this line has to be able to tell them apart.
+  {
+    const computedAt = msErr || !msRows || !msRows.length
+      ? null
+      : msRows.map((r) => r.computed_at).sort().pop();
+    console.log('STATS_SOURCE ' + JSON.stringify({
+      computed_at: computedAt,
+      computed_date: computedAt ? computedAt.slice(0, 10) : null,
+      rows: msErr || !msRows ? 0 : msRows.length,
+      error: msErr ? msErr.message : null,
+    }));
+  }
+
   if (msErr) {
     log(`⚠ market_stats unavailable (${msErr.message}) - price index NOT regenerated this run`);
   } else if (!msRows.length) {
