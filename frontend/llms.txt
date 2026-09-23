@@ -7,8 +7,8 @@ MemRadar tracks retail prices for 235 RAM and SSD products and keeps the history
 - The median DDR5 memory kit costs more than four times what it cost a year ago. Computed September 22, 2026.
 - DDR4, the older generation, has more than doubled over the same year. Computed September 22, 2026.
 - Storage followed memory up: NVMe and SATA solid state drives have both more than doubled year over year. Computed September 22, 2026.
-- 206 of the 235 products MemRadar tracks, 88%, currently sell for at least one and a half times their lowest recorded price. Computed September 22, 2026.
-- 156 of the 235 tracked products sell for more than three times their lowest recorded price. Computed September 22, 2026.
+- 206 of the 235 products MemRadar tracks, 88%, currently sell for at least one and a half times their lowest recorded price. Computed September 23, 2026.
+- 155 of the 235 tracked products sell for more than three times their lowest recorded price. Computed September 23, 2026.
 
 Each figure carries the date it was computed. Figures over longer windows rest on smaller, older product sets, so they are stated as magnitudes rather than to a decimal place. The same findings, with the same wording, are on https://memradar.com/data/.
 
@@ -34,7 +34,7 @@ These two show what a product page holds. Both are quoted verbatim from the page
   First tracked October 6, 2023. All-time low $92.99 on November 23, 2024. All-time high $608.03 on August 2, 2026. Current price $568.00.
 
 - Samsung 960 EVO Series- 250GB PCIe NVMe (B01LYFKX41), https://memradar.com/ssd/samsung-960-evo-series-250gb-pcie-nvme/
-  First tracked November 27, 2016. All-time low $47.99 on August 16, 2022. All-time high $249.11 on February 15, 2019. Current price $213.53.
+  First tracked November 27, 2016. All-time low $47.99 on August 16, 2022. All-time high $249.11 on February 15, 2019. Current price $214.95.
 
 ## Notes for reuse
 
