@@ -95,15 +95,31 @@ const WATCH = [
     job_id: 'regenerate-pages',
     cron: '0 9 * * *',
     interval_hours: 24,
-    p95_minutes: 49.0, // n=1 -- see REVISIT note below
+    p95_minutes: 408.1, // n=15, measured 2026-09-23
     margin_hours: 6, // 0.25x interval
-    max_age_hours: 30.82, // 24 + 0.817 + 6 = 30.817
-    // MARGIN 0.25x, the tightest on the board and deliberately so. Per
-    // CLAUDE.md the guides and Price Index ARGUE from baked values, rank
+    max_age_hours: 36.80, // 24 + 6.802 + 6 = 36.802
+    // P95 CORRECTED 2026-09-23, AND IT WAS WRONG BY A FACTOR OF EIGHT. It read
+    // 49.0 minutes from a SINGLE observation. Measured over n=15 runs this job
+    // arrives between 12:46 and 15:48 against a 09:00 cron: p50 4.74h, p90
+    // 6.18h, p95 6.80h (408.1 min), max 6.81h. The old figure was a
+    // placeholder that nobody went back for, and it sat inside an arithmetic
+    // the file asserts at tick time, so the assertion was faithfully checking
+    // a wrong input.
+    //
+    // NO FALSE ALARM EVER FIRED, which is why it went unnoticed: the largest
+    // observed gap between consecutive successes is 26.27h, still inside the
+    // old 30.82h. The correction is about the number being right, not about a
+    // bug it caused.
+    //
+    // MARGIN 0.25x, the tightest on the board and deliberately so, unchanged.
+    // Per CLAUDE.md the guides and Price Index ARGUE from baked values, rank
     // products, print their own build date and tell the reader they update
     // automatically. A stale build is therefore a page making a false claim
     // about itself, which makes a single miss already a correctness problem
-    // rather than a latency problem. 30.82h alerts the same day it happens.
+    // rather than a latency problem. The margin is unchanged BECAUSE the
+    // reasoning behind it is unchanged; only the delivery measurement moved,
+    // and 36.80h still alerts within a day of a genuine miss (a miss shows as
+    // ~48h since the last success).
   },
   {
     workflow_file: 'bluesky-posts.yml',
