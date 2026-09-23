@@ -3,9 +3,9 @@
 // Mirrors scripts/run-alert-check.js: thin wrapper, all logic in
 // backend/lib/priceFetch.js.
 //
-// Market stats recompute on the 08:00 UTC slot OR when the stored figures are
-// more than 20h old, and that decision belongs to priceFetch.js because its
-// age half needs the database client (see shouldComputeStats there). This
+// Market stats recompute on the first run at or after 08:00 UTC on a UTC day
+// that has no compute yet, and that decision belongs to priceFetch.js because
+// the today-check needs the database client (see shouldComputeStats there). This
 // runner used to make the call itself and pass it in, which meant the library's
 // own default was dead code and the fix had to be made in two places.
 // --market-stats / --no-market-stats still force it either way for manual runs,
@@ -37,7 +37,7 @@ async function main() {
   }
   const hour = new Date().getUTCHours();
   // Only pass the flag when a human forced it. Omitting it is what lets
-  // priceFetch.js apply hour-or-age; passing a computed value would put the
+  // priceFetch.js apply the calendar rule; passing a computed value would put the
   // gate back in two places.
   let opts = FORCE_STATS ? { withMarketStats: true } : SKIP_STATS ? { withMarketStats: false } : {};
 
@@ -63,7 +63,7 @@ async function main() {
   }
 
   const treeLabel = gitState.label() || 'unknown (git unavailable)';
-  log(`Price fetch starting (UTC hour ${hour}, tree ${treeLabel}, market stats ${opts.withMarketStats === true ? 'FORCED ON' : opts.withMarketStats === false ? 'off' : 'decided by hour-or-age'})`);
+  log(`Price fetch starting (UTC hour ${hour}, tree ${treeLabel}, market stats ${opts.withMarketStats === true ? 'FORCED ON' : opts.withMarketStats === false ? 'off' : 'decided by the calendar rule'})`);
 
   const summary = await runPriceFetch(opts);
   console.log('SUMMARY ' + JSON.stringify(summary));

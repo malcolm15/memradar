@@ -10,8 +10,8 @@
 // opens and closes issues, but it has no database credential and no Supabase
 // client, and giving it one would put a fifth secret in a fifth place to read
 // a value this job already holds in memory. The absence case the supervisor
-// would have covered ("stats never ran") is covered instead by the hour-or-age
-// gate plus the freshness alarm it already has on price-fetch.yml.
+// would have covered ("stats never ran") is covered instead by the calendar
+// stats gate plus the freshness alarm it already has on price-fetch.yml.
 //
 // DRY RUN BY DEFAULT. --confirm creates, comments and closes. Anything else
 // prints what it would do and touches nothing, which is how the titles and

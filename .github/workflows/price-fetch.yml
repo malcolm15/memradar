@@ -14,11 +14,12 @@
 # + GitHub's failure email. A failed run writes nothing further; the next run
 # is at most 4 hours away.
 #
-# The 08:00 slot also recomputes market stats, the stability tripwire and the
-# published-claim floors - or the first slot more than 20h after the last
-# compute, whichever comes first. The exact-hour test alone missed 4 of the 12
-# complete days to 2026-09-21 because GitHub delivers scheduled runs late. See
-# shouldComputeStats() in backend/lib/priceFetch.js.
+# Market stats, the stability tripwire and the published-claim floors run on the
+# FIRST run at or after 08:00 UTC on a UTC day that has no compute yet. Not the
+# 08:00 slot exactly: over 18 days it arrived between 08:27 and 09:31, so an
+# exact-hour test caught it only about half the time. Not an age ceiling either:
+# that drifts to the afternoon slot and stays there, behind the regen that reads
+# the figures. See shouldComputeStats() in backend/lib/priceFetch.js.
 name: price-fetch
 
 on:

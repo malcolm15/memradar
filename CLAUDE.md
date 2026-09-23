@@ -834,14 +834,43 @@ The generator **writes first, then sweeps only orphans**. It used to delete ever
 
 Three things changed together, and the middle one is the load-bearing idea:
 - **`claim_floor_runs`** records one row per stats run that reached the check, **clean runs included**, with `ran_at` (when the check executed) and `computed_at` (the `market_stats` run it checked) as separate columns, because their divergence is the other half of the bug. Writing OK runs is what makes the **absence** of a row for a day a signal in itself.
-- **The Actions job opens the GitHub issue**, not the supervisor. The supervisor Worker already has issue open/close machinery with title dedup, but it holds no database credential and no Supabase client, and giving it one would put a fifth secret in a fifth place to read a value the fetch job already has in memory. The absence case the supervisor would have covered is covered instead by the hour-or-age gate below plus the freshness alarm it already runs on `price-fetch.yml`. Fewer moving parts wins.
+- **The Actions job opens the GitHub issue**, not the supervisor. The supervisor Worker already has issue open/close machinery with title dedup, but it holds no database credential and no Supabase client, and giving it one would put a fifth secret in a fifth place to read a value the fetch job already has in memory. The absence case the supervisor would have covered is covered instead by the stats gate below plus the freshness alarm it already runs on `price-fetch.yml`. Fewer moving parts wins.
 - **`scripts/claim-floor-issues.js`**, dry run by default, one issue per entry id. **The dedup rule differs by state on purpose.** BREACHED checks OPEN issues only: a closed issue means someone judged it dealt with, so a breach still present on the next run deserves a fresh issue rather than a comment on a closed one. WITHDRAWN checks open AND closed: it is informational, and DDR4 sitting at 98.7% for a month is one issue, not thirty. Resolution only ever touches OPEN issues.
 
 **BACKLOG on this rung, both recorded 2026-09-22, neither done.**
 - **(a) `price-fetch.yml` declares a `skip_market_stats` dispatch input that nothing reads, and has no force input.** `grep -n 'skip_market_stats\|inputs\.'` returns its declaration and nothing else; the run line is a bare `node scripts/run-price-fetch.js --confirm`. So the input appears in the Actions UI, does nothing when set, and there is no way to force a recompute from GitHub at all: forcing one means running the fetch locally against production. Either wire both to the runner's existing `--no-market-stats` / `--market-stats` flags, or delete the dead one. Note the flag is `--market-stats`, not `--force-stats`.
 - **(b) WITHDRAWN dedup checks CLOSED issues too, so a second withdrawal of the same entry would never be reported.** Once the resolver closes `[claim-floor] WITHDRAWN: <id>`, `anyByTitle` matches that closed issue forever and the finding can withdraw again in silence. The two candidate fixes: a label the resolver applies on close which dedup then ignores (so only the ORIGINAL closed issue suppresses, not a resolved one), or hysteresis in the finding itself so it does not flip back and forth across the 2x line in the first place. **Decide after the cohort investigation**, because the same 1y figure drives both, and if the cohort work changes how the stable figure is computed the flip-flop may stop being a real scenario.
 
-**THE STATS GATE IS NOW HOUR-OR-AGE, AND THE MEASUREMENT IS WHY.** It was `new Date().getUTCHours() === 8`. GitHub delivers scheduled runs late and sometimes drops a slot outright, so of the **12 complete days to 2026-09-21 the 08:00 slot landed inside hour 8 on only 8 of them**. The four misses: **2026-09-14, 2026-09-15, 2026-09-17, 2026-09-21.** On each, no `market_stats` update, no stability tripwire and no claim-floor check ran, and nothing said so. Two of the eight "hits" landed at 08:59, a 61-second margin. The gate is now `hour === 8 || age(last compute) > 20h`, decided inside `shouldComputeStats()` in `backend/lib/priceFetch.js` because the age half needs the database client. **20 hours, not 24, and the 4-hour grid is the reason:** after a compute at T the slots at T+4h..T+16h all sit inside 20h and skip, so exactly one slot a day qualifies and never two. **The hour is kept as the preferred slot rather than replaced**, because the 09:00 UTC regen reads these rows and a pure age rule would let the stats slot drift past it. If the age query itself fails, the run falls back to the hour test and **says so loudly**; it never skips silently.
+**THE STATS GATE IS A CALENDAR RULE, AND IT TOOK TWO ATTEMPTS TO GET THERE.** It computes on the **first run at or after 08:00 UTC on a UTC day with no `market_stats` row yet**, in `shouldComputeStats()` in `backend/lib/priceFetch.js`.
+
+**Attempt 1, the bare hour test `getUTCHours() === 8`, failed on delivery jitter.** Measured over 18 days: the 08:00 slot arrives between **08:27 and 09:31**, so it lands inside hour 8 only about half the time, and of the 12 complete days to 2026-09-21 it hit on 8. The four misses were **2026-09-14, 15, 17 and 21**; on each, no `market_stats` update, no tripwire and no claim-floor check ran, and nothing said so. Three DDR4 claim breaches sat unread for two days.
+
+**Attempt 2, hour-or-age with a 20h ceiling, failed differently and worse: it has a STABLE ATTRACTOR at the afternoon slot.** The worked example, every step observed on 2026-09-22/23:
+1. a **forced** run at **16:26** on 09-22 wrote `computed_at` 16:26.
+2. the 08:00 slot on 09-23 arrived at **09:00**, found the figures **16.6h** old, inside the ceiling, and **skipped**.
+3. the regen arrived at **14:09** and built `/data/` and `/llms.txt` from 09-22 figures, which is why the live findings read "Computed September 22" while the page said "last regenerated September 23".
+4. stats finally recomputed at **15:58**, after the page that consumes them.
+
+**It does not recover on its own.** 09:00 the next morning is exactly **17h** after a ~16:00 compute, permanently under a 20h ceiling, so the morning slot skips forever and the afternoon slot computes forever. Simulated three days forward on the observed arrival pattern: 16:00, 16:00, 16:00. A one-off manual run in the afternoon permanently relocated the daily compute to behind its own consumer.
+
+**A calendar rule has no fixed point**, because "has today produced a compute?" resets at midnight regardless of when yesterday's answer was written. **Forced runs are asymmetric and that falls out of the date test rather than needing a special case**: a forced run counts as today's compute so the rest of today skips, and it never blocks tomorrow because tomorrow asks about a different date. Yesterday's 16:26 forced run would not have delayed this morning's compute by a minute. If the today-check query itself fails, the run falls back to the **bare hour test** and **says so loudly**, naming whether that fallback matched; it never skips silently.
+
+**MEASURED DELIVERY, 18 days, 80 scheduled price-fetch runs.** Worth keeping because every scheduling decision here argues from it:
+
+| nominal slot | n | median delay | max | observed arrival |
+|---|---|---|---|---|
+| 00:00 | 17 | 2.82h | 3.03h | 02:47-03:03 |
+| **04:00** | **0** | - | - | **never delivered, 18 days running** |
+| 08:00 | 17 | **0.84h** | 1.52h | 08:27-09:31 |
+| 12:00 | 12 | 3.71h | 3.97h | 15:13-15:58 |
+| 16:00 | 17 | 2.35h | 3.44h | 16:04-19:26 |
+| 20:00 | 17 | 2.20h | 2.96h | 22:03-22:57 |
+
+The grid is **five slots, not six**. The 08:00 slot is by far the most punctual, which is why it is the anchor.
+
+**THE REGEN CRON STAYS AT `0 9 * * *`, DECIDED 2026-09-23 AGAINST MOVING IT.** Moving it to 11:00 was proposed and rejected on the data: `regenerate-pages` already arrives **12:46-15:48** (n=15, median 13:44, min delay 3.77h, p95 6.80h), so it already lands 3 to 7 hours after the 08:00 fetch. The ordering problem was never the regen's slot, it was the compute drifting past it. With the calendar rule the worst observed case is a **3h15m** margin (latest 08:00 arrival 09:31 against earliest regen 12:46). Moving to 11:00 would shift arrivals to 14:46-17:48, buy no margin, collide with the 16:00 fetch slot and delay the deploy by two hours.
+
+**RESIDUAL, ACCEPTED: roughly 1 day in 18.** If the 08:00 slot is dropped entirely, the first run at or after hour 8 is the 12:00-nominal one arriving 15:13-15:58, which is after the regen, so that day's pages argue from yesterday. Rare, versus the previous rule's *every* day.
 
 `scripts/run-price-fetch.js` no longer computes the gate. It used to, and passed the result in, which made the library's own default dead code and would have needed the same fix in two places. It now passes `withMarketStats` only when a human forces it with `--market-stats` / `--no-market-stats`.
 

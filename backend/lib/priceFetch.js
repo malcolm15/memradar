@@ -33,58 +33,83 @@ const defaultLogError = (msg, err) => console.error(`[${new Date().toISOString()
 // The UTC hour whose run also recomputes market stats (one slot per day).
 const MARKET_STATS_HOUR_UTC = 8;
 
-// A recompute is ALSO due when the stored figures are older than this,
-// whatever the hour. MEASURED 2026-09-22: the hour test alone missed 4 of the
-// 12 complete days to 09-21 (09-14, 09-15, 09-17, 09-21). GitHub delivers
-// scheduled runs late and sometimes drops a slot outright, so the 08:00 run
-// arrived inside hour 9 and the entire stats step went with it: no market_stats
-// update, no stability tripwire, and no published-claim check, on a third of
-// the days, with nothing anywhere saying so. Three DDR4 claim breaches sat
-// unread for two days because of it.
+// THE CALENDAR RULE: compute on the FIRST run at or after MARKET_STATS_HOUR_UTC
+// on a UTC day that has no market_stats row yet. It replaced an hour-or-age
+// rule on 2026-09-23, and the reason is drift, measured rather than guessed.
 //
-// 20 HOURS, NOT 24, AND THE 4-HOUR GRID IS THE REASON. After a compute at T,
-// the slots at T+4h through T+16h all sit inside 20h and skip; the first one
-// past it is T+20h or T+24h. So exactly one slot a day qualifies and never two.
-const STATS_MAX_AGE_HOURS = 20;
+// WHY THE BARE HOUR TEST FAILED (2026-09-22): GitHub delivers scheduled runs
+// late and sometimes drops a slot outright. Over 18 days the 08:00 slot arrived
+// between 08:27 and 09:31, so it landed inside hour 8 only about half the time,
+// and on the days it did not the whole stats step went with it - no
+// market_stats update, no stability tripwire, no published-claim check, and
+// nothing saying so. Three DDR4 claim breaches sat unread for two days.
+//
+// WHY THE AGE RULE THAT REPLACED IT ALSO FAILED, and this is the subtle one:
+// a 20h ceiling has a STABLE ATTRACTOR at the afternoon slot. Worked example
+// from 2026-09-22/23, all four steps observed:
+//   1. a FORCED run at 16:26 on 09-22 wrote computed_at 16:26.
+//   2. the 08:00 slot on 09-23 arrived at 09:00, found the figures 16.6h old,
+//      inside the 20h ceiling, and SKIPPED.
+//   3. the regen arrived at 14:09 and built /data/ and /llms.txt from 09-22
+//      figures, which is why the live findings read "Computed September 22".
+//   4. the stats finally recomputed at 15:58, after the page that consumes them.
+// It does not recover on its own: 09:00 the next morning is exactly 17h after a
+// ~16:00 compute, permanently under the ceiling, so the morning slot skips
+// forever and the afternoon slot computes forever. Simulated three days
+// forward on the observed arrival pattern: 16:00, 16:00, 16:00.
+//
+// THE CALENDAR RULE HAS NO SUCH FIXED POINT. "Has today produced a compute?"
+// cannot drift, because the question resets at midnight regardless of when
+// yesterday's answer was written. On the observed pattern it computes at the
+// 08:00 slot's arrival (08:27-09:31) every day, and the regen lands 12:46-15:48
+// (n=15, never earlier than 12:46), so the consumer reads same-day figures with
+// at least 3h15m of margin in the worst observed case.
+//
+// FORCED RUNS ARE ASYMMETRIC, AND THAT FALLS OUT OF THE DATE TEST RATHER THAN
+// NEEDING A SPECIAL CASE. A forced run counts as today's compute, so the rest
+// of today skips. It never blocks tomorrow, because tomorrow asks about a
+// different date. Yesterday's 16:26 forced run would not have delayed this
+// morning's compute by a minute.
 
-// HOUR-OR-AGE. The hour is kept as the PREFERRED slot rather than replaced,
-// because the 09:00 UTC regen reads these rows: a pure age rule would let the
-// stats slot drift past 09:00 and leave the regen arguing from yesterday's
-// figures, which is a different bug wearing the same clothes.
+// HOUR OR LATER, not the hour exactly: the point is to catch the first run of
+// the working day whenever it actually arrives, including hours later.
 async function shouldComputeStats(log) {
-  const hour = new Date().getUTCHours();
+  const now = new Date();
+  const hour = now.getUTCHours();
   const slot = `${String(MARKET_STATS_HOUR_UTC).padStart(2, '0')}:00 UTC`;
-  if (hour === MARKET_STATS_HOUR_UTC) return { run: true, why: `this is the ${slot} slot` };
+  const today = now.toISOString().slice(0, 10);
+  if (hour < MARKET_STATS_HOUR_UTC) {
+    return { run: false, why: `it is ${String(hour).padStart(2, '0')}:xx UTC, before the ${slot} slot` };
+  }
 
+  const startOfDay = `${today}T00:00:00.000Z`;
   const { data, error } = await supabase
     .from('market_stats')
     .select('computed_at')
-    .order('computed_at', { ascending: false })
+    .gte('computed_at', startOfDay)
     .limit(1);
 
   if (error) {
-    // NEVER SKIP SILENTLY. Falling back to the hour test means falling back to
-    // a test we have already failed, so stats are off this run - and saying so
-    // out loud is the whole point, because unannounced silence is the failure
-    // this change exists to end.
-    log(`⚠ market_stats age unreadable (${error.message}) - falling back to the hour test alone, which this run does not match, so stats are OFF and the published-claim check will NOT run`);
-    return { run: false, why: `age query failed (${error.message}) and the hour is not ${slot}` };
+    // NEVER SKIP SILENTLY. Falling back means falling back to the bare hour
+    // test, which is the test this rule exists to replace, so on most days it
+    // will say no - and saying that out loud is the whole point, because
+    // unannounced silence is the failure this change exists to end.
+    const hourMatches = hour === MARKET_STATS_HOUR_UTC;
+    log(`⚠ market_stats today-check failed (${error.message}) - falling back to the bare hour test, which this run does ${hourMatches ? 'match, so stats run' : 'NOT match, so stats are OFF and the published-claim check will NOT run'}`);
+    return { run: hourMatches, why: `today-check failed (${error.message}); bare hour test ${hourMatches ? 'matched' : 'did not match'} ${slot}` };
   }
 
-  const last = data && data[0] && data[0].computed_at;
-  if (!last) return { run: true, why: 'no market_stats rows exist yet' };
-  const ageHours = (Date.now() - new Date(last).getTime()) / 3600000;
-  if (ageHours > STATS_MAX_AGE_HOURS) {
-    return { run: true, why: `the last compute was ${ageHours.toFixed(1)}h ago, past the ${STATS_MAX_AGE_HOURS}h ceiling` };
+  if (data && data.length) {
+    return { run: false, why: `market_stats already has a row computed today (${today})` };
   }
-  return { run: false, why: `the last compute was ${ageHours.toFixed(1)}h ago, inside the ${STATS_MAX_AGE_HOURS}h ceiling` };
+  return { run: true, why: `first run at or after ${slot} with no compute yet on ${today}` };
 }
 
 async function runPriceFetch(opts = {}) {
   const log = opts.log || defaultLog;
   const logError = opts.logError || defaultLogError;
-  // Default: hour-or-age, decided here rather than by the caller, because the
-  // age half needs the database client that lives in this module.
+  // Default: the calendar rule, decided here rather than by the caller, because
+  // the today-check needs the database client that lives in this module.
   let withMarketStats;
   let statsReason;
   if (opts.withMarketStats !== undefined) {
