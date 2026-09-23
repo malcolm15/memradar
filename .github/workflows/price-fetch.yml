@@ -78,8 +78,15 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PRICE_FETCH_SUMMARY_PATH: ${{ runner.temp }}/price-fetch-summary.json
         run: |
-          gh label create claim-floor \
-            --color B60205 \
-            --description "A published magnitude claim is unsupported or withdrawn" \
-            --repo "$GITHUB_REPOSITORY" || true
+          # Create the label only when it is absent. `gh label create ... || true`
+          # worked, but printed `label with name "claim-floor" already exists`
+          # on every single run: an error-shaped line in a healthy log, which is
+          # how people learn to skim past error-shaped lines.
+          if ! gh label list --repo "$GITHUB_REPOSITORY" --search claim-floor --json name \
+               -q '.[].name' | grep -qx claim-floor; then
+            gh label create claim-floor \
+              --color B60205 \
+              --description "A published magnitude claim is unsupported or withdrawn" \
+              --repo "$GITHUB_REPOSITORY"
+          fi
           node scripts/claim-floor-issues.js --confirm
