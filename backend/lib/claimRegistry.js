@@ -104,6 +104,13 @@ const bakedSsdGuideMetaFloor = () => bakedFloor(
 // Present in one only, or worded differently -> BREACH, because one of the two
 // public locations is then saying something the other does not.
 const LLMS_PATH = PAGE('llms.txt');
+// A THIRD LOCATION as of 2026-09-24: /blog/will-ram-prices-go-back-down/
+// restates two of the findings in its own prose. It carries the SAME
+// data-claim/data-floor-pct attribute /data/ does, so the floor is readable and
+// the three locations must agree on the number. It does NOT have to match the
+// sentence, because the post says it in its own words on purpose; what is
+// checked there is the FLOOR, which is the thing that can go false.
+const POST_PATH = PAGE('blog', 'will-ram-prices-go-back-down', 'index.html');
 const unescapeHtml = (t) => t
   .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
   .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&#x27;/g, "'");
@@ -136,7 +143,23 @@ const bakedFindingFloor = (claimId) => () => {
     e.code = 'CLAIM_LOCATION_MISMATCH';
     throw e;
   }
-  return { floorPct: onData.floorPct, source: `${onData.source}, and the same sentence in /llms.txt` };
+  // The post restates only two of the three findings, so its absence for a given
+  // claim is normal and silent; a DISAGREEMENT is not.
+  let postNote = '';
+  try {
+    const post = fs.readFileSync(POST_PATH, 'utf8');
+    const m = new RegExp(`data-claim="${claimId}"[^>]*data-floor-pct="(\\d+)"`).exec(post);
+    if (m && Number(m[1]) !== onData.floorPct) {
+      const e = new Error(`the "${claimId}" floor is ${onData.floorPct}% on /data/ but ${m[1]}% on /blog/will-ram-prices-go-back-down/; two published locations disagree about the number`);
+      e.code = 'CLAIM_LOCATION_MISMATCH';
+      throw e;
+    }
+    if (m) postNote = ', and the same floor on /blog/will-ram-prices-go-back-down/';
+  } catch (err) {
+    if (err.code === 'CLAIM_LOCATION_MISMATCH') throw err;
+    // The post not existing is not a problem: it restates, it does not own.
+  }
+  return { floorPct: onData.floorPct, source: `${onData.source}, and the same sentence in /llms.txt${postNote}` };
 };
 
 const bakedListingFloor = (cat) => () => bakedFloor(
@@ -371,11 +394,64 @@ const CLAIM_REGISTRY = [
   },
   {
     id: 'data-atl-counts',
-    page: '/data/',
+    page: '/data/, and restated with a date on /blog/will-ram-prices-go-back-down/',
     where: 'Current findings',
     sentence: 'N of the M products MemRadar tracks sell for at least one and a half times their lowest recorded price, and K for more than three times it.',
     monitorable: false,
-    reason: 'counts, not segment figures. Both are recomputed from each product\'s own recorded history during every regen (atlMultipleDistribution), so unlike a hand-written magnitude they cannot go stale between builds, and no market_stats row can falsify them. Same standing as the explainer\'s ATL-multiple counts. They are dated with the BUILD date on the page rather than the market_stats computed_at, because that is when they were actually calculated.',
+    reason: 'counts, not segment figures. Both are recomputed from each product\'s own recorded history during every regen (atlMultipleDistribution), so unlike a hand-written magnitude they cannot go stale between builds, and no market_stats row can falsify them. Same standing as the explainer\'s ATL-multiple counts. They are dated with the BUILD date on the page rather than the market_stats computed_at, because that is when they were actually calculated. RESTATED 2026-09-24 on /blog/will-ram-prices-go-back-down/ as "It is 88% today", which is a DATED PIN rather than a live figure: that post carries a hand-set reviewed date and its figures are fixed to it, so the number there will not track the regen and is not expected to. If the share moves materially the post is re-reviewed by hand, never silently updated.',
+  },
+
+  // --------------------------- /blog/will-ram-prices-go-back-down/ (2026-09-24)
+  // A forecast-adjacent piece, so every figure in it is PINNED to a measurement
+  // date and hand-written. The four historical entries describe a closed period
+  // and cannot drift; the one current comparison is dated in the copy itself.
+  {
+    id: 'lastcycle-peak-ratio',
+    page: '/blog/will-ram-prices-go-back-down/',
+    where: 'verdict box and "What happened last time"',
+    sentence: 'peaked at 2.2 to 2.8 times their 2016 price in December 2017 and January 2018',
+    monitorable: false,
+    reason: 'historical, about a closed period, and no market_stats figure spans 2016: the segment tables start at 2019-11 because ddr4 had 2 to 3 tracked products before 2018-11. Measured 2.16x, 2.34x and 2.76x, median 2.34x, peaks on 2017-12-12, 2018-01-02 and 2018-01-08. Method: each kit\'s own price_history through buildDailySeries (in_stock only, last reading per UTC day); baseline is the median of that kit\'s 2016-H1 observations; the peak is the highest observation in 2017-2018 across ALL observations. No marketplace exclusion was applied and none is possible here: regular_price is a frozen backfill MSRP for these products, a single value of $259.99 on every row from 2015 to 2025, so price above regular_price means only above the 2015 MSRP, which is what a shortage does. Slugs: g-skill-ripjawsv-series-ddr4-ram-32gb-3200mhz, g-skill-ripjawsv-series-ddr4-ram-16gb-3200mhz, g-skill-ripjawsv-series-ddr4-ram-16gb-3200mhz-2.',
+  },
+  {
+    id: 'lastcycle-months-to-baseline',
+    page: '/blog/will-ram-prices-go-back-down/',
+    where: 'verdict box and the per-kit list',
+    sentence: 'fell back to where they started within about a year and a half',
+    monitorable: false,
+    reason: 'historical, a closed period. Measured 15.7, 15.9 and 17.5 months from each peak to the first observation back below that kit’s own 2016-H1 baseline, on 2019-04-05, 2019-05-07 and 2019-06-20. Method: each kit\'s own price_history through buildDailySeries (in_stock only, last reading per UTC day); baseline is the median of that kit\'s 2016-H1 observations; the peak is the highest observation in 2017-2018 across ALL observations. No marketplace exclusion was applied and none is possible here: regular_price is a frozen backfill MSRP for these products, a single value of $259.99 on every row from 2015 to 2025, so price above regular_price means only above the 2015 MSRP, which is what a shortage does. Slugs: g-skill-ripjawsv-series-ddr4-ram-32gb-3200mhz, g-skill-ripjawsv-series-ddr4-ram-16gb-3200mhz, g-skill-ripjawsv-series-ddr4-ram-16gb-3200mhz-2.',
+  },
+  {
+    id: 'lastcycle-trough',
+    page: '/blog/will-ram-prices-go-back-down/',
+    where: 'verdict box and the per-kit list',
+    sentence: 'two years later were selling for roughly half their pre-spike price',
+    monitorable: false,
+    reason: 'historical, a closed period. Troughs $105.99 on 2020-08-26, $58.99 on 2020-08-10 and $59.97 on 2020-09-11, which are 0.57x, 0.71x and 0.55x the respective 2016-H1 baselines. Method: each kit\'s own price_history through buildDailySeries (in_stock only, last reading per UTC day); baseline is the median of that kit\'s 2016-H1 observations; the peak is the highest observation in 2017-2018 across ALL observations. No marketplace exclusion was applied and none is possible here: regular_price is a frozen backfill MSRP for these products, a single value of $259.99 on every row from 2015 to 2025, so price above regular_price means only above the 2015 MSRP, which is what a shortage does. Slugs: g-skill-ripjawsv-series-ddr4-ram-32gb-3200mhz, g-skill-ripjawsv-series-ddr4-ram-16gb-3200mhz, g-skill-ripjawsv-series-ddr4-ram-16gb-3200mhz-2.',
+  },
+  {
+    id: 'lastcycle-peak-window',
+    page: '/blog/will-ram-prices-go-back-down/',
+    where: '"What happened last time", closing paragraph',
+    sentence: 'a peak within a five-week window at the turn of 2018',
+    monitorable: false,
+    reason: 'historical, a closed period. The three peaks fall on 2017-12-12, 2018-01-02 and 2018-01-08, a span of 27 days, which a five-week window contains. Method: each kit\'s own price_history through buildDailySeries (in_stock only, last reading per UTC day); baseline is the median of that kit\'s 2016-H1 observations; the peak is the highest observation in 2017-2018 across ALL observations. No marketplace exclusion was applied and none is possible here: regular_price is a frozen backfill MSRP for these products, a single value of $259.99 on every row from 2015 to 2025, so price above regular_price means only above the 2015 MSRP, which is what a shortage does. Slugs: g-skill-ripjawsv-series-ddr4-ram-32gb-3200mhz, g-skill-ripjawsv-series-ddr4-ram-16gb-3200mhz, g-skill-ripjawsv-series-ddr4-ram-16gb-3200mhz-2.',
+  },
+  {
+    id: 'ddr4-now-vs-2016',
+    page: '/blog/will-ram-prices-go-back-down/',
+    where: '"Where DDR4 sits now, against that"',
+    sentence: 'the three kits today sit between 1.2 and 1.8 times where they started, median 1.3 times (measured September 23, 2026)',
+    monitorable: false,
+    reason: 'PINNED TO ITS MEASUREMENT DATE, the csv-header-44pp-divergence pattern: the sentence carries its own date, so a later reading does not falsify it. Measured 2026-09-23 at $239.99 against a $187.58 baseline (1.28x), $145.99 against $83.00 (1.76x) and $129.99 against $109.80 (1.18x), median 1.28x. It compares today against a fixed 2016 baseline held only in price_history, so no stored market_stats figure could floor it in any case. Method: each kit\'s own price_history through buildDailySeries (in_stock only, last reading per UTC day); baseline is the median of that kit\'s 2016-H1 observations; the peak is the highest observation in 2017-2018 across ALL observations. No marketplace exclusion was applied and none is possible here: regular_price is a frozen backfill MSRP for these products, a single value of $259.99 on every row from 2015 to 2025, so price above regular_price means only above the 2015 MSRP, which is what a shortage does. Slugs: g-skill-ripjawsv-series-ddr4-ram-32gb-3200mhz, g-skill-ripjawsv-series-ddr4-ram-16gb-3200mhz, g-skill-ripjawsv-series-ddr4-ram-16gb-3200mhz-2.',
+  },
+  {
+    id: 'longtracked-kit-count',
+    page: '/blog/will-ram-prices-go-back-down/',
+    where: 'verdict box and "What happened last time"',
+    sentence: 'three DDR4 kits we have tracked since 2015 and 2016',
+    monitorable: false,
+    reason: 'a count of catalog members, not a market figure, so no market_stats row can test it. ENFORCED AT BUILD TIME INSTEAD: WILL_RAM_FALL_KITS lists the three slugs and buildWillRamFall() THROWS if one is missing from the catalog or carries noindex, which fails the regen rather than publishing a post that cites a page we tell crawlers to ignore. First observations 2015-11-12, 2015-11-27 and 2016-02-15, with no gap over 60 days before 2021.',
   },
 
   // ------------------------------------- registered, deliberately not checked

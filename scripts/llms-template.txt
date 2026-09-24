@@ -16,6 +16,8 @@ Each figure carries the date it was computed. Figures over longer windows rest o
 - [Memory Price Index](https://memradar.com/price-index/): Median price change per segment across four time windows, recomputed daily from the full price history.
 - [Data for journalists](https://memradar.com/data/): Current findings, how to cite, catalog composition, and the downloadable files below.
 - [Methodology](https://memradar.com/methodology/): How prices are collected, how the figures are computed, and what the data cannot tell you.
+- [Why Is RAM So Expensive in 2026?](https://memradar.com/blog/why-ram-prices-are-so-high/): Why RAM prices rose: causes, with figures checked against the index.
+- [Will RAM prices go back down?](https://memradar.com/blog/will-ram-prices-go-back-down/): What the last memory price cycle looked like in our own data, 2016 to 2020.
 - [Guides](https://memradar.com/guides/): Buying guides argued from the tracked price data rather than opinion.
 - [Should I Buy RAM Now?](https://memradar.com/guides/should-i-buy-ram-now/): What the 2025 to 2026 memory price surge did to DDR5 and DDR4, and how to judge a fair kit price today.
 - [Should I Buy an SSD Now?](https://memradar.com/guides/should-i-buy-an-ssd-now/): A decade of falling storage prices, what changed in late 2025, and how to buy a drive well in the current market.

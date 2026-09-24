@@ -2322,6 +2322,10 @@ const EXPLAINERS = [{
   href: '/blog/why-ram-prices-are-so-high/',
   title: 'Why Is RAM So Expensive in 2026?',
   blurb: 'What drove the memory price surge, why it landed on consumers, and what the industry\'s own cycle says about how it ends.',
+}, {
+  href: '/blog/will-ram-prices-go-back-down/',
+  title: 'Will RAM prices go back down?',
+  blurb: 'The one completed memory cycle in our data: what the 2017 to 2018 DDR4 spike did, how long it took to unwind, and where prices sit against it now.',
 }];
 
 const GUIDES = [{
@@ -2700,6 +2704,109 @@ function buildExplainer(ctx) {
     .replace('<!--CHART_DATA-->', JSON.stringify(downsampleForChart(chartP.series)).replace(/<\//g, '<\\/'))
     .replace('<!--CHART_CAPTION-->', esc(caption));
   return { html, dist: d, chart: chartP, desc };
+}
+
+// ------------------------------------------- /blog/will-ram-prices-go-back-down/
+// The second explainer. Distinct from the first by question: that one answers
+// "why did it happen", this one answers "does it end, and what did the last one
+// look like". It argues from the only COMPLETED memory cycle in our data, the
+// 2016-2018 DDR4 crunch, which exists on exactly three product histories.
+//
+// EVERY FIGURE IN THIS POST IS PINNED TO ITS MEASUREMENT DATE AND HAND-WRITTEN,
+// deliberately. A forecast piece whose numbers move under the reader is worse
+// than one that states when it was measured: the argument is about a fixed
+// historical shape, and a figure that silently updated would break the argument
+// rather than refresh it. The two exceptions are the live floors below, which
+// restate claims already floored on /data/ and must agree with them.
+const WILL_RAM_FALL_SLUG = 'will-ram-prices-go-back-down';
+const WILL_RAM_FALL_PUBLISHED = '2026-09-24';
+// HAND-SET, AND NEVER GENERATOR-EMITTED. A reviewed date that the regen wrote
+// would claim a review nobody performed, which is the same failure as a page
+// printing figures fresher than the data behind them. Bump it by hand when the
+// piece is actually re-read against the data.
+const WILL_RAM_FALL_REVIEWED = '2026-09-24';
+
+// The three kits the post names. If one leaves the catalog or goes noindex the
+// build FAILS: the whole argument rests on a reader being able to click through
+// and check the chart, and a post citing a page we tell crawlers to ignore is
+// worse than no post.
+const WILL_RAM_FALL_KITS = [
+  'g-skill-ripjawsv-series-ddr4-ram-32gb-3200mhz',
+  'g-skill-ripjawsv-series-ddr4-ram-16gb-3200mhz',
+  'g-skill-ripjawsv-series-ddr4-ram-16gb-3200mhz-2',
+];
+
+function buildWillRamFall(ctx) {
+  const { generable, buildDate, findings } = ctx;
+
+  const bySlug = new Map(generable.map((p) => [p.finalSlug || p.slug, p]));
+  for (const slug of WILL_RAM_FALL_KITS) {
+    const p = bySlug.get(slug);
+    if (!p) throw new Error(`${WILL_RAM_FALL_SLUG}: cited kit ${slug} is not in the catalog`);
+    if (p.stats && p.stats.indexable === false) {
+      throw new Error(`${WILL_RAM_FALL_SLUG}: cited kit ${slug} is noindex; the post must not link a page we tell crawlers to ignore`);
+    }
+  }
+
+  // The two live restatements read their floor from the SAME findings items
+  // /data/ renders, so the three locations cannot disagree about the number.
+  const floorOf = (id) => {
+    const it = (findings || []).find((x) => x.id === id);
+    if (!it || it.floorPct == null) {
+      throw new Error(`${WILL_RAM_FALL_SLUG}: no floor for ${id}; the post restates a /data/ finding that this build did not emit`);
+    }
+    return it.floorPct;
+  };
+  const ddr4Floor = floorOf('data-ddr4-1y');
+  const ddr5Floor = floorOf('data-ddr5-1y');
+
+  const url = `${SITE}/blog/${WILL_RAM_FALL_SLUG}/`;
+  const h1 = 'Will RAM prices go back down?';
+  const pageTitle = `${h1} | MemRadar`;
+  if (pageTitle.length > 60) throw new Error(`${WILL_RAM_FALL_SLUG} title is ${pageTitle.length} chars, over 60`);
+
+  const descVariants = [
+    'Will RAM prices go back down? The last memory spike peaked at 2.2 to 2.8 times its 2016 price and took about a year and a half to unwind. Where prices sit against that now.',
+    'Will RAM prices go back down? The last spike peaked at 2.2 to 2.8 times its 2016 price and took about a year and a half to unwind. Where prices sit against that now.',
+    'Will RAM prices go back down? The last memory spike peaked at up to 2.8 times its 2016 price and unwound in about a year and a half. Where prices sit now.',
+  ];
+  const desc = descVariants.find((v) => v.length >= DESC_MIN && v.length <= 160);
+  if (!desc) throw new Error(`${WILL_RAM_FALL_SLUG} meta description: no variant fits ${DESC_MIN}-160 (lengths ${descVariants.map((v) => v.length).join(', ')})`);
+
+  const jsonld = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Article',
+        headline: h1,
+        description: desc,
+        url,
+        datePublished: WILL_RAM_FALL_PUBLISHED,
+        dateModified: buildDate,
+        author: AUTHOR_PERSON,
+        publisher: PUBLISHER_ORG,
+        mainEntityOfPage: { '@type': 'WebPage', '@id': url },
+      },
+      { '@type': 'BreadcrumbList', itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: SITE + '/' },
+        { '@type': 'ListItem', position: 2, name: 'Blog', item: SITE + '/blog/' },
+        { '@type': 'ListItem', position: 3, name: h1, item: url },
+      ] },
+    ],
+  }, null, 2);
+
+  const tpl = fs.readFileSync(path.join(FRONTEND, 'blog', WILL_RAM_FALL_SLUG, 'template.html'), 'utf8');
+  const html = tpl
+    .replace(/<!--META_DESC-->/g, esc(desc))
+    .replace(/<!--PAGE_TITLE-->/g, esc(pageTitle))
+    .replace(/<!--OG_TITLE-->/g, esc(h1))
+    .replace('<!--JSONLD-->', `<script type="application/ld+json">\n${jsonld}\n  </script>`)
+    .replace(/<!--BUILD_DATE-->/g, longDate(buildDate))
+    .replace(/<!--REVIEWED_DATE-->/g, longDate(WILL_RAM_FALL_REVIEWED))
+    .replace(/<!--DDR4_FLOOR-->/g, String(ddr4Floor))
+    .replace(/<!--DDR5_FLOOR-->/g, String(ddr5Floor));
+  if (/<!--[A-Z_0-9]+-->/.test(html)) throw new Error(`${WILL_RAM_FALL_SLUG}: unreplaced anchor ${(/<!--[A-Z_0-9]+-->/.exec(html) || [])[0]}`);
+  return { html, desc, ddr4Floor, ddr5Floor };
 }
 
 // AUTHOR. Every Article on the site is written by Malcolm, not by a faceless
@@ -4816,6 +4923,7 @@ async function run() {
       log(`⚠ explainer NOT regenerated: ${e.message}`);
     }
 
+
     if (written.length) {
       fs.writeFileSync(path.join(FRONTEND, 'guides', 'index.html'), buildGuidesIndex(buildDate));
       fs.writeFileSync(path.join(FRONTEND, 'glossary', 'index.html'), buildGlossaryPage(buildDate));
@@ -4876,6 +4984,20 @@ async function run() {
     } catch (e) {
       log(`⚠ /data/ NOT regenerated: ${e.message}`);
     }
+  }
+
+  // The second explainer. Needs the /data/ findings for its two live floors,
+  // so it runs after them; independently skippable like every other content
+  // build, because a failure here must not take a day's prices with it.
+  try {
+    if (!dataFindings) throw new Error('the /data/ findings did not build this run, and the post restates two of them');
+    const wf = buildWillRamFall({ generable, buildDate, findings: dataFindings });
+    const wfDir = path.join(FRONTEND, 'blog', WILL_RAM_FALL_SLUG);
+    fs.mkdirSync(wfDir, { recursive: true });
+    fs.writeFileSync(path.join(wfDir, 'index.html'), wf.html);
+    log(`Post written: /blog/${WILL_RAM_FALL_SLUG}/ (reviewed ${WILL_RAM_FALL_REVIEWED}, floors ddr4 ${wf.ddr4Floor}% / ddr5 ${wf.ddr5Floor}%, ${WILL_RAM_FALL_KITS.length} kits cited)`);
+  } catch (e) {
+    log(`⚠ /blog/${WILL_RAM_FALL_SLUG}/ NOT regenerated: ${e.message}`);
   }
 
   // 2d) Category listing pages and the homepage. Both are generator output as
