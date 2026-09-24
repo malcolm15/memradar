@@ -5118,7 +5118,25 @@ async function run() {
       const prevState = (() => { try { return JSON.parse(fs.readFileSync(INDEXNOW_STATE_PATH, 'utf8')); } catch (e) { return {}; } })();
       const { items, nextState, seeding } = indexNowMaterial(prevState, materialState, fs.readFileSync(SITEMAP_PATH, 'utf8'));
       if (seeding) log('IndexNow: no prior state, BASELINE SEEDED; nothing will be submitted this run');
-      fs.writeFileSync(INDEXNOW_STATE_PATH, JSON.stringify(nextState, null, 1) + '\n');
+
+      // THE STATE FILE IS CI-OWNED. It records what has been GENERATED, and the
+      // submitting step runs only in CI, so a local --confirm regen that
+      // advanced it silently consumed a pending submission. MEASURED before
+      // this gate: 425 URL-state advances across 8 local commits against 120
+      // across 3 CI runs, and three confirmed incidents, each traced to a named
+      // commit - 2026-09-21 four pages (aede3527), 2026-09-22 two pages
+      // (40b800aa), 2026-09-23 /blog/ (cb6e6ef9). All three were recovered by
+      // hand, and all three were noticed only because someone looked.
+      //
+      // THE SEMANTICS DO NOT CHANGE: state still means "last generated", not
+      // "last submitted". What changes is who may generate-and-record, which is
+      // now only the machine that also submits.
+      const writeState = process.env.INDEXNOW_STATE_WRITE === '1';
+      if (writeState) {
+        fs.writeFileSync(INDEXNOW_STATE_PATH, JSON.stringify(nextState, null, 1) + '\n');
+      }
+      // ALWAYS written, flag or not: it is gitignored, per-run, and it is how a
+      // human sees what is pending without consuming it.
       fs.mkdirSync(path.dirname(INDEXNOW_URLS_PATH), { recursive: true });
       fs.writeFileSync(INDEXNOW_URLS_PATH, JSON.stringify(items, null, 1) + '\n');
       const byReason = {};
@@ -5126,6 +5144,14 @@ async function run() {
       log(`IndexNow: ${items.length} material URLs of ${Object.keys(nextState).length} tracked (${Object.entries(byReason).map(([k, v]) => `${k}=${v}`).join(', ') || 'none'})`);
       items.slice(0, 12).forEach((it) => log(`   ${it.url} (${it.reasons.join('; ')})`));
       if (items.length > 12) log(`   ... and ${items.length - 12} more`);
+      if (writeState) {
+        log(`IndexNow state written (INDEXNOW_STATE_WRITE=1): ${Object.keys(nextState).length} URLs tracked.`);
+      } else {
+        // Deliberately not phrased as "CI will submit these N": this list is
+        // computed against the last CI-written state, so it is what CI would
+        // send IF IT RAN NOW. By morning the set differs, because prices move.
+        log(`IndexNow state NOT written (local run). ${items.length} URL(s) stay pending; CI's next regen will recompute and submit them. Set INDEXNOW_STATE_WRITE=1 to write it.`);
+      }
     } catch (e) {
       log(`⚠ IndexNow material list NOT written: ${e.message}`);
     }
