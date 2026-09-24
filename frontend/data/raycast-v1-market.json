@@ -1,7 +1,7 @@
 {
  "version": 1,
  "generated": "2026-09-24",
- "computed_at": "2026-09-23T15:58:44.953+00:00",
+ "computed_at": "2026-09-24T08:57:51.432+00:00",
  "update_frequency": "daily",
  "notice": "Regenerated once a day. memradar.com refreshes prices six times a day, so these figures can be up to 24 hours behind the site. This is not a live feed.",
  "method": "Every figure is a median, never a mean: a single expensive kit would drag an average. pct_change compares the same products with themselves across that window, so product_count is the size of that matched set and the periods are not directly comparable with each other. median_price_usd is the median current price across every tracked product in the segment; median_usd_per_gb is the same median over those whose capacity we can parse. Neither is a per-period figure.",
@@ -14,24 +14,24 @@
    "label": "DDR5 memory",
    "periods": {
     "1m": {
-     "pct_change": 10.3,
+     "pct_change": 10.7,
      "product_count": 77
     },
     "3m": {
-     "pct_change": 14.9,
+     "pct_change": 12.9,
      "product_count": 68
     },
     "6m": {
-     "pct_change": 21,
+     "pct_change": 18.8,
      "product_count": 68
     },
     "1y": {
-     "pct_change": 368.3,
+     "pct_change": 360.3,
      "product_count": 59
     }
    },
    "median_price_usd": 549.99,
-   "median_usd_per_gb": 17.41
+   "median_usd_per_gb": 17.28
   },
   {
    "segment": "ddr4",
@@ -46,11 +46,11 @@
      "product_count": 31
     },
     "6m": {
-     "pct_change": -8.9,
-     "product_count": 20
+     "pct_change": -7.8,
+     "product_count": 19
     },
     "1y": {
-     "pct_change": 133.4,
+     "pct_change": 143.4,
      "product_count": 27
     }
    },
@@ -74,8 +74,8 @@
      "product_count": 69
     },
     "1y": {
-     "pct_change": 130.9,
-     "product_count": 66
+     "pct_change": 130.8,
+     "product_count": 67
     }
    },
    "median_price_usd": 304.99,
@@ -86,23 +86,23 @@
    "label": "SATA SSDs",
    "periods": {
     "1m": {
-     "pct_change": 1.1,
+     "pct_change": -0.6,
      "product_count": 32
     },
     "3m": {
-     "pct_change": 2.2,
+     "pct_change": 4.3,
      "product_count": 25
     },
     "6m": {
-     "pct_change": 6.6,
+     "pct_change": 4.2,
      "product_count": 27
     },
     "1y": {
-     "pct_change": 142.7,
+     "pct_change": 144,
      "product_count": 26
     }
    },
-   "median_price_usd": 232.48,
+   "median_price_usd": 232.49,
    "median_usd_per_gb": 0.17
   }
  ]
