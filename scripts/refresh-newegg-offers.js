@@ -17,6 +17,13 @@
 //   express CHANGES, so unseen-in-delta is not evidence of absence; this net
 //   only catches failed/missed Sunday fulls (one missed Sunday + 2-day
 //   buffer).
+// - CHANGE HISTORY (2026-09-26): every path that changes state also appends
+//   one row to retailer_offer_history, but ONLY when price or in_stock
+//   actually moved. retailer_offers is current state, upserted in place, so it
+//   structurally cannot answer "what did Newegg charge in July"; this can.
+//   Change-only because most writes here are no-ops: measured 2026-09-12..25,
+//   592 offer writes carried 81 real price changes. Best effort - a failed
+//   insert is counted as histFailures and never fails the run.
 // - FAILURE: any hard error exits nonzero (red Actions run + GitHub email)
 //   and changes nothing further - stale beats wrong. Per-row write failures
 //   are counted and also fail the run at the end.
@@ -42,6 +49,49 @@ const FULL_TIMEOUT_MS = 900_000; // 15min ceiling for the ~158MB file
 
 const log = (m) => console.log(`[${new Date().toISOString()}] ${m}`);
 
+// THE ONE PLACE THAT DECIDES WHETHER AN UPDATE IS A CHANGE WORTH RECORDING,
+// and what the recorded row looks like. Called for every path that writes
+// state: a feed hit (I/U/present), a D, absence from the complete feed, and the
+// staleness net. Computed once in the report phase and consumed by both the
+// dry-run line and the apply loop, because a second copy of this predicate next
+// to the insert is how the log and the table start disagreeing.
+//
+// WHY CHANGE-ONLY: neither cron writer compares the incoming price to the
+// stored one, so `priceUpdates` counts rows REFRESHED, not rows that moved.
+// Measured over 13 runs, 2026-09-12 to 2026-09-25: 592 writes, 81 real price
+// changes. Logging all of them would be 86% duplicates.
+//
+// PRICE IS CARRIED FORWARD on a stock flip, mirroring retailer_offers, where an
+// out-of-stock row keeps its last known price so the UI can say "last seen $X".
+// The column is NOT NULL, so an offer with no known price yields no row rather
+// than a failed insert.
+//
+// observedAt is passed in rather than read off `fields`, because two paths
+// deliberately leave retailer_offers.fetched_at alone (absence from the
+// complete feed, and the staleness net) and are still observations OF A CHANGE:
+// we observed the absence now, even though we did not sight the offer.
+function historyRowFor(offer, fields, observedAt) {
+  const price = fields.price != null
+    ? Number(fields.price)
+    : (offer.price == null ? null : Number(offer.price));
+  // Every current put() sets in_stock; the fallback exists so a future path
+  // that omits it cannot write NULL into a NOT NULL column.
+  const inStock = fields.in_stock !== undefined ? fields.in_stock : offer.in_stock === true;
+  const priceMoved = price != null && (offer.price == null || price !== Number(offer.price));
+  const stockMoved = inStock !== offer.in_stock;
+  if (!priceMoved && !stockMoved) return { skip: 'unchanged' };
+  if (price == null) return { skip: 'no known price to record' };
+  return {
+    row: {
+      product_id: offer.product_id,
+      retailer: offer.retailer,
+      price,
+      in_stock: inStock,
+      observed_at: observedAt,
+    },
+  };
+}
+
 async function run() {
   const started = Date.now();
   const mode = FULL ? 'full' : 'delta';
@@ -51,7 +101,9 @@ async function run() {
   // rows that already exist - matching stays a human-gated concern.
   const { data: offers, error } = await supabase
     .from('retailer_offers')
-    .select('id, product_id, retailer_sku, price, in_stock, fetched_at')
+    // `retailer` is selected so the history row carries the real value rather
+    // than a literal that has to keep matching the filter below.
+    .select('id, product_id, retailer, retailer_sku, price, in_stock, fetched_at')
     .eq('retailer', 'newegg');
   if (error) throw new Error('offers load failed: ' + error.message);
   // sku -> offer[] (NOT a 1:1 map): several of our products legitimately
@@ -135,23 +187,51 @@ async function run() {
   // ---- report + apply ----
   const priceUpdates = [...updates.values()].filter((u) => u.fields.price != null);
   const oosFlips = [...updates.values()].filter((u) => u.fields.in_stock === false);
+
+  // Which of those updates actually CHANGE state, decided by historyRowFor()
+  // and by nothing else. Computed before the dry-run return so a dry run
+  // reports the real number instead of the refresh count.
+  const history = new Map(); // offer id -> row to append
+  let historySkipped = 0;
+  for (const { offer, fields } of updates.values()) {
+    const h = historyRowFor(offer, fields, fields.fetched_at || now);
+    if (h.row) history.set(offer.id, h.row);
+    else if (h.skip !== 'unchanged') {
+      historySkipped++;
+      console.log(`  ${offer.retailer_sku}: history row SKIPPED (${h.skip})`);
+    }
+  }
+
   log(`Planned: ${updates.size} row updates (${priceUpdates.length} price refreshes, ${oosFlips.length} OOS flips of which ${staleFlips} staleness)`);
+  log(`Of those, ${history.size} change price or stock and would append to retailer_offer_history${historySkipped ? ` (${historySkipped} skipped for want of a price)` : ''}`);
   for (const { offer, reason } of updates.values()) {
-    console.log(`  ${offer.retailer_sku}: ${reason}`);
+    console.log(`  ${offer.retailer_sku}: ${reason}${history.has(offer.id) ? ' [history]' : ''}`);
   }
 
   if (!CONFIRM) {
     log('Dry run complete - re-run with --confirm to apply.');
     return;
   }
-  let writes = 0, failures = 0;
+  let writes = 0, failures = 0, historyWrites = 0, histFailures = 0;
   for (const { offer, fields } of updates.values()) {
     const { error: upErr } = await supabase.from('retailer_offers').update(fields).eq('id', offer.id);
     if (upErr) { console.error(`  write failed [${offer.retailer_sku}]: ${upErr.message}`); failures++; continue; }
     writes++;
+    // AFTER the state write and never before: a history row for a change that
+    // failed to land is a lie about the current state.
+    const row = history.get(offer.id);
+    if (!row) continue;
+    const { error: hErr } = await supabase.from('retailer_offer_history').insert(row);
+    if (hErr) { console.error(`  history insert failed [${offer.retailer_sku}]: ${hErr.message}`); histFailures++; continue; }
+    historyWrites++;
   }
-  const summary = { mode, feedRows: stats.total, ourSkusSeen: seen.size, writes, priceUpdates: priceUpdates.length, oosFlips: oosFlips.length, staleFlips, failures, viaWatchdog: dl.viaWatchdog, durationMs: Date.now() - started };
+  const summary = { mode, feedRows: stats.total, ourSkusSeen: seen.size, writes, priceUpdates: priceUpdates.length, oosFlips: oosFlips.length, staleFlips, failures, historyWrites, histFailures, historySkipped, viaWatchdog: dl.viaWatchdog, durationMs: Date.now() - started };
   log('SUMMARY ' + JSON.stringify(summary));
+  // histFailures is DELIBERATELY ABSENT from this condition. A lost history row
+  // costs one observation in an analytical log; failing the run over it would
+  // redden a refresh that correctly updated live offer state, and the
+  // supervisor reads a red refresh-offers as "the refresh did not run". The
+  // count rides the SUMMARY so the loss is still visible rather than silent.
   if (failures) throw new Error(`${failures} row writes failed`);
 }
 

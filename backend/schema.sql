@@ -170,6 +170,57 @@ CREATE TABLE IF NOT EXISTS claim_floor_runs (
 ALTER TABLE claim_floor_runs ENABLE ROW LEVEL SECURITY;
 
 -- -----------------------------------------------
+-- retailer_offer_history (2026-09-26)
+-- Append-only log of CHANGES to retailer_offers. retailer_offers is current
+-- state, exactly one row per (product, retailer), upserted in place, so it
+-- structurally cannot answer "what did Newegg charge in July". This can.
+--
+-- WRITTEN ONLY ON A CHANGE. A row is appended only when price or in_stock
+-- differs from the row already in retailer_offers. Neither cron writer compares
+-- the incoming price to the stored one, so the run summary's priceUpdates
+-- counts rows REFRESHED, not rows that moved: measured over 13 runs,
+-- 2026-09-12 to 2026-09-25, 592 offer writes carried 81 real price changes, so
+-- an unconditional log would be 86% duplicates. At the change rate this table
+-- grows by roughly 130 to 440 rows a month.
+--
+-- GRANULARITY IS WEEKLY FOR MOST PRODUCTS, NOT DAILY. The daily Rakuten delta
+-- surfaces 0 to 3 real changes; the Sunday full reconciliation surfaced 27 of
+-- the 35 changes in the ten days to 2026-09-25. Any figure derived from this
+-- table must be worded as COMPARISONS ("on 14 of the 21 times we compared
+-- them"), never as days, or it implies a resolution the data does not have.
+--
+-- AMAZON IS DELIBERATELY ABSENT. price_history already logs every Amazon
+-- observation six times a day, append-only. A second Amazon log in a different
+-- shape would be two sources for one fact.
+-- -----------------------------------------------
+CREATE TABLE IF NOT EXISTS retailer_offer_history (
+  id          BIGSERIAL PRIMARY KEY,
+  product_id  BIGINT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  retailer    TEXT NOT NULL,                       -- 'newegg' (see note above)
+  price       NUMERIC(10, 2) NOT NULL,             -- last known price carried forward on a stock flip, mirroring retailer_offers
+  in_stock    BOOLEAN NOT NULL,
+  observed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- SERVICE ROLE ONLY. RLS on with NO policy of any kind, which denies every anon
+-- and authenticated request. The frontend reads current state from
+-- retailer_offers and has no use for this; same reasoning as claim_floor_runs.
+ALTER TABLE retailer_offer_history ENABLE ROW LEVEL SECURITY;
+
+-- SEED, run once on 2026-09-26 alongside the CREATE. One row per existing
+-- Newegg offer, so every series starts from a known state instead of from its
+-- first later change. The NOT EXISTS guard makes re-running it a no-op.
+INSERT INTO retailer_offer_history (product_id, retailer, price, in_stock, observed_at)
+SELECT o.product_id, o.retailer, o.price, o.in_stock, o.fetched_at
+FROM retailer_offers o
+WHERE o.retailer = 'newegg'
+  AND o.price IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM retailer_offer_history h
+    WHERE h.product_id = o.product_id AND h.retailer = o.retailer
+  );
+
+-- -----------------------------------------------
 -- INDEXES
 -- Run these in Supabase SQL Editor after data starts flowing.
 -- These are not created automatically — must be applied manually.
@@ -189,3 +240,8 @@ CREATE INDEX IF NOT EXISTS idx_products_retailer ON products(retailer);
 
 -- claim_floor_runs: every read is "the recent history of this check"
 CREATE INDEX IF NOT EXISTS idx_claim_floor_runs_ran_at ON claim_floor_runs(ran_at DESC);
+
+-- retailer_offer_history: every read is "this product's offer history at this
+-- retailer, newest first"
+CREATE INDEX IF NOT EXISTS idx_roh_product_retailer
+  ON retailer_offer_history(product_id, retailer, observed_at DESC);
