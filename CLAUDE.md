@@ -56,6 +56,27 @@ MemRadar tracks Amazon prices on RAM and SSDs via the Keepa API (licensed price-
 
 **THE RULE IS NOT IN THIS REPO.** It is Cloudflare dashboard state, so nothing here enforces it and no commit will update it. **Renaming or moving these files (for example shipping `raycast-v2-*.json` under a different path) requires editing the rule in the dashboard in the same change**, or the new paths silently fall back to `DYNAMIC` with no error anywhere. Same class of hazard as the supervisor's config array: the workflow ships through git and the watcher does not.
 
+### MEASURED EDGE-CACHE STATE (2026-09-25, `curl -I` against live)
+
+Recorded because two claims in this file were guesses that turned out to be wrong, and because "is this path edge-cached" decides whether a regen needs a purge. **Re-measure rather than reason about it**: Cloudflare decides eligibility by EXTENSION, not directory, and a dashboard rule can override that with nothing in the repo to show it.
+
+| path | `cf-cache-status` | `cache-control` |
+|---|---|---|
+| `/llms.txt` | **DYNAMIC** | max-age=600 |
+| `<indexnow-key>.txt` | **DYNAMIC** | max-age=600 |
+| `/robots.txt` | **HIT** | max-age=14400 |
+| `/sitemap.xml` | DYNAMIC | max-age=600 |
+| `/search-index.json` | DYNAMIC | max-age=600 |
+| `/data/memradar-price-index-monthly.csv` | MISS, i.e. cacheable | max-age=14400 |
+| `/data/raycast-v1-market.json` | MISS, i.e. cacheable | max-age=14400 |
+| `/data/charts/ddr4-ddr5-latest.png` | MISS, i.e. cacheable | max-age=14400 |
+
+**Root `.txt` is not a category.** `robots.txt` is edge-cached at 4h; `llms.txt` and the IndexNow key are not, both `DYNAMIC` at `max-age=600`. Whatever distinguishes them is dashboard state, so do not generalise from one to another.
+
+**THE ONLY EDGE-CACHED FILES THAT CAN SERVE STALE AFTER A REGEN ARE THE TWO `raycast-v1-*.json` AND THE MONTHLY CSV**, for up to 4 hours. That is accepted and documented: all three carry their own `generated` or computed date, and the Raycast payloads say in `notice` that they can be up to 24h behind. **To force them current, purge those three paths in the Cloudflare dashboard** (Caching, Configuration, Purge Everything is never needed; purge by URL). The chart PNGs are also edge-cached but cannot go stale, because dated files are write-once and `-latest` only changes at the monthly rollover.
+
+**Everything else the regen writes is `DYNAMIC` and needs no purge**: all HTML, `sitemap.xml`, `search-index.json` and `llms.txt` are live the moment Pages publishes. The older instruction to "purge Cloudflare after a regen" is therefore obsolete for every file except those three.
+
 ## Directory Structure
 
 ```
@@ -1167,7 +1188,7 @@ Pings IndexNow from the daily regen with the URLs that **materially** changed. G
 
 **STATE IS "LAST GENERATED", NOT "LAST SUBMITTED"** (`scripts/indexnow-state.json`, committed beside the lastmod manifest). A failed submission is NOT retried tomorrow; that URL waits for an ordinary crawl. The alternative is writing state from the submitting step, which is the one step allowed to fail, and owning a submission queue is worse than missing a ping. **An empty or absent state file SEEDS and submits nothing** rather than treating all 249 URLs as new, which would fire the whole sitemap in one request. The file was seeded on 2026-09-20 from the pages then published, so the first run reported real changes rather than a baseline.
 
-**THE KEY IS PUBLIC BY DESIGN AND AUTHORISES ONLY THIS HOST'S URLs.** `frontend/<key>.txt` contains the key and nothing else; IndexNow fetches it and compares it against the key in the payload, which is the whole ownership proof. Anyone can read it, and anyone holding it can submit **memradar.com** URLs (and only those), so the worst case is a stranger spamming submissions in our name and getting the host throttled. `scripts/indexnow-submit.js` **derives the key from the published file** rather than from an env var or a literal, so the file and the payload cannot desynchronise. **To rotate:** drop in a new `<newkey>.txt`, delete the old file, regenerate; nothing else changes. It is excluded from the sitemap by construction (static entries come only from the existing XML plus `GUARANTEED_STATIC`). Cloudflare edge-caches root `.txt` for 4h, which is harmless for a file that never changes, and a 404 for a missing `.txt` is `DYNAMIC`, so a probe before publication cannot cache a 404 over it.
+**THE KEY IS PUBLIC BY DESIGN AND AUTHORISES ONLY THIS HOST'S URLs.** `frontend/<key>.txt` contains the key and nothing else; IndexNow fetches it and compares it against the key in the payload, which is the whole ownership proof. Anyone can read it, and anyone holding it can submit **memradar.com** URLs (and only those), so the worst case is a stranger spamming submissions in our name and getting the host throttled. `scripts/indexnow-submit.js` **derives the key from the published file** rather than from an env var or a literal, so the file and the payload cannot desynchronise. **To rotate:** drop in a new `<newkey>.txt`, delete the old file, regenerate; nothing else changes. It is excluded from the sitemap by construction (static entries come only from the existing XML plus `GUARANTEED_STATIC`). **CORRECTED 2026-09-25 from measured headers: root `.txt` is NOT uniformly edge-cached, and this file specifically is not.** The key file returns `cf-cache-status: DYNAMIC` with `cache-control: max-age=600`, so it is served from origin every time. The earlier note here claimed Cloudflare edge-caches root `.txt` for 4h and called that harmless; the conclusion was right (nothing depends on it, because the file never changes) but the stated reason was false. A 404 for a missing `.txt` is also `DYNAMIC`, so a probe before publication still cannot cache a 404 over it, which was the real concern. See the measured table in the Cloudflare cache rule section.
 
 **WHAT NORMAL LOOKS LIKE, so a future session does not re-derive it: 30 to 60 URLs a day.** That is the audit's measured range for material changes (price moves ~32/day, plus all-time low/high changes and buy-state flips), against ~235/day from the manifest hash diff. The first live list was 24, but that run covered only the hours since the previous regen, not a full day. **Two alarms watch it, and they answer different questions:**
 - **DRIFT, over 100 URLs in one run** (`DRIFT_ALARM` in `scripts/indexnow-submit.js`): prints three `***` lines and submits anyway, because it is a prompt to re-measure rather than an error. **Set at 100, not at the top of the 60 range, on purpose:** memory prices lurch, and an alarm that fires on a genuinely volatile day is one people learn to scroll past. What it catches is the systematic case, a change to generation quietly widening materiality back toward "everything changed". `drift` rides the SUMMARY JSON either way, so the quiet days are greppable too.
