@@ -430,6 +430,14 @@ const CLAIM_REGISTRY = [
     reason: 'historical, a closed period. Troughs $105.99 on 2020-08-26, $58.99 on 2020-08-10 and $59.97 on 2020-09-11, which are 0.57x, 0.71x and 0.55x the respective 2016-H1 baselines. Method: each kit\'s own price_history through buildDailySeries (in_stock only, last reading per UTC day); baseline is the median of that kit\'s 2016-H1 observations; the peak is the highest observation in 2017-2018 across ALL observations. No marketplace exclusion was applied and none is possible here: regular_price is a frozen backfill MSRP for these products, a single value of $259.99 on every row from 2015 to 2025, so price above regular_price means only above the 2015 MSRP, which is what a shortage does. Slugs: g-skill-ripjawsv-series-ddr4-ram-32gb-3200mhz, g-skill-ripjawsv-series-ddr4-ram-16gb-3200mhz, g-skill-ripjawsv-series-ddr4-ram-16gb-3200mhz-2.',
   },
   {
+    id: 'lastcycle-alltime-trough',
+    page: '/blog/will-ram-prices-go-back-down/',
+    where: '"Where DDR4 sits now, against that"',
+    sentence: 'At their lowest, in June 2024 and March 2025, the three kits sold for about a quarter of their 2016 price.',
+    monitorable: false,
+    reason: 'historical, a closed period, and no market_stats figure reaches 2016. This is a DIFFERENT low from lastcycle-trough and does not supersede it: that entry is the 2020 unwind (0.57x, 0.71x, 0.55x), this one is the deeper all-time low that came years later. Both are true of different windows, which is why the sentence names its years. Measured $46.99 on 2025-03-09, $19.98 on 2024-06-27 and $27.99 on 2025-03-14, which are 0.251x, 0.241x and 0.255x the respective 2016-H1 baselines, so "about a quarter" holds on all three within 24 to 26 percent. Method: the lowest in-stock price AFTER that kit\'s 2018 peak, from its own price_history through buildDailySeries (in_stock only, last reading per UTC day); baseline is the median of that kit\'s 2016-H1 observations. THE SENTENCE STATES A LEVEL, NOT A PRICE, DELIBERATELY: two of the three lows ($46.99 and $27.99) appear in exactly ONE in-stock reading in the whole history, so a dated exact price would rest on a single observation, the same hazard as the all-time-high spikes on the backlog. The level is corroborated where the cent is not, with 31, 3 and 2 row-days inside 5 percent of each low. No low sits next to an out-of-stock gap (zero in_stock=false rows within 7 days of any of the three) and regular_price is null on all three low days, so the marketplace test returns nothing rather than a misleading pass. Slugs: g-skill-ripjawsv-series-ddr4-ram-32gb-3200mhz, g-skill-ripjawsv-series-ddr4-ram-16gb-3200mhz, g-skill-ripjawsv-series-ddr4-ram-16gb-3200mhz-2.',
+  },
+  {
     id: 'lastcycle-peak-window',
     page: '/blog/will-ram-prices-go-back-down/',
     where: '"What happened last time", closing paragraph',

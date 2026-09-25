@@ -2724,7 +2724,7 @@ const WILL_RAM_FALL_PUBLISHED = '2026-09-24';
 // would claim a review nobody performed, which is the same failure as a page
 // printing figures fresher than the data behind them. Bump it by hand when the
 // piece is actually re-read against the data.
-const WILL_RAM_FALL_REVIEWED = '2026-09-24';
+const WILL_RAM_FALL_REVIEWED = '2026-09-25';
 
 // The three kits the post names. If one leaves the catalog or goes noindex the
 // build FAILS: the whole argument rests on a reader being able to click through
