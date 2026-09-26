@@ -13,7 +13,7 @@
 #
 # SOURCES: Amazon price history licensed from Keepa. These figures are medians computed by MemRadar from that history, not the raw licensed data. Newegg prices are not included: MemRadar records Newegg as a current price only and holds no Newegg history.
 #
-# Generated 2026-09-25. Regenerated daily.
+# Generated 2026-09-26. Regenerated daily.
 # Source: MemRadar Memory Price Index, memradar.com/price-index/
 segment,month,median_price_usd,median_usd_per_gb,product_count
 ddr5,2022-06,271.10,6.9916,10

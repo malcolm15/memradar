@@ -462,6 +462,98 @@ const CLAIM_REGISTRY = [
     reason: 'a count of catalog members, not a market figure, so no market_stats row can test it. ENFORCED AT BUILD TIME INSTEAD: WILL_RAM_FALL_KITS lists the three slugs and buildWillRamFall() THROWS if one is missing from the catalog or carries noindex, which fails the regen rather than publishing a post that cites a page we tell crawlers to ignore. First observations 2015-11-12, 2015-11-27 and 2016-02-15, with no gap over 60 days before 2021.',
   },
 
+  // ---------------- Prime Day event study (2026-09-25). All unmonitorable:
+  // every figure is a historical event gap over closed sale windows, and
+  // market_stats holds no history and nothing before 2019-11 at segment level.
+  {
+    id: 'primeday-edge-3pt',
+    page: '/blog/is-prime-day-a-good-time-to-buy-ram/',
+    where: 'verdict box and "Prime Day: a small, repeatable edge"',
+    sentence: 'by about 3 percentage points on a typical product',
+    monitorable: false,
+    reason: 'historical event study over closed periods; no market_stats row spans a 2017 sale window, and the table holds no history. Measured median gap across the nine Prime Days 2017 to 2025 = -3.47pp, beating the same-year control in 7 of 9 (the two that did not are 2018 +0.83pp and 2019 +0.73pp, both years whose ordinary windows already carried a discount). Prime Day 2016 is excluded because zero products had both a window reading and a prior baseline. METHOD, common to every entry from this post: for each sale, each product with an in-stock price in the sale window AND in the prior 30 days contributes one figure, the window MINIMUM against the median of that product over the prior 30 days. The reported gap is that figure minus the same statistic computed over ordinary windows of the same length drawn from the SAME calendar year and kept 14 days clear of every sale, which is what removes the year trend. All series built by the generator daily-series rule (in_stock only, last reading per UTC day), day strings not array positions. REGULAR PRICE ONLY: keepa.js reads csv[0] AMAZON, csv[1] NEW and csv[18] BUY_BOX_SHIPPING; csv[8] LIGHTNING_DEAL and csv[9] WAREHOUSE are never requested, so no deal price is in the data. Audited 2026-09-25 and every figure is pinned to that date.',
+  },
+  {
+    id: 'primeday-nvme-6to9',
+    page: '/blog/is-prime-day-a-good-time-to-buy-ram/',
+    where: '"Prime Day: a small, repeatable edge"',
+    sentence: 'they bottomed 6 to 9 points further below their recent price on Prime Day than in an ordinary window',
+    monitorable: false,
+    reason: 'historical, closed periods. NVMe gaps: 2024 -6.68pp on n=18, 2025 -9.09pp on n=30. These are the only two Prime Days where NVMe clears n=15; earlier years hold 1 to 8 drives and are not reportable, which is why the copy names those two years. METHOD, common to every entry from this post: for each sale, each product with an in-stock price in the sale window AND in the prior 30 days contributes one figure, the window MINIMUM against the median of that product over the prior 30 days. The reported gap is that figure minus the same statistic computed over ordinary windows of the same length drawn from the SAME calendar year and kept 14 days clear of every sale, which is what removes the year trend. All series built by the generator daily-series rule (in_stock only, last reading per UTC day), day strings not array positions. REGULAR PRICE ONLY: keepa.js reads csv[0] AMAZON, csv[1] NEW and csv[18] BUY_BOX_SHIPPING; csv[8] LIGHTNING_DEAL and csv[9] WAREHOUSE are never requested, so no deal price is in the data. Audited 2026-09-25 and every figure is pinned to that date.',
+  },
+  {
+    id: 'primeday-2024-example',
+    page: '/blog/is-prime-day-a-good-time-to-buy-ram/',
+    where: '"Prime Day: a small, repeatable edge"',
+    sentence: 'The typical product lowest Prime Day price was 6.7 percent under its previous month; an ordinary two-day window that year managed zero.',
+    monitorable: false,
+    reason: 'historical, a closed period. Prime Day 2024 event median -6.67% on n=49; same-year two-day control median -0.02% on n=4595 product-windows. The gap is -6.64pp, the largest of any Prime Day measured. METHOD, common to every entry from this post: for each sale, each product with an in-stock price in the sale window AND in the prior 30 days contributes one figure, the window MINIMUM against the median of that product over the prior 30 days. The reported gap is that figure minus the same statistic computed over ordinary windows of the same length drawn from the SAME calendar year and kept 14 days clear of every sale, which is what removes the year trend. All series built by the generator daily-series rule (in_stock only, last reading per UTC day), day strings not array positions. REGULAR PRICE ONLY: keepa.js reads csv[0] AMAZON, csv[1] NEW and csv[18] BUY_BOX_SHIPPING; csv[8] LIGHTNING_DEAL and csv[9] WAREHOUSE are never requested, so no deal price is in the data. Audited 2026-09-25 and every figure is pinned to that date.',
+  },
+  {
+    id: 'primeday-other-segments-2to4',
+    page: '/blog/is-prime-day-a-good-time-to-buy-ram/',
+    where: '"Prime Day: a small, repeatable edge"',
+    sentence: 'DDR4, DDR5 and SATA drives all showed the edge, but smaller, in the 2 to 4 point range',
+    monitorable: false,
+    reason: 'historical, closed periods. NOTE THE STATISTIC DIFFERS FROM THE HEADLINE FIGURE and this is deliberate: these are POOLED EVENT MEDIANS across all ten Prime Days, not year-matched gaps, because per-event segment cells fall to 0 to 2 products. DDR4 -2.63% on n=62, DDR5 -3.06% on n=55, SATA -3.55% on n=45, against pooled same-length controls of -0.71%, +0.00% and +0.00%, so the implied gaps are about -1.9pp, -3.1pp and -3.6pp and the 2 to 4 range holds on either reading. NVMe pooled is -7.28% on n=60 and is reported separately. METHOD, common to every entry from this post: for each sale, each product with an in-stock price in the sale window AND in the prior 30 days contributes one figure, the window MINIMUM against the median of that product over the prior 30 days. The reported gap is that figure minus the same statistic computed over ordinary windows of the same length drawn from the SAME calendar year and kept 14 days clear of every sale, which is what removes the year trend. All series built by the generator daily-series rule (in_stock only, last reading per UTC day), day strings not array positions. REGULAR PRICE ONLY: keepa.js reads csv[0] AMAZON, csv[1] NEW and csv[18] BUY_BOX_SHIPPING; csv[8] LIGHTNING_DEAL and csv[9] WAREHOUSE are never requested, so no deal price is in the data. Audited 2026-09-25 and every figure is pinned to that date.',
+  },
+  {
+    id: 'october-no-edge',
+    page: '/blog/is-prime-day-a-good-time-to-buy-ram/',
+    where: 'verdict box and "The October sale: no edge at all"',
+    sentence: 'it beat an ordinary window in two of the four years and lost in the other two, with a median gap under 1 point',
+    monitorable: false,
+    reason: 'historical, closed periods. The four October events are 2022-10-11/12 (Prime Early Access Sale), 2023-10-10/11, 2024-10-08/09 and 2025-10-07/08 (Prime Big Deal Days). Gaps -3.31pp, +0.85pp, -2.59pp, +3.87pp, so 2 of 4 beat their year and the median is -0.87pp. METHOD, common to every entry from this post: for each sale, each product with an in-stock price in the sale window AND in the prior 30 days contributes one figure, the window MINIMUM against the median of that product over the prior 30 days. The reported gap is that figure minus the same statistic computed over ordinary windows of the same length drawn from the SAME calendar year and kept 14 days clear of every sale, which is what removes the year trend. All series built by the generator daily-series rule (in_stock only, last reading per UTC day), day strings not array positions. REGULAR PRICE ONLY: keepa.js reads csv[0] AMAZON, csv[1] NEW and csv[18] BUY_BOX_SHIPPING; csv[8] LIGHTNING_DEAL and csv[9] WAREHOUSE are never requested, so no deal price is in the data. Audited 2026-09-25 and every figure is pinned to that date.',
+  },
+  {
+    id: 'blackfriday-2pt',
+    page: '/blog/is-prime-day-a-good-time-to-buy-ram/',
+    where: '"Black Friday: a small edge in normal years, a trap in a rising one"',
+    sentence: 'beat an ordinary same-year window in six of nine years, by a median of about 2 points',
+    monitorable: false,
+    reason: 'historical, closed periods. PRIMARY FIGURE, 2017 TO 2025: 6 of 9 Black Friday windows beat their own year, median gap -2.31pp. That span was chosen to match the verdict box phrase "since 2017", after the first draft quoted the ten-year figure and disagreed with it. THE TEN-YEAR FIGURE, KEPT FOR THE RECORD: over 2016 to 2025 it is 7 of 10 with a median of -2.03pp. Both are correct; the published sentence uses the nine-year span because the rest of the post starts at 2017, where Prime Day first has usable data. Windows run Black Friday through Cyber Monday, and Black Friday was verified for each year as the day after the fourth Thursday of November. Gaps: 2016 -1.75, 2017 -6.93, 2018 -2.38, 2019 -2.31, 2020 +1.11, 2021 -2.90, 2022 -2.52, 2023 +2.68, 2024 -0.86, 2025 +13.18pp. METHOD, common to every entry from this post: for each sale, each product with an in-stock price in the sale window AND in the prior 30 days contributes one figure, the window MINIMUM against the median of that product over the prior 30 days. The reported gap is that figure minus the same statistic computed over ordinary windows of the same length drawn from the SAME calendar year and kept 14 days clear of every sale, which is what removes the year trend. All series built by the generator daily-series rule (in_stock only, last reading per UTC day), day strings not array positions. REGULAR PRICE ONLY: keepa.js reads csv[0] AMAZON, csv[1] NEW and csv[18] BUY_BOX_SHIPPING; csv[8] LIGHTNING_DEAL and csv[9] WAREHOUSE are never requested, so no deal price is in the data. Audited 2026-09-25 and every figure is pinned to that date.',
+  },
+  {
+    id: 'blackfriday-2025-worse',
+    page: '/blog/is-prime-day-a-good-time-to-buy-ram/',
+    where: 'verdict box and "Black Friday: a small edge in normal years, a trap in a rising one"',
+    sentence: 'the typical product lowest Black Friday weekend price was 13 percent above its previous month, and 13 points worse than an ordinary week that year',
+    monitorable: false,
+    reason: 'historical, a closed period. BF-CM 2025 (2025-11-28 to 2025-12-01) event median +12.90% on n=116, same-year four-day control median -0.27% on n=7141, gap +13.18pp, the worst of any event measured. The companion claim that waiting cost money is supported by October Prime 2025 at +3.87% against this +12.90%. METHOD, common to every entry from this post: for each sale, each product with an in-stock price in the sale window AND in the prior 30 days contributes one figure, the window MINIMUM against the median of that product over the prior 30 days. The reported gap is that figure minus the same statistic computed over ordinary windows of the same length drawn from the SAME calendar year and kept 14 days clear of every sale, which is what removes the year trend. All series built by the generator daily-series rule (in_stock only, last reading per UTC day), day strings not array positions. REGULAR PRICE ONLY: keepa.js reads csv[0] AMAZON, csv[1] NEW and csv[18] BUY_BOX_SHIPPING; csv[8] LIGHTNING_DEAL and csv[9] WAREHOUSE are never requested, so no deal price is in the data. Audited 2026-09-25 and every figure is pinned to that date.',
+  },
+  {
+    id: 'presale-no-inflation',
+    page: '/blog/is-prime-day-a-good-time-to-buy-ram/',
+    where: '"Two things people assume that the data does not show"',
+    sentence: 'the median change is zero and the price rose in 49 percent of cases',
+    monitorable: false,
+    reason: 'historical, closed periods, and a NULL result rather than a magnitude, so there is no floor to breach. Compares the median of days -60 to -45 before each sale with the median of days -14 to -1, pooled over all 24 event windows: n=990 product-and-sale pairs, median +0.00%, 49.1% rising. Per-event figures track the prevailing trend in both directions, from -15.84% (BF 2018) to +38.47% (BF 2025), which is why only the pooled figure is published. METHOD, common to every entry from this post: for each sale, each product with an in-stock price in the sale window AND in the prior 30 days contributes one figure, the window MINIMUM against the median of that product over the prior 30 days. The reported gap is that figure minus the same statistic computed over ordinary windows of the same length drawn from the SAME calendar year and kept 14 days clear of every sale, which is what removes the year trend. All series built by the generator daily-series rule (in_stock only, last reading per UTC day), day strings not array positions. REGULAR PRICE ONLY: keepa.js reads csv[0] AMAZON, csv[1] NEW and csv[18] BUY_BOX_SHIPPING; csv[8] LIGHTNING_DEAL and csv[9] WAREHOUSE are never requested, so no deal price is in the data. Audited 2026-09-25 and every figure is pinned to that date.',
+  },
+  {
+    id: 'annual-low-no-month',
+    page: '/blog/is-prime-day-a-good-time-to-buy-ram/',
+    where: '"Two things people assume that the data does not show"',
+    sentence: 'the annual low landed in November 16 percent of the time, July 10 percent, October 3 percent',
+    monitorable: false,
+    reason: 'historical, and a NULL result. Product-years with at least 200 in-stock readings: 31. November 5 of 31 = 16.1% (z=+1.50), July 3 = 9.7% (z=+0.26), October 1 = 3.2% (z=-0.99), against a uniform expectation of 8.3%. January reads 9 of 31 = 29.0% (z=+3.99) and is DELIBERATELY NOT PUBLISHED as seasonality: 6 of those 9 are 2026, a partial year in which prices rose continuously so January is mechanically the minimum, and dropping 2026 returns January to 3 of 23, near uniform. METHOD, common to every entry from this post: for each sale, each product with an in-stock price in the sale window AND in the prior 30 days contributes one figure, the window MINIMUM against the median of that product over the prior 30 days. The reported gap is that figure minus the same statistic computed over ordinary windows of the same length drawn from the SAME calendar year and kept 14 days clear of every sale, which is what removes the year trend. All series built by the generator daily-series rule (in_stock only, last reading per UTC day), day strings not array positions. REGULAR PRICE ONLY: keepa.js reads csv[0] AMAZON, csv[1] NEW and csv[18] BUY_BOX_SHIPPING; csv[8] LIGHTNING_DEAL and csv[9] WAREHOUSE are never requested, so no deal price is in the data. Audited 2026-09-25 and every figure is pinned to that date.',
+  },
+  {
+    id: 'marketplace-share',
+    page: '/blog/is-prime-day-a-good-time-to-buy-ram/',
+    where: '"What we cannot see"',
+    sentence: 'the best marketplace price where Amazon has no offer of its own, which is the case for about three quarters of the products we track',
+    monitorable: false,
+    reason: 'not checkable on a schedule, and this is structural rather than awkward: the price SOURCE (Keepa AMAZON versus NEW) is not stored anywhere in the database, only the resulting price, so recomputing it costs one Keepa token per product and cannot ride a stats run. Recorded figure 73.3%, 165 of 225 priced products, from the methodology audit; "about three quarters" holds on that denominator and on 70.2% of all 235. Re-measure by hand per the procedure in the methodology section of CLAUDE.md. METHOD, common to every entry from this post: for each sale, each product with an in-stock price in the sale window AND in the prior 30 days contributes one figure, the window MINIMUM against the median of that product over the prior 30 days. The reported gap is that figure minus the same statistic computed over ordinary windows of the same length drawn from the SAME calendar year and kept 14 days clear of every sale, which is what removes the year trend. All series built by the generator daily-series rule (in_stock only, last reading per UTC day), day strings not array positions. REGULAR PRICE ONLY: keepa.js reads csv[0] AMAZON, csv[1] NEW and csv[18] BUY_BOX_SHIPPING; csv[8] LIGHTNING_DEAL and csv[9] WAREHOUSE are never requested, so no deal price is in the data. Audited 2026-09-25 and every figure is pinned to that date.',
+  },
+  {
+    id: 'product-count-235',
+    page: '/blog/is-prime-day-a-good-time-to-buy-ram/',
+    where: 'verdict box',
+    sentence: '235 memory kits and SSDs we track',
+    monitorable: false,
+    reason: 'a pinned catalog count, not a market figure, so no market_stats row can test it. 235 products at the 2026-09-25 audit (119 ram, 116 ssd), of which 231 are indexable. PINNED ON PURPOSE: the post is an event study fixed to its audit date, so the count is stated as of that date and does not follow the catalog. If the catalog changes materially, the sentence needs a human edit rather than a regen. METHOD, common to every entry from this post: for each sale, each product with an in-stock price in the sale window AND in the prior 30 days contributes one figure, the window MINIMUM against the median of that product over the prior 30 days. The reported gap is that figure minus the same statistic computed over ordinary windows of the same length drawn from the SAME calendar year and kept 14 days clear of every sale, which is what removes the year trend. All series built by the generator daily-series rule (in_stock only, last reading per UTC day), day strings not array positions. REGULAR PRICE ONLY: keepa.js reads csv[0] AMAZON, csv[1] NEW and csv[18] BUY_BOX_SHIPPING; csv[8] LIGHTNING_DEAL and csv[9] WAREHOUSE are never requested, so no deal price is in the data. Audited 2026-09-25 and every figure is pinned to that date.',
+  },
+
   // ------------------------------------- registered, deliberately not checked
   //
   // These are live magnitude claims that no market_stats figure can falsify.

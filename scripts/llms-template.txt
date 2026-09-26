@@ -18,6 +18,7 @@ Each figure carries the date it was computed. Figures over longer windows rest o
 - [Methodology](https://memradar.com/methodology/): How prices are collected, how the figures are computed, and what the data cannot tell you.
 - [Why Is RAM So Expensive in 2026?](https://memradar.com/blog/why-ram-prices-are-so-high/): Why RAM prices rose: causes, with figures checked against the index.
 - [Will RAM prices go back down?](https://memradar.com/blog/will-ram-prices-go-back-down/): What the last memory price cycle looked like in our own data, 2016 to 2020.
+- [Is Prime Day a good time to buy RAM?](https://memradar.com/blog/is-prime-day-a-good-time-to-buy-ram/): What the regular price of memory and SSDs does around Prime Day, October sales and Black Friday, 2017 to 2025.
 - [Guides](https://memradar.com/guides/): Buying guides argued from the tracked price data rather than opinion.
 - [Should I Buy RAM Now?](https://memradar.com/guides/should-i-buy-ram-now/): What the 2025 to 2026 memory price surge did to DDR5 and DDR4, and how to judge a fair kit price today.
 - [Should I Buy an SSD Now?](https://memradar.com/guides/should-i-buy-an-ssd-now/): A decade of falling storage prices, what changed in late 2025, and how to buy a drive well in the current market.

@@ -2326,6 +2326,10 @@ const EXPLAINERS = [{
   href: '/blog/will-ram-prices-go-back-down/',
   title: 'Will RAM prices go back down?',
   blurb: 'The one completed memory cycle in our data: what the 2017 to 2018 DDR4 spike did, how long it took to unwind, and where prices sit against it now.',
+}, {
+  href: '/blog/is-prime-day-a-good-time-to-buy-ram/',
+  title: 'Is Prime Day a good time to buy RAM? What ten years of prices show',
+  blurb: 'Every Prime Day, October Prime sale and Black Friday weekend since 2017, measured against ordinary weeks in the same year. Where the regular price actually moves, and where it does not.',
 }];
 
 const GUIDES = [{
@@ -2807,6 +2811,81 @@ function buildWillRamFall(ctx) {
     .replace(/<!--DDR5_FLOOR-->/g, String(ddr5Floor));
   if (/<!--[A-Z_0-9]+-->/.test(html)) throw new Error(`${WILL_RAM_FALL_SLUG}: unreplaced anchor ${(/<!--[A-Z_0-9]+-->/.exec(html) || [])[0]}`);
   return { html, desc, ddr4Floor, ddr5Floor };
+}
+
+// The third explainer, and the first that argues from an EVENT STUDY rather
+// than from a level or a cycle. Its question is "does waiting for a sale pay",
+// and the answer is small and positive for Prime Day, absent for the October
+// event, and negative in 2025 for Black Friday.
+//
+// EVERY FIGURE IS HAND-WRITTEN AND PINNED TO ITS AUDIT DATE, the same rule as
+// the last-cycle post and for the same reason: an event study whose numbers
+// move under the reader stops being a record of what happened. There are NO
+// live restatements here, so unlike buildWillRamFall this builder needs no
+// findings and carries no data-claim spans.
+//
+// THE COVERAGE LIMIT IS THE LOAD-BEARING CAVEAT AND THE COPY LEADS WITH IT.
+// backend/lib/keepa.js reads csv[0] AMAZON, csv[1] NEW and csv[18]
+// BUY_BOX_SHIPPING and nothing else; csv[8] LIGHTNING_DEAL and csv[9] WAREHOUSE
+// are never requested. So the post measures the REGULAR price and cannot speak
+// to advertised deals at all. Do not let a future edit soften that sentence.
+const PRIME_DAY_SLUG = 'is-prime-day-a-good-time-to-buy-ram';
+const PRIME_DAY_PUBLISHED = '2026-09-25';
+// HAND-SET, NEVER GENERATOR-EMITTED, same rule as WILL_RAM_FALL_REVIEWED: a
+// generated reviewed date claims a review nobody performed. The copy promises a
+// review after Prime Big Deal Days and again after Black Friday; bump it then.
+const PRIME_DAY_REVIEWED = '2026-09-25';
+
+function buildPrimeDay(ctx) {
+  const { buildDate } = ctx;
+
+  const url = `${SITE}/blog/${PRIME_DAY_SLUG}/`;
+  const h1 = 'Is Prime Day a good time to buy RAM? What ten years of prices show';
+  // The h1 is 66 characters, so the SERP title cannot carry it whole. It is cut
+  // at the question, which is the part a searcher types, rather than truncated.
+  const pageTitle = 'Is Prime Day a good time to buy RAM? | MemRadar';
+  if (pageTitle.length > 60) throw new Error(`${PRIME_DAY_SLUG} title is ${pageTitle.length} chars, over 60`);
+
+  const descVariants = [
+    'Is Prime Day a good time to buy RAM? Every Prime Day, October sale and Black Friday since 2017, measured against ordinary weeks in the same year.',
+    'Is Prime Day a good time to buy RAM? Every sale since 2017 measured against ordinary weeks in the same year. What the regular price actually does.',
+    'Is Prime Day a good time to buy RAM? Ten years of prices, with every sale measured against ordinary weeks in the same calendar year.',
+  ];
+  const desc = descVariants.find((v) => v.length >= DESC_MIN && v.length <= 160);
+  if (!desc) throw new Error(`${PRIME_DAY_SLUG} meta description: no variant fits ${DESC_MIN}-160 (lengths ${descVariants.map((v) => v.length).join(', ')})`);
+
+  const jsonld = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Article',
+        headline: h1,
+        description: desc,
+        url,
+        datePublished: PRIME_DAY_PUBLISHED,
+        dateModified: buildDate,
+        author: AUTHOR_PERSON,
+        publisher: PUBLISHER_ORG,
+        mainEntityOfPage: { '@type': 'WebPage', '@id': url },
+      },
+      { '@type': 'BreadcrumbList', itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: SITE + '/' },
+        { '@type': 'ListItem', position: 2, name: 'Blog', item: SITE + '/blog/' },
+        { '@type': 'ListItem', position: 3, name: h1, item: url },
+      ] },
+    ],
+  }, null, 2);
+
+  const tpl = fs.readFileSync(path.join(FRONTEND, 'blog', PRIME_DAY_SLUG, 'template.html'), 'utf8');
+  const html = tpl
+    .replace(/<!--META_DESC-->/g, esc(desc))
+    .replace(/<!--PAGE_TITLE-->/g, esc(pageTitle))
+    .replace(/<!--OG_TITLE-->/g, esc(h1))
+    .replace('<!--JSONLD-->', `<script type="application/ld+json">\n${jsonld}\n  </script>`)
+    .replace(/<!--BUILD_DATE-->/g, longDate(buildDate))
+    .replace(/<!--REVIEWED_DATE-->/g, longDate(PRIME_DAY_REVIEWED));
+  if (/<!--[A-Z_0-9]+-->/.test(html)) throw new Error(`${PRIME_DAY_SLUG}: unreplaced anchor ${(/<!--[A-Z_0-9]+-->/.exec(html) || [])[0]}`);
+  return { html, desc, pageTitle };
 }
 
 // AUTHOR. Every Article on the site is written by Malcolm, not by a faceless
@@ -4998,6 +5077,18 @@ async function run() {
     log(`Post written: /blog/${WILL_RAM_FALL_SLUG}/ (reviewed ${WILL_RAM_FALL_REVIEWED}, floors ddr4 ${wf.ddr4Floor}% / ddr5 ${wf.ddr5Floor}%, ${WILL_RAM_FALL_KITS.length} kits cited)`);
   } catch (e) {
     log(`⚠ /blog/${WILL_RAM_FALL_SLUG}/ NOT regenerated: ${e.message}`);
+  }
+
+  // The third explainer. Needs nothing from the findings (no live restatements),
+  // so it is independent of /data/; still skippable on its own, same rule.
+  try {
+    const pd = buildPrimeDay({ buildDate });
+    const pdDir = path.join(FRONTEND, 'blog', PRIME_DAY_SLUG);
+    fs.mkdirSync(pdDir, { recursive: true });
+    fs.writeFileSync(path.join(pdDir, 'index.html'), pd.html);
+    log(`Post written: /blog/${PRIME_DAY_SLUG}/ (reviewed ${PRIME_DAY_REVIEWED}, title ${pd.pageTitle.length} chars, desc ${pd.desc.length} chars)`);
+  } catch (e) {
+    log(`⚠ /blog/${PRIME_DAY_SLUG}/ NOT regenerated: ${e.message}`);
   }
 
   // 2d) Category listing pages and the homepage. Both are generator output as

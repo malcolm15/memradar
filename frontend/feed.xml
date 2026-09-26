@@ -5,7 +5,7 @@
     <link>https://memradar.com/</link>
     <description>Guides, explainers and reference data on RAM and SSD prices, argued from a decade of tracked retail price history.</description>
     <language>en-us</language>
-    <lastBuildDate>Fri, 25 Sep 2026 00:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Sat, 26 Sep 2026 00:00:00 GMT</lastBuildDate>
     <atom:link href="https://memradar.com/feed.xml" rel="self" type="application/rss+xml"/>
     <image>
       <url>https://memradar.com/android-chrome-512x512.png</url>
@@ -17,55 +17,62 @@
       <link>https://memradar.com/methodology/</link>
       <guid isPermaLink="true">https://memradar.com/methodology/</guid>
       <description>How MemRadar collects, stores and interprets prices for 235 RAM and SSD products, where the data comes from, and what it cannot tell you.</description>
-      <pubDate>Fri, 25 Sep 2026 00:00:00 GMT</pubDate>
+      <pubDate>Sat, 26 Sep 2026 00:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Is Prime Day a good time to buy RAM?</title>
+      <link>https://memradar.com/blog/is-prime-day-a-good-time-to-buy-ram/</link>
+      <guid isPermaLink="true">https://memradar.com/blog/is-prime-day-a-good-time-to-buy-ram/</guid>
+      <description>Is Prime Day a good time to buy RAM? Every Prime Day, October sale and Black Friday since 2017, measured against ordinary weeks in the same year.</description>
+      <pubDate>Sat, 26 Sep 2026 00:00:00 GMT</pubDate>
     </item>
     <item>
       <title>Memory Price Data for Journalists</title>
       <link>https://memradar.com/data/</link>
       <guid isPermaLink="true">https://memradar.com/data/</guid>
       <description>Retail price data on 235 RAM and SSD products, free to cite with attribution. Current findings, how to cite, and custom cuts on request.</description>
-      <pubDate>Fri, 25 Sep 2026 00:00:00 GMT</pubDate>
-    </item>
-    <item>
-      <title>RAM &amp; SSD Price Index: Memory Price Trends</title>
-      <link>https://memradar.com/price-index/</link>
-      <guid isPermaLink="true">https://memradar.com/price-index/</guid>
-      <description>DDR5 is up +353.9% year over year. Median price changes across 235 tracked RAM and SSD products, from live price history. Updated daily.</description>
-      <pubDate>Fri, 25 Sep 2026 00:00:00 GMT</pubDate>
+      <pubDate>Sat, 26 Sep 2026 00:00:00 GMT</pubDate>
     </item>
     <item>
       <title>RAM &amp; SSD Spec Glossary: Every Term Defined</title>
       <link>https://memradar.com/glossary/</link>
       <guid isPermaLink="true">https://memradar.com/glossary/</guid>
       <description>Every RAM and SSD spec MemRadar reads off a listing, in plain English: DDR generation, CAS latency, NVMe and SATA, TLC and QLC, PCIe generation and more.</description>
-      <pubDate>Fri, 25 Sep 2026 00:00:00 GMT</pubDate>
+      <pubDate>Sat, 26 Sep 2026 00:00:00 GMT</pubDate>
     </item>
     <item>
       <title>Should I Buy an SSD Now? (2026 Data, Not Vibes)</title>
       <link>https://memradar.com/guides/should-i-buy-an-ssd-now/</link>
       <guid isPermaLink="true">https://memradar.com/guides/should-i-buy-an-ssd-now/</guid>
       <description>SSD prices are up more than 120% year over year. What a decade of tracked price history says about waiting, and how to spot a fair drive price today.</description>
-      <pubDate>Fri, 25 Sep 2026 00:00:00 GMT</pubDate>
+      <pubDate>Sat, 26 Sep 2026 00:00:00 GMT</pubDate>
     </item>
     <item>
       <title>Should I Buy RAM Now? (2026 Data, Not Vibes)</title>
       <link>https://memradar.com/guides/should-i-buy-ram-now/</link>
       <guid isPermaLink="true">https://memradar.com/guides/should-i-buy-ram-now/</guid>
       <description>Should you buy RAM now? DDR5 is up +353.9% year over year and still grinding higher. What a decade of real price data says about buying in this market.</description>
-      <pubDate>Fri, 25 Sep 2026 00:00:00 GMT</pubDate>
+      <pubDate>Sat, 26 Sep 2026 00:00:00 GMT</pubDate>
     </item>
     <item>
       <title>Why Is RAM So Expensive in 2026?</title>
       <link>https://memradar.com/blog/why-ram-prices-are-so-high/</link>
       <guid isPermaLink="true">https://memradar.com/blog/why-ram-prices-are-so-high/</guid>
       <description>Why is RAM so expensive in 2026? AI demand took the DRAM capacity and prices multiplied. 206 of 235 tracked products sit at 1.5x their all-time low or more.</description>
-      <pubDate>Fri, 25 Sep 2026 00:00:00 GMT</pubDate>
+      <pubDate>Sat, 26 Sep 2026 00:00:00 GMT</pubDate>
     </item>
     <item>
       <title>Will RAM prices go back down?</title>
       <link>https://memradar.com/blog/will-ram-prices-go-back-down/</link>
       <guid isPermaLink="true">https://memradar.com/blog/will-ram-prices-go-back-down/</guid>
       <description>Will RAM prices go back down? The last memory spike peaked at up to 2.8 times its 2016 price and unwound in about a year and a half. Where prices sit now.</description>
+      <pubDate>Sat, 26 Sep 2026 00:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>RAM &amp; SSD Price Index: Memory Price Trends</title>
+      <link>https://memradar.com/price-index/</link>
+      <guid isPermaLink="true">https://memradar.com/price-index/</guid>
+      <description>DDR5 is up +353.9% year over year. Median price changes across 235 tracked RAM and SSD products, from live price history. Updated daily.</description>
       <pubDate>Fri, 25 Sep 2026 00:00:00 GMT</pubDate>
     </item>
   </channel>
