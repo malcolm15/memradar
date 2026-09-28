@@ -1015,6 +1015,61 @@ function buildHistoryTable(ctx) {
 // lives here, as a dated fact rather than a sentence on every page.
 // See the tens-floor comment in the Price Index notables builder.
 const GENERATED_FLOOR_HEADROOM_PP = 5;
+// THE CEILING ON THAT HEADROOM (2026-09-28). Headroom now scales with the
+// binding segment's own jackknife spread, capped here, because a flat 5pp was
+// measured failing.
+//
+// WHAT HAPPENED. DDR4's full cohort moved 141.7 -> 126.6 -> 119.4 -> 124.4 over
+// four days while its paired median moved five points, and the flat 5pp floor
+// could not keep up: /ram/ went false on 2026-09-26 (baked 130 against a worst
+// of 126.6) and /ram/ AND /price-index/ both went false on 2026-09-27 (baked
+// 120 against 119.4). Three false sentence-days, each live for roughly 4.7
+// hours between the morning stats compute and the afternoon regen that rebaked
+// a lower floor. The claim monitor caught both and the regen self-healed, which
+// is the system working, but the sentence should not have gone false at all.
+//
+// WHY THE JACKKNIFE. product_count is not a proxy for robustness and the same
+// week proves it: ddr4 1y at n=28 carried a 40.1pp leave-one-out spread while
+// nvme 1y at n=67 carried 6.7pp. The jackknife measures directly what the
+// headroom needs to absorb, which is how far this figure can move when cohort
+// membership churns rather than when prices move.
+//
+// WHY CAPPED, AND WHY AT 20. Uncapped, today's 40.1pp DDR4 spread would floor
+// /price-index/ and /ram/ at 80% against the current 110%, which is thirty
+// points of headline bought for no measured gain. Simulated over 2026-09-22 to
+// 28, false sentence-days come out: flat 5pp 3, cap 10 one, cap 15 zero, cap 20
+// zero, uncapped zero. 15 and 20 give identical floors today (100/100/130/130)
+// and 20 is the conservative pick of the two, because the largest one-day move
+// actually observed in the binding segment was 15.1pp, which sits exactly on a
+// 15 cap and comfortably inside a 20.
+const GENERATED_FLOOR_HEADROOM_CAP_PP = 20;
+// Used when a row carries no jackknife at all. Deliberately the hand-written
+// prose figure, not the generated one: an unknown spread is not a small one,
+// and rows written before the column landed on 2026-09-22 still read null.
+const GENERATED_FLOOR_NO_JACKKNIFE_PP = 25;
+
+/**
+ * THE ONE PLACE THAT TURNS WORST-COHORT FIGURES INTO A PUBLISHED TENS-FLOOR.
+ * All three generated tens-floor sites call this and none computes its own, so
+ * the rule cannot drift between /price-index/, the listing intros and the SSD
+ * guide meta the way the headroom itself did before 2026-09-22.
+ *
+ * @param {Array<{pct:number,row:object}>} entries one per segment the sentence
+ *        depends on, `pct` already the worse of the two cohorts for that segment.
+ * @returns {{floorPct:number, binding:object, headroom:number, jackknife:number|null}}
+ */
+function generatedTensFloor(entries) {
+  let binding = entries[0];
+  for (const e of entries) if (e.pct < binding.pct) binding = e;
+  const raw = binding.row && binding.row.jackknife_spread_pp != null
+    ? Number(binding.row.jackknife_spread_pp)
+    : null;
+  const headroom = Math.max(
+    GENERATED_FLOOR_HEADROOM_PP,
+    Math.min(raw == null ? GENERATED_FLOOR_NO_JACKKNIFE_PP : raw, GENERATED_FLOOR_HEADROOM_CAP_PP),
+  );
+  return { floorPct: Math.floor((binding.pct - headroom) / 10) * 10, binding, headroom, jackknife: raw };
+}
 
 const MILESTONE_MIN = 2;
 const FLAT_TOLERANCE = 0.02; // "within 2%" counts as unchanged
@@ -2241,7 +2296,7 @@ function buildPriceIndex(ctx) {
       // segment on either reading, so the floor takes the worse of the two.
       const worst = y.map((r) => {
         const stable = stablePctOf(r);
-        return { segment: r.segment, pct: stable == null ? Number(r.pct_change) : Math.min(Number(r.pct_change), stable), stableKnown: stable != null };
+        return { segment: r.segment, row: r, pct: stable == null ? Number(r.pct_change) : Math.min(Number(r.pct_change), stable), stableKnown: stable != null };
       });
       // A missing delta means the stable figure is UNKNOWN, never "the same".
       // Silently falling back to the full cohort would rebuild the exact bug
@@ -2250,9 +2305,10 @@ function buildPriceIndex(ctx) {
       if (noStable.length) {
         log(`⚠ price index tens-floor: no stable-cohort figure for ${noStable.join(', ')} - that segment is floored on the full cohort ALONE and the sentence is not cohort-verified`);
       }
-      const weakest = Math.min(...worst.map((w) => w.pct));
-      // GENERATED TENS-FLOORS CARRY AT LEAST 5pp OF HEADROOM: floor10(worst - 5),
-      // not floor10(worst).
+      // GENERATED TENS-FLOORS CARRY HEADROOM THAT SCALES WITH THE BINDING
+      // SEGMENT'S JACKKNIFE SPREAD, floored at 5pp and capped at 20pp. See
+      // GENERATED_FLOOR_HEADROOM_CAP_PP for the 2026-09-26/27 measurement that
+      // replaced the flat 5pp.
       //
       // Hand-written prose gets 25pp because a human sentence cannot step down on its
       // own: it sits there being false until someone edits it. Generated prose
@@ -2265,7 +2321,9 @@ function buildPriceIndex(ctx) {
       // cohort at 129.5. The published sentence was false by 0.5pp the same day, on
       // /price-index/, /ram/ and /ssd/ at once. floor10(worst - 5) would have baked
       // 120 and survived it.
-      const floorPct = Math.floor((weakest - GENERATED_FLOOR_HEADROOM_PP) / 10) * 10;
+      const tf = generatedTensFloor(worst);
+      const floorPct = tf.floorPct;
+      log(`price index tens-floor: ${floorPct}% from ${tf.binding.segment} at ${tf.binding.pct.toFixed(1)}% less ${tf.headroom}pp headroom (jackknife ${tf.jackknife == null ? 'absent, using ' + GENERATED_FLOOR_NO_JACKKNIFE_PP : tf.jackknife}pp)`);
       notables.push(`<strong>Every segment is up more than ${floorPct}% year over year.</strong> The memory and storage market has not returned to its pre-2026 pricing.`);
     }
   }
@@ -2529,13 +2587,15 @@ function buildGuideSsdNow(ctx) {
     .filter((r) => r && r.pct_change != null)
     .map((r) => {
       const stable = stablePctOf(r);
-      return stable == null ? Number(r.pct_change) : Math.min(Number(r.pct_change), stable);
+      return { row: r, pct: stable == null ? Number(r.pct_change) : Math.min(Number(r.pct_change), stable) };
     });
-  // Same 5pp headroom rule as the other two tens-floors (see the Price Index
-  // notables builder). This site was found carrying "more than 130%" on
+  // Same headroom rule as the other two tens-floors, through the same function
+  // (see generatedTensFloor). This site was found carrying "more than 130%" on
   // 2026-09-22 while the other two had already stepped to 120, because it was
   // the one generated floor nobody had listed.
-  const floorPct = oneYr.length ? Math.floor((Math.min(...oneYr) - GENERATED_FLOOR_HEADROOM_PP) / 10) * 10 : null;
+  const ssdTf = oneYr.length ? generatedTensFloor(oneYr) : null;
+  const floorPct = ssdTf ? ssdTf.floorPct : null;
+  if (ssdTf) log(`SSD guide meta tens-floor: ${floorPct}% from ${ssdTf.binding.row.segment} at ${ssdTf.binding.pct.toFixed(1)}% less ${ssdTf.headroom}pp headroom (jackknife ${ssdTf.jackknife == null ? 'absent, using ' + GENERATED_FLOOR_NO_JACKKNIFE_PP : ssdTf.jackknife}pp)`);
   const metaDesc = esc(floorPct != null
     ? `SSD prices are up more than ${floorPct}% year over year. What a decade of tracked price history says about waiting, and how to spot a fair drive price today.`
     : 'What a decade of tracked SSD price history says about waiting, and how to spot a fair drive price today.');
@@ -3774,10 +3834,13 @@ function listingIntro(category, msRows) {
     const r = msRows.find((x) => x.segment === seg && x.period === '1y');
     if (!r || r.pct_change == null) return { html: '', floorPct: null }; // silent beats partial
     const stable = stablePctOf(r);
-    worst.push(stable == null ? Number(r.pct_change) : Math.min(Number(r.pct_change), stable));
+    worst.push({ row: r, pct: stable == null ? Number(r.pct_change) : Math.min(Number(r.pct_change), stable) });
   }
-  // Same 5pp headroom rule as the Price Index tens-floor; see the comment there.
-  const floorPct = Math.floor((Math.min(...worst) - GENERATED_FLOOR_HEADROOM_PP) / 10) * 10;
+  // Same headroom rule as the Price Index tens-floor, through the same
+  // function; see generatedTensFloor.
+  const tf = generatedTensFloor(worst);
+  const floorPct = tf.floorPct;
+  log(`${category} listing tens-floor: ${floorPct}% from ${tf.binding.row.segment} at ${tf.binding.pct.toFixed(1)}% less ${tf.headroom}pp headroom (jackknife ${tf.jackknife == null ? 'absent, using ' + GENERATED_FLOOR_NO_JACKKNIFE_PP : tf.jackknife}pp)`);
   if (floorPct < 10) return { html: '', floorPct: null }; // nothing striking to say
   const noun = category === 'ram' ? 'RAM' : 'SSD';
   // RAM is a mass noun and SSD is a count noun, so the same sentence frame does
@@ -4877,7 +4940,15 @@ async function run() {
   // 2b) The Memory Price Index page (generated, so its baked table refreshes
   // with every regeneration; it also hydrates from market_stats on load).
   const { data: msRows, error: msErr } = await supabase
-    .from('market_stats').select('segment, period, pct_change, product_count, computed_at, stability_delta_pp');
+    // stable_paired_pct and jackknife_spread_pp added 2026-09-28. NEITHER WAS
+    // FETCHED BEFORE, with two consequences that were invisible: the tens-floors
+    // resolved their stable figure through stableFigureOf's RECONSTRUCTION path
+    // (pct_change - stability_delta_pp, the ratio of medians) while the claim
+    // monitor used the paired median from a row that had it, so the floor and
+    // the check could disagree about the same segment; and the jackknife the
+    // headroom rule now reads would have been null on every row, silently
+    // collapsing it to the 25pp no-jackknife fallback everywhere.
+    .from('market_stats').select('segment, period, pct_change, product_count, computed_at, stability_delta_pp, stable_paired_pct, jackknife_spread_pp');
 
   // WHAT THIS BUILD ACTUALLY READ, emitted machine-readably for the workflow
   // step that checks whether the consumer got today's figures.

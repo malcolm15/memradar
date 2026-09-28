@@ -707,7 +707,20 @@ function checkClaimFloors(stats) {
 
     // BOTH cohorts, every required figure. One failure anywhere breaches.
     const failing = figures.filter((f) => f.full_pct < floorPct || f.stable_pct < floorPct);
-    const record = { ...summarise(entry), floor_pct: floorPct, floor_source: floorSource, figures };
+    // The tightest margin across both cohorts, computed BEFORE the branch so a
+    // breached entry carries it too, negative, saying by how much the sentence
+    // is now false. It used to be assigned only on the ok path, after `record`
+    // had already been spread into `breached`, so every breach recorded
+    // `min_margin_pp: undefined` and you could not tell a 0.6pp miss from a
+    // 30pp one without recomputing from `figures` by hand. Found on the
+    // 2026-09-26/27 DDR4 breaches, where that was exactly the question.
+    const record = {
+      ...summarise(entry),
+      floor_pct: floorPct,
+      floor_source: floorSource,
+      figures,
+      min_margin_pp: round1(Math.min(...figures.flatMap((f) => [f.full_margin_pp, f.stable_margin_pp]))),
+    };
     if (failing.length) {
       breached.push({
         ...record,
@@ -719,9 +732,6 @@ function checkClaimFloors(stats) {
         }),
       });
     } else {
-      // The tightest margin across both cohorts, so a claim creeping toward its
-      // floor is visible before it goes through.
-      record.min_margin_pp = round1(Math.min(...figures.flatMap((f) => [f.full_margin_pp, f.stable_margin_pp])));
       ok.push(record);
     }
   }

@@ -37,7 +37,7 @@ These two show what a product page holds. Both are quoted verbatim from the page
   First tracked October 6, 2023. All-time low $92.99 on November 23, 2024. All-time high $608.03 on August 2, 2026. Current price $567.99.
 
 - Samsung 960 EVO Series- 250GB PCIe NVMe (B01LYFKX41), https://memradar.com/ssd/samsung-960-evo-series-250gb-pcie-nvme/
-  First tracked November 27, 2016. All-time low $47.99 on August 16, 2022. All-time high $249.11 on February 15, 2019. Current price $225.21.
+  First tracked November 27, 2016. All-time low $47.99 on August 16, 2022. All-time high $249.11 on February 15, 2019. Current price $225.99.
 
 ## Notes for reuse
 
