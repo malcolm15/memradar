@@ -33,7 +33,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
   <meta name="theme-color" content="#0f1623">
-  <link rel="stylesheet" href="../css/style.css?v=20260928">
+  <link rel="stylesheet" href="../css/style.css?v=20260929">
 </head>
 <body>
 
@@ -83,20 +83,32 @@
         <p class="guide-sub">One figure a month for the parts a builder buys together, from <!--START_MONTH--> to <!--LATEST_MONTH-->.</p>
       </div>
 
-      <div class="guide-verdict" role="note" aria-label="Latest figures">
-        <p>In <!--LATEST_MONTH-->, the memory and storage for a current build cost <strong>$<!--CURRENT_USD--></strong>. The same parts around a DDR4 board cost <strong>$<!--DDR4_USD--></strong>. Against the same month a year earlier that is <span data-claim="buildcost-current-yoy" data-floor-pct="<!--CURRENT_YOY_FLOOR-->">up more than <!--CURRENT_YOY_FLOOR-->%</span> for the current build and <span data-claim="buildcost-ddr4-yoy" data-floor-pct="<!--DDR4_YOY_FLOOR-->">up more than <!--DDR4_YOY_FLOOR-->%</span> for the DDR4 one.</p>
+      <div class="guide-verdict bc-latest" role="note" aria-label="Latest reading">
+        <p class="bc-latest-month"><!--LATEST_MONTH--></p>
+        <ul class="bc-latest-list">
+          <li><strong>Current build</strong> (32GB DDR5-6000 + 1TB NVMe + 2TB NVMe): <strong>$<!--CURRENT_USD--></strong>, up from $<!--CURRENT_YEARAGO_USD--> in <!--YEARAGO_MONTH-->, <span data-claim="buildcost-current-yoy" data-floor-pct="<!--CURRENT_YOY_FLOOR-->">more than <!--CURRENT_YOY_FLOOR-->% higher</span>.</li>
+          <li><strong>DDR4 build</strong> (32GB DDR4-3200 + 1TB NVMe): <strong>$<!--DDR4_USD--></strong>, up from $<!--DDR4_YEARAGO_USD--> in <!--YEARAGO_MONTH-->, <span data-claim="buildcost-ddr4-yoy" data-floor-pct="<!--DDR4_YOY_FLOOR-->">more than <!--DDR4_YOY_FLOOR-->% higher</span>.</li>
+        </ul>
+        <p class="bc-note">Regular U.S. Amazon listing prices, medians across the products we track. Amazon price history licensed from Keepa; methodology by MemRadar. Completed months do not change.</p>
+        <p class="bc-note">The two baskets contain different storage and are not comparable with each other. Each is meant to be compared with itself over time.</p>
+      </div>
+
+      <div class="bc-cite">
+        <p><strong>For citation.</strong> The memory and storage in MemRadar's current-build basket cost about $<!--CURRENT_USD--> in <!--LATEST_MONTH-->, up from about $<!--CURRENT_YEARAGO_USD--> a year earlier. Source: MemRadar Build-Cost Index, <!--LATEST_MONTH-->.</p>
+        <p class="bc-note"><a href="/data/#how-to-cite">How to cite MemRadar data</a></p>
       </div>
 
       <h2>What is in each basket</h2>
-      <p>This is a shopping basket, not an index. Each component is the median price across the products we tracked in that exact specification that month, and the basket is their sum. Nothing is weighted and nothing is rebased.</p>
+      <p>This is a fixed basket priced in dollars rather than a series rebased to 100, so each month's figure is a cost you can compare with a receipt. Each component is the median price across the products we tracked in that exact specification that month, and the basket is their sum. Nothing is weighted and nothing is rebased.</p>
+      <p>For each product, we take the median of its daily prices within the calendar month. For each component, we take the median of those product figures across every product in that exact specification that had a price that month. The basket total is the sum of the component medians. Completed months are never recomputed.</p>
       <ul class="guide-list">
         <li><strong>Current build</strong>: a 32GB DDR5-6000 kit, a 1TB NVMe drive and a 2TB NVMe drive.</li>
         <li><strong>DDR4 build</strong>: a 32GB DDR4-3200 kit and a 1TB NVMe drive.</li>
       </ul>
-      <p>The specifications are fixed. They are not the cheapest parts available, and they are not a recommendation: they are a constant basket, so that a change in the figure is a change in prices rather than a change in what is being priced.</p>
+      <p>The baskets are editorial choices, not survey results. 32GB of DDR5-6000 is the configuration current desktop builds and reviews most often settle on, and 32GB of DDR4-3200 was its equivalent in the previous generation. The storage is one 1TB drive for the system and a 2TB drive for games and files. The DDR4 basket carries one drive because the other storage specifications we track did not have enough products far enough back to keep the series starting in January 2023. Specifications are held fixed so that changes reflect prices, not shifting parts.</p>
 
       <h2>The series</h2>
-      <p>Each line is the basket total at the end of that month. The current month never appears, because a partial month moves under the reader for no reason other than how far through it you are. <strong>A month's figure is fixed once the month ends and is not revised afterwards.</strong></p>
+      <p>Each point is the basket total for that month. The current month never appears, because a partial month moves under the reader for no reason other than how far through it you are. <strong>A month's figure is fixed once the month ends and is not revised afterwards.</strong></p>
       <div class="buildcost-sparks">
         <figure>
           <figcaption>Current build, <!--START_MONTH--> to <!--LATEST_MONTH--></figcaption>
@@ -107,6 +119,16 @@
           <!--SPARK_DDR4-->
         </figure>
       </div>
+
+      <h2>What this figure is for</h2>
+      <dl class="bc-use">
+        <dt>Use this figure for</dt>
+        <dd>tracking what the same fixed memory-and-storage basket costs at U.S. retail over time.</dd>
+        <dt>Do not use it for</dt>
+        <dd>the cost of a complete PC, the cheapest possible build, or the RAM and SSD market as a whole.</dd>
+        <dt>Prices represent</dt>
+        <dd>regular Amazon listing prices, not Lightning Deals, Prime-exclusive or Warehouse prices.</dd>
+      </dl>
 
       <h2>What this does not tell you</h2>
       <p><strong>The series starts in <!--START_MONTH-->, and that is a limit of the catalog rather than of the market.</strong> A basket can only begin when every one of its components has enough tracked products to give an honest median, which we set at five. The 1TB NVMe component is the binding one: it reaches five products in January 2023, later than any other component in either basket. There are earlier figures, but they sit above a gap rather than continuing a run, so they are not published.</p>
@@ -180,9 +202,9 @@
     </div>
   </footer>
 
-  <script src="../js/main.js?v=20260928"></script>
-  <script src="../js/theme.js?v=20260928"></script>
-  <script src="../js/mobile-nav.js?v=20260928"></script>
-  <script src="../js/search.js?v=20260928"></script>
+  <script src="../js/main.js?v=20260929"></script>
+  <script src="../js/theme.js?v=20260929"></script>
+  <script src="../js/mobile-nav.js?v=20260929"></script>
+  <script src="../js/search.js?v=20260929"></script>
 </body>
 </html>

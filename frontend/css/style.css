@@ -2214,6 +2214,77 @@ html.dark .pi-down { color: #4ade80; }
 html.dark .pi-citation { background: #1a2332; border-color: #2d3f55; }
 
 
+/* ── /build-cost/ ──
+   These five classes shipped with the page and were never defined, so the
+   sparklines, the series table and the product counts rendered on inherited
+   defaults. Defined here with the rest of them. `guide-list` is deliberately
+   left undefined: it is used on other pages too and is not this page's to set. */
+
+/* The latest-reading block reuses .guide-verdict for the box itself, so these
+   rules add only what its list and note lines need. */
+.bc-latest-month {
+  margin: 0 0 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+.bc-latest-list { list-style: none; padding: 0; margin: 0 0 14px; }
+.bc-latest-list li { margin-bottom: 8px; line-height: 1.6; font-size: 1.02rem; }
+.bc-latest-list li:last-child { margin-bottom: 0; }
+.bc-note { font-size: 0.86rem; color: #6b7280; line-height: 1.6; margin: 0 0 8px; }
+.bc-note:last-child { margin-bottom: 0; }
+/* MUST stay two classes. `.guide-verdict p` is 0,1,1 and would beat a bare
+   `.bc-note` at 0,1,0, flattening the note lines back to body size inside the
+   box. Third instance of this site's recurring specificity trap; see
+   .pulse-windows and .footer-nav. */
+.bc-latest .bc-note { margin: 0 0 8px; font-size: 0.86rem; line-height: 1.6; }
+.bc-latest .bc-note:last-child { margin-bottom: 0; }
+
+/* A sentence written to be copied off the page, so it is boxed and set apart
+   from the prose around it. Same chrome as .pi-citation, body font rather than
+   monospace, because this one is a sentence and not a citation string. */
+.bc-cite {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-left: 3px solid var(--brand-primary);
+  border-radius: 6px;
+  padding: 14px 16px;
+  margin: 0 0 30px;
+}
+.bc-cite p { margin: 0 0 8px; line-height: 1.6; }
+.bc-cite p:last-child { margin-bottom: 0; }
+
+/* Label and value pairs. A dl is the right element; it needs only to stop each
+   dd indenting away from the dt it belongs to. */
+.bc-use { margin: 0 0 8px; }
+.bc-use dt { font-weight: 700; color: #374151; margin-top: 12px; }
+.bc-use dt:first-child { margin-top: 0; }
+.bc-use dd { margin: 2px 0 0; line-height: 1.6; }
+
+/* Seven columns, so it needs more room than the 4x4 index before it scrolls.
+   Everything else comes from .pi-table, which it carries alongside this. */
+.bc-table { min-width: 720px; }
+/* Product counts beside a component median: subordinate to the price and never
+   mistakable for part of it. */
+.bc-n { font-size: 0.74rem; color: #9ca3af; font-weight: 500; }
+
+.buildcost-sparks { display: grid; gap: 22px; margin: 20px 0 8px; }
+.buildcost-sparks figure { margin: 0; }
+.buildcost-sparks figcaption { font-size: 0.82rem; color: #9ca3af; margin-bottom: 8px; }
+/* The svg carries preserveAspectRatio="none" and a 560x120 viewBox, so it takes
+   the width it is given and keeps a fixed height. currentColor is what the
+   polyline strokes with. */
+.buildcost-spark { display: block; width: 100%; height: 120px; color: var(--brand-primary); }
+@media (min-width: 720px) { .buildcost-sparks { grid-template-columns: 1fr 1fr; } }
+
+html.dark .bc-latest-month { color: #94a3b8; }
+html.dark .bc-note { color: #94a3b8; }
+html.dark .bc-cite { background: #1a2332; border-color: #2d3f55; }
+html.dark .bc-use dt { color: #f1f5f9; }
+
+
 /* ── PDP retailer strip (header purchase affordance) ──
    Retailer-SEMANTIC colors, deliberately NOT general-palette additions: they
    exist only to identify a retailer button and must never be reused as
