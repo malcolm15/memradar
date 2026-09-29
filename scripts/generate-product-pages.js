@@ -3627,6 +3627,11 @@ const monthLabel = (m) => `${MONTH_LONG[Number(m.slice(5))]} ${m.slice(0, 4)}`;
 // use, while "$1,023.61" invites the precision the figure does not have. The
 // table is the reference and keeps the cents; the registry pins record both.
 const usdWhole = (n) => '$' + Math.round(n).toLocaleString('en-US');
+// One decimal with an EXPLICIT sign, in ASCII. The year-over-year caveat states
+// a range whose ends can both be negative in a different market, so the sign is
+// never inferred from the reader's sense of which way prices went, and a Unicode
+// minus would not match the ASCII figure in the registry or the CSV.
+const pctSigned1 = (n) => `${n > 0 ? '+' : ''}${n.toFixed(1)}`;
 
 // A bare inline sparkline. No axis and no labels: the figure beside it carries
 // the number, and this only has to show the shape. Deliberately not Chart.js,
@@ -3647,6 +3652,31 @@ function sparkline(values, id) {
         </svg>`;
 }
 
+// A 12-month step on a YYYY-MM key. Only the year moves, so no date arithmetic
+// and no timezone to get wrong.
+const yearEarlier = (m) => `${Number(m.slice(0, 4)) - 1}${m.slice(4)}`;
+
+// The year-over-year range of a basket, computed from the SAME rows the page
+// tables and the published CSV carry, so a reader can recompute either endpoint
+// from what is in front of them. Eligible months are those with a same-month
+// predecessor in the series: the contiguous-start rule means the first one is
+// twelve months after the start, and a month before the start is not published
+// and must never be used as a base.
+function yoyRangeOf(rows) {
+  const byMonth = new Map(rows.map((r) => [r[1], Number(r[2])]));
+  let lo = null, hi = null;
+  for (const [month, total] of byMonth) {
+    const base = byMonth.get(yearEarlier(month));
+    if (base == null) continue;
+    const pct = (total / base - 1) * 100;
+    if (lo == null || pct < lo.pct) lo = { month, pct };
+    if (hi == null || pct > hi.pct) hi = { month, pct };
+  }
+  if (!lo || !hi) throw new Error('build-cost: no month has a same-month predecessor, so no year-over-year range exists');
+  const r1 = (x) => Math.round(x * 10) / 10;
+  return { min: { month: lo.month, pct: r1(lo.pct) }, max: { month: hi.month, pct: r1(hi.pct) } };
+}
+
 // The two figures the Price Index section and /build-cost/ both state. Computed
 // ONCE here and passed to both, so the two pages cannot disagree about a dollar
 // figure or a floor. Same rule as the /data/ findings feeding llms.txt.
@@ -3654,7 +3684,7 @@ function buildCostFigures(buildCsvRows, msRows) {
   if (!buildCsvRows || !buildCsvRows.length) return null;
   const byBasket = {};
   for (const r of buildCsvRows) (byBasket[r[0]] || (byBasket[r[0]] = [])).push(r);
-  const out = { baskets: {}, months: null, start: null, latest: null };
+  const out = { baskets: {}, months: null, start: null, latest: null, yearAgoMonth: null, yoyRange: null };
   for (const [seg, rows] of Object.entries(byBasket)) {
     rows.sort((a, b) => (a[1] < b[1] ? -1 : 1));
     const last = rows[rows.length - 1];
@@ -3665,11 +3695,26 @@ function buildCostFigures(buildCsvRows, msRows) {
       const pct = stable == null ? Number(r.pct_change) : Math.min(Number(r.pct_change), stable);
       floorPct = generatedTensFloor([{ pct, row: r }], BUILD_COST_MIN_HEADROOM_PP).floorPct;
     }
-    out.baskets[seg] = { rows, month: last[1], total: Number(last[2]), floorPct, yoy: r ? Number(r.pct_change) : null };
+    // THROWS rather than omitting. The series is contiguous by construction and
+    // spans more than a year, so a missing same-month row a year back is a bug
+    // in the start rule or the month walk, not a thin-data case to degrade on.
+    const yearAgoMonth = yearEarlier(last[1]);
+    const yearAgoRow = rows.find((x) => x[1] === yearAgoMonth);
+    if (!yearAgoRow) throw new Error(`build-cost: ${seg} has no ${yearAgoMonth} row to compare ${last[1]} against`);
+    out.baskets[seg] = {
+      rows,
+      month: last[1],
+      total: Number(last[2]),
+      yearAgoTotal: Number(yearAgoRow[2]),
+      floorPct,
+      yoy: r ? Number(r.pct_change) : null,
+    };
     out.months = rows.length;
     out.start = rows[0][1];
     out.latest = last[1];
+    out.yearAgoMonth = yearAgoMonth;
   }
+  if (out.baskets.build_current) out.yoyRange = yoyRangeOf(out.baskets.build_current.rows);
   return out;
 }
 
@@ -3688,6 +3733,83 @@ function buildCostSection(figures) {
       ${spark}
       <p><a href="/build-cost/">The full series, the basket definitions and what the figures do not tell you</a>, back to ${monthLabel(figures.start)}.</p>
 `;
+}
+
+// THE GENERATED-PIN TRANSCRIPT. Committed, generator-written, and the reason it
+// exists is a failure mode Phase 1 measured rather than guessed: claimRegistry's
+// loop skips every `monitorable: false` entry at its first statement, so nothing
+// anywhere verifies that an unmonitorable entry's `sentence` is still on its
+// page. Three of the six build-cost entries therefore hardcoded a month and a
+// dollar figure that NOTHING would notice going stale, and the first month
+// rollover would have left the registry describing sentences the page no longer
+// carried.
+//
+// So the registry stops naming the month and the figure, and this file carries
+// the transcript instead. It is written by the build that published the copy,
+// from the same values the template was substituted with, and every sentence in
+// it is ASSERTED to appear exactly once in the page's own rendered text. A pin
+// cannot go stale, because nothing about it is typed by hand; and a pin cannot
+// describe copy that is not there, because the build throws if it does.
+const BUILD_PINS_PATH = ['build-cost-pins.json'];
+
+// The page as a reader meets it: tags dropped, entities for the characters our
+// copy actually uses resolved, runs of whitespace collapsed. The transcripts are
+// prose and the page is markup, so a literal comparison has to happen here.
+//
+// A tag becomes a SPACE rather than nothing, because dropping it outright would
+// weld the last word of one paragraph to the first of the next. The cost is a
+// spurious space wherever an inline tag sits against punctuation: `cost
+// <strong>$1,024</strong>.` renders as `cost $1,024 .`. So both sides of the
+// comparison go through canon(), which closes spaces against punctuation and
+// after an opening `$` or `(`. Whitespace is not meaningful in HTML, so
+// canonicalising it on both sides is the correct comparison rather than a fudge.
+const canon = (t) => t
+  .replace(/\s+/g, ' ')
+  .replace(/\s+([.,;:%!?)])/g, '$1')
+  .replace(/([$(])\s+/g, '$1')
+  .trim();
+
+const renderedText = (html) => canon(html
+  .replace(/<script[\s\S]*?<\/script>/g, ' ')
+  .replace(/<style[\s\S]*?<\/style>/g, ' ')
+  .replace(/<[^>]+>/g, ' ')
+  .replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+  .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' '));
+
+function buildCostPins(figures, buildDate) {
+  const cur = figures.baskets.build_current, d4 = figures.baskets.build_ddr4;
+  const rng = figures.yoyRange;
+  return {
+    generated: buildDate.slice(0, 10),
+    page: `/${BUILD_COST_SLUG}/`,
+    latest_month: figures.latest,
+    year_ago_month: figures.yearAgoMonth,
+    note: 'Written by scripts/generate-product-pages.js on every --confirm run, from the same figures it substitutes into the page. backend/lib/claimRegistry.js reads it so its build-cost entries need not hardcode a month or a dollar figure. Every sentence here is asserted present exactly once in the rendered text of the page named above; the build fails otherwise. Do not hand-edit.',
+    pins: {
+      'buildcost-current-level': {
+        describes: 'dollar level of the build_current basket for the latest complete month',
+        month: figures.latest,
+        usd: usdWhole(cur.total),
+        usd_exact: cur.total.toFixed(2),
+        sentence: `In ${monthLabel(figures.latest)}, the memory and storage for a current build cost ${usdWhole(cur.total)}.`,
+      },
+      'buildcost-ddr4-level': {
+        describes: 'dollar level of the build_ddr4 basket for the latest complete month',
+        month: figures.latest,
+        usd: usdWhole(d4.total),
+        usd_exact: d4.total.toFixed(2),
+        sentence: `The same parts around a DDR4 board cost ${usdWhole(d4.total)}.`,
+      },
+      'buildcost-yoy-range': {
+        describes: 'the minimum and maximum year-over-year change of the build_current basket across every month of the published series that has a same-month predecessor, each labelled with the month it measures',
+        min_pct: rng.min.pct,
+        min_month: rng.min.month,
+        max_pct: rng.max.pct,
+        max_month: rng.max.month,
+        sentence: `For the current build it has run from ${pctSigned1(rng.min.pct)}% in ${monthLabel(rng.min.month)} to ${pctSigned1(rng.max.pct)}% in ${monthLabel(rng.max.month)}, measured across the published monthly series`,
+      },
+    },
+  };
 }
 
 function buildBuildCost(ctx) {
@@ -3759,11 +3881,26 @@ ${rowsHtml.join('\n')}
     .replace(/<!--CURRENT_YOY_FLOOR-->/g, String(cur.floorPct))
     .replace(/<!--DDR4_YOY_FLOOR-->/g, String(d4.floorPct))
     .replace(/<!--ROW_COUNT-->/g, String(figures.months))
+    // The year-over-year caveat's two endpoints, computed from the same rows the
+    // table below publishes. Signed, one decimal, ASCII hyphen-minus.
+    .replace(/<!--YOY_MIN-->/g, pctSigned1(figures.yoyRange.min.pct))
+    .replace(/<!--YOY_MIN_MONTH-->/g, monthLabel(figures.yoyRange.min.month))
+    .replace(/<!--YOY_MAX-->/g, pctSigned1(figures.yoyRange.max.pct))
+    .replace(/<!--YOY_MAX_MONTH-->/g, monthLabel(figures.yoyRange.max.month))
     .replace('<!--SPARK_CURRENT-->', sparkline(cur.rows.map((r) => Number(r[2])), 'bc-cur'))
     .replace('<!--SPARK_DDR4-->', sparkline(d4.rows.map((r) => Number(r[2])), 'bc-d4'))
     .replace('<!--TABLE-->', table);
   if (/<!--[A-Z_0-9]+-->/.test(html)) throw new Error(`${BUILD_COST_SLUG}: unreplaced anchor ${(/<!--[A-Z_0-9]+-->/.exec(html) || [])[0]}`);
-  return { html, desc, floors: { build_current: cur.floorPct, build_ddr4: d4.floorPct } };
+
+  // A pin describing copy that is not on the page is the exact failure this
+  // mechanism replaces, so it is a build error rather than a silent record.
+  const pins = buildCostPins(figures, ctx.buildDate);
+  const text = renderedText(html);
+  for (const [id, pin] of Object.entries(pins.pins)) {
+    const n = text.split(canon(pin.sentence)).length - 1;
+    if (n !== 1) throw new Error(`${BUILD_COST_SLUG}: the "${id}" transcript appears ${n} times in the page, expected exactly 1: "${pin.sentence}"`);
+  }
+  return { html, desc, pins, floors: { build_current: cur.floorPct, build_ddr4: d4.floorPct } };
 }
 
 // -------------------------------------------------------------- /data/
@@ -5397,7 +5534,12 @@ async function run() {
     const bcDir = path.join(FRONTEND, BUILD_COST_SLUG);
     fs.mkdirSync(bcDir, { recursive: true });
     fs.writeFileSync(path.join(bcDir, 'index.html'), bc.html);
+    // Committed beside the lastmod manifest and the IndexNow state, NOT under
+    // frontend/: it is a record for the claim registry, not a public file, and
+    // publishing it would add a served surface nothing asked for.
+    fs.writeFileSync(path.join(__dirname, ...BUILD_PINS_PATH), JSON.stringify(bc.pins, null, 2) + '\n');
     log(`Build-cost page written: /${BUILD_COST_SLUG}/ (floors build_current ${bc.floors.build_current}% / build_ddr4 ${bc.floors.build_ddr4}%, desc ${bc.desc.length} chars)`);
+    log(`Build-cost pins written: scripts/${BUILD_PINS_PATH.join('/')} (${Object.keys(bc.pins.pins).length} transcripts, each verified present once in the page)`);
   } catch (e) {
     log(`⚠ /${BUILD_COST_SLUG}/ NOT regenerated: ${e.message}`);
   }

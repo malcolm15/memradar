@@ -274,6 +274,13 @@ async function runPriceFetch(opts = {}) {
           min_margin_pp: o.min_margin_pp,
           figures: o.figures,
         })),
+        // GENERATED PINS ride the summary for the same reason withdrawn
+        // findings do: they are never checked, so the only thing standing
+        // between one of them and silent staleness is its transcript reaching
+        // a durable record. The log line expires with Actions retention; this
+        // is the copy that lands in the run summary JSON.
+        generated: c.generated || [],
+        ...(c.generated_source ? { generated_source: c.generated_source } : {}),
         checked: c.checked ?? 0,
         registered: c.registered ?? 0,
         ...(c.error ? { error: c.error } : {}),

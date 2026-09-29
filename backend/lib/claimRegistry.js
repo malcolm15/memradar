@@ -42,6 +42,43 @@ const pctOf = (ratio) => (ratio - 1) * 100;
 // boundary. Read it back off the page instead — the baked HTML is the claim.
 const PAGE = (...parts) => path.join(__dirname, '..', '..', 'frontend', ...parts);
 
+// THE GENERATED-PIN TRANSCRIPT, written by the generator on every --confirm run
+// (scripts/build-cost-pins.json, buildCostPins() in generate-product-pages.js).
+//
+// It exists because of a gap this file had and Phase 1 of the 2026-09-29 review
+// measured: checkClaimFloors() skips every `monitorable: false` entry at the
+// FIRST statement of its loop, so an unmonitorable entry's `sentence` is never
+// compared against anything, anywhere. That is correct for a historical claim
+// about a closed period, which cannot change. It was wrong for the build-cost
+// pins, which hardcoded a month and a dollar figure that the next month
+// rollover would have falsified with nothing in the system noticing: not a
+// false alarm, a silent one.
+//
+// An entry carrying `generated: true` therefore states no figure of its own.
+// Its published wording is read back from this file, which the build that
+// published that wording wrote, and which that build asserted matches the page.
+// READ-ONLY AND NEVER THROWS: a missing or malformed file must degrade to "the
+// transcript could not be read", never take down a stats run over a record.
+const BUILD_PINS_FILE = path.join(__dirname, '..', '..', 'scripts', 'build-cost-pins.json');
+
+function buildPins() {
+  try {
+    return JSON.parse(fs.readFileSync(BUILD_PINS_FILE, 'utf8'));
+  } catch (err) {
+    return { error: err.code || err.message, pins: {} };
+  }
+}
+
+// What a generated entry's sentence resolves to. The entry's own `sentence` is
+// a DESCRIPTION of the figure, so it is the fallback rather than the answer:
+// printing "dollar level of the build_current basket for the latest complete
+// month" beats printing a month that may be wrong.
+function generatedSentence(entry, pins) {
+  const pin = (pins || buildPins()).pins[entry.id];
+  if (pin && pin.sentence) return pin.sentence;
+  return `${entry.sentence} (transcript unavailable: scripts/build-cost-pins.json ${pins && pins.error ? pins.error : 'has no entry for this id'})`;
+}
+
 // Reads a generated tens-floor back off the page that carries it. Used by every
 // claim whose number the generator derives rather than a human writing it.
 function bakedFloor(file, re, url, what) {
@@ -613,25 +650,31 @@ const CLAIM_REGISTRY = [
     id: 'buildcost-current-level',
     page: '/build-cost/ and the /price-index/ build-cost section',
     where: 'verdict box and the series table',
-    sentence: 'the memory and storage for a current build cost $1,024 in August 2026',
+    sentence: 'dollar level of the build_current basket for the latest complete month, with that month named',
     monitorable: false,
-    reason: 'a DATED DOLLAR LEVEL, not a magnitude, so no market_stats figure can falsify it and there is no floor to breach. PUBLISHED ROUNDED TO WHOLE DOLLARS ($1,024); the exact basket total is $1023.61, and the series table on /build-cost/ and the CSV both carry the cents. Prose rounds because the last two digits of a sum of three medians carry no information a reader can use, while a figure to the cent invites a precision it does not have. It is regenerated from the monthly series every build and pinned to the month it names, which is why the month is always stated beside it. Basket: 32GB DDR5-6000 + 1TB NVMe + 2TB NVMe, component medians $504.99 + $178.63 + $339.99 over 25 / 30 / 27 products in 2026-08. METHOD: one value per product per month (the median of its daily prices, in_stock only, last reading per UTC day), then the cross-product median per component, then the sum. The current month is excluded until complete and a month is fixed once it ends. ENFORCED AT BUILD TIME INSTEAD: buildMonthlyBaskets() throws if any component falls under 5 products, so a thin figure is never published.',
+    generated: true,
+    generatedFrom: 'scripts/build-cost-pins.json, key buildcost-current-level',
+    reason: 'a DATED DOLLAR LEVEL, not a magnitude, so no market_stats figure can falsify it and there is no floor to breach. GENERATED, SO THIS ENTRY NAMES NO MONTH AND NO FIGURE: the published wording is recorded in scripts/build-cost-pins.json by the build that published it, and that build asserts the transcript appears exactly once in the rendered page. It used to hardcode "$1,024 in August 2026", which nothing in this file verified, because the loop below skips unmonitorable entries before reading `sentence`; the first month rollover would have left this entry describing a sentence the page no longer carried. PUBLISHED ROUNDED TO WHOLE DOLLARS; the series table on /build-cost/ and the CSV both carry the cents, and the pin records both. Prose rounds because the last two digits of a sum of three medians carry no information a reader can use, while a figure to the cent invites a precision it does not have. Basket: 32GB DDR5-6000 + 1TB NVMe + 2TB NVMe. METHOD: one value per product per month (the median of its daily prices, in_stock only, last reading per UTC day), then the cross-product median per component, then the sum. The current month is excluded until complete and a month is fixed once it ends. ENFORCED AT BUILD TIME: buildMonthlyBaskets() throws if any component falls under 5 products, so a thin figure is never published.',
   },
   {
     id: 'buildcost-ddr4-level',
     page: '/build-cost/ and the /price-index/ build-cost section',
     where: 'verdict box and the series table',
-    sentence: 'the same parts around a DDR4 board cost $388 in August 2026',
+    sentence: 'dollar level of the build_ddr4 basket for the latest complete month',
     monitorable: false,
-    reason: 'a DATED DOLLAR LEVEL, same treatment as buildcost-current-level. PUBLISHED ROUNDED ($388); the exact basket total is $387.62, with cents in the table and the CSV. Basket: 32GB DDR4-3200 + 1TB NVMe, component medians $208.99 + $178.63 over 13 / 30 products in 2026-08. Same method and the same build-time floor.',
+    generated: true,
+    generatedFrom: 'scripts/build-cost-pins.json, key buildcost-ddr4-level',
+    reason: 'a DATED DOLLAR LEVEL, same treatment as buildcost-current-level, and generated for the same reason. Basket: 32GB DDR4-3200 + 1TB NVMe. Rounded in prose, cents in the table and the CSV, both recorded in the pin. Same method and the same build-time floor. The pin carries the month as a field rather than in the sentence, because on the page the month is stated once for both baskets and repeating it in the DDR4 sentence would be copy this entry invented.',
   },
   {
     id: 'buildcost-yoy-range',
     page: '/build-cost/',
     where: '"What this does not tell you", the year-over-year caveat',
-    sentence: 'has run from -20.1% in January 2024 to +210.7% in May 2026, measured across the published monthly series',
+    sentence: 'the minimum and maximum year-over-year change of the build_current basket across the published series, each labelled with the month it measures',
     monitorable: false,
-    reason: 'a DATED PAIR OF PINS describing a historical range, not a live magnitude, so no market_stats figure can falsify it and there is no floor to breach. Both endpoints are year-over-year percent changes of the build_current basket computed as total[m] / total[m-12] - 1 over the PUBLISHED monthly series in /data/memradar-build-cost-monthly.csv, which is why the caveat says so: a reader can recompute either figure from the table on the page. Measured 2026-09-29 across the 32 eligible months, 2024-01 to 2026-08: minimum -20.1% at 2024-01 ($362.30 against $453.47), maximum +210.7% at 2026-05 ($1015.19 against $326.72). THE EARLIEST ELIGIBLE MONTH IS 2024-01 AND THAT IS LOAD-BEARING: the series starts 2023-01 under the contiguous-start rule, so the first month with a same-month predecessor is 2024-01. TWO DRAFTS WERE REJECTED AND BOTH FAILURES ARE WORTH REMEMBERING. The first quoted a steeply negative figure for 2023-11, which compares against 2022-11, a month the contiguous-start rule deliberately excludes; it is not derivable from anything published and must not reappear. The second labelled the maximum with its BASE month rather than the month it measures: 2025-05 is itself -10.5%, and the +210.7% belongs to 2026-05 measured against it, so naming the base month would have put the figure a year early on a page whose own table contradicts it. HARDCODED HERE, matching every other buildcost pin: the generator computes page figures and substitutes them into the template, and never reads a figure back from this registry, so these entries are a transcript of what was published rather than its source. If the caveat is reworded or the figures change, this entry changes in the same commit.',
+    generated: true,
+    generatedFrom: 'scripts/build-cost-pins.json, key buildcost-yoy-range',
+    reason: 'a DATED PAIR OF PINS describing a historical range, not a live magnitude, so no market_stats figure can falsify it and there is no floor to breach. Both endpoints are year-over-year percent changes of the build_current basket computed as total[m] / total[m-12] - 1 over the PUBLISHED monthly series in /data/memradar-build-cost-monthly.csv, which is why the caveat says so: a reader can recompute either figure from the table on the page. As first published, 2026-09-29, across the 32 eligible months 2024-01 to 2026-08: minimum -20.1% at 2024-01 ($362.30 against $453.47), maximum +210.7% at 2026-05 ($1015.19 against $326.72). Those figures are recorded here as the dated reading behind the first appearance of the caveat, NOT as the values the page states: read the pin for what is live. THE EARLIEST ELIGIBLE MONTH IS 2024-01 AND THAT IS LOAD-BEARING: the series starts 2023-01 under the contiguous-start rule, so the first month with a same-month predecessor is 2024-01. TWO DRAFTS WERE REJECTED AND BOTH FAILURES ARE WORTH REMEMBERING. The first quoted a steeply negative figure for 2023-11, which compares against 2022-11, a month the contiguous-start rule deliberately excludes; it is not derivable from anything published and must not reappear. The second labelled the maximum with its BASE month rather than the month it measures: 2025-05 is itself -10.5%, and the +210.7% belongs to 2026-05 measured against it, so naming the base month would have put the figure a year early on a page whose own table contradicts it. NO LONGER HARDCODED, AND THAT IS THE POINT OF THIS REVISION: both endpoints are now computed by buildCostFigures() from the published rows and substituted into the caveat, and the published wording is recorded in scripts/build-cost-pins.json by the build that published it. The two rejected drafts above were both hand-typed figures, which is exactly the class of error a generated pin cannot make: the first used a base month the start rule excludes, and the second mislabelled a month, and neither could have survived being derived from the rows the page itself prints.',
   },
   {
     id: 'buildcost-basket-start',
@@ -824,6 +867,17 @@ function checkClaimFloors(stats) {
     }
   }
 
+  // GENERATED PINS ARE REPORTED, NOT CHECKED, and the distinction is the whole
+  // design. They are not floor-checkable, so they never enter `checked`; but
+  // their resolved transcripts ride every run's output, which is what makes a
+  // stale pin impossible to have without someone seeing the wording. Resolved
+  // once here rather than per entry, so one unreadable file reports once.
+  const pins = buildPins();
+  const generated = CLAIM_REGISTRY.filter((e) => e.generated).map((e) => ({
+    ...summarise(e, pins),
+    describes: (pins.pins[e.id] || {}).describes || null,
+  }));
+
   return {
     // `checked` counts claims that were actually tested. A withdrawn finding
     // was not tested and must not inflate it.
@@ -834,11 +888,24 @@ function checkClaimFloors(stats) {
     unresolved,
     withdrawn,
     ok,
+    generated,
+    generated_source: pins.error ? { error: pins.error } : { generated: pins.generated, latest_month: pins.latest_month },
   };
 }
 
-function summarise(entry) {
-  return { id: entry.id, page: entry.page, where: entry.where, sentence: entry.sentence };
+// `sentence` is what every downstream reader prints: logClaimFloors, the
+// `claim_floors` field on the price-fetch summary (priceFetch.js) and the issue
+// bodies scripts/claim-floor-issues.js writes. A generated entry resolves it
+// from the transcript, so all three print the wording the page actually carries
+// rather than the entry's description of it.
+function summarise(entry, pins) {
+  return {
+    id: entry.id,
+    page: entry.page,
+    where: entry.where,
+    sentence: entry.generated ? generatedSentence(entry, pins) : entry.sentence,
+    ...(entry.generated ? { generated: true, generated_from: entry.generatedFrom } : {}),
+  };
 }
 
 const round1 = (x) => Math.round(x * 10) / 10;
@@ -872,6 +939,15 @@ function logClaimFloors(result, log) {
   }
   if (result.unmonitorable) {
     log(`Claim registry: ${result.registered} claims registered, ${result.unmonitorable} recorded as not floor-checkable (historical or generated).`);
+  }
+  // The generated pins, with the wording the last build published. Printed on
+  // every run BECAUSE nothing checks them: the transcript reaching a human is
+  // the only thing standing between a pin and silent staleness, and a pin whose
+  // transcript could not be read says so in place of a figure.
+  if ((result.generated || []).length) {
+    const src = result.generated_source || {};
+    log(`Claim registry: ${result.generated.length} generated pin(s), transcribed by the last build${src.error ? ` - *** TRANSCRIPT UNREADABLE (${src.error}), the wording below is a description, not what is published ***` : ` (${src.generated}, figures through ${src.latest_month})`}:`);
+    for (const g of result.generated) log(`    ${g.id}: "${g.sentence}"`);
   }
 }
 
