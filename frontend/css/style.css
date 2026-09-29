@@ -2230,9 +2230,11 @@ html.dark .pi-citation { background: #1a2332; border-color: #2d3f55; }
   text-transform: uppercase;
   color: #6b7280;
 }
-.bc-latest-list { list-style: none; padding: 0; margin: 0 0 14px; }
-.bc-latest-list li { margin-bottom: 8px; line-height: 1.6; font-size: 1.02rem; }
-.bc-latest-list li:last-child { margin-bottom: 0; }
+/* The two build lines read as short paragraphs, not a list: a two-item bulleted
+   list inside a callout box is indent and bullet furniture wrapped around two
+   sentences. They take their size and leading from `.guide-verdict p` and need
+   only a bottom margin, and that needs TWO classes for the reason below. */
+.bc-latest .bc-latest-line { margin: 0 0 8px; }
 .bc-note { font-size: 0.86rem; color: #6b7280; line-height: 1.6; margin: 0 0 8px; }
 .bc-note:last-child { margin-bottom: 0; }
 /* MUST stay two classes. `.guide-verdict p` is 0,1,1 and would beat a bare
@@ -2241,20 +2243,6 @@ html.dark .pi-citation { background: #1a2332; border-color: #2d3f55; }
    .pulse-windows and .footer-nav. */
 .bc-latest .bc-note { margin: 0 0 8px; font-size: 0.86rem; line-height: 1.6; }
 .bc-latest .bc-note:last-child { margin-bottom: 0; }
-
-/* A sentence written to be copied off the page, so it is boxed and set apart
-   from the prose around it. Same chrome as .pi-citation, body font rather than
-   monospace, because this one is a sentence and not a citation string. */
-.bc-cite {
-  background: #f8fafc;
-  border: 1px solid #e5e7eb;
-  border-left: 3px solid var(--brand-primary);
-  border-radius: 6px;
-  padding: 14px 16px;
-  margin: 0 0 30px;
-}
-.bc-cite p { margin: 0 0 8px; line-height: 1.6; }
-.bc-cite p:last-child { margin-bottom: 0; }
 
 /* Label and value pairs. A dl is the right element; it needs only to stop each
    dd indenting away from the dt it belongs to. */
@@ -2279,9 +2267,23 @@ html.dark .pi-citation { background: #1a2332; border-color: #2d3f55; }
 .buildcost-spark { display: block; width: 100%; height: 120px; color: var(--brand-primary); }
 @media (min-width: 720px) { .buildcost-sparks { grid-template-columns: 1fr 1fr; } }
 
+/* PHONE WIDTH. This box is the first thing on the page and now carries five
+   paragraphs, including the citation line that used to sit in a box of its own,
+   so its vertical padding and inter-paragraph gaps come down by about a third.
+   Horizontal padding, the desktop sizes and the note-line size are untouched.
+   MUST sit after the base rules above: a media query adds no specificity, so
+   source order is the only thing deciding this, and writing it earlier in the
+   file would lose outright. Same trap as .pulse-windows and .footer-nav. */
+@media (max-width: 768px) {
+  .bc-latest { padding-top: 12px; padding-bottom: 12px; }
+  .bc-latest-month { margin-bottom: 7px; }
+  .bc-latest .bc-latest-line { margin-bottom: 5px; }
+  .bc-latest .bc-note { margin-bottom: 5px; }
+  .bc-latest .bc-note:last-child { margin-bottom: 0; }
+}
+
 html.dark .bc-latest-month { color: #94a3b8; }
 html.dark .bc-note { color: #94a3b8; }
-html.dark .bc-cite { background: #1a2332; border-color: #2d3f55; }
 html.dark .bc-use dt { color: #f1f5f9; }
 
 
