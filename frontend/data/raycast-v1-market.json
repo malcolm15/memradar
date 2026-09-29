@@ -105,5 +105,84 @@
    "median_price_usd": 232.49,
    "median_usd_per_gb": 0.17
   }
+ ],
+ "baskets": [
+  {
+   "basket": "build_current",
+   "label": "Current build: 32GB DDR5-6000 + 1TB NVMe + 2TB NVMe",
+   "month": "2026-08",
+   "total_usd": 1023.61,
+   "components": [
+    {
+     "spec": "32GB DDR5-6000",
+     "median_price_usd": 504.99,
+     "product_count": 25
+    },
+    {
+     "spec": "1TB NVMe",
+     "median_price_usd": 178.63,
+     "product_count": 30
+    },
+    {
+     "spec": "2TB NVMe",
+     "median_price_usd": 339.99,
+     "product_count": 27
+    }
+   ],
+   "periods": {
+    "1m": {
+     "pct_change": 6.4,
+     "product_count": 25
+    },
+    "3m": {
+     "pct_change": 0.8,
+     "product_count": 25
+    },
+    "6m": {
+     "pct_change": 3.3,
+     "product_count": 25
+    },
+    "1y": {
+     "pct_change": 194.1,
+     "product_count": 25
+    }
+   }
+  },
+  {
+   "basket": "build_ddr4",
+   "label": "DDR4 build: 32GB DDR4-3200 + 1TB NVMe",
+   "month": "2026-08",
+   "total_usd": 387.62,
+   "components": [
+    {
+     "spec": "32GB DDR4-3200",
+     "median_price_usd": 208.99,
+     "product_count": 13
+    },
+    {
+     "spec": "1TB NVMe",
+     "median_price_usd": 178.63,
+     "product_count": 30
+    }
+   ],
+   "periods": {
+    "1m": {
+     "pct_change": 3.6,
+     "product_count": 13
+    },
+    "3m": {
+     "pct_change": -13.6,
+     "product_count": 13
+    },
+    "6m": {
+     "pct_change": -5.5,
+     "product_count": 13
+    },
+    "1y": {
+     "pct_change": 140.1,
+     "product_count": 13
+    }
+   }
+  }
  ]
 }

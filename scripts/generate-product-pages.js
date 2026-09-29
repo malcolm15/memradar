@@ -4500,7 +4500,7 @@ const SEGMENT_LABELS = { ddr5: 'DDR5 memory', ddr4: 'DDR4 memory', nvme_ssd: 'NV
 const KEEPA_ATTRIBUTION_AGGREGATE = 'Price history is sourced from Keepa (keepa.com) under license. These figures are medians computed by MemRadar from that history, not the raw licensed data. Credit MemRadar and Keepa if you republish.';
 const KEEPA_ATTRIBUTION_PER_PRODUCT = 'Price history is sourced from Keepa (keepa.com) under license and published here at one point per month with Keepa\'s written permission. Figures computed by MemRadar from that history. This data is provided for use with the MemRadar Raycast extension; it does not carry a right to redistribute the price history.';
 
-function buildRaycastMarket(msRows, segPerGb, segPrice, buildDate) {
+function buildRaycastMarket(msRows, segPerGb, segPrice, buildDate, figures) {
   const computedAt = msRows.map((r) => r.computed_at).sort().pop();
   const segments = [];
   for (const seg of CSV_SEGMENTS) {
@@ -4531,6 +4531,47 @@ function buildRaycastMarket(msRows, segPerGb, segPrice, buildDate) {
     if (Object.keys(entry.periods).length) segments.push(entry);
   }
   if (!segments.length) throw new Error('raycast market: no segments with figures');
+
+  // BUILD-COST BASKETS. Additive and NO VERSION BUMP: the file keeps its v1
+  // shape, and a consumer that does not know the key ignores it. An installed
+  // extension cannot be migrated, which is why the shape is only ever extended.
+  //
+  // WITHIN THE KEEPA CONSENT, and the reason is what these numbers are rather
+  // than where they sit. Every figure here is a CROSS-PRODUCT MEDIAN: each
+  // component is the median across 13 to 30 tracked products for that month,
+  // and total_usd is the sum of those medians. That is the same class as the
+  // `segments` array above and the monthly CSV, both of which say in their own
+  // payload that these are medians computed by MemRadar, not the raw licensed
+  // data. NO PER-PRODUCT PRICE APPEARS ANYWHERE IN THIS ARRAY, and the
+  // assertion below refuses to publish one. The 5-product floor in
+  // buildMonthlyBaskets() is what keeps a component an aggregate rather than a
+  // thin proxy for one product's own history, so it is the licensing boundary
+  // as much as a statistical one.
+  const baskets = [];
+  if (figures) {
+    for (const b of BUILD_BASKETS) {
+      const f = figures.baskets[b.segment];
+      if (!f) continue;
+      const last = f.rows[f.rows.length - 1];
+      const components = b.components.map((c, i) => {
+        const usd = last[3 + i], n = last[6 + i];
+        if (usd === '' || n === '') return null;
+        return { spec: c.key, median_price_usd: Number(usd), product_count: Number(n) };
+      }).filter(Boolean);
+      if (components.length !== b.components.length) continue;
+      if (components.some((c) => c.product_count < BASKET_MIN_PRODUCTS)) {
+        throw new Error(`raycast market: ${b.segment} has a component under ${BASKET_MIN_PRODUCTS} products; a median that thin is not an aggregate and must not be published`);
+      }
+      const periods = {};
+      for (const period of ['1m', '3m', '6m', '1y']) {
+        const r = msRows.find((x) => x.segment === b.segment && x.period === period);
+        if (!r || r.pct_change == null) continue;
+        periods[period] = { pct_change: Number(r.pct_change), product_count: r.product_count };
+      }
+      baskets.push({ basket: b.segment, label: b.label, month: f.month, total_usd: Number(last[2]), components, periods });
+    }
+  }
+
   return {
     version: 1,
     generated: buildDate,
@@ -4542,6 +4583,7 @@ function buildRaycastMarket(msRows, segPerGb, segPrice, buildDate) {
     source: `${SITE}/price-index/`,
     methodology: `${SITE}/methodology/`,
     segments,
+    ...(baskets.length ? { baskets } : {}),
   };
 }
 
@@ -5673,7 +5715,7 @@ async function run() {
     try {
       if (!msErr && msRows && msRows.length) {
         const f = path.join(FRONTEND, ...RAYCAST_MARKET_PATH);
-        fs.writeFileSync(f, JSON.stringify(buildRaycastMarket(msRows, segPerGb, segPrice, buildDate), null, 1) + '\n');
+        fs.writeFileSync(f, JSON.stringify(buildRaycastMarket(msRows, segPerGb, segPrice, buildDate, buildFigures), null, 1) + '\n');
         log(`Raycast market JSON written: /${RAYCAST_MARKET_PATH.join('/')} (${kb(f)}KB)`);
       } else {
         log('⚠ /data/raycast-v1-market.json NOT regenerated: no market_stats rows');
