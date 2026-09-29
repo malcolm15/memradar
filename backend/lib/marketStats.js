@@ -15,6 +15,7 @@
 // already tracking a year ago).
 const { checkClaimFloors, logClaimFloors } = require('./claimRegistry');
 const { stableFigureOf } = require('./stableFigure');
+const { totalCapacityGB, parseSpeed } = require('./productParsers');
 
 const PERIODS = [
   { key: '1m', target: 30, min: 25, max: 35 },
@@ -26,6 +27,232 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const PAGE = 1000; // PostgREST caps responses at 1000 rows — paginate
 
 const SEGMENTS = ['ddr5', 'ddr4', 'nvme_ssd', 'sata_ssd'];
+
+// ------------------------------------------------------------------ baskets
+// THE BUILD-COST INDEX: one dollar figure per month for the memory and storage
+// in a typical PC build, stored in market_stats as PSEUDO-SEGMENTS
+// (build_current, build_ddr4) across the same four periods.
+//
+// WHY PSEUDO-SEGMENTS RATHER THAN A NEW TABLE. checkClaimFloors() looks its
+// figures up by `${segment}|${period}` and has no segment allow-list, so two
+// registry entries requiring build_current|1y and build_ddr4|1y are checked by
+// the existing machinery with ZERO changes to claimRegistry.js. The tripwire,
+// stableFigureOf and the generated tens-floors are equally key-driven. The one
+// thing that was NOT key-driven was the Price Index's "every 1y row" filter,
+// which is why that was fixed in its own commit before this one existed.
+//
+// THESE ARE MONTHLY, FROZEN FIGURES AND THAT MAKES THEM UNLIKE EVERY OTHER ROW
+// IN THE TABLE. A segment row compares today's batch with a window ~N days ago
+// and moves daily. A basket row compares the LAST COMPLETE MONTH with the month
+// N months before it, so it does not move at all for ~30 days and then steps.
+// The current month is excluded until it is complete, exactly as
+// buildMonthlyCsv does, because a partial month is a trap for anyone charting
+// it. Consequence for the claim floors: a breach arrives as a step rather than
+// a drift, so the headroom has to absorb a whole month's move in one go.
+//
+// PRICES GO THROUGH THE GENERATOR'S DAILY RULE, NOT THE SEGMENT RULE. in_stock
+// false rows are dropped and the last reading per UTC day wins, then each
+// product contributes ONE value per month (the median of its daily prices)
+// before the cross-product median. That is buildMonthlyCsv's rule, and it is
+// deliberately NOT the segment rule, which reads price_history unfiltered (a
+// known, documented inconsistency that is fine for a ratio of medians and is
+// not fine for anything that counts days or aggregates a month).
+const BASKET_MIN_PRODUCTS = 5;
+// A component computed over fewer products than this publishes something close
+// to an individual product's price history. market_stats is PUBLIC READ, and
+// the Keepa consent covers displaying our own aggregate medians, not
+// republishing per-product history. The floor is what keeps a basket component
+// an aggregate rather than a thin proxy for one product's price, so it is a
+// licensing boundary as much as a statistical one. A component under the floor
+// yields NO FIGURES for that basket-period rather than a thin one.
+const BASKET_PERIOD_MONTHS = { '1m': 1, '3m': 3, '6m': 6, '1y': 12 };
+
+const capacityGb = (p) => (p.capacity_gb != null ? Number(p.capacity_gb) : totalCapacityGB(p.name || ''));
+const speedMts = (p) => { const v = parseSpeed(p.name || ''); return Array.isArray(v) ? v[0] : v; };
+const ddrGen = (p) => (/ddr5/i.test(p.name || '') ? 5 : (/ddr4/i.test(p.name || '') ? 4 : null));
+// SATA first, same precedence as classifySegment: an M.2 SATA drive is SATA.
+const driveKind = (p) => (/sata|2\.5/i.test(p.name || '') ? 'sata' : (/nvme|m\.2/i.test(p.name || '') ? 'nvme' : null));
+
+const BASKETS = [
+  {
+    segment: 'build_current',
+    label: 'Current build: 32GB DDR5-6000 + 1TB NVMe + 2TB NVMe',
+    components: [
+      { key: '32GB DDR5-6000', match: (p) => p.category === 'ram' && ddrGen(p) === 5 && capacityGb(p) === 32 && speedMts(p) === 6000 },
+      { key: '1TB NVMe', match: (p) => p.category === 'ssd' && driveKind(p) === 'nvme' && capacityGb(p) === 1024 },
+      { key: '2TB NVMe', match: (p) => p.category === 'ssd' && driveKind(p) === 'nvme' && capacityGb(p) === 2048 },
+    ],
+  },
+  {
+    segment: 'build_ddr4',
+    label: 'DDR4 build: 32GB DDR4-3200 + 1TB NVMe',
+    components: [
+      { key: '32GB DDR4-3200', match: (p) => p.category === 'ram' && ddrGen(p) === 4 && capacityGb(p) === 32 && speedMts(p) === 3200 },
+      // 1TB SATA was considered as a pre-NVMe stand-in and REJECTED on the
+      // measurement: it clears 5 products only from 2026-05, three years LATER
+      // than 1TB NVMe, on a catalog of 6 drives. It would shorten the series,
+      // never lengthen it. Do not reintroduce it as a fallback.
+      { key: '1TB NVMe', match: (p) => p.category === 'ssd' && driveKind(p) === 'nvme' && capacityGb(p) === 1024 },
+    ],
+  },
+];
+
+const monthOf = (iso) => iso.slice(0, 7);
+const addMonths = (m, n) => {
+  const [y, mo] = m.split('-').map(Number);
+  const t = (y * 12 + (mo - 1)) + n;
+  return `${Math.floor(t / 12)}-${String((t % 12) + 1).padStart(2, '0')}`;
+};
+const monthStartIso = (m) => `${m}-01T00:00:00.000Z`;
+
+// One value per product per month: the median of that product's daily prices,
+// where a day's price is its LAST in-stock reading. The generator's rule.
+function monthlyByProduct(rows) {
+  const daily = new Map(); // productId -> Map(day -> {t, price})
+  for (const r of rows) {
+    if (r.in_stock === false) continue;
+    const day = r.fetched_at.slice(0, 10);
+    let d = daily.get(r.product_id);
+    if (!d) { d = new Map(); daily.set(r.product_id, d); }
+    const prev = d.get(day);
+    if (!prev || r.fetched_at > prev.t) d.set(day, { t: r.fetched_at, price: Number(r.price) });
+  }
+  const out = new Map(); // productId -> Map(month -> median price)
+  for (const [pid, days] of daily) {
+    const byMonth = new Map();
+    for (const [day, v] of days) {
+      const m = day.slice(0, 7);
+      (byMonth.get(m) || byMonth.set(m, []).get(m)).push(v.price);
+    }
+    out.set(pid, new Map([...byMonth].map(([m, xs]) => [m, median(xs)])));
+  }
+  return out;
+}
+
+async function computeBaskets(supabase, log) {
+  const products = await selectPaged(() =>
+    supabase.from('products').select('id, name, category, capacity_gb').eq('retailer', 'amazon')
+  );
+  // Which products any basket needs, so the history query stays narrow.
+  const memberOf = new Map(); // `${segment}|${componentKey}` -> [productId]
+  const needed = new Set();
+  for (const b of BASKETS) {
+    for (const c of b.components) {
+      const ids = products.filter(c.match).map((p) => p.id);
+      memberOf.set(`${b.segment}|${c.key}`, ids);
+      ids.forEach((id) => needed.add(id));
+    }
+  }
+  if (!needed.size) { log('Build-cost baskets: no products matched any component - skipped'); return []; }
+
+  const lastComplete = addMonths(monthOf(new Date().toISOString()), -1);
+  const months = [...new Set([lastComplete, ...Object.values(BASKET_PERIOD_MONTHS).map((n) => addMonths(lastComplete, -n))])];
+
+  // One narrow query per month rather than one wide range: the periods are
+  // 1/3/6/12 months back, so a single span would fetch a year of history to use
+  // five months of it. Same reasoning as the four disjoint baseline windows.
+  const ids = [...needed];
+  const rows = [];
+  for (const m of months) {
+    rows.push(...await selectPaged(() =>
+      supabase.from('price_history').select('product_id, price, in_stock, fetched_at')
+        .in('product_id', ids)
+        .gte('fetched_at', monthStartIso(m))
+        .lt('fetched_at', monthStartIso(addMonths(m, 1)))
+    ));
+  }
+  const perProduct = monthlyByProduct(rows);
+
+  // component -> month -> { med, n, values: [{pid, v}] }
+  const cell = (segment, key, month) => {
+    const vals = [];
+    for (const pid of memberOf.get(`${segment}|${key}`) || []) {
+      const v = (perProduct.get(pid) || new Map()).get(month);
+      if (v != null) vals.push({ pid, v });
+    }
+    return vals.length ? { med: median(vals.map((x) => x.v)), n: vals.length, vals } : { med: null, n: 0, vals: [] };
+  };
+
+  const stats = [];
+  for (const b of BASKETS) {
+    for (const [periodKey, back] of Object.entries(BASKET_PERIOD_MONTHS)) {
+      const base = addMonths(lastComplete, -back);
+      const now = b.components.map((c) => cell(b.segment, c.key, lastComplete));
+      const then = b.components.map((c) => cell(b.segment, c.key, base));
+      const thin = b.components
+        .map((c, i) => ({ key: c.key, n: Math.min(now[i].n, then[i].n) }))
+        .filter((x) => x.n < BASKET_MIN_PRODUCTS);
+      if (thin.length) {
+        log(`Build-cost ${b.segment} [${periodKey}]: NO FIGURE - ${thin.map((x) => `${x.key} has ${x.n} product(s)`).join(', ')}, under the floor of ${BASKET_MIN_PRODUCTS}. A component this thin would publish something close to one product's own price history, which the Keepa consent does not cover.`);
+        stats.push({ segment: b.segment, period: periodKey, current_avg_price: null, baseline_avg_price: null, pct_change: null, product_count: 0 });
+        continue;
+      }
+      const curTotal = now.reduce((a, c) => a + c.med, 0);
+      const baseTotal = then.reduce((a, c) => a + c.med, 0);
+      const pct = ((curTotal - baseTotal) / baseTotal) * 100;
+
+      // STABLE COHORT FOR A BASKET = products priced in BOTH months, per
+      // component. Deliberately not the segments' stable cohort (present in all
+      // four windows), which is meaningless here: a basket period compares two
+      // specific months, so "present at both ends" is the like-for-like set.
+      const pairedLevels = b.components.map((c, i) => {
+        const thenById = new Map(then[i].vals.map((x) => [x.pid, x.v]));
+        const pairs = now[i].vals.filter((x) => thenById.has(x.pid));
+        if (pairs.length < BASKET_MIN_PRODUCTS) return null;
+        const stBase = median(pairs.map((x) => thenById.get(x.pid)));
+        const r = median(pairs.map((x) => x.v / thenById.get(x.pid)));
+        // Converted back to a DOLLAR LEVEL before summing. A ratio of sums is
+        // not a sum of ratios, so the paired ratios cannot be added directly.
+        return { stBase, stCur: stBase * r, stNow: median(pairs.map((x) => x.v)), n: pairs.length };
+      });
+      let stablePaired = null, stablePct = null, stabilityDelta = null, stableCount = 0;
+      if (pairedLevels.every((x) => x)) {
+        const sb = pairedLevels.reduce((a, x) => a + x.stBase, 0);
+        stablePaired = round1((pairedLevels.reduce((a, x) => a + x.stCur, 0) / sb - 1) * 100);
+        // The SAME statistic as pct_change on the paired cohort, which is what
+        // makes stability_delta_pp a clean measure of cohort dependence.
+        stablePct = round1((pairedLevels.reduce((a, x) => a + x.stNow, 0) / sb - 1) * 100);
+        stabilityDelta = round1(pct - stablePct);
+        stableCount = Math.min(...pairedLevels.map((x) => x.n));
+      }
+
+      // JACKKNIFE of the TOTAL: drop one product from one component, recompute
+      // that component's median, resum, and take the range of the resulting
+      // pct_change. Same units as every other row (pp of pct_change) so the
+      // column keeps one meaning across segments and baskets.
+      let jackknife = null;
+      const spreads = [];
+      for (let i = 0; i < b.components.length; i++) {
+        if (now[i].n < 3) continue;
+        for (const drop of now[i].vals) {
+          const m2 = median(now[i].vals.filter((x) => x.pid !== drop.pid).map((x) => x.v));
+          const t2 = curTotal - now[i].med + m2;
+          spreads.push(((t2 - baseTotal) / baseTotal) * 100);
+        }
+      }
+      if (spreads.length >= 2) jackknife = round1(Math.max(...spreads) - Math.min(...spreads));
+
+      stats.push({
+        segment: b.segment,
+        period: periodKey,
+        current_avg_price: round2(curTotal),
+        baseline_avg_price: round2(baseTotal),
+        pct_change: round1(pct),
+        // The binding constraint, and what the floor tests.
+        product_count: Math.min(...now.map((c) => c.n)),
+        stability_delta_pp: stabilityDelta,
+        stable_pct_change: stablePct,
+        stable_paired_pct: stablePaired,
+        jackknife_spread_pp: jackknife,
+        stable_count: stableCount,
+        _month: lastComplete,
+        _baseMonth: base,
+        _components: b.components.map((c, i) => ({ key: c.key, usd: round2(now[i].med), n: now[i].n })),
+      });
+    }
+  }
+  return stats;
+}
 
 // STABILITY TRIPWIRE. The per-period fairness rule means figures are not
 // equally robust: recomputing a period over only the products present in
@@ -252,6 +479,19 @@ async function computeMarketStats(supabase, batchTimestamp, log = () => {}) {
     }
   }
 
+  // Build-cost baskets as pseudo-segments, appended to the same upsert. ISOLATED:
+  // a basket failure logs and yields no basket rows, but must never cost the run
+  // its 16 segment rows or the claim check that follows them. The baskets are a
+  // new feature; the Price Index is the site's most-cited page.
+  try {
+    const basketStats = await computeBaskets(supabase, log);
+    stats.push(...basketStats);
+    const priced = basketStats.filter((b) => b.pct_change != null).length;
+    log(`Build-cost baskets: ${basketStats.length} row(s), ${priced} with figures (month ${basketStats.find((b) => b._month) ? basketStats.find((b) => b._month)._month : 'n/a'})`);
+  } catch (err) {
+    log(`⚠ Build-cost baskets FAILED (non-fatal, segment rows unaffected): ${err.message}`);
+  }
+
   const computedAt = new Date().toISOString();
   // stable_count and stable_pct_change stay IN-PROCESS ONLY. stable_pct_change
   // is recoverable from a stored row as `pct_change - stability_delta_pp`, and
@@ -263,7 +503,10 @@ async function computeMarketStats(supabase, batchTimestamp, log = () => {}) {
   // Before 2026-09-22 the only record of a past run's cohort statistics was the
   // Actions log line, which expires at 90 days.
   const toRow = (s, withStability, withNew) => {
-    const { stable_count, stable_pct_change, stability_delta_pp, stable_paired_pct, jackknife_spread_pp, ...rest } = s;
+    // _month/_baseMonth/_components are basket detail for the log line only.
+    // They must be stripped here or the upsert sends unknown columns.
+    const { stable_count, stable_pct_change, stability_delta_pp, stable_paired_pct, jackknife_spread_pp,
+      _month, _baseMonth, _components, ...rest } = s;
     const row = { ...rest, computed_at: computedAt };
     if (withStability) row.stability_delta_pp = stability_delta_pp;
     if (withNew) { row.stable_paired_pct = stable_paired_pct; row.jackknife_spread_pp = jackknife_spread_pp; }
@@ -318,12 +561,27 @@ async function computeMarketStats(supabase, batchTimestamp, log = () => {}) {
     const st = s.stable_pct_change == null ? 'n/a' : `${s.stable_pct_change}%`;
     const pr = s.stable_paired_pct == null ? 'n/a' : `${s.stable_paired_pct}%`;
     const jk = s.jackknife_spread_pp == null ? 'n/a' : `${s.jackknife_spread_pp}pp`;
+    if (s._components) {
+      log(`Build-cost ${s.segment} [${s.period}]: ${s._month} $${s.current_avg_price} vs ${s._baseMonth} $${s.baseline_avg_price} = ${s.pct_change}% (n=${s.product_count}, stable n=${s.stable_count}) paired=${pr} delta=${s.stability_delta_pp == null ? 'n/a' : s.stability_delta_pp + 'pp'} jackknife=${jk} | ${s._components.map((c) => `${c.key} $${c.usd} n=${c.n}`).join(' + ')}`);
+      continue;
+    }
     log(`Market stats ${s.segment} [${s.period}]: full=${s.pct_change}% (n=${s.product_count}) stable=${st} paired=${pr} (stable n=${s.stable_count}) delta=${s.stability_delta_pp == null ? 'n/a' : Math.abs(s.stability_delta_pp) + 'pp'} jackknife=${jk} | current=$${s.current_avg_price} baseline=$${s.baseline_avg_price}`);
   }
 
   // THE TRIPWIRE ANNOUNCES ITSELF. A figure this cohort-sensitive must not be
   // quoted to a decimal in prose, a guide or a social post; state a magnitude
   // that survives the swing instead.
+  //
+  // BASKETS PASS THROUGH THIS UNCHANGED, and the expectation going in was that
+  // they would always sit below the flag line. MEASURED 2026-09-29, THEY DO NOT:
+  // the two 1y rows come in at 8.2pp (build_current) and 6.6pp (build_ddr4), so
+  // they clear the 5pp moderate line while staying well under the 15pp SEVERE
+  // line. The 1m/3m/6m rows are 0.0 to 2.6pp. So expect the two 1y baskets in the
+  // "moderate, context only" list on most runs, and treat a basket reaching
+  // SEVERE as genuine news rather than noise: their leave-one-out spread is
+  // 2.9% and 3.6% of the total, far steadier than any single segment, which is
+  // the whole reason a basket is worth publishing. The thresholds are NOT tuned
+  // per row type on purpose - one tripwire, one meaning.
   const unstable = stats
     .filter((s) => s.stability_delta_pp != null && Math.abs(s.stability_delta_pp) >= STABILITY_FLAG_PP)
     .sort((a, b) => Math.abs(b.stability_delta_pp) - Math.abs(a.stability_delta_pp));
@@ -366,4 +624,4 @@ function stablePctOf(row, onFallback) {
   return stableFigureOf(row, onFallback);
 }
 
-module.exports = { computeMarketStats, classifySegment, SEGMENTS, PERIODS, STABILITY_FLAG_PP, STABILITY_SEVERE_PP, stablePctOf };
+module.exports = { computeMarketStats, computeBaskets, classifySegment, SEGMENTS, BASKETS, BASKET_MIN_PRODUCTS, PERIODS, STABILITY_FLAG_PP, STABILITY_SEVERE_PP, stablePctOf };
