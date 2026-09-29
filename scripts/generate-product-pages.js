@@ -3483,6 +3483,126 @@ function buildMonthlyCsv(products, buildDate) {
   return { csv, rows, starts, bounds };
 }
 
+const BUILD_CSV_PATH = ['data', 'memradar-build-cost-monthly.csv'];
+// The floor is BASKET_MIN_PRODUCTS from marketStats.js, not a second constant
+// here: the monthly file and the market_stats rows must agree about what is too
+// thin to publish, and two numbers would drift.
+const { BASKETS: BUILD_BASKETS, BASKET_MIN_PRODUCTS } = require('../backend/lib/marketStats');
+
+// The monthly build-cost series: one row per basket per month, the sum of its
+// component medians. Same aggregation as buildMonthlyCsv (one value per product
+// per month, then the cross-product median, current month excluded) and the same
+// contiguous-start rule, because the trap is the same: a per-row floor publishes
+// a scatter of early rows with holes between them and a charting tool draws a
+// straight line across the hole.
+//
+// IT THROWS AT THE FLOOR, where the market_stats path emits no figure instead.
+// The difference is deliberate and is about blast radius. There, a throw would
+// cost the run its 16 segment rows and the claim check. Here the file is a
+// build artifact, nothing downstream depends on it within the run, and a
+// silently shortened series published as though it were the whole history is
+// worse than no file at all: stale beats wrong.
+function buildMonthlyBaskets(products, buildDate) {
+  const thisMonth = buildDate.slice(0, 7);
+  const nextMonth = (m) => { const [y, mo] = m.split('-').map(Number); return mo === 12 ? `${y + 1}-01` : `${y}-${String(mo + 1).padStart(2, '0')}`; };
+
+  // productId -> month -> median of that product's daily prices that month.
+  const monthly = new Map();
+  for (const p of products) {
+    if (!p.series || !p.series.length) continue;
+    const byMonth = new Map();
+    for (const pt of p.series) {
+      const m = pt.day.slice(0, 7);
+      if (m >= thisMonth) continue; // excluded until complete, as in buildMonthlyCsv
+      (byMonth.get(m) || byMonth.set(m, []).get(m)).push(pt.price);
+    }
+    monthly.set(p.id, new Map([...byMonth].map(([m, xs]) => [m, median(xs)])));
+  }
+
+  const rows = [];
+  const starts = {};
+  for (const b of BUILD_BASKETS) {
+    const members = b.components.map((c) => products.filter(c.match));
+    // component index -> month -> [price]
+    const cells = members.map((mem) => {
+      const byMonth = new Map();
+      for (const p of mem) {
+        for (const [m, v] of monthly.get(p.id) || []) (byMonth.get(m) || byMonth.set(m, []).get(m)).push(v);
+      }
+      return byMonth;
+    });
+    const complete = (m) => cells.every((c) => (c.get(m) || []).length >= BASKET_MIN_PRODUCTS);
+    const months = [...new Set(cells.flatMap((c) => [...c.keys()]))].sort();
+
+    // Walk back from the newest month; stop at the first month that is either
+    // under the floor on any component or not contiguous with the one after it.
+    let start = null;
+    for (let i = months.length - 1; i >= 0; i--) {
+      const contiguous = i === months.length - 1 || nextMonth(months[i]) === months[i + 1];
+      if (contiguous && complete(months[i])) start = months[i]; else break;
+    }
+    if (!start) {
+      const worst = cells.map((c, i) => `${b.components[i].key} peaks at ${Math.max(0, ...[...c.values()].map((v) => v.length))} product(s)`).join('; ');
+      throw new Error(`build-cost CSV: ${b.segment} has no run of months with ${BASKET_MIN_PRODUCTS}+ products on every component (${worst}). A component that thin publishes something close to one product's own price history, and the Keepa consent covers our own aggregate medians, not per-product republication.`);
+    }
+    starts[b.segment] = start;
+
+    for (const m of months) {
+      if (m < start) continue;
+      const meds = cells.map((c) => median(c.get(m)));
+      const ns = cells.map((c) => c.get(m).length);
+      const total = meds.reduce((a, x) => a + x, 0);
+      // Three component slots so both baskets share one header; the DDR4 basket
+      // has two components and leaves the third empty rather than getting a
+      // second file with a near-identical shape.
+      const usd = [0, 1, 2].map((i) => (meds[i] == null ? '' : meds[i].toFixed(2)));
+      const cnt = [0, 1, 2].map((i) => (ns[i] == null ? '' : String(ns[i])));
+      rows.push([b.segment, m, total.toFixed(2), ...usd, ...cnt]);
+    }
+
+    // Asserted rather than assumed, same as the segment CSV: a hole here is
+    // exactly what the start rule exists to prevent and would be charted as a
+    // straight line.
+    const mine = rows.filter((r) => r[0] === b.segment);
+    for (let i = 1; i < mine.length; i++) {
+      if (nextMonth(mine[i - 1][1]) !== mine[i][1]) throw new Error(`build-cost CSV: ${b.segment} has a hole between ${mine[i - 1][1]} and ${mine[i][1]}`);
+    }
+    for (const r of mine) {
+      for (const n of [r[6], r[7], r[8]]) {
+        if (n !== '' && Number(n) < BASKET_MIN_PRODUCTS) throw new Error(`build-cost CSV: ${b.segment} published ${r[1]} with a component under ${BASKET_MIN_PRODUCTS} products`);
+      }
+    }
+  }
+
+  const header = [
+    '# MemRadar Build-Cost Index: what the memory and storage for a PC build cost, by month',
+    "# Lines starting with # are notes, not data. pandas: read_csv(url, comment='#'). R: read.csv(url, comment.char='#'). DuckDB: a saved copy reads as is; reading from the URL needs SET force_download=true first. Spreadsheets show these lines as text rows above the data.",
+    '#',
+    '# WHAT THIS IS: one row per basket per month. total_usd is the sum of that basket\'s component medians. Each component column is the median retail price across the products MemRadar tracked in that spec that month, and each _n column is how many products that median was computed over. It is a shopping basket, not an index: two or three parts priced together.',
+    '#',
+    '# BASKETS: ' + BUILD_BASKETS.map((b) => `${b.segment} = ${b.label}`).join('; ') + '. The DDR4 basket has two components, so ssd2_usd and ssd2_n are empty on its rows.',
+    '#',
+    '# THESE ARE MONTHLY PRICE LEVELS, NOT A MEASURE OF CHANGE. A change computed between two rows of this file will NOT equal the MemRadar Price Index for the same period. The Price Index compares each product with itself; this file compares whichever products were tracked in each month. For how much prices changed over a period, cite the Price Index at memradar.com/price-index/',
+    '#',
+    '# SURVIVORSHIP: the tracked catalog was assembled in July 2026, so historical rows contain only products still sold in 2026. They describe those products, not the whole market as it stood at the time.',
+    '#',
+    `# METHOD: only real price observations are used; days a product had no offer are excluded. Each product contributes one value per month (the median of its daily prices), so products observed more often do not outweigh the rest. A basket's series begins at the first month from which no component ever falls below ${BASKET_MIN_PRODUCTS} products; use the _n columns to apply a stricter bar. The current month is excluded until it is complete. Full methodology: memradar.com/methodology/`,
+    '#',
+    '# REGULAR PRICE ONLY: these are the everyday listed prices. Lightning Deals, Prime-exclusive member prices and Warehouse prices are not in the data at all, so this file says nothing about what a sale offered.',
+    '#',
+    '# SOURCES: Amazon price history licensed from Keepa. These figures are medians computed by MemRadar from that history, not the raw licensed data. Newegg prices are not included: MemRadar records Newegg as a current price only and holds no Newegg history.',
+    '#',
+    `# Generated ${buildDate}. Regenerated daily.`,
+    '# Source: MemRadar Build-Cost Index, memradar.com/build-cost/',
+  ];
+  const csv = header.join('\n') + '\n'
+    + 'basket,month,total_usd,ram_usd,ssd1_usd,ssd2_usd,ram_n,ssd1_n,ssd2_n\n'
+    + rows.map((r) => r.join(',')).join('\n') + '\n';
+  if (/[^\x00-\x7f]/.test(csv)) throw new Error('build-cost CSV contains a non-ASCII character');
+  const months = rows.map((r) => r[1]).sort();
+  return { csv, rows, starts, bounds: months.length ? { first: months[0], last: months[months.length - 1] } : null };
+}
+
 // -------------------------------------------------------------- /data/
 // The page outreach pitches link to. A journalist may lift a findings sentence
 // VERBATIM, which sets the bar: each one has to read correctly in isolation,
@@ -4947,6 +5067,20 @@ async function run() {
       log(`Monthly CSV written: /${CSV_PATH.join('/')} (${m.rows.length} rows, ${Buffer.byteLength(m.csv)} bytes; starts ${Object.entries(m.starts).map(([k, v]) => `${k} ${v}`).join(', ')})`);
     } catch (e) {
       log(`⚠ /${CSV_PATH.join('/')} NOT regenerated: ${e.message}`);
+    }
+  }
+
+  // The monthly build-cost series, beside the segment CSV and on the same rule.
+  let buildCsvRows = null;
+  if (!IS_SAMPLE) {
+    try {
+      const bm = buildMonthlyBaskets(generable, buildDate);
+      buildCsvRows = bm.rows;
+      fs.mkdirSync(path.join(FRONTEND, BUILD_CSV_PATH[0]), { recursive: true });
+      fs.writeFileSync(path.join(FRONTEND, ...BUILD_CSV_PATH), bm.csv);
+      log(`Build-cost CSV written: /${BUILD_CSV_PATH.join('/')} (${bm.rows.length} rows, ${Buffer.byteLength(bm.csv)} bytes; starts ${Object.entries(bm.starts).map(([k, v]) => `${k} ${v}`).join(', ')}; through ${bm.bounds ? bm.bounds.last : 'n/a'})`);
+    } catch (e) {
+      log(`⚠ /${BUILD_CSV_PATH.join('/')} NOT regenerated: ${e.message}`);
     }
   }
 
