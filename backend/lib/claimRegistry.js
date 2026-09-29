@@ -626,6 +626,14 @@ const CLAIM_REGISTRY = [
     reason: 'a DATED DOLLAR LEVEL, same treatment as buildcost-current-level. PUBLISHED ROUNDED ($388); the exact basket total is $387.62, with cents in the table and the CSV. Basket: 32GB DDR4-3200 + 1TB NVMe, component medians $208.99 + $178.63 over 13 / 30 products in 2026-08. Same method and the same build-time floor.',
   },
   {
+    id: 'buildcost-yoy-range',
+    page: '/build-cost/',
+    where: '"What this does not tell you", the year-over-year caveat',
+    sentence: 'has run from -20.1% in January 2024 to +210.7% in May 2026, measured across the published monthly series',
+    monitorable: false,
+    reason: 'a DATED PAIR OF PINS describing a historical range, not a live magnitude, so no market_stats figure can falsify it and there is no floor to breach. Both endpoints are year-over-year percent changes of the build_current basket computed as total[m] / total[m-12] - 1 over the PUBLISHED monthly series in /data/memradar-build-cost-monthly.csv, which is why the caveat says so: a reader can recompute either figure from the table on the page. Measured 2026-09-29 across the 32 eligible months, 2024-01 to 2026-08: minimum -20.1% at 2024-01 ($362.30 against $453.47), maximum +210.7% at 2026-05 ($1015.19 against $326.72). THE EARLIEST ELIGIBLE MONTH IS 2024-01 AND THAT IS LOAD-BEARING: the series starts 2023-01 under the contiguous-start rule, so the first month with a same-month predecessor is 2024-01. TWO DRAFTS WERE REJECTED AND BOTH FAILURES ARE WORTH REMEMBERING. The first quoted a steeply negative figure for 2023-11, which compares against 2022-11, a month the contiguous-start rule deliberately excludes; it is not derivable from anything published and must not reappear. The second labelled the maximum with its BASE month rather than the month it measures: 2025-05 is itself -10.5%, and the +210.7% belongs to 2026-05 measured against it, so naming the base month would have put the figure a year early on a page whose own table contradicts it. HARDCODED HERE, matching every other buildcost pin: the generator computes page figures and substitutes them into the template, and never reads a figure back from this registry, so these entries are a transcript of what was published rather than its source. If the caveat is reworded or the figures change, this entry changes in the same commit.',
+  },
+  {
     id: 'buildcost-basket-start',
     page: '/build-cost/',
     where: '"What this does not tell you"',
