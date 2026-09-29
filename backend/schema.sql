@@ -63,17 +63,70 @@ CREATE POLICY "Public read price_history" ON price_history
 CREATE POLICY "Service role write price_history" ON price_history
   FOR ALL USING (auth.role() = 'service_role');
 
--- Market Pulse stats: one row per segment, recomputed daily by the cron
--- (backend/lib/marketStats.js). Read by the frontend via the anon key.
+-- Market Pulse stats: ONE ROW PER (SEGMENT, PERIOD), recomputed daily by the
+-- cron (backend/lib/marketStats.js). Read by the frontend via the anon key.
+--
+-- CORRECTED 2026-09-29 TO MATCH THE LIVE TABLE. What this file said before was
+-- impossible: it declared `segment TEXT NOT NULL UNIQUE` and had NO `period`
+-- column at all, which cannot hold the 16 rows (4 segments x 4 periods) the
+-- table has held since the four-period migration, and cannot support the
+-- `onConflict: 'segment,period'` that marketStats.js has been upserting on in
+-- production. The `period` column and the composite key were added live and
+-- never recorded here.
+--
+-- RECONSTRUCTED FROM THE LIVE TABLE, and the index half is now VERIFIED rather
+-- than inferred. Columns come from the table's observable shape, since reading
+-- pg_catalog needs SQL access no credential in this project has and PostgREST
+-- does not expose it: the column list and ordinal order (period sits 8th, after
+-- computed_at, which is the signature of an ALTER rather than a rewrite); 16
+-- rows with 16 distinct (segment, period) pairs, which proves the old
+-- `segment UNIQUE` is gone; and `segment` rejecting NULL with 23502.
+--
+-- The indexes were read from pg_indexes by Malcolm on 2026-09-29 and there are
+-- exactly two, quoted verbatim:
+--   market_stats_pkey                 UNIQUE btree (id)
+--   market_stats_segment_period_key   UNIQUE btree (segment, period)
+-- So the name and columns below are exact. What is still unread is whether that
+-- second object was created as a UNIQUE CONSTRAINT or a bare unique index;
+-- pg_indexes renders both identically and the `_key` suffix is PostgreSQL's
+-- default for a constraint, which suggests a constraint. It does not matter
+-- here: ON CONFLICT accepts either, and CREATE UNIQUE INDEX IF NOT EXISTS
+-- matches on the relation name, so re-running this file is a no-op either way.
+--
+-- STILL UNRECORDED, as for every table in this file: the RLS policy TEXT. The
+-- two CREATE POLICY statements below are the intent, not a transcript.
+--
+-- `period` is spelled that way because `window` is a reserved keyword in
+-- PostgreSQL and would need quoting forever.
+--
+-- SEGMENT IS FREE TEXT AND THAT IS LOAD-BEARING, NOT AN OVERSIGHT. The
+-- build-cost baskets are stored here as pseudo-segments (build_current,
+-- build_ddr4) so the claim registry, the stability tripwire and the generated
+-- tens-floors read them through the machinery they already have, with no
+-- special case anywhere. Anything that must see only the four real segments
+-- filters on its own explicit list; see PI_SEGMENTS in the generator and
+-- SEGMENT_LABELS in frontend/js/price-index.js.
 CREATE TABLE IF NOT EXISTS market_stats (
   id BIGSERIAL PRIMARY KEY,
-  segment TEXT NOT NULL UNIQUE,        -- 'ddr5' | 'ddr4' | 'nvme_ssd' | 'sata_ssd'
-  current_avg_price NUMERIC(10,2),
-  baseline_avg_price NUMERIC(10,2),    -- avg ~180 days ago
+  segment TEXT NOT NULL,               -- 'ddr5' | 'ddr4' | 'nvme_ssd' | 'sata_ssd' | 'build_current' | 'build_ddr4'
+  current_avg_price NUMERIC(10,2),     -- MEDIAN despite the name (see CLAUDE.md)
+  baseline_avg_price NUMERIC(10,2),    -- median at the period's baseline window
   pct_change NUMERIC(6,1),             -- e.g. 42.3 means +42.3%
-  product_count INTEGER,               -- products contributing to this segment
-  computed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  product_count INTEGER,               -- products contributing to this (segment, period)
+  computed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  period TEXT NOT NULL                 -- '1m' | '3m' | '6m' | '1y'
 );
+
+-- For an existing table, whose CREATE above is a no-op under IF NOT EXISTS.
+-- Same pattern as the two paired-cohort columns below.
+ALTER TABLE market_stats ADD COLUMN IF NOT EXISTS period TEXT;
+
+-- The conflict target marketStats.js upserts on, name and columns verified
+-- against pg_indexes (see above). Written as a unique INDEX rather than a
+-- constraint because ADD CONSTRAINT has no IF NOT EXISTS in PostgreSQL and this
+-- file has to stay safe to re-run; ON CONFLICT accepts either.
+CREATE UNIQUE INDEX IF NOT EXISTS market_stats_segment_period_key
+  ON market_stats (segment, period);
 
 -- stable_paired_pct  (added 2026-09-22) median of per-product current/baseline
 --   ratios over the stable cohort. The published pct_change is a ratio of two
