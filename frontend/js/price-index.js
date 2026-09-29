@@ -36,7 +36,15 @@
       var newest = null;
       var topSeg = null; // steepest 1y move, recomputed from the same fetch
       res.data.forEach(function (row) {
-        if (row.period === '1y' && row.pct_change != null &&
+        // SEGMENT_LABELS is the allow-list, not just a lookup. market_stats is
+        // keyed on (segment, period) and carries rows this page does not
+        // tabulate - the build-cost baskets are stored there as pseudo-segments
+        // so the claim-floor machinery can read them unchanged. Without this
+        // guard such a row could win the steepest-1y race and the hydrated
+        // sentence would disagree with the baked one. The generator applies the
+        // same filter; the two must stay in step.
+        var known = Object.prototype.hasOwnProperty.call(SEGMENT_LABELS, row.segment);
+        if (known && row.period === '1y' && row.pct_change != null &&
             (!topSeg || Number(row.pct_change) > Number(topSeg.pct_change))) {
           topSeg = row;
         }
