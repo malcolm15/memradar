@@ -1058,14 +1058,24 @@ const GENERATED_FLOOR_NO_JACKKNIFE_PP = 25;
  *        depends on, `pct` already the worse of the two cohorts for that segment.
  * @returns {{floorPct:number, binding:object, headroom:number, jackknife:number|null}}
  */
-function generatedTensFloor(entries) {
+function generatedTensFloor(entries, minHeadroomPp = GENERATED_FLOOR_HEADROOM_PP) {
   let binding = entries[0];
   for (const e of entries) if (e.pct < binding.pct) binding = e;
   const raw = binding.row && binding.row.jackknife_spread_pp != null
     ? Number(binding.row.jackknife_spread_pp)
     : null;
+  // minHeadroomPp raises the FLOOR on headroom without touching the cap. The
+  // build-cost baskets pass the cap itself, because the jackknife is the wrong
+  // risk measure for them: it measures how much a figure moves when cohort
+  // membership churns WITHIN a month, and a basket figure is frozen for a month
+  // at a time. What can actually break a basket sentence is the STEP when the
+  // month rolls over, and that was measured at up to 45pp month to month on the
+  // year-over-year figure. 20pp does not cover that either; what does is that
+  // the floor re-derives in the same day's regen, so the exposure is the few
+  // hours between the stats compute and the rebake, as for every other floor.
   const headroom = Math.max(
     GENERATED_FLOOR_HEADROOM_PP,
+    minHeadroomPp,
     Math.min(raw == null ? GENERATED_FLOOR_NO_JACKKNIFE_PP : raw, GENERATED_FLOOR_HEADROOM_CAP_PP),
   );
   return { floorPct: Math.floor((binding.pct - headroom) / 10) * 10, binding, headroom, jackknife: raw };
@@ -2242,7 +2252,7 @@ function piCellClass(pct) {
 const piPct = (v) => (v == null ? 'n/a' : (v >= 0 ? '+' : '') + v + '%');
 
 function buildPriceIndex(ctx) {
-  const { marketStats, products, statsBySku, computedAt } = ctx;
+  const { marketStats, products, statsBySku, computedAt, buildCostSectionHtml } = ctx;
   const bySegPeriod = new Map();
   marketStats.forEach((r) => bySegPeriod.set(r.segment + '|' + r.period, r));
 
@@ -2371,6 +2381,7 @@ function buildPriceIndex(ctx) {
     .replace('<!--JSONLD-->', `<script type="application/ld+json">\n${jsonld}\n  </script>`)
     .replace('<!--INDEX_ROWS-->', rows)
     .replace('<!--NOTABLES-->', notables.map((n) => `        <li>${n}</li>`).join('\n'))
+    .replace('<!--BUILD_COST_SECTION-->', buildCostSectionHtml || '')
     .replace('<!--FLAGSHIP_LINKS-->', flagship)
     .replace(/<!--PRODUCT_COUNT-->/g, String(products.length))
     .replace(/<!--RAM_COUNT-->/g, String(ram))
@@ -3601,6 +3612,158 @@ function buildMonthlyBaskets(products, buildDate) {
   if (/[^\x00-\x7f]/.test(csv)) throw new Error('build-cost CSV contains a non-ASCII character');
   const months = rows.map((r) => r[1]).sort();
   return { csv, rows, starts, bounds: months.length ? { first: months[0], last: months[months.length - 1] } : null };
+}
+
+const BUILD_COST_SLUG = 'build-cost';
+// Baskets are FROZEN MONTHLY figures, so their floors take the full 20pp cap as
+// their headroom rather than the jackknife. See generatedTensFloor.
+const BUILD_COST_MIN_HEADROOM_PP = GENERATED_FLOOR_HEADROOM_CAP_PP;
+
+const MONTH_LONG = ['', 'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'];
+const monthLabel = (m) => `${MONTH_LONG[Number(m.slice(5))]} ${m.slice(0, 4)}`;
+// PROSE ROUNDS TO WHOLE DOLLARS; THE TABLE KEEPS CENTS. A basket total is a sum
+// of three medians and its last two digits carry no information a reader can
+// use, while "$1,023.61" invites the precision the figure does not have. The
+// table is the reference and keeps the cents; the registry pins record both.
+const usdWhole = (n) => '$' + Math.round(n).toLocaleString('en-US');
+
+// A bare inline sparkline. No axis and no labels: the figure beside it carries
+// the number, and this only has to show the shape. Deliberately not Chart.js,
+// which this page does not otherwise load.
+function sparkline(values, id) {
+  if (values.length < 2) return '';
+  const W = 560, H = 120, P = 6;
+  const lo = Math.min(...values), hi = Math.max(...values);
+  const span = hi - lo || 1;
+  const pts = values.map((v, i) => {
+    const x = P + (i / (values.length - 1)) * (W - 2 * P);
+    const y = H - P - ((v - lo) / span) * (H - 2 * P);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  });
+  return `<svg class="buildcost-spark" viewBox="0 0 ${W} ${H}" role="img" aria-labelledby="${id}-t" preserveAspectRatio="none">
+          <title id="${id}-t">From $${lo.toFixed(2)} at the lowest to $${hi.toFixed(2)} at the highest over the period</title>
+          <polyline fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" points="${pts.join(' ')}"/>
+        </svg>`;
+}
+
+// The two figures the Price Index section and /build-cost/ both state. Computed
+// ONCE here and passed to both, so the two pages cannot disagree about a dollar
+// figure or a floor. Same rule as the /data/ findings feeding llms.txt.
+function buildCostFigures(buildCsvRows, msRows) {
+  if (!buildCsvRows || !buildCsvRows.length) return null;
+  const byBasket = {};
+  for (const r of buildCsvRows) (byBasket[r[0]] || (byBasket[r[0]] = [])).push(r);
+  const out = { baskets: {}, months: null, start: null, latest: null };
+  for (const [seg, rows] of Object.entries(byBasket)) {
+    rows.sort((a, b) => (a[1] < b[1] ? -1 : 1));
+    const last = rows[rows.length - 1];
+    const r = (msRows || []).find((x) => x.segment === seg && x.period === '1y');
+    let floorPct = null;
+    if (r && r.pct_change != null) {
+      const stable = stablePctOf(r);
+      const pct = stable == null ? Number(r.pct_change) : Math.min(Number(r.pct_change), stable);
+      floorPct = generatedTensFloor([{ pct, row: r }], BUILD_COST_MIN_HEADROOM_PP).floorPct;
+    }
+    out.baskets[seg] = { rows, month: last[1], total: Number(last[2]), floorPct, yoy: r ? Number(r.pct_change) : null };
+    out.months = rows.length;
+    out.start = rows[0][1];
+    out.latest = last[1];
+  }
+  return out;
+}
+
+// The Price Index section. DELIBERATELY OUTSIDE the notable-numbers strip: the
+// notables are derived from `y`, the four real segments, and a basket dropped in
+// there would be read as a fifth segment. This is its own section with its own
+// heading, stating two dollar figures and two floored magnitudes.
+function buildCostSection(figures) {
+  if (!figures) return '';
+  const cur = figures.baskets.build_current, d4 = figures.baskets.build_ddr4;
+  if (!cur || !d4 || cur.floorPct == null || d4.floorPct == null) return '';
+  const spark = sparkline(cur.rows.map((r) => Number(r[2])), 'pi-bc');
+  return `      <h2>What a build's memory and storage costs</h2>
+      <p>The index above measures change. This measures level: what a fixed basket of parts cost, added up. In <strong>${monthLabel(cur.month)}</strong>, the memory and storage for a current build (a 32GB DDR5-6000 kit, a 1TB NVMe drive and a 2TB NVMe drive) cost <strong>${usdWhole(cur.total)}</strong>. The same parts around a DDR4 board (a 32GB DDR4-3200 kit and a 1TB NVMe drive) cost <strong>${usdWhole(d4.total)}</strong>.</p>
+      <p>Against the same month a year earlier, the current build is <span data-claim="buildcost-current-yoy" data-floor-pct="${cur.floorPct}">up more than ${cur.floorPct}%</span> and the DDR4 build is <span data-claim="buildcost-ddr4-yoy" data-floor-pct="${d4.floorPct}">up more than ${d4.floorPct}%</span>. These are regular Amazon listing prices, not deals. Each month's figure is fixed once that month ends; the current month is not shown.</p>
+      ${spark}
+      <p><a href="/build-cost/">The full series, the basket definitions and what the figures do not tell you</a>, back to ${monthLabel(figures.start)}.</p>
+`;
+}
+
+function buildBuildCost(ctx) {
+  const { buildDate, figures } = ctx;
+  if (!figures) throw new Error('no build-cost figures this run (the monthly series did not build)');
+  const cur = figures.baskets.build_current, d4 = figures.baskets.build_ddr4;
+  if (!cur || !d4) throw new Error('both baskets are required; missing ' + (cur ? 'build_ddr4' : 'build_current'));
+  if (cur.floorPct == null || d4.floorPct == null) {
+    throw new Error('no market_stats 1y row for a basket, so the year-over-year floors cannot be derived');
+  }
+
+  const url = `${SITE}/${BUILD_COST_SLUG}/`;
+  const h1 = 'What memory and storage cost for a PC build';
+  const pageTitle = 'Build-Cost Index | MemRadar';
+  if (pageTitle.length > 60) throw new Error(`${BUILD_COST_SLUG} title is ${pageTitle.length} chars, over 60`);
+  const descVariants = [
+    `Memory and storage for a PC build cost ${usdWhole(cur.total)} in ${monthLabel(cur.month)}. A fixed basket of a memory kit and its drives, priced every month from ${monthLabel(figures.start)}.`,
+    `What the memory and storage for a PC build cost each month: a fixed basket of a kit and its drives, from ${monthLabel(figures.start)} to ${monthLabel(figures.latest)}.`,
+  ];
+  const desc = descVariants.find((v) => v.length >= DESC_MIN && v.length <= 160);
+  if (!desc) throw new Error(`${BUILD_COST_SLUG} meta description: no variant fits ${DESC_MIN}-160 (lengths ${descVariants.map((v) => v.length).join(', ')})`);
+
+  const rowsHtml = [];
+  const months = cur.rows.map((r) => r[1]);
+  for (const m of months) {
+    const c = cur.rows.find((r) => r[1] === m), d = d4.rows.find((r) => r[1] === m);
+    rowsHtml.push(`            <tr><th scope="row">${monthLabel(m)}</th>` +
+      `<td>$${c[2]}</td><td>$${c[3]} <span class="bc-n">${c[6]}</span></td><td>$${c[4]} <span class="bc-n">${c[7]}</span></td><td>$${c[5]} <span class="bc-n">${c[8]}</span></td>` +
+      `<td>${d ? '$' + d[2] : ''}</td><td>${d ? '$' + d[3] + ' <span class="bc-n">' + d[6] + '</span>' : ''}</td></tr>`);
+  }
+  const table = `<div class="pi-table-wrap" tabindex="0" role="region" aria-label="Build cost by month">
+        <table class="pi-table bc-table">
+          <caption class="visually-hidden">Basket totals and component medians by month</caption>
+          <thead>
+            <tr><th scope="col">Month</th><th scope="col">Current build</th><th scope="col">32GB DDR5-6000</th><th scope="col">1TB NVMe</th><th scope="col">2TB NVMe</th><th scope="col">DDR4 build</th><th scope="col">32GB DDR4-3200</th></tr>
+          </thead>
+          <tbody>
+${rowsHtml.join('\n')}
+          </tbody>
+        </table>
+      </div>
+      <p class="bc-note">Small figures are product counts. Component medians are per month; the basket total is their sum.</p>`;
+
+  const jsonld = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@graph': [
+      { '@type': 'WebPage', name: h1, description: desc, url, dateModified: buildDate,
+        author: AUTHOR_PERSON, publisher: PUBLISHER_ORG, mainEntityOfPage: { '@type': 'WebPage', '@id': url } },
+      { '@type': 'BreadcrumbList', itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: SITE + '/' },
+        { '@type': 'ListItem', position: 2, name: 'Data', item: SITE + '/data/' },
+        { '@type': 'ListItem', position: 3, name: 'Build-Cost Index', item: url },
+      ] },
+    ],
+  }, null, 2);
+
+  const tpl = fs.readFileSync(path.join(FRONTEND, BUILD_COST_SLUG, 'template.html'), 'utf8');
+  const html = tpl
+    .replace(/<!--META_DESC-->/g, esc(desc))
+    .replace(/<!--PAGE_TITLE-->/g, esc(pageTitle))
+    .replace(/<!--OG_TITLE-->/g, esc(h1))
+    .replace('<!--JSONLD-->', `<script type="application/ld+json">\n${jsonld}\n  </script>`)
+    .replace(/<!--BUILD_DATE-->/g, longDate(buildDate))
+    .replace(/<!--START_MONTH-->/g, monthLabel(figures.start))
+    .replace(/<!--LATEST_MONTH-->/g, monthLabel(figures.latest))
+    // Prose rounds; the table below keeps cents. See usdWhole.
+    .replace(/<!--CURRENT_USD-->/g, usdWhole(cur.total).slice(1))
+    .replace(/<!--DDR4_USD-->/g, usdWhole(d4.total).slice(1))
+    .replace(/<!--CURRENT_YOY_FLOOR-->/g, String(cur.floorPct))
+    .replace(/<!--DDR4_YOY_FLOOR-->/g, String(d4.floorPct))
+    .replace(/<!--ROW_COUNT-->/g, String(figures.months))
+    .replace('<!--SPARK_CURRENT-->', sparkline(cur.rows.map((r) => Number(r[2])), 'bc-cur'))
+    .replace('<!--SPARK_DDR4-->', sparkline(d4.rows.map((r) => Number(r[2])), 'bc-d4'))
+    .replace('<!--TABLE-->', table);
+  if (/<!--[A-Z_0-9]+-->/.test(html)) throw new Error(`${BUILD_COST_SLUG}: unreplaced anchor ${(/<!--[A-Z_0-9]+-->/.exec(html) || [])[0]}`);
+  return { html, desc, floors: { build_current: cur.floorPct, build_ddr4: d4.floorPct } };
 }
 
 // -------------------------------------------------------------- /data/
@@ -5083,6 +5246,10 @@ async function run() {
       log(`⚠ /${BUILD_CSV_PATH.join('/')} NOT regenerated: ${e.message}`);
     }
   }
+  // The two dollar figures and two floors that /price-index/ and /build-cost/
+  // both state, derived ONCE so the pages cannot disagree. Needs msRows, which
+  // is fetched just below, so it is resolved after that.
+  let buildFigures = null;
 
   // 2b) The Memory Price Index page (generated, so its baked table refreshes
   // with every regeneration; it also hydrates from market_stats on load).
@@ -5170,12 +5337,27 @@ async function run() {
       since: p.series[0].day.slice(0, 4),
     }));
     const computedAt = msRows.map((r) => r.computed_at).sort().pop();
-    const html = buildPriceIndex({ marketStats: msRows, products: generable, statsBySku, flagship, computedAt, csvBounds });
+    buildFigures = buildCostFigures(buildCsvRows, msRows);
+    const html = buildPriceIndex({ marketStats: msRows, products: generable, statsBySku, flagship, computedAt, csvBounds, buildCostSectionHtml: buildCostSection(buildFigures) });
     const outDir = path.join(FRONTEND, 'price-index');
     fs.mkdirSync(outDir, { recursive: true });
     fs.writeFileSync(path.join(outDir, 'index.html'), html);
 
     log(`Price index written: ${msRows.length} market_stats rows, computed ${computedAt.slice(0, 10)}`);
+  }
+
+  // 2b-ii) /build-cost/. Needs the monthly series AND the market_stats 1y rows
+  // for its floors, so it runs after both. Independently skippable like every
+  // other content build: a failure here leaves the last good page rather than
+  // taking a day's prices with it.
+  try {
+    const bc = buildBuildCost({ buildDate, figures: buildFigures });
+    const bcDir = path.join(FRONTEND, BUILD_COST_SLUG);
+    fs.mkdirSync(bcDir, { recursive: true });
+    fs.writeFileSync(path.join(bcDir, 'index.html'), bc.html);
+    log(`Build-cost page written: /${BUILD_COST_SLUG}/ (floors build_current ${bc.floors.build_current}% / build_ddr4 ${bc.floors.build_ddr4}%, desc ${bc.desc.length} chars)`);
+  } catch (e) {
+    log(`⚠ /${BUILD_COST_SLUG}/ NOT regenerated: ${e.message}`);
   }
 
   // 2c) Guides. Same market_stats source as the Price Index, plus the

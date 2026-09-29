@@ -167,6 +167,39 @@ const bakedListingFloor = (cat) => () => bakedFloor(
   /are up more than (\d+)% year over year/,
   `/${cat}/`, '"up more than N% year over year"');
 
+// The build-cost year-over-year floors are baked in TWO places, the /build-cost/
+// verdict box and the /price-index/ section, and both carry the same
+// data-floor-pct attribute. Read both and require agreement, the same rule the
+// /data/ findings follow against /llms.txt: present in one location only, or
+// carrying different numbers, means two published pages disagree, which is a
+// BREACH rather than a missing claim.
+const bakedBuildCostFloor = (claimId) => () => {
+  const onPage = bakedFloor(
+    PAGE('build-cost', 'index.html'),
+    new RegExp(`data-claim="${claimId}"[^>]*data-floor-pct="(\\d+)"`),
+    '/build-cost/', `the "${claimId}" figure`);
+  let idx;
+  try {
+    idx = fs.readFileSync(PAGE('price-index', 'index.html'), 'utf8');
+  } catch (err) {
+    const e = new Error(`cannot read /price-index/ to cross-check "${claimId}" (${err.code || err.message})`);
+    e.code = 'CLAIM_LOCATION_MISMATCH';
+    throw e;
+  }
+  const m = new RegExp(`data-claim="${claimId}"[^>]*data-floor-pct="(\\d+)"`).exec(idx);
+  if (!m) {
+    const e = new Error(`"${claimId}" is on /build-cost/ but not in the /price-index/ build-cost section; the two published locations disagree`);
+    e.code = 'CLAIM_LOCATION_MISMATCH';
+    throw e;
+  }
+  if (Number(m[1]) !== onPage.floorPct) {
+    const e = new Error(`the "${claimId}" floor is ${onPage.floorPct}% on /build-cost/ but ${m[1]}% on /price-index/; two published locations disagree about the number`);
+    e.code = 'CLAIM_LOCATION_MISMATCH';
+    throw e;
+  }
+  return { floorPct: onPage.floorPct, source: `${onPage.source}, and the same floor in the /price-index/ build-cost section` };
+};
+
 const CLAIM_REGISTRY = [
   // ---------------------------------------------------------------- explainer
   {
@@ -552,6 +585,53 @@ const CLAIM_REGISTRY = [
     sentence: '235 memory kits and SSDs we track',
     monitorable: false,
     reason: 'a pinned catalog count, not a market figure, so no market_stats row can test it. 235 products at the 2026-09-25 audit (119 ram, 116 ssd), of which 231 are indexable. PINNED ON PURPOSE: the post is an event study fixed to its audit date, so the count is stated as of that date and does not follow the catalog. If the catalog changes materially, the sentence needs a human edit rather than a regen. METHOD, common to every entry from this post: for each sale, each product with an in-stock price in the sale window AND in the prior 30 days contributes one figure, the window MINIMUM against the median of that product over the prior 30 days. The reported gap is that figure minus the same statistic computed over ordinary windows of the same length drawn from the SAME calendar year and kept 14 days clear of every sale, which is what removes the year trend. All series built by the generator daily-series rule (in_stock only, last reading per UTC day), day strings not array positions. REGULAR PRICE ONLY: keepa.js reads csv[0] AMAZON, csv[1] NEW and csv[18] BUY_BOX_SHIPPING; csv[8] LIGHTNING_DEAL and csv[9] WAREHOUSE are never requested, so no deal price is in the data. Audited 2026-09-25 and every figure is pinned to that date.',
+  },
+
+  // ------------------------------------------------- Build-Cost Index (2026-09-29)
+  // The baskets live in market_stats as pseudo-segments, so the two magnitude
+  // claims below are checked by the ordinary machinery: `requires` names
+  // build_current|1y and build_ddr4|1y exactly as it would name ddr5|1y.
+  {
+    id: 'buildcost-current-yoy',
+    page: '/build-cost/ and the /price-index/ build-cost section',
+    where: 'verdict box on /build-cost/, and the build-cost section on /price-index/',
+    sentence: 'up more than N% for the current build',
+    requires: [{ segment: 'build_current', period: '1y' }],
+    resolveFloor: bakedBuildCostFloor('buildcost-current-yoy'),
+    floorLabel: 'the tens-floor baked into /build-cost/ and /price-index/',
+  },
+  {
+    id: 'buildcost-ddr4-yoy',
+    page: '/build-cost/ and the /price-index/ build-cost section',
+    where: 'verdict box on /build-cost/, and the build-cost section on /price-index/',
+    sentence: 'up more than N% for the DDR4 one',
+    requires: [{ segment: 'build_ddr4', period: '1y' }],
+    resolveFloor: bakedBuildCostFloor('buildcost-ddr4-yoy'),
+    floorLabel: 'the tens-floor baked into /build-cost/ and /price-index/',
+  },
+  {
+    id: 'buildcost-current-level',
+    page: '/build-cost/ and the /price-index/ build-cost section',
+    where: 'verdict box and the series table',
+    sentence: 'the memory and storage for a current build cost $1,024 in August 2026',
+    monitorable: false,
+    reason: 'a DATED DOLLAR LEVEL, not a magnitude, so no market_stats figure can falsify it and there is no floor to breach. PUBLISHED ROUNDED TO WHOLE DOLLARS ($1,024); the exact basket total is $1023.61, and the series table on /build-cost/ and the CSV both carry the cents. Prose rounds because the last two digits of a sum of three medians carry no information a reader can use, while a figure to the cent invites a precision it does not have. It is regenerated from the monthly series every build and pinned to the month it names, which is why the month is always stated beside it. Basket: 32GB DDR5-6000 + 1TB NVMe + 2TB NVMe, component medians $504.99 + $178.63 + $339.99 over 25 / 30 / 27 products in 2026-08. METHOD: one value per product per month (the median of its daily prices, in_stock only, last reading per UTC day), then the cross-product median per component, then the sum. The current month is excluded until complete and a month is fixed once it ends. ENFORCED AT BUILD TIME INSTEAD: buildMonthlyBaskets() throws if any component falls under 5 products, so a thin figure is never published.',
+  },
+  {
+    id: 'buildcost-ddr4-level',
+    page: '/build-cost/ and the /price-index/ build-cost section',
+    where: 'verdict box and the series table',
+    sentence: 'the same parts around a DDR4 board cost $388 in August 2026',
+    monitorable: false,
+    reason: 'a DATED DOLLAR LEVEL, same treatment as buildcost-current-level. PUBLISHED ROUNDED ($388); the exact basket total is $387.62, with cents in the table and the CSV. Basket: 32GB DDR4-3200 + 1TB NVMe, component medians $208.99 + $178.63 over 13 / 30 products in 2026-08. Same method and the same build-time floor.',
+  },
+  {
+    id: 'buildcost-basket-start',
+    page: '/build-cost/',
+    where: '"What this does not tell you"',
+    sentence: 'The series starts in January 2023',
+    monitorable: false,
+    reason: 'a statement about catalog coverage, not a market figure, so no market_stats row can test it. ENFORCED AT BUILD TIME: buildMonthlyBaskets() applies the same contiguous-start rule as the monthly segment CSV and THROWS if any basket has no run of months with 5+ products on every component, so the page cannot quietly publish a shorter series than it claims. The binding component is 1TB NVMe, which reaches 5 tracked products in 2023-01, later than any other component in either basket; 32GB DDR4-3200 alone would reach back to 2020-09. Earlier basket values exist (2022-11 computes) but sit above a gap, because 1TB NVMe drops to 4 products in 2022-12, so the start rule correctly refuses them rather than publishing a series with a hole a chart would draw straight through. POOLING WAS REJECTED: merging 1TB and 2TB NVMe would start both baskets at 2022-03, but the component would stop being "a 1TB drive" and the basket would stop describing a build.',
   },
 
   // ------------------------------------- registered, deliberately not checked
