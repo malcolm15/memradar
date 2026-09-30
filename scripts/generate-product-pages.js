@@ -4412,7 +4412,7 @@ function listingIntro(category, msRows) {
   // whitespace. It is styled compactly instead.
   const html = `          <h2 class="listing-hero-q">${question}</h2>
           <p class="listing-hero-answer">Yes, and not marginally. Both ${pair} are up more than ${floorPct}% year over year across the products tracked here, and neither has given the rise back. The market has not returned to its pre-2026 pricing, so the question worth asking is not whether prices are high but whether the one you are looking at is fairly priced against the rest. Every card below carries its price per gigabyte for exactly that comparison.</p>
-          <p class="listing-intro-link"><a href="${guide}">${guideAsk} Read the full answer</a> &middot; ${sibling} &middot; <a href="/price-index/">Memory Price Index</a></p>`;
+          <p class="listing-intro-link"><a href="${guide}">${guideAsk} Read the full answer</a> &middot; ${sibling} &middot; <a href="/price-index/">Memory Price Index</a> &middot; <a href="/glossary/">Glossary</a></p>`;
   return { html, floorPct };
 }
 
