@@ -8,7 +8,6 @@
 const FROM = 'MemRadar <hello@memradar.com>';
 const API_BASE = 'https://memradar-three.vercel.app'; // Vercel serves the API; GitHub Pages can't
 const SITE = 'https://memradar.com';
-const AFFILIATE_TAG = 'memradar-20';
 
 function esc(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -101,7 +100,8 @@ function priceDropEmail({ productName, currentPrice, targetPrice, allTimeLow, pr
   const name = esc(productName);
   const cur = money(currentPrice);
   const target = money(targetPrice);
-  const affiliate = productUrl + (productUrl.includes('?') ? '&' : '?') + 'tag=' + AFFILIATE_TAG;
+  // Plain product link since 2026-09-30: no Associates tag is appended.
+  const amazonUrl = productUrl;
   const pdpUrl = `${SITE}/${category}/${slug}/`;
   const unsubUrl = `${API_BASE}/api/unsubscribe?token=${unsubscribeToken}`;
   const atlLine = allTimeLow != null
@@ -115,7 +115,7 @@ function priceDropEmail({ productName, currentPrice, targetPrice, allTimeLow, pr
           <p style="margin:0 0 4px;font-size:22px;color:#111827;font-weight:800;">${cur}</p>
           <p style="margin:0 0 16px;font-size:13px;color:#6b7280;">Now at or below your target of ${target}.</p>
           ${atlLine}
-          <p style="margin:0 0 12px;">${button(affiliate, 'View on Amazon →')}</p>
+          <p style="margin:0 0 12px;">${button(amazonUrl, 'View on Amazon →')}</p>
           <p style="margin:0 0 16px;font-size:13px;"><a href="${pdpUrl}" style="color:#3A5BC7;">See full price history on MemRadar</a></p>
         </td></tr>
         ${unsubLineHtml(unsubUrl)}`);
@@ -124,7 +124,7 @@ function priceDropEmail({ productName, currentPrice, targetPrice, allTimeLow, pr
 
 Now at or below your target of ${target}.${allTimeLow != null ? `\nAll-time low we've tracked: ${money(allTimeLow)}` : ''}
 
-View on Amazon: ${affiliate}
+View on Amazon: ${amazonUrl}
 Full price history: ${pdpUrl}
 
 Unsubscribe: ${unsubUrl}`;

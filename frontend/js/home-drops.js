@@ -9,7 +9,6 @@
   var grid = document.getElementById('biggestDropsGrid');
   if (!section || !grid) return;
   var sb = window.memradarSupabase;
-  var AFFILIATE_TAG = 'memradar-20';
   var SLOTS = 4;
   var chosenBySku = {}; // sku -> product, for the Track Price buttons
 
@@ -21,9 +20,9 @@
   function money(v) {
     return v == null ? 'N/A' : v.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
   }
-  function affiliateUrl(url, sku) {
-    var u = url || ('https://www.amazon.com/dp/' + sku + '/');
-    return u + (u.indexOf('?') >= 0 ? '&' : '?') + 'tag=' + AFFILIATE_TAG;
+  // Amazon links are PLAIN product links since 2026-09-30: no tag is appended.
+  function productUrl(url, sku) {
+    return url || ('https://www.amazon.com/dp/' + sku + '/');
   }
 
   // The grid is BAKED by the generator now, so "hide the section" is only the
@@ -70,7 +69,7 @@
         '<span class="listing-card-retailer">Amazon</span>' +
       '</div>' +
       '<div class="listing-card-actions">' +
-        '<a href="' + esc(affiliateUrl(p.product_url, p.sku)) + '" class="listing-card-deal-btn" target="_blank" rel="nofollow sponsored noopener noreferrer">View on Amazon</a>' +
+        '<a href="' + esc(productUrl(p.product_url, p.sku)) + '" class="listing-card-deal-btn" target="_blank" rel="nofollow noopener noreferrer">View on Amazon</a>' +
         '<button class="listing-card-alert-btn" type="button" data-sku="' + esc(p.sku) + '">Track Price</button>' +
       '</div>' +
     '</div>';

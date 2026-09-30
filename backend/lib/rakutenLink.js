@@ -1,7 +1,8 @@
 // Rakuten Advertising deep-link wrapper for Newegg affiliate links.
 //
-// Convention mirrors Amazon's ?tag= handling: the DB stores CLEAN product
-// URLs; wrapping happens at render time only. Format per Rakuten's publisher
+// The DB stores CLEAN product URLs; wrapping happens at render time only.
+// Amazon used the same convention until 2026-09-30, when its Associates tag
+// was dropped; Amazon links are now emitted exactly as stored. Format per Rakuten's publisher
 // docs ("Create Deep Links Outside the Dashboard"):
 //
 //   https://click.linksynergy.com/deeplink?id={AFFILIATE_ID}&mid={MID}&murl={encoded destination}

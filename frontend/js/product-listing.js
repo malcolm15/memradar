@@ -15,8 +15,6 @@
   var category = grid.getAttribute('data-category'); // 'ram' | 'ssd'
   var sb = window.memradarSupabase;
 
-  var AFFILIATE_TAG = 'memradar-20';
-
   // THE FAILURE COPY IS BUILT HERE, NOT READ FROM THE PAGE. It used to be a
   // hidden div in the HTML that this script un-hid, which meant "Prices didn't
   // load." sat in the crawlable source of both category pages permanently,
@@ -55,7 +53,7 @@
         change30: chg === '' || chg == null ? null : Number(chg),
         slug: href.replace(/^\/[^/]+\//, '').replace(/\/$/, ''),
         image_url: (card.querySelector('.listing-card-img-el') || {}).src || null,
-        product_url: card.getAttribute('data-aff') || null,
+        product_url: card.getAttribute('data-url') || null,
         _baked: true
       });
       bakedMeta[sku] = {
@@ -91,10 +89,10 @@
   function fmtPrice(v) {
     return v == null ? 'N/A' : v.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
   }
-  function affiliateUrl(url) {
-    if (!url) return '#';
-    if (url.indexOf('tag=' + AFFILIATE_TAG) >= 0) return url; // already tagged (baked cards carry the full URL)
-    return url + (url.indexOf('?') >= 0 ? '&' : '?') + 'tag=' + AFFILIATE_TAG;
+  // Amazon links are PLAIN product links since 2026-09-30: no tag is appended
+  // here or anywhere. The baked card already carries the full URL.
+  function productUrl(url) {
+    return url || '#';
   }
 
   // ---------- name parsing (filters) ----------
@@ -247,7 +245,7 @@
         '<span class="listing-card-retailer">Amazon</span>' +
       '</div>' +
       '<div class="listing-card-actions">' +
-        '<a href="' + esc(affiliateUrl(p.product_url)) + '" class="listing-card-deal-btn" target="_blank" rel="nofollow sponsored noopener noreferrer">View on Amazon</a>' +
+        '<a href="' + esc(productUrl(p.product_url)) + '" class="listing-card-deal-btn" target="_blank" rel="nofollow noopener noreferrer">View on Amazon</a>' +
       '</div>' +
     '</div>';
   }
