@@ -1254,6 +1254,14 @@ Two static files for the Raycast extension, written by the daily regen beside th
 
 **Sizes: market 2.7KB, products 271KB** (53KB gzipped as served), 231 indexable products, monthly history median 30 points and max 129. **The 300KB budget is asserted in the log**: past it, downsample further rather than ship a slow fetch.
 
+## Click depth (`scripts/click-depth.js`, 2026-09-30)
+
+**Shortest path from the homepage to any page, following body and nav links only, with everything from `<footer` onward cut.** Footer links are duplicated boilerplate on 262 pages; counting them makes every page look one click from everywhere, which is why this excludes them. **Run it after any nav, footer or homepage change, and after adding a page.** `node scripts/click-depth.js` checks the four that have bitten us, `--all` walks every sitemap URL deepest-first and exits nonzero if anything is unreachable, and named paths can be passed instead.
+
+**It exists because `/guides/` and `/glossary/` were UNREACHABLE until 2026-09-30** and nothing reported it: both were linked from all 262 pages, but only from the footer, and Search Console had all three editorial pages at "Discovered, not crawled". The two guides sat at depth 2. All four are now at depth 1. **A page can be linked everywhere and still be unreachable in the sense that matters.**
+
+**KNOWN UNREACHABLE AS OF 2026-09-30, and not all of them are faults:** `/privacy.html` and `/terms.html` are footer-only by convention and that is fine. **`/raycast/` is footer-only and is NOT fine**: it is a content page published the same day, and it has the exact problem the guides had. Fixing it is its own decision, not a ride-along.
+
 ## IndexNow (Bing, 2026-09-20)
 
 Pings IndexNow from the daily regen with the URLs that **materially** changed. Google does not consume IndexNow, so this reaches Bing, Yandex, Seznam and Naver only: a side channel, not a lever on the Google recovery.
