@@ -2319,6 +2319,26 @@ html.dark .bc-use dt { color: #f1f5f9; }
   white-space: nowrap;
 }
 .rc-install:hover { background: var(--brand-hover); }
+
+/* FIFTH INSTANCE of this file's specificity trap, and the first to ship a
+   visible bug. `.content-page a` is 0,1,1 and beats `.rc-install` at 0,1,0, so
+   the moment this page moved into the reading column the install button took
+   the link color: cobalt text on a cobalt background, 1.00:1, invisible. Dark
+   mode LOOKED fine and was not, taking --brand-light at 3.24:1, under AA.
+   Two classes plus the element is 0,2,1 and beats it; the dark block is 0,3,1
+   and beats html.dark .content-page a. Both land on #fff, matching .btn-alert
+   exactly at 6.00:1 resting and 7.46:1 on hover in either theme. The underline
+   goes too, because .content-page a:hover adds one and a filled button that
+   underlines on hover reads as a broken link.
+   See .pulse-windows, .footer-nav, .bc-note and .bc-latest-line. */
+.content-page a.rc-install,
+.content-page a.rc-install:hover,
+.content-page a.rc-install:visited,
+.content-page a.rc-install:focus-visible { color: #fff; text-decoration: none; }
+html.dark .content-page a.rc-install,
+html.dark .content-page a.rc-install:hover,
+html.dark .content-page a.rc-install:visited,
+html.dark .content-page a.rc-install:focus-visible { color: #fff; text-decoration: none; }
 .rc-cta { margin: 14px 0 10px; }
 .rc-fineprint { font-size: 0.86rem; color: #6b7280; line-height: 1.6; margin: 0; }
 /* Two classes for the same reason .bc-note needs them: `.guide-verdict p` is
