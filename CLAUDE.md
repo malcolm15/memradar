@@ -507,7 +507,7 @@ All queries paginate at PostgREST's 1000-row cap. At ~120 products/page this is 
 
 **Rendering (`.listing-card`):** product image (with gray-placeholder fallback on error), brand badge (omitted entirely when `brand` is null — never an empty/"null" badge), current price, 30-day change indicator (green ▼ for drops, red ▲ for rises, nothing if no baseline), and a "View on Amazon" affiliate button. Each card carries `data-sku` (used by the "Track Price" alert flow) and links to its PDP. Default sort is Name A–Z; skeleton grid (8 pulsing cards) shows while loading; a live "Showing N products · Prices updated twice daily" count sits above the grid.
 
-**Affiliate links convention:** product URL + `?tag=memradar-20`, with `rel="nofollow sponsored noopener noreferrer"` and `target="_blank"` (SEO for paid links + external-link security).
+**Retailer links convention:** Amazon is the stored product URL unchanged, `rel="nofollow noopener noreferrer"`; Newegg is a Rakuten deep link, `rel="nofollow sponsored noopener noreferrer"`. Both `target="_blank"`. `sponsored` marks a paid link and belongs only on the affiliate one; see the Affiliate Tags section for why Amazon has no tag.
 
 **Filters/sorts — all client-side over the fetched dataset (AND across groups, no re-queries):**
 - RAM: Type (name substring DDR5/DDR4), Capacity (**kit rule**: the total capacity that appears BEFORE the first "(" — "32GB (2x16GB)" matches 32GB — else the largest capacity token), Speed (parsed MHz/MT/s banded; excludes bandwidth codes like PC5-48000), Brand (exact match on `brand` column).
@@ -723,7 +723,7 @@ Full email-alert flow. **PII (email addresses) — every decision errs toward pr
 
 **`email_send_log` holds no personal data, deliberately (2026-09-19).** It is `id, send_type, sent_at` and nothing else. It used to store the full address on every send, including for people who later unsubscribed, which the privacy policy does not describe. **Nothing ever read that column**: the circuit breaker, the table's only reader, counts `send_type='confirmation'` rows in the last 24h by type and timestamp, and `'alert'` rows are read by nothing. For abuse investigation (who is being bombed with confirmations), the masked address (`ma***@gmail.com`) already appears in the Vercel function log line for every signup outcome, which is enough to see a burst against one inbox without keeping the address in the database. Hashing was considered and rejected: an unsalted hash of an email is re-identifiable by hashing a candidate address, so it would still be personal data and the policy would still be untrue. **Dropped in a zero-window sequence**: `DROP NOT NULL` first (both old and new code valid), then the code stopped writing it and Vercel's deploy of that commit was confirmed, then `DROP COLUMN`. Both inserts now check their result and log a failure, because an unrecorded confirmation silently undercounts the breaker. Do not add an address column back.
 
-**Emails** (`backend/lib/alertEmails.js`, Resend REST API via `fetch`, from `hello@memradar.com`): confirmation (product, target, confirm button, 48h expiry, unsubscribe) and price-drop (product, current vs target, all-time-low, **View on Amazon with `?tag=memradar-20`** — the revenue moment, PDP link, unsubscribe).
+**Emails** (`backend/lib/alertEmails.js`, Resend REST API via `fetch`, from `hello@memradar.com`): confirmation (product, target, confirm button, 48h expiry, unsubscribe) and price-drop (product, current vs target, all-time-low, **View on Amazon, a plain product link with no tag since 2026-09-30**, PDP link, unsubscribe).
 
 **Cron alert step** (`backend/lib/alertCheck.js`, run from `api/fetch-prices.js` after price inserts, isolated try/catch): query `confirmed=true AND triggered=false`, match `current<=target` against the just-inserted prices, **send-then-delete** (send email → log → DELETE the alert row; **if send fails the row is untouched so the next run retries**; if the delete fails the row is parked at `triggered=true` and swept by the next run, never re-sent). Also DELETEs unconfirmed alerts >48h old (makes the pending cap self-healing) and ANY alert 12 months after creation. Stats in the cron summary: `checked/matched/sent/failed/expired_cleaned/deleted_after_send/stale_cleaned/triggered_swept`.
 
@@ -807,12 +807,23 @@ Built 2026-07-21 via `scripts/build-catalog.js` (18 Amazon keyword searches thro
 
 ## Affiliate Tags
 
-- **Amazon Associates:** `memradar-20`
-  - All Amazon product URLs must include the tag: `https://amazon.com/dp/PRODUCTID?tag=memradar-20`
-- **Best Buy:** dormant — no Best Buy links are generated (client unused; outreach considered closed 2026-08-21, see Retailer & Affiliate Program Status)
-  - If Best Buy is ever revived, append its affiliate tag to all Best Buy URLs the same way
+**AMAZON LINKS ARE PLAIN PRODUCT LINKS. THE ASSOCIATES TAG WAS DROPPED ON 2026-09-30.**
 
-Never generate Amazon product links without the `memradar-20` tag appended. (The same rule would apply to Best Buy if that client is ever revived.)
+- **Amazon:** no affiliate tag. Links are emitted exactly as stored, `https://www.amazon.com/dp/<ASIN>/`, with `rel="nofollow noopener noreferrer"`. **No `sponsored`**, because the link is not paid.
+- **Newegg:** unchanged. Rakuten Advertising deep links via `backend/lib/rakutenLink.js` (`RAKUTEN_AFFILIATE_ID`, Newegg MID 44583), `rel="nofollow sponsored noopener noreferrer"`.
+- **Best Buy:** dormant, no links generated.
+
+**WHY, recorded so it is not re-litigated from memory.** Amazon's Associates Program Policies require that a site displaying Amazon prices or availability either serve those through Amazon's own link, or source them from the Product Advertising API or the Creators API, with cached data refreshed within 24 hours and a date/time stamp plus the prescribed disclaimer adjacent to every price. **Verified 2026-09-30: this site uses neither API.** Every Amazon price on the site traces to `price_history.price`, written from Keepa. A read-only audit the same day measured the gap between consecutive price fetches at up to **9.50 hours**, with the baked HTML able to carry a figure roughly a day old before the next regen, and found **no date/time stamp adjacent to any displayed price**: the PDP carries one date-only line below the buy table and a relative "N hours ago" after hydration. Rather than rebuild the price pipeline onto the PA API or strip the prices that are the point of the site, **the Special Links were dropped.** Prices, charts, all-time lows, the Price Index, alerts, the Raycast payload, the Bluesky posts and the Keepa attribution are all unchanged: the only thing removed is the `tag=` parameter and the revenue it carried.
+
+**THE ASSOCIATES ACCOUNT IS LEFT OPEN**, not closed. Nothing on the site uses it.
+
+**NO CODE MAY ADD AN AMAZON TAG AGAIN WITHOUT A DECISION RECORDED HERE.** There is deliberately no constant, no env var and no empty-string mechanism to re-enable: the four `AFFILIATE_TAG` constants that existed in `generate-product-pages.js`, `alertEmails.js`, `product-listing.js` and `home-drops.js` were **deleted**, not set to `''`. Reintroducing one is a decision, and it needs the policy read against the pipeline first.
+
+**THREE MECHANICAL NOTES FROM THE CHANGE:**
+
+- **`rel` is derived, not written twice.** `retailerList()` rows carry an `affiliate: true|false` field and `relFor(row)` maps it to `REL_AFFILIATE` or `REL_PLAIN`. The PDP retailer strip and the Buy Now table render from that one sorted list, so a per-retailer `rel` could not be a string edit: both emitters served both retailers. The two browser scripts cannot require Node code, so they hardcode the plain `rel` with a comment pointing here.
+- **`data-aff` became `data-url`** on listing cards (`generate-product-pages.js`, read back in `product-listing.js`). The attribute carries a plain product URL now, and the old name asserted otherwise.
+- **The PDP buy-table note existed twice and one copy was dead.** `frontend/ram/product-template.html:283` sits inside the template's `<main>`, which `buildPage` discards wholesale (`<body>${beforeMain}<main>${buildMain(ctx)}</main>${afterMain}`); 20 of 25 distinctive lines from that region appear in no built PDP. The generator's copy is the live one. The dead template copy was deleted.
 
 ## Memory Price Index (`/price-index/`)
 
@@ -1269,7 +1280,7 @@ Current queue (as of 2026-08-23):
 
 | Retailer | Network | Status |
 |---|---|---|
-| **Amazon** | Associates (`memradar-20`) | **Live**, earning-ready |
+| **Amazon** | none since 2026-09-30 | Links are plain; account left open, unused |
 | **Newegg** | Rakuten Advertising (SID 4705448, MID 44583) | **Live**, feed-automated (see the Newegg integration section) |
 | **B&H Photo** | Impact | **Applied 2026-08-22**, decision expected ~2 weeks |
 | **Walmart** | — | Nudged June + follow-up, still silent |
