@@ -8,18 +8,19 @@
     "b": "marketplace-only spike. Amazon had no offer (or a different price) and the NEW series (csv[1]) carries the ATH.",
     "c": "data artifact or unexplained. No requested series sits within 2% of the stored ATH."
   },
-  "rule": "For each product, read the value in effect at the END of the ATH UTC day (the last change at or before 23:59, matching buildDailySeries which keeps the last reading per day). AMAZON within 2% of the stored ATH gives (a); AMAZON absent or off-price while NEW is within 2% gives (b); otherwise (c).",
+  "rule": "For each product, find the stored ATH value in the requested series ON the ATH UTC day. AMAZON (csv[0]) carrying it within 2% gives (a); AMAZON absent or holding no offer while NEW (csv[1]) carries it gives (b); otherwise (c). NOTE: the first pass read only the value in effect at the END of the day and mis-sorted two rows into (c); the full intraday series is authoritative, because a day can close on a -1 or on a different price than the one our fetch recorded.",
   "caveats": [
     "csv[18] BUY_BOX_SHIPPING is null on every row because backend/lib/keepa.js does not request it: fetchBatch sends only key, domain, asin, stats and history, and Keepa returns buy box history only when asked. A null here means NOT REQUESTED, never \"no buy box offer\".",
     "amazon_no_offer true means csv[0] existed and its value in effect was -1, which is a real \"Amazon had no offer\" reading rather than a missing series.",
     "Pre-2019 ATH days (four rows) sit in backfilled history, where CLAUDE.md warns the list price is frozen and the marketplace heuristic does not apply. Their class here rests on the Keepa series, not on the ratio.",
-    "Keepa records a price only when it CHANGES, so the value in effect at end of day is usually a level that had held for some time rather than a same-day observation."
+    "Keepa records a price only when it CHANGES, so the value in effect at end of day is usually a level that had held for some time rather than a same-day observation.",
+    "RESOLVED 2026-09-30: the two rows first reported (c) are both (b). The end-of-day-only reading was the fault, not the data. Raw Keepa responses are now saved to the scratchpad BEFORE parsing, so re-reading a response costs no tokens."
   ],
-  "tokens_spent": 30,
+  "tokens_spent": 32,
   "counts": {
     "a": 2,
-    "b": 26,
-    "c": 2
+    "b": 28,
+    "c": 0
   },
   "products": {
     "B0B9C4DKKG": {
@@ -194,13 +195,14 @@
       "ath_date": "2026-09-15",
       "list_price": 326.81,
       "ratio": 2.0601,
-      "class": "c",
-      "reason": "no series within 2% of the stored ATH",
+      "class": "b",
+      "reason": "no Amazon offer (csv[0] -1 from 2026-09-11 through the ATH day); NEW carried $673.25 intraday at 2026-09-15T11:38Z, matching the stored ATH exactly, then went to no offer at 16:05Z",
       "keepa_checked_at": "2026-09-30T21:38:00Z",
       "csv_amazon": null,
-      "csv_new": null,
+      "csv_new": 673.25,
       "csv_buybox": null,
-      "amazon_no_offer": true
+      "amazon_no_offer": true,
+      "keepa_resolved_at": "2026-09-30T21:52:00Z"
     },
     "B0CYM3TYCR": {
       "name": "FURY Beast RGB 8GB 6000MT/s DDR5 CL30 Desktop Memory | AMD EXPO | Single Module | KF560C30BBEA-8",
@@ -404,13 +406,14 @@
       "ath_date": "2022-01-18",
       "list_price": 269,
       "ratio": 1.5985,
-      "class": "c",
-      "reason": "no series within 2% of the stored ATH",
+      "class": "b",
+      "reason": "no Amazon offer (csv[0] -1 from 2021-11-06 through the ATH day); NEW carried $429.99 intraday at 2022-01-18T01:16Z, matching the stored ATH exactly, before moving to $449.99 at 05:50Z",
       "keepa_checked_at": "2026-09-30T21:38:00Z",
       "csv_amazon": null,
-      "csv_new": 449.99,
+      "csv_new": 429.99,
       "csv_buybox": null,
-      "amazon_no_offer": true
+      "amazon_no_offer": true,
+      "keepa_resolved_at": "2026-09-30T21:52:00Z"
     },
     "B0BHJFNW9X": {
       "name": "990 PRO w/ Heatsink SSD 1TB PCIe 4.0 M.2 Internal Solid State Hard Drive, Fastest Speed for Gaming, Heat Control, Direct Storage and Memory Expansion, Compatible w/ Playstation5, MZ-V9P2T0GW",
