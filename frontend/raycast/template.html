@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-797Q89S8GG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-797Q89S8GG');
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>(function(){var t=localStorage.getItem('memradar-theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark');}})();</script>
+  <title><!--PAGE_TITLE--></title>
+  <meta name="description" content="<!--META_DESC-->">
+  <link rel="canonical" href="https://memradar.com/raycast/">
+  <link rel="alternate" type="application/rss+xml" title="MemRadar" href="/feed.xml">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MemRadar">
+  <meta property="og:url" content="https://memradar.com/raycast/">
+  <meta property="og:title" content="<!--OG_TITLE-->">
+  <meta property="og:description" content="<!--META_DESC-->">
+  <meta property="og:image" content="https://memradar.com/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="<!--OG_TITLE-->">
+  <meta name="twitter:description" content="<!--META_DESC-->">
+  <meta name="twitter:image" content="https://memradar.com/og-image.png">
+  <!--JSONLD-->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#0f1623">
+  <link rel="stylesheet" href="../css/style.css?v=20260930">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container">
+      <a href="/" class="logo">
+        <span class="logo-mem">Mem</span><span class="logo-radar">Radar</span>
+      </a>
+      <nav>
+        <a href="/ram/" class="nav-link">RAM</a>
+        <a href="/ssd/" class="nav-link">SSDs</a>
+        <a href="/faq/" class="nav-link">FAQ</a>
+        <a href="/blog/" class="nav-link">Blog</a>
+        <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Menu" aria-expanded="false" aria-controls="mobileNavPanel">
+          <svg class="icon-menu" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          <svg class="icon-close" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+        </button>
+        <a href="#" class="btn-alert">Set an Alert</a>
+        <button class="header-search-toggle" id="headerSearchToggle" aria-label="Search products" aria-expanded="false" aria-controls="headerSearchPanel">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </button>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode"></button>
+        <div class="mobile-nav-panel" id="mobileNavPanel">
+          <a href="/ram/" class="mobile-nav-link">RAM</a>
+          <a href="/ssd/" class="mobile-nav-link">SSDs</a>
+          <a href="/faq/" class="mobile-nav-link">FAQ</a>
+          <a href="/blog/" class="mobile-nav-link">Blog</a>
+        </div>
+        <div class="header-search-panel" id="headerSearchPanel" hidden>
+          <input type="text" class="header-search-input" placeholder="Search RAM &amp; SSDs…" aria-label="Search products" autocomplete="off">
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="container guide-page">
+
+      <div class="page-header">
+        <h1>MemRadar for Raycast</h1>
+        <p class="guide-sub">Search MemRadar's RAM and SSD prices without opening a browser. A free extension for Raycast on macOS, available in the Raycast Store.</p>
+      </div>
+
+      <div class="guide-verdict" role="note" aria-label="What this is">
+        <p>Two commands: one to look up a product's price and history, one to see how each part of the market has moved.</p>
+        <p class="rc-cta"><a class="rc-install" href="https://www.raycast.com/memradar/memradar">Get it in the Raycast Store</a></p>
+        <p class="rc-fineprint">Requires Raycast on macOS. Free and open source under the MIT license.</p>
+      </div>
+
+      <h2>What it does</h2>
+      <h3>Search Memory Prices</h3>
+      <p>Search the RAM and SSD products MemRadar tracks by name, brand or ASIN. Each result shows the current price and a marker for how it compares with that product's 90-day average. Press Enter for the product's price history: the all-time low and high with the dates they were set, the 90-day average, and one price point per month.</p>
+      <h3>Show Market Overview</h3>
+      <p>See how prices have moved in each segment we track: DDR5, DDR4, NVMe and SATA SSDs. For each one, the median price, the price per gigabyte, and the change over the past one, three, six and twelve months.</p>
+
+      <h2>Shortcuts</h2>
+      <dl class="bc-use">
+        <dt>Enter</dt>
+        <dd>show the product's price history</dd>
+        <dt>Cmd+Enter</dt>
+        <dd>open the product on memradar.com</dd>
+        <dt>Cmd+D</dt>
+        <dd>show or hide the side pane</dd>
+        <dt>Refresh</dt>
+        <dd>Raycast's standard refresh shortcut</dd>
+      </dl>
+
+      <h2>What it looks like</h2>
+      <div class="rc-shots">
+        <figure>
+          <img src="/images/raycast/search-list.webp" alt="A Raycast window showing a search for vengeance 32gb. A header line reads 14 matches, with the date the data was computed. Below it, rows of Corsair Vengeance DDR5 32GB kits, each with a colored dot and a price on the right. A category dropdown set to All sits at the top right." width="1200" height="750">
+          <figcaption>Searching the tracked catalog. The header states how many products matched and when the data was computed; each row carries a price and a dot for how that price sits against the product's own 90-day average.</figcaption>
+        </figure>
+        <figure>
+          <img src="/images/raycast/product-detail.webp" alt="The price history for a G.SKILL RipjawsV DDR4 32GB 3200MHz kit in Raycast. A table of recent months and their prices fills the left. On the right: current price, buy state, 90-day average, all-time low and high with their dates, and how far above the low the current price sits." width="1200" height="750" loading="lazy">
+          <figcaption>One product, reached with Enter. Recent months as a table, and beside it the all-time low and high with the dates they were set, the 90-day average, and the gap between the current price and that low.</figcaption>
+        </figure>
+        <figure>
+          <img src="/images/raycast/market-overview.webp" alt="The market overview in Raycast. Four segments are listed on the left, DDR5 memory, DDR4 memory, NVMe SSDs and SATA SSDs, each with a year-over-year percentage. The right pane explains how to read the figures, then gives the median price, the median price per gigabyte, and the change over one month, three months, six months and a year, each with the number of products it was measured across." width="1200" height="750" loading="lazy">
+          <figcaption>The four segments. Each carries a median price, a median price per gigabyte, and four windows of change, with the product count behind every figure.</figcaption>
+        </figure>
+      </div>
+
+      <h2>About the data</h2>
+      <p>The extension uses the same price history as the rest of MemRadar. Current prices are refreshed daily; price history is one point per month.</p>
+      <p class="rc-fineprint"><!--KEEPA_ATTRIBUTION--></p>
+      <p>After the first load, the extension keeps a copy on your Mac, so search still works when you are offline.</p>
+      <p><a href="https://github.com/raycast/extensions/tree/main/extensions/memradar">The source is on GitHub</a>.</p>
+
+</main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-inner">
+        <p class="footer-brand"><strong>MemRadar</strong> · RAM &amp; SSD price tracking for PC builders.</p>
+        <nav class="footer-nav" aria-label="Footer">
+          <div class="footer-col">
+            <h2 class="footer-col-title">Track prices</h2>
+            <ul>
+              <li><a href="/ram/">RAM</a></li>
+              <li><a href="/ssd/">SSDs</a></li>
+              <li><a href="/price-index/">Price Index</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h2 class="footer-col-title">Research</h2>
+            <ul>
+              <li><a href="/guides/">Guides</a></li>
+              <li><a href="/blog/">Blog</a></li>
+              <li><a href="/glossary/">Glossary</a></li>
+              <li><a href="/methodology/">Methodology</a></li>
+              <li><a href="/data/">Data</a></li>
+              <li><a href="/build-cost/">Build cost</a></li>
+              <li><a href="/feed.xml">RSS</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h2 class="footer-col-title">Site</h2>
+            <ul>
+              <li><a href="/about.html">About</a></li>
+              <li><a href="/faq/">FAQ</a></li>
+              <li><a href="/contact.html">Contact</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h2 class="footer-col-title">Legal</h2>
+            <ul>
+              <li><a href="/affiliate.html">Affiliate Disclosure</a></li>
+              <li><a href="/privacy.html">Privacy</a></li>
+              <li><a href="/terms.html">Terms</a></li>
+            </ul>
+          </div>
+        </nav>
+        <div class="footer-social">
+          <a href="https://bsky.app/profile/memradar.bsky.social" target="_blank" rel="noopener noreferrer" class="footer-social-link" aria-label="MemRadar on Bluesky">
+            <svg class="footer-social-icon" width="18" height="18" viewBox="0 0 568 501" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M123.121 33.6637C188.241 82.5526 258.281 181.681 284 234.873C309.719 181.681 379.759 82.5526 444.879 33.6637C491.866 -1.61183 568 -28.9064 568 57.9464C568 75.2916 558.055 203.659 552.222 224.501C531.947 296.954 458.067 315.434 392.347 304.249C507.222 323.8 536.444 388.56 473.333 453.32C353.473 576.312 301.061 422.461 287.631 383.039C285.169 375.812 284.017 372.431 284 375.306C283.983 372.431 282.831 375.812 280.369 383.039C266.939 422.461 214.527 576.312 94.6667 453.32C31.5556 388.56 60.7778 323.8 175.653 304.249C109.933 315.434 36.0535 296.954 15.7778 224.501C9.94525 203.659 0 75.2916 0 57.9464C0 -28.9064 76.1345 -1.61183 123.121 33.6637Z"/></svg>
+          </a>
+        </div>
+        <p class="footer-legal">MemRadar participates in the Amazon Associates Program and in Newegg's affiliate program via Rakuten Advertising. Links to products may be affiliate links. If you purchase through them, we may earn a small commission at no extra cost to you.</p>
+        <p class="footer-copyright">© <span class="footer-year">2026</span> MemRadar</p>
+        <script>document.querySelectorAll(".footer-year").forEach(function(e){e.textContent=new Date().getFullYear();});</script>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../js/main.js?v=20260930"></script>
+  <script src="../js/theme.js?v=20260930"></script>
+  <script src="../js/mobile-nav.js?v=20260930"></script>
+  <script src="../js/search.js?v=20260930"></script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 {
  "version": 1,
- "generated": "2026-09-29",
+ "generated": "2026-09-30",
  "computed_at": "2026-09-29T00:51:53.557+00:00",
  "update_frequency": "daily",
  "notice": "Regenerated once a day. memradar.com refreshes prices six times a day, so these figures can be up to 24 hours behind the site. This is not a live feed.",
@@ -30,8 +30,8 @@
      "product_count": 61
     }
    },
-   "median_price_usd": 560.99,
-   "median_usd_per_gb": 17.66
+   "median_price_usd": 554.99,
+   "median_usd_per_gb": 17.53
   },
   {
    "segment": "ddr4",
@@ -78,7 +78,7 @@
      "product_count": 68
     }
    },
-   "median_price_usd": 298.99,
+   "median_price_usd": 304.99,
    "median_usd_per_gb": 0.18
   },
   {
@@ -102,7 +102,7 @@
      "product_count": 26
     }
    },
-   "median_price_usd": 232.48,
+   "median_price_usd": 234.98,
    "median_usd_per_gb": 0.17
   }
  ],

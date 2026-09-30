@@ -2287,6 +2287,53 @@ html.dark .bc-note { color: #94a3b8; }
 html.dark .bc-use dt { color: #f1f5f9; }
 
 
+/* ── /raycast/ ── */
+
+/* The install call to action. DUPLICATES .btn-alert's declarations rather than
+   reusing the class: .btn-alert is the header's modal trigger, and coupling an
+   in-content link to a nav control means the next change to one silently moves
+   the other. Same values on purpose, so they look alike today. */
+.rc-install {
+  display: inline-block;
+  background: var(--brand-primary);
+  color: #fff;
+  padding: 8px 18px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.rc-install:hover { background: var(--brand-hover); }
+.rc-cta { margin: 14px 0 10px; }
+.rc-fineprint { font-size: 0.86rem; color: #6b7280; line-height: 1.6; margin: 0; }
+/* Two classes for the same reason .bc-note needs them: `.guide-verdict p` is
+   0,1,1 and would beat a bare `.rc-fineprint` at 0,1,0, putting the small
+   print back at body size inside the box. */
+.guide-verdict .rc-cta { margin: 14px 0 10px; }
+.guide-verdict .rc-fineprint { margin: 0; font-size: 0.86rem; line-height: 1.6; }
+
+/* The screenshot series. The site had no element-level figure or figcaption
+   rule at all before this: the only two were scoped to .guide-chart and
+   .buildcost-sparks, so a figure anywhere else inherited browser defaults and
+   a 40px indent. Scoped the same way rather than styling figure globally. */
+.rc-shots { display: grid; gap: 30px; margin: 22px 0 8px; }
+.rc-shots figure { margin: 0; }
+.rc-shots img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
+/* Same size and color as the captions .guide-chart and .buildcost-sparks
+   already use, so the three read as one treatment. */
+.rc-shots figcaption { font-size: 0.82rem; color: #9ca3af; line-height: 1.55; margin-top: 10px; }
+
+html.dark .rc-fineprint { color: #94a3b8; }
+html.dark .rc-shots img { border-color: #2d3f55; }
+
+
 /* ── PDP retailer strip (header purchase affordance) ──
    Retailer-SEMANTIC colors, deliberately NOT general-palette additions: they
    exist only to identify a retailer button and must never be reused as
