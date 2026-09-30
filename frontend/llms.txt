@@ -46,7 +46,7 @@ These two show what a product page holds. Both are quoted verbatim from the page
 - Price figures change daily. A page's own "last updated" line states when its figures were computed.
 - Figures over longer windows rest on smaller, older product sets, so quote long-window percentages as magnitudes rather than to a decimal.
 - Product pages with under 30 days of tracked history carry noindex and are excluded from the sitemap; they hold too little history to be worth citing.
-- Amazon and Newegg links are affiliate links. Price history is Amazon data licensed from Keepa. Newegg data comes from Rakuten Advertising.
+- Newegg links are affiliate links; Amazon links are not. Price history is Amazon data licensed from Keepa. Newegg data comes from Rakuten Advertising.
 
 ## Data for developers
 
