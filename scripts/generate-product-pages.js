@@ -4901,6 +4901,10 @@ function buildSitemap(existingXml, productEntries, prevManifest, manifest) {
     // right and the one outreach links to, not a supporting reference.
     { loc: SITE + '/methodology/', changefreq: 'weekly', priority: '0.7' },
     { loc: SITE + '/data/', changefreq: 'weekly', priority: '0.6' },
+    // Present in sitemap.xml by a hand edit since it shipped, which is exactly
+    // the fragility the comment above describes: carried forward only for as
+    // long as nobody regenerates from a sitemap that lost it. Guaranteed now.
+    { loc: SITE + '/build-cost/', changefreq: 'weekly', priority: '0.6' },
   ];
   for (const g of GUARANTEED_STATIC) {
     if (staticEntries.some((e) => e.includes(`<loc>${g.loc}</loc>`))) continue;
