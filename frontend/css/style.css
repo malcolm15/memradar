@@ -574,6 +574,19 @@ html.dark .footer-social-icon { fill: #fff; }
   margin: 36px 0 10px;
 }
 
+/* The site had NO h3 rule of any kind, and the reset at the top of this file
+   zeroes every margin, so an h3 sat flush against the paragraph above it.
+   Scoped to .content-page exactly as h2 is, and sized just under it so the
+   hierarchy reads. Checked before adding: across all 27 built pages using
+   .content-page, zero contained an h3, so this rule can only affect the page
+   that introduced one. */
+.content-page h3 {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 24px 0 6px;
+}
+
 .content-page p {
   font-size: 0.95rem;
   color: #374151;
@@ -709,6 +722,7 @@ html.dark .footer-legal { color: #64748b; }
 html.dark .content-page .page-header { border-bottom-color: #2d3f55; }
 html.dark .content-page .page-header h1 { color: #f1f5f9; }
 html.dark .content-page .page-header p { color: #94a3b8; }
+html.dark .content-page h3 { color: #f1f5f9; }
 html.dark .content-page h2 { color: #f1f5f9; }
 html.dark .content-page p { color: #94a3b8; }
 html.dark .content-page ul li { color: #94a3b8; }

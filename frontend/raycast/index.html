@@ -95,7 +95,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
   <meta name="theme-color" content="#0f1623">
-  <link rel="stylesheet" href="../css/style.css?v=20260930">
+  <link rel="stylesheet" href="../css/style.css?v=2026093002">
 </head>
 <body>
 
@@ -132,7 +132,12 @@
   </header>
 
   <main>
-    <div class="container guide-page">
+    <article class="content-page guide-page">
+
+      <nav class="guide-crumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a> <span aria-hidden="true">&rsaquo;</span>
+        <span aria-current="page">Raycast extension</span>
+      </nav>
 
       <div class="page-header">
         <h1>MemRadar for Raycast</h1>
@@ -152,16 +157,12 @@
       <p>See how prices have moved in each segment we track: DDR5, DDR4, NVMe and SATA SSDs. For each one, the median price, the price per gigabyte, and the change over the past one, three, six and twelve months.</p>
 
       <h2>Shortcuts</h2>
-      <dl class="bc-use">
-        <dt>Enter</dt>
-        <dd>show the product's price history</dd>
-        <dt>Cmd+Enter</dt>
-        <dd>open the product on memradar.com</dd>
-        <dt>Cmd+D</dt>
-        <dd>show or hide the side pane</dd>
-        <dt>Refresh</dt>
-        <dd>Raycast's standard refresh shortcut</dd>
-      </dl>
+      <ul>
+        <li><strong>Enter:</strong> show the product's price history</li>
+        <li><strong>Cmd+Enter:</strong> open the product on memradar.com</li>
+        <li><strong>Cmd+D:</strong> show or hide the side pane</li>
+        <li><strong>Refresh:</strong> Raycast's standard refresh shortcut</li>
+      </ul>
 
       <h2>What it looks like</h2>
       <div class="rc-shots">
@@ -185,7 +186,8 @@
       <p>After the first load, the extension keeps a copy on your Mac, so search still works when you are offline.</p>
       <p><a href="https://github.com/raycast/extensions/tree/main/extensions/memradar">The source is on GitHub</a>.</p>
 
-</main>
+    </article>
+  </main>
 
   <footer class="site-footer">
     <div class="container">
@@ -242,9 +244,9 @@
     </div>
   </footer>
 
-  <script src="../js/main.js?v=20260930"></script>
-  <script src="../js/theme.js?v=20260930"></script>
-  <script src="../js/mobile-nav.js?v=20260930"></script>
-  <script src="../js/search.js?v=20260930"></script>
+  <script src="../js/main.js?v=2026093002"></script>
+  <script src="../js/theme.js?v=2026093002"></script>
+  <script src="../js/mobile-nav.js?v=2026093002"></script>
+  <script src="../js/search.js?v=2026093002"></script>
 </body>
 </html>
