@@ -1490,7 +1490,7 @@ function peersFor(p, pool) {
     if (q.id === p.id) return false;
     if (q.category !== p.category) return false;
     if (q.inStock === false) return false;              // never compare against something unbuyable
-    if (q.stats.indexable === false || q._relistingOf) return false; // R1 exclusions
+    if (!q.isHealthy) return false;   // PRODUCT surface: healthy(), never indexable
     if (totalCapacityGB(q.name) !== cap) return false;
     if (isRam) return ramType(q.name) === gen;
     return ssdType(q.name) === iface && formFactor(q.name) === ff;
@@ -3120,8 +3120,12 @@ function buildWillRamFall(ctx) {
   for (const slug of WILL_RAM_FALL_KITS) {
     const p = bySlug.get(slug);
     if (!p) throw new Error(`${WILL_RAM_FALL_SLUG}: cited kit ${slug} is not in the catalog`);
-    if (p.stats && p.stats.indexable === false) {
-      throw new Error(`${WILL_RAM_FALL_SLUG}: cited kit ${slug} is noindex; the post must not link a page we tell crawlers to ignore`);
+    // Checks the REGISTRATION, not the resulting state. requiredByBuild() is
+    // what guarantees a cited kit stays indexable through any gate change, so
+    // asserting membership catches the real failure (a pin that the dependency
+    // union does not know about) rather than waiting for a gate to expose it.
+    if (!requiredByBuild(p)) {
+      throw new Error(`${WILL_RAM_FALL_SLUG}: cited kit ${slug} is not covered by requiredByBuild(), so a gate change could noindex a page this post links`);
     }
   }
 
@@ -3334,7 +3338,7 @@ function buildHomepage(ctx) {
   // and the hydrated four are the same four on a normal day. Real 30-day falls
   // first, then closest-to-all-time-low to fill the row, which is what the
   // client does when fewer than four products have fallen.
-  const priced = products.filter((p) => p.stats && p.stats.current != null && p.stats.indexable !== false && !p._relistingOf);
+  const priced = products.filter((p) => p.stats && p.stats.current != null && p.isHealthy);
   const drops = priced.filter((p) => p.stats.change30 != null && p.stats.change30 < 0)
     .sort((a, b) => a.stats.change30 - b.stats.change30);
   const chosen = drops.slice(0, HOME_DROP_SLOTS);
@@ -4508,7 +4512,7 @@ function exampleFromBuiltPage(product) {
     throw new Error(`llms.txt example ${product.sku}: cannot read its built page (${err.code || err.message})`);
   }
   if (/<meta name="robots" content="[^"]*noindex/.test(html)) {
-    throw new Error(`llms.txt example ${product.sku} is noindex; it must not be quoted as an example`);
+    throw new Error(`llms.txt example ${product.sku} is noindex; requiredByBuild() is meant to make that impossible, so either the pin is not registered there or the rule changed under it`);
   }
   const flat = html.replace(/<script[\s\S]*?<\/script>/g, '').replace(/\s+/g, ' ').replace(/<[^>]+>/g, '|');
   const pick = (label) => {
@@ -4704,7 +4708,7 @@ function bestValueTable(category, products, neweggBySku, segPerGb) {
   const rows = [];
   for (const p of products) {
     if (p.category !== category || !p.stats || p.stats.current == null) continue;
-    if (p.stats.indexable === false || p._relistingOf) continue;
+    if (!p.isHealthy) continue;      // PRODUCT surface: healthy(), never indexable
     if (p.inStock === false) continue;
     const ng = neweggBySku.get(p.sku);
     if (ng && ng.in_stock === false) continue;
@@ -4783,7 +4787,7 @@ function buildListingPage(ctx) {
   const { category, products, neweggBySku, segPerGb, msRows, buildDate } = ctx;
   const pool = products
     .filter((p) => p.category === category && p.stats && p.stats.current != null)
-    .filter((p) => p.stats.indexable !== false && !p._relistingOf)
+    .filter((p) => p.isHealthy)      // PRODUCT surface: healthy(), never indexable
     .sort((a, b) => a._titleName.localeCompare(b._titleName)); // name A-Z = the client's default sort
   if (!pool.length) throw new Error(`no indexable ${category} products to bake`);
 
@@ -5452,6 +5456,11 @@ async function run() {
   // longer decided there.
   const indexCtx = buildIndexContext(generable, buildDate);
   for (const p of generable) {
+    // Two separate questions, answered once each. isHealthy drives every
+    // PRODUCT SURFACE; indexable drives only the robots tag, the sitemap and
+    // IndexNow. Stored as a field rather than threaded as ctx so no surface
+    // has to know about the gates, and so "today" has exactly one definition.
+    p.isHealthy = healthy(p, indexCtx);
     p.stats.indexable = keepIndexable(p, indexCtx);
     p.indexReasons = indexReasons(p, indexCtx);
   }
@@ -6182,6 +6191,14 @@ async function run() {
   const relistings = generable.filter((p) => p._relistingOf);
   const indexable = generable.filter((p) => p.stats.indexable !== false && !p._relistingOf);
   const nonIndexable = generable.filter((p) => p.stats.indexable === false);
+  // THE SITEMAP AND THE SEARCH INDEX NO LONGER SHARE A LIST. The sitemap is a
+  // search-engine instruction and reads `indexable`; search-index.json is a
+  // PRODUCT surface, read by the site typeahead and by the alert modal's
+  // product picker, so it reads healthy(). Keeping them merged meant a page we
+  // chose not to submit to Google also became unfindable on our own site and
+  // impossible to set an alert on, which was never the intent. Filtered off
+  // the same `generable` in the same order, so ordering is unchanged.
+  const healthyProducts = generable.filter((p) => p.isHealthy);
   const productEntries = indexable.map((p) => {
     const u = `${SITE}/${p.category}/${p.finalSlug}/`;
     return { url: u, lastmod: lastmodByUrl.get(u) || buildDate };
@@ -6307,7 +6324,7 @@ async function run() {
 
   // 5) Search index — one lean entry per product for the site-wide typeahead
   // (frontend/js/search.js). Regenerated every run so it never drifts.
-  const searchIndex = indexable.map((p) => ({
+  const searchIndex = healthyProducts.map((p) => ({
     sku: p.sku,
     name: p.name,
     slug: p.finalSlug,
@@ -6339,7 +6356,7 @@ async function run() {
     }
     try {
       const f = path.join(FRONTEND, ...RAYCAST_PRODUCTS_PATH);
-      const payload = buildRaycastProducts(indexable, buildDate);
+      const payload = buildRaycastProducts(healthyProducts, buildDate);
       fs.writeFileSync(f, JSON.stringify(payload) + '\n');
       // The size budget is the reason history is monthly. If this ever goes
       // past ~300KB, downsample further rather than shipping a slow fetch.
