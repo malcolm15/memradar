@@ -4390,9 +4390,9 @@ const RAYCAST_STORE_URL = 'https://www.raycast.com/memradar/memradar';
 function buildRaycast(ctx) {
   const url = `${SITE}/${RAYCAST_PAGE_SLUG}/`;
   const h1 = 'MemRadar for Raycast';
-  const pageTitle = 'MemRadar for Raycast: RAM and SSD Prices on Mac';
+  const pageTitle = 'MemRadar for Raycast: Search RAM and SSD Prices';
   if (pageTitle.length > 60) throw new Error(`${RAYCAST_PAGE_SLUG} title is ${pageTitle.length} chars, over 60`);
-  const desc = "Search RAM and SSD prices from Raycast on your Mac. MemRadar's free extension shows current prices, all-time lows and each product's monthly price history.";
+  const desc = "Search RAM and SSD prices from Raycast on Mac or Windows. MemRadar's free extension shows current prices, all-time lows and each product's price history.";
   if (desc.length < DESC_MIN || desc.length > 160) {
     throw new Error(`${RAYCAST_PAGE_SLUG} meta description is ${desc.length} chars, outside ${DESC_MIN}-160`);
   }
@@ -4426,7 +4426,7 @@ function buildRaycast(ctx) {
         '@id': `${url}#app`,
         name: 'MemRadar for Raycast',
         applicationCategory: 'ShoppingApplication',
-        operatingSystem: 'macOS',
+        operatingSystem: 'macOS, Windows',
         url,
         installUrl: RAYCAST_STORE_URL,
         offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },

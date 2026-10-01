@@ -16,7 +16,7 @@ Each figure carries the date it was computed. Figures over longer windows rest o
 - [Memory Price Index](https://memradar.com/price-index/): Median price change per segment across four time windows, recomputed daily from the full price history.
 - [Data for journalists](https://memradar.com/data/): Current findings, how to cite, catalog composition, and the downloadable files below.
 - [Build-Cost Index](https://memradar.com/build-cost/): What the memory and storage for a fixed PC build specification cost each month, back to January 2023, with the basket definitions and what the figures do not tell you.
-- [MemRadar for Raycast](https://memradar.com/raycast/): a free Raycast extension for macOS that searches MemRadar's RAM and SSD prices and shows each product's monthly price history.
+- [MemRadar for Raycast](https://memradar.com/raycast/): a free Raycast extension for macOS and Windows that searches MemRadar's RAM and SSD prices and shows each product's monthly price history.
 - [Methodology](https://memradar.com/methodology/): How prices are collected, how the figures are computed, and what the data cannot tell you.
 - [Why Is RAM So Expensive in 2026?](https://memradar.com/blog/why-ram-prices-are-so-high/): Why RAM prices rose: causes, with figures checked against the index.
 - [Will RAM prices go back down?](https://memradar.com/blog/will-ram-prices-go-back-down/): What the last memory price cycle looked like in our own data, 2016 to 2020.

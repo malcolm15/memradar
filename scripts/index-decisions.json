@@ -203,7 +203,8 @@
    "google_position": 12.31,
    "bing_impressions": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "percentile_extreme"
    ]
   },
   "ram/corsair-vengeance-ddr5-ram-32gb-6000mhz": {
@@ -299,7 +300,8 @@
    "google_position": 12.22,
    "bing_impressions": 0,
    "reasons": [
-    "long_history"
+    "long_history",
+    "percentile_extreme"
    ]
   },
   "ram/corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz-2": {
@@ -764,7 +766,8 @@
    "google_position": 18.5,
    "bing_impressions": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "percentile_extreme"
    ]
   },
   "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-32gb-6000mhz-3": {
@@ -854,7 +857,8 @@
    "google_position": 17.46,
    "bing_impressions": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "percentile_extreme"
    ]
   },
   "ram/g-skill-trident-z5-rgb-series-ddr5-ram-32gb-6000mhz": {
@@ -1135,7 +1139,8 @@
    "google_position": 5,
    "bing_impressions": 0,
    "reasons": [
-    "long_history"
+    "long_history",
+    "percentile_extreme"
    ]
   },
   "ram/lexar-oc-ddr5-ram-1x8gb-6000mhz-cl38": {
@@ -1228,7 +1233,8 @@
    "google_position": 24.61,
    "bing_impressions": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "percentile_extreme"
    ]
   },
   "ram/puskill-32gb-kit-3200mhz": {
@@ -1273,7 +1279,8 @@
    "bing_impressions": 0,
    "reasons": [
     "sparse_history",
-    "gsc_crawled_not_indexed"
+    "gsc_crawled_not_indexed",
+    "percentile_extreme"
    ]
   },
   "ram/silicon-power-ddr5-64gb-6000mhz": {
@@ -2415,7 +2422,8 @@
    "bing_impressions": 1,
    "reasons": [
     "gsc_crawled_not_indexed",
-    "long_history"
+    "long_history",
+    "percentile_extreme"
    ]
   },
   "ssd/silicon-power-2tb-ssd-3d-nand-a55-slc": {
