@@ -1,7 +1,7 @@
 {
  "version": 1,
- "generated": "2026-09-30",
- "computed_at": "2026-09-30T10:14:58.932+00:00",
+ "generated": "2026-10-01",
+ "computed_at": "2026-10-01T10:40:15.877+00:00",
  "update_frequency": "daily",
  "notice": "Regenerated once a day. memradar.com refreshes prices six times a day, so these figures can be up to 24 hours behind the site. This is not a live feed.",
  "method": "Every figure is a median, never a mean: a single expensive kit would drag an average. pct_change compares the same products with themselves across that window, so product_count is the size of that matched set and the periods are not directly comparable with each other. median_price_usd is the median current price across every tracked product in the segment; median_usd_per_gb is the same median over those whose capacity we can parse. Neither is a per-period figure.",
@@ -14,31 +14,31 @@
    "label": "DDR5 memory",
    "periods": {
     "1m": {
-     "pct_change": 12.1,
-     "product_count": 79
+     "pct_change": 6,
+     "product_count": 78
     },
     "3m": {
-     "pct_change": 18.1,
-     "product_count": 68
+     "pct_change": 19.3,
+     "product_count": 65
     },
     "6m": {
-     "pct_change": 22.6,
-     "product_count": 73
+     "pct_change": 20.2,
+     "product_count": 72
     },
     "1y": {
-     "pct_change": 340.9,
-     "product_count": 62
+     "pct_change": 328.6,
+     "product_count": 61
     }
    },
-   "median_price_usd": 564.99,
-   "median_usd_per_gb": 17.7
+   "median_price_usd": 554.99,
+   "median_usd_per_gb": 17.53
   },
   {
    "segment": "ddr4",
    "label": "DDR4 memory",
    "periods": {
     "1m": {
-     "pct_change": 3.4,
+     "pct_change": 5.8,
      "product_count": 34
     },
     "3m": {
@@ -50,7 +50,7 @@
      "product_count": 18
     },
     "1y": {
-     "pct_change": 117.8,
+     "pct_change": 122.3,
      "product_count": 28
     }
    },
@@ -62,20 +62,20 @@
    "label": "NVMe SSDs",
    "periods": {
     "1m": {
-     "pct_change": 6.3,
-     "product_count": 79
+     "pct_change": 7.9,
+     "product_count": 78
     },
     "3m": {
-     "pct_change": 14.7,
-     "product_count": 69
+     "pct_change": 11.1,
+     "product_count": 67
     },
     "6m": {
-     "pct_change": 4.4,
-     "product_count": 68
+     "pct_change": 5.9,
+     "product_count": 67
     },
     "1y": {
-     "pct_change": 134.6,
-     "product_count": 68
+     "pct_change": 130.8,
+     "product_count": 67
     }
    },
    "median_price_usd": 304.99,
@@ -86,11 +86,11 @@
    "label": "SATA SSDs",
    "periods": {
     "1m": {
-     "pct_change": 0.9,
+     "pct_change": 0.3,
      "product_count": 31
     },
     "3m": {
-     "pct_change": 0.6,
+     "pct_change": -1,
      "product_count": 24
     },
     "6m": {
@@ -110,40 +110,40 @@
   {
    "basket": "build_current",
    "label": "Current build: 32GB DDR5-6000 + 1TB NVMe + 2TB NVMe",
-   "month": "2026-08",
-   "total_usd": 1023.61,
+   "month": "2026-09",
+   "total_usd": 1065.79,
    "components": [
     {
      "spec": "32GB DDR5-6000",
-     "median_price_usd": 504.99,
+     "median_price_usd": 532.87,
      "product_count": 25
     },
     {
      "spec": "1TB NVMe",
-     "median_price_usd": 178.63,
+     "median_price_usd": 184.93,
      "product_count": 30
     },
     {
      "spec": "2TB NVMe",
-     "median_price_usd": 339.99,
-     "product_count": 27
+     "median_price_usd": 347.99,
+     "product_count": 26
     }
    ],
    "periods": {
     "1m": {
-     "pct_change": 6.4,
+     "pct_change": 4.1,
      "product_count": 25
     },
     "3m": {
-     "pct_change": 0.8,
+     "pct_change": 11.4,
      "product_count": 25
     },
     "6m": {
-     "pct_change": 3.3,
+     "pct_change": 7.3,
      "product_count": 25
     },
     "1y": {
-     "pct_change": 194.1,
+     "pct_change": 231.4,
      "product_count": 25
     }
    }
@@ -151,36 +151,36 @@
   {
    "basket": "build_ddr4",
    "label": "DDR4 build: 32GB DDR4-3200 + 1TB NVMe",
-   "month": "2026-08",
-   "total_usd": 387.62,
+   "month": "2026-09",
+   "total_usd": 409.92,
    "components": [
     {
      "spec": "32GB DDR4-3200",
-     "median_price_usd": 208.99,
-     "product_count": 13
+     "median_price_usd": 224.99,
+     "product_count": 12
     },
     {
      "spec": "1TB NVMe",
-     "median_price_usd": 178.63,
+     "median_price_usd": 184.93,
      "product_count": 30
     }
    ],
    "periods": {
     "1m": {
-     "pct_change": 3.6,
-     "product_count": 13
+     "pct_change": 5.8,
+     "product_count": 12
     },
     "3m": {
-     "pct_change": -13.6,
-     "product_count": 13
+     "pct_change": 3.1,
+     "product_count": 12
     },
     "6m": {
-     "pct_change": -5.5,
-     "product_count": 13
+     "pct_change": -6.6,
+     "product_count": 12
     },
     "1y": {
-     "pct_change": 140.1,
-     "product_count": 13
+     "pct_change": 167.1,
+     "product_count": 12
     }
    }
   }

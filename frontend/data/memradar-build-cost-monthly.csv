@@ -15,7 +15,7 @@
 #
 # SOURCES: Amazon price history licensed from Keepa. These figures are medians computed by MemRadar from that history, not the raw licensed data. Newegg prices are not included: MemRadar records Newegg as a current price only and holds no Newegg history.
 #
-# Generated 2026-09-30. Regenerated daily.
+# Generated 2026-10-01. Regenerated daily.
 # Source: MemRadar Build-Cost Index, memradar.com/build-cost/
 basket,month,total_usd,ram_usd,ssd1_usd,ssd2_usd,ram_n,ssd1_n,ssd2_n
 build_current,2023-01,453.47,179.99,90.99,182.49,8,5,8
@@ -62,6 +62,7 @@ build_current,2026-05,1015.19,479.99,205.63,329.56,25,24,27
 build_current,2026-06,956.45,460.49,180.97,314.99,23,22,24
 build_current,2026-07,961.60,484.62,176.99,299.99,26,30,27
 build_current,2026-08,1023.61,504.99,178.63,339.99,25,30,27
+build_current,2026-09,1065.79,532.87,184.93,347.99,25,30,26
 build_ddr4,2023-01,172.10,81.11,90.99,,8,5,
 build_ddr4,2023-02,177.78,77.99,99.79,,7,6,
 build_ddr4,2023-03,182.85,79.97,102.88,,9,6,
@@ -106,3 +107,4 @@ build_ddr4,2026-05,448.62,242.99,205.63,,10,24,
 build_ddr4,2026-06,397.51,216.54,180.97,,12,22,
 build_ddr4,2026-07,374.08,197.09,176.99,,13,30,
 build_ddr4,2026-08,387.62,208.99,178.63,,13,30,
+build_ddr4,2026-09,409.92,224.99,184.93,,12,30,

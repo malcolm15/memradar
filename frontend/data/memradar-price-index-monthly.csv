@@ -13,7 +13,7 @@
 #
 # SOURCES: Amazon price history licensed from Keepa. These figures are medians computed by MemRadar from that history, not the raw licensed data. Newegg prices are not included: MemRadar records Newegg as a current price only and holds no Newegg history.
 #
-# Generated 2026-09-30. Regenerated daily.
+# Generated 2026-10-01. Regenerated daily.
 # Source: MemRadar Memory Price Index, memradar.com/price-index/
 segment,month,median_price_usd,median_usd_per_gb,product_count
 ddr5,2022-06,271.10,6.9916,10
@@ -67,6 +67,7 @@ ddr5,2026-05,479.99,14.7028,74
 ddr5,2026-06,477.48,14.7005,78
 ddr5,2026-07,478.12,15.1559,84
 ddr5,2026-08,498.49,15.7028,82
+ddr5,2026-09,531.42,17.4686,82
 ddr4,2019-11,86.49,4.1630,14
 ddr4,2019-12,90.24,4.3370,14
 ddr4,2020-01,92.24,4.6223,12
@@ -149,6 +150,7 @@ ddr4,2026-05,169.98,7.8106,25
 ddr4,2026-06,144.99,7.2919,31
 ddr4,2026-07,157.26,6.8744,35
 ddr4,2026-08,157.26,6.8609,35
+ddr4,2026-09,153.63,7.2039,34
 nvme_ssd,2022-08,149.74,0.1238,10
 nvme_ssd,2022-09,134.99,0.1074,11
 nvme_ssd,2022-10,138.06,0.1123,10
@@ -198,6 +200,7 @@ nvme_ssd,2026-05,325.76,0.1735,74
 nvme_ssd,2026-06,279.99,0.1727,69
 nvme_ssd,2026-07,277.98,0.1650,82
 nvme_ssd,2026-08,287.98,0.1660,81
+nvme_ssd,2026-09,309.99,0.1776,81
 sata_ssd,2021-07,203.30,0.1709,13
 sata_ssd,2021-08,184.65,0.1733,12
 sata_ssd,2021-09,181.52,0.1847,11
@@ -260,3 +263,4 @@ sata_ssd,2026-05,261.25,0.2243,29
 sata_ssd,2026-06,229.46,0.2077,30
 sata_ssd,2026-07,229.41,0.1587,34
 sata_ssd,2026-08,232.49,0.1587,34
+sata_ssd,2026-09,229.99,0.1697,34
