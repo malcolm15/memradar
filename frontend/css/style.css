@@ -3523,6 +3523,11 @@ html.dark .guides-subhead { color: #94a3b8; }
   margin-bottom: 10px;
 }
 .listing-intro-link { font-size: 0.92rem; }
+/* The universal reset zeroes every margin and nothing else targets these
+   paragraphs, so two in a row sat flush. 16px matches .content-page p and
+   .listing-about p, the site's paragraph spacing. Adjacent-sibling on purpose:
+   it can only match where the class appears twice, which is the homepage. */
+.listing-intro-link + .listing-intro-link { margin-top: 16px; }
 .listing-intro-link a { color: var(--brand-primary); font-weight: 600; }
 .listing-intro-link a:hover { text-decoration: underline; }
 html.dark .listing-intro { border-bottom-color: #2d3f55; }
