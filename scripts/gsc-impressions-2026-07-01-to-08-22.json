@@ -1,6 +1,0 @@
-{
-  "window": { "start": "2026-07-01", "end": "2026-08-22" },
-  "source": "Google Search Console, Pages export, filtered to /ram/ and /ssd/ product URLs",
-  "note": "PRE-DEMOTION WINDOW ON PURPOSE. Impressions collapsed 96% on 2026-08-23, so any later window measures the penalty rather than the demand this page once had. Keys are '<category>/<slug>', the same form GSC_CRAWLED_NOT_INDEXED uses; derive one from an exported URL with new URL(u).pathname.replace(/^\\//,'').replace(/\\/$/,''). Merged as a LEFT JOIN onto the catalog: a slug absent here reads 0 impressions and is never dropped, and a slug here that matches no page is reported by --index-plan rather than failing the build. The gate is ADMIT-ONLY: it can rescue a page that passes no fact gate, and can never evict one that does.",
-  "pages": {}
-}
