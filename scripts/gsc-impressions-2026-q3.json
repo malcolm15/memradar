@@ -1,0 +1,1655 @@
+{
+ "meta": {
+  "google": {
+   "source": "Google Search Console, Pages export",
+   "window": {
+    "start": "2026-06-29",
+    "end": "2026-09-28"
+   },
+   "label": "last 3 months"
+  },
+  "bing": {
+   "source": "Bing Webmaster Tools, Page Traffic Report",
+   "window": {
+    "start": "2026-07-01",
+    "end": "2026-09-28"
+   }
+  },
+  "note": "TREATED AS PRE-DEMOTION DEMAND. Impressions collapsed on 2026-08-24 (209 on 08-23, then 50, 9, 5, 8). Of 6156 Google impressions in this window, 5787 (94.0%) fall on or before 2026-08-23 and 369 (6.0%) after, so the totals measure demand the pages had before the demotion rather than after it. Bing offered no shorter window than July 1 to September 28 and was not demoted, so its figures span the whole quarter.",
+  "keys": "Product slug with the /ram/ or /ssd/ prefix and trailing slash stripped. Non-product URLs are ignored. Absent slug means zero: the merge is a LEFT JOIN onto the catalog and never drops a product.",
+  "gate": "Read by gateImpressions() in scripts/generate-product-pages.js as an ADMIT-ONLY term: it can rescue a page that passes no fact gate and can never evict one that does.",
+  "counts": {
+   "google_product_rows": 232,
+   "google_non_product_rows_ignored": 16,
+   "bing_product_rows": 32,
+   "bing_non_product_rows_ignored": 7,
+   "slugs": 232
+  }
+ },
+ "pages": {
+  "16gb-1x16gb-ddr4-2666mhz-pc4-21300-2rx8": {
+   "google_clicks": 0,
+   "google_impressions": 1,
+   "google_position": 59,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "16gb-2x8gb-ddr5-4800mhz-pc5-38400-1rx8": {
+   "google_clicks": 0,
+   "google_impressions": 2,
+   "google_position": 44,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "1tb-sata-ssd-2-5-ssd-sata-iii-6": {
+   "google_clicks": 0,
+   "google_impressions": 11,
+   "google_position": 19.64,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "1tb-sn850p-nvme-m-2-ssd-officially": {
+   "google_clicks": 0,
+   "google_impressions": 1,
+   "google_position": 9,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "32gb-ddr4-3200mhz-desktop-ram-memory-kit": {
+   "google_clicks": 0,
+   "google_impressions": 20,
+   "google_position": 13.1,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "500gb-optimus-5100-nvme-ssd-pcie-4-0": {
+   "google_clicks": 0,
+   "google_impressions": 7,
+   "google_position": 21.14,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "a-tech-16gb-3200mhz": {
+   "google_clicks": 0,
+   "google_impressions": 3,
+   "google_position": 8,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "a-tech-16gb-ddr4-2400-mhz-udimm-pc4-19200": {
+   "google_clicks": 0,
+   "google_impressions": 9,
+   "google_position": 8.89,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "a-tech-16gb-ddr4-2666-mhz-udimm-pc4-21300": {
+   "google_clicks": 0,
+   "google_impressions": 12,
+   "google_position": 8.08,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "a-tech-16gb-ddr4-3200-mhz-sodimm-pc4-25600": {
+   "google_clicks": 0,
+   "google_impressions": 5,
+   "google_position": 9.6,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "a-tech-16gb-ddr5-4800mhz-pc5-38400-cl40": {
+   "google_clicks": 0,
+   "google_impressions": 23,
+   "google_position": 10.96,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "a-tech-32gb-3200mhz": {
+   "google_clicks": 0,
+   "google_impressions": 15,
+   "google_position": 12.27,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "a-tech-ddr4-ram-16gb-2666mhz-pc4-21300": {
+   "google_clicks": 0,
+   "google_impressions": 3,
+   "google_position": 11,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "a-tech-ddr4-ram-32gb-kit-2666mhz": {
+   "google_clicks": 0,
+   "google_impressions": 11,
+   "google_position": 15.36,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "acer-predator-gm7-1tb-ssd-m-2-2280-pcie": {
+   "google_clicks": 0,
+   "google_impressions": 9,
+   "google_position": 17.11,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "acer-predator-gm7-2tb-ssd-m-2-2280-pcie": {
+   "google_clicks": 1,
+   "google_impressions": 41,
+   "google_position": 26.54,
+   "bing_impressions": 1,
+   "bing_clicks": 0
+  },
+  "acer-predator-gm7-4tb-ssd-m-2-2280-pcie": {
+   "google_clicks": 0,
+   "google_impressions": 23,
+   "google_position": 29.65,
+   "bing_impressions": 40,
+   "bing_clicks": 0
+  },
+  "acer-predator-vesta-ii-rgb-ddr5-ram-32gb-6000mhz": {
+   "google_clicks": 1,
+   "google_impressions": 36,
+   "google_position": 10.83,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "bestoss-1tb-m-2-ssd-nvme-pcie4-0-2280": {
+   "google_clicks": 0,
+   "google_impressions": 5,
+   "google_position": 8.6,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "bestoss-1tb-nvme-m-2-ssd-pcie-3-0-2280": {
+   "google_clicks": 0,
+   "google_impressions": 7,
+   "google_position": 10.57,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "bestoss-2tb-m-2-ssd-nvme-pcie4-0-2280": {
+   "google_clicks": 0,
+   "google_impressions": 5,
+   "google_position": 10.2,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "bestoss-2tb-nvme-m-2-2280-ssd-with": {
+   "google_clicks": 0,
+   "google_impressions": 22,
+   "google_position": 15.64,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "bestoss-2tb-nvme-m-2-ssd-pcie-3-0-m-2": {
+   "google_clicks": 0,
+   "google_impressions": 8,
+   "google_position": 10.62,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "bestoss-2tb-sata-ssd-2-5-inch-internal": {
+   "google_clicks": 0,
+   "google_impressions": 7,
+   "google_position": 14.57,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "bestoss-m-2-2280-nvme-ssd-2tb-pcie-4-0": {
+   "google_clicks": 0,
+   "google_impressions": 3,
+   "google_position": 9,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "biwin-black-opal-nv7400-4tb-ssd-gen4x4": {
+   "google_clicks": 0,
+   "google_impressions": 17,
+   "google_position": 18.88,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "centon-2tb-ssd-internal-solid-state-drive": {
+   "google_clicks": 0,
+   "google_impressions": 7,
+   "google_position": 39.86,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "corsair-vengeance-ddr5-32gb-6000mhz": {
+   "google_clicks": 0,
+   "google_impressions": 50,
+   "google_position": 11.12,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "corsair-vengeance-ddr5-ram-16gb-5200mhz": {
+   "google_clicks": 0,
+   "google_impressions": 19,
+   "google_position": 11.58,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "corsair-vengeance-ddr5-ram-16gb-6000mhz": {
+   "google_clicks": 0,
+   "google_impressions": 45,
+   "google_position": 12.31,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "corsair-vengeance-ddr5-ram-32gb-6000mhz": {
+   "google_clicks": 0,
+   "google_impressions": 38,
+   "google_position": 12.55,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "corsair-vengeance-ddr5-ram-32gb-6000mhz-2": {
+   "google_clicks": 0,
+   "google_impressions": 120,
+   "google_position": 11.03,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "corsair-vengeance-ddr5-ram-32gb-6400mhz": {
+   "google_clicks": 1,
+   "google_impressions": 35,
+   "google_position": 17.57,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "corsair-vengeance-lpx-ddr4-ram-16gb-3200mhz": {
+   "google_clicks": 0,
+   "google_impressions": 9,
+   "google_position": 33.22,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "corsair-vengeance-lpx-ddr4-ram-32gb-3200mhz": {
+   "google_clicks": 0,
+   "google_impressions": 31,
+   "google_position": 17.35,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "corsair-vengeance-rgb-ddr5-32gb-6000mhz": {
+   "google_clicks": 0,
+   "google_impressions": 62,
+   "google_position": 12.06,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "corsair-vengeance-rgb-ddr5-ram-16gb-5200mhz": {
+   "google_clicks": 0,
+   "google_impressions": 12,
+   "google_position": 14.5,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz": {
+   "google_clicks": 0,
+   "google_impressions": 23,
+   "google_position": 12.22,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz-2": {
+   "google_clicks": 0,
+   "google_impressions": 21,
+   "google_position": 11.43,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz-3": {
+   "google_clicks": 0,
+   "google_impressions": 18,
+   "google_position": 15.22,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz-4": {
+   "google_clicks": 0,
+   "google_impressions": 342,
+   "google_position": 10.19,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "corsair-vengeance-rgb-ddr5-ram-32gb-6400mhz": {
+   "google_clicks": 1,
+   "google_impressions": 23,
+   "google_position": 17.04,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "corsair-vengeance-rgb-rs-ddr5-16gb-6000mhz": {
+   "google_clicks": 0,
+   "google_impressions": 13,
+   "google_position": 10.08,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "corsair-vengeance-rgb-rs-ddr5-32gb-6000mhz": {
+   "google_clicks": 0,
+   "google_impressions": 35,
+   "google_position": 11.94,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "corsair-vengeance-rgb-rs-ddr5-ram-16gb-5200mhz": {
+   "google_clicks": 0,
+   "google_impressions": 5,
+   "google_position": 9,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "corsair-vengeance-rgb-rs-ddr5-ram-16gb-6000mhz": {
+   "google_clicks": 0,
+   "google_impressions": 5,
+   "google_position": 9.8,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "corsair-vengeance-rgb-rs-ddr5-ram-32gb-5600mhz": {
+   "google_clicks": 2,
+   "google_impressions": 175,
+   "google_position": 8.97,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "corsair-vengeance-rgb-rs-ddr5-ram-32gb-6000mhz": {
+   "google_clicks": 0,
+   "google_impressions": 9,
+   "google_position": 10.44,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "corsair-vengeance-rgb-rs-ddr5-ram-64gb-6000mhz": {
+   "google_clicks": 0,
+   "google_impressions": 5,
+   "google_position": 6,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "crucial-128gb-kit-5600mhz": {
+   "google_clicks": 2,
+   "google_impressions": 89,
+   "google_position": 10.75,
+   "bing_impressions": 1,
+   "bing_clicks": 0
+  },
+  "crucial-16gb-ddr4-ram-3200mhz": {
+   "google_clicks": 0,
+   "google_impressions": 18,
+   "google_position": 9.72,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "crucial-16gb-ddr5-ram-4800mhz": {
+   "google_clicks": 0,
+   "google_impressions": 4,
+   "google_position": 16.5,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "crucial-16gb-ddr5-ram-5600mhz": {
+   "google_clicks": 0,
+   "google_impressions": 40,
+   "google_position": 19,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "crucial-16gb-ddr5-ram-5600mhz-2": {
+   "google_clicks": 0,
+   "google_impressions": 17,
+   "google_position": 16.35,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "crucial-32gb-ddr4-ram-kit-3200mhz": {
+   "google_clicks": 0,
+   "google_impressions": 9,
+   "google_position": 13.56,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "crucial-32gb-ddr4-ram-kit-3200mhz-2": {
+   "google_clicks": 0,
+   "google_impressions": 5,
+   "google_position": 12.6,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "crucial-32gb-ddr5-ram-kit-4800mhz": {
+   "google_clicks": 0,
+   "google_impressions": 24,
+   "google_position": 18.71,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "crucial-32gb-ddr5-ram-kit-5600mhz": {
+   "google_clicks": 0,
+   "google_impressions": 59,
+   "google_position": 13.27,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "crucial-64gb-ddr5-ram-5600mhz": {
+   "google_clicks": 0,
+   "google_impressions": 54,
+   "google_position": 17.89,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "crucial-64gb-ddr5-ram-kit-4800mhz": {
+   "google_clicks": 0,
+   "google_impressions": 45,
+   "google_position": 14.53,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "crucial-96gb-ddr5-5600mhz-laptop-memory": {
+   "google_clicks": 0,
+   "google_impressions": 15,
+   "google_position": 18.2,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "crucial-bx500-sata-ssd-2tb": {
+   "google_clicks": 0,
+   "google_impressions": 13,
+   "google_position": 19.85,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "crucial-e100-2tb-m-2-nvme-pcie-gen4": {
+   "google_clicks": 0,
+   "google_impressions": 6,
+   "google_position": 8,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "crucial-p310-1tb-232l-micron-qlc-nand-pcie": {
+   "google_clicks": 0,
+   "google_impressions": 2,
+   "google_position": 8.5,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "crucial-p310-1tb-ssd": {
+   "google_clicks": 0,
+   "google_impressions": 34,
+   "google_position": 15.12,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "crucial-p310-2tb-ssd": {
+   "google_clicks": 0,
+   "google_impressions": 19,
+   "google_position": 15.95,
+   "bing_impressions": 10,
+   "bing_clicks": 1
+  },
+  "crucial-p310-4tb-ssd": {
+   "google_clicks": 0,
+   "google_impressions": 8,
+   "google_position": 8,
+   "bing_impressions": 1,
+   "bing_clicks": 0
+  },
+  "crucial-p310-500gb-ssd": {
+   "google_clicks": 0,
+   "google_impressions": 2,
+   "google_position": 20.5,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "crucial-p510-pcie-gen5-nvme-1tb-ssd": {
+   "google_clicks": 0,
+   "google_impressions": 6,
+   "google_position": 19.5,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "crucial-pro-64gb-ddr5-ram-kit-5600mhz": {
+   "google_clicks": 0,
+   "google_impressions": 38,
+   "google_position": 14.45,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "crucial-pro-ddr5-ram-64gb-kit-6400mhz": {
+   "google_clicks": 0,
+   "google_impressions": 15,
+   "google_position": 21.4,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "crucial-ram-16gb-ddr5-5200mhz": {
+   "google_clicks": 0,
+   "google_impressions": 8,
+   "google_position": 12.75,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "crucial-t500-2tb-pcie-gen4-nvme-gaming-ps5": {
+   "google_clicks": 0,
+   "google_impressions": 10,
+   "google_position": 9.2,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "crucial-t500-4tb-pcie-gen4-nvme-gaming-ps5": {
+   "google_clicks": 0,
+   "google_impressions": 2,
+   "google_position": 7,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "crucial-t500-pcie-gen4-nvme-1tb-ssd": {
+   "google_clicks": 0,
+   "google_impressions": 9,
+   "google_position": 22.33,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "crucial-t500-pcie-gen4-nvme-4tb-ssd": {
+   "google_clicks": 1,
+   "google_impressions": 19,
+   "google_position": 15.42,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "crucial-t500-pcie-gen4-nvme-500gb-ssd": {
+   "google_clicks": 1,
+   "google_impressions": 26,
+   "google_position": 17.19,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "crucial-t705-pcie-gen5-nvme-1tb-ssd": {
+   "google_clicks": 1,
+   "google_impressions": 9,
+   "google_position": 31.89,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "ddr4-ram-16gb-3200mhz": {
+   "google_clicks": 0,
+   "google_impressions": 101,
+   "google_position": 26.38,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "ddr4-ram-laptop-only-gigastone-32gb-kit-3200mhz": {
+   "google_clicks": 0,
+   "google_impressions": 13,
+   "google_position": 20.77,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "fanxiang-1tb-nvme-ssd-pcie-gen-4-gaming": {
+   "google_clicks": 0,
+   "google_impressions": 10,
+   "google_position": 18.2,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "fanxiang-1tb-nvme-ssd-pcie-gen4-m-2": {
+   "google_clicks": 0,
+   "google_impressions": 14,
+   "google_position": 11.57,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "fanxiang-2tb-nvme-ssd-pcie-gen4-m-2-ssd": {
+   "google_clicks": 0,
+   "google_impressions": 1,
+   "google_position": 10,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "fanxiang-2tb-sata-ssd-2-5-ssd-sata-iii": {
+   "google_clicks": 0,
+   "google_impressions": 2,
+   "google_position": 12.5,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "fanxiang-s501q-ssd-1tb-pcle-3-0x4": {
+   "google_clicks": 0,
+   "google_impressions": 8,
+   "google_position": 20.12,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "fanxiang-ssd-2tb-internal-solid-state": {
+   "google_clicks": 0,
+   "google_impressions": 12,
+   "google_position": 13.17,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "fikwot-fn203-m-2-sata-ssd-slc-cache-1tb": {
+   "google_clicks": 0,
+   "google_impressions": 12,
+   "google_position": 10,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "fikwot-fn955-2tb-nvme-ssd-m-2-2280-pcie": {
+   "google_clicks": 0,
+   "google_impressions": 2,
+   "google_position": 23,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "fikwot-fn960-4tb-m-2-nvme-ssd-pcie-gen4": {
+   "google_clicks": 0,
+   "google_impressions": 6,
+   "google_position": 8.5,
+   "bing_impressions": 2,
+   "bing_clicks": 0
+  },
+  "fikwot-fs810-2tb-ssd": {
+   "google_clicks": 0,
+   "google_impressions": 9,
+   "google_position": 11,
+   "bing_impressions": 1,
+   "bing_clicks": 1
+  },
+  "fikwot-fx815-1tb-ssd": {
+   "google_clicks": 0,
+   "google_impressions": 6,
+   "google_position": 9.67,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "g-skill-flare-x5-series-ddr5-ram-32gb-6000mhz": {
+   "google_clicks": 0,
+   "google_impressions": 44,
+   "google_position": 17.5,
+   "bing_impressions": 2,
+   "bing_clicks": 0
+  },
+  "g-skill-flare-x5-series-ddr5-ram-64gb-6000mhz": {
+   "google_clicks": 0,
+   "google_impressions": 280,
+   "google_position": 13.15,
+   "bing_impressions": 1,
+   "bing_clicks": 0
+  },
+  "g-skill-ripjaws-s5-series-ddr5-ram-64gb-6000mhz": {
+   "google_clicks": 0,
+   "google_impressions": 1,
+   "google_position": 10,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "g-skill-ripjawsv-series-ddr4-ram-16gb-3200mhz": {
+   "google_clicks": 0,
+   "google_impressions": 6,
+   "google_position": 7.33,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "g-skill-ripjawsv-series-ddr4-ram-16gb-3200mhz-2": {
+   "google_clicks": 0,
+   "google_impressions": 3,
+   "google_position": 4,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "g-skill-ripjawsv-series-ddr4-ram-32gb-3200mhz": {
+   "google_clicks": 0,
+   "google_impressions": 1,
+   "google_position": 8,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "g-skill-trident-z-rgb-series-ddr4-ram-16gb-3600mhz": {
+   "google_clicks": 0,
+   "google_impressions": 2,
+   "google_position": 23,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "g-skill-trident-z-rgb-series-ddr4-ram-32gb-3200mhz": {
+   "google_clicks": 0,
+   "google_impressions": 2,
+   "google_position": 7,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "g-skill-trident-z5-neo-rgb-series-ddr5-ram-32gb-6000mhz": {
+   "google_clicks": 0,
+   "google_impressions": 9,
+   "google_position": 9.33,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "g-skill-trident-z5-neo-rgb-series-ddr5-ram-32gb-6000mhz-2": {
+   "google_clicks": 0,
+   "google_impressions": 2,
+   "google_position": 18.5,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "g-skill-trident-z5-neo-rgb-series-ddr5-ram-32gb-6000mhz-3": {
+   "google_clicks": 0,
+   "google_impressions": 4,
+   "google_position": 9.25,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "g-skill-trident-z5-neo-rgb-series-ddr5-ram-32gb-6000mhz-4": {
+   "google_clicks": 0,
+   "google_impressions": 7,
+   "google_position": 14.14,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "g-skill-trident-z5-neo-rgb-series-ddr5-ram-64gb-6000mhz": {
+   "google_clicks": 0,
+   "google_impressions": 169,
+   "google_position": 10.92,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "g-skill-trident-z5-neo-rgb-series-ddr5-ram-64gb-6000mhz-2": {
+   "google_clicks": 0,
+   "google_impressions": 7,
+   "google_position": 13.29,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "g-skill-trident-z5-neo-rgb-series-ddr5-ram-64gb-6000mhz-3": {
+   "google_clicks": 0,
+   "google_impressions": 5,
+   "google_position": 14,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "g-skill-trident-z5-neo-series-ddr5-ram-64gb-6000mhz": {
+   "google_clicks": 0,
+   "google_impressions": 13,
+   "google_position": 10.31,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "g-skill-trident-z5-rgb-32gb-2-x-16gb": {
+   "google_clicks": 0,
+   "google_impressions": 4,
+   "google_position": 12.75,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "g-skill-trident-z5-rgb-series-ddr5-ram-16gb-6000mhz": {
+   "google_clicks": 1,
+   "google_impressions": 13,
+   "google_position": 17.46,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "g-skill-trident-z5-rgb-series-ddr5-ram-32gb-6000mhz": {
+   "google_clicks": 0,
+   "google_impressions": 7,
+   "google_position": 12.86,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "g-skill-trident-z5-rgb-series-ddr5-ram-32gb-6000mhz-2": {
+   "google_clicks": 0,
+   "google_impressions": 1,
+   "google_position": 5,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "g-skill-trident-z5-rgb-series-ddr5-ram-32gb-6400mhz": {
+   "google_clicks": 0,
+   "google_impressions": 7,
+   "google_position": 11.43,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "g-skill-trident-z5-rgb-series-ddr5-ram-64gb-6000mhz": {
+   "google_clicks": 0,
+   "google_impressions": 9,
+   "google_position": 8,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "g-skill-trident-z5-rgb-series-ddr5-ram-64gb-6400mhz": {
+   "google_clicks": 0,
+   "google_impressions": 9,
+   "google_position": 27,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "g-skill-trident-z5-royal-neo-series-ddr5-32gb-6000mhz": {
+   "google_clicks": 0,
+   "google_impressions": 28,
+   "google_position": 14.25,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "g-skill-trident-z5-royal-neo-series-ddr5-64gb-6000mhz": {
+   "google_clicks": 0,
+   "google_impressions": 24,
+   "google_position": 17.08,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "gigastone-m-2-ssd-1tb-pcie-4-0-nvme-ssd": {
+   "google_clicks": 0,
+   "google_impressions": 3,
+   "google_position": 8.67,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "kingspec-2tb-2-5-inch-sata-iii-internal": {
+   "google_clicks": 0,
+   "google_impressions": 9,
+   "google_position": 6.33,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "kingspec-oneboom-2tb-internal-ssd-2-5": {
+   "google_clicks": 0,
+   "google_impressions": 3,
+   "google_position": 33.67,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "kingspec-ssd-1tb": {
+   "google_clicks": 0,
+   "google_impressions": 12,
+   "google_position": 8.33,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "kingston-fury-beast-16gb-5200mhz": {
+   "google_clicks": 0,
+   "google_impressions": 9,
+   "google_position": 15.56,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "kingston-fury-beast-16gb-6000mt-s-ddr5": {
+   "google_clicks": 0,
+   "google_impressions": 8,
+   "google_position": 18.5,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "kingston-fury-beast-32gb-5200mhz": {
+   "google_clicks": 0,
+   "google_impressions": 12,
+   "google_position": 13.58,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "kingston-fury-beast-32gb-5600mhz": {
+   "google_clicks": 0,
+   "google_impressions": 14,
+   "google_position": 8.36,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "kingston-fury-beast-32gb-6000mhz": {
+   "google_clicks": 0,
+   "google_impressions": 36,
+   "google_position": 12.08,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "kingston-fury-beast-32gb-6000mt-s-ddr5": {
+   "google_clicks": 0,
+   "google_impressions": 11,
+   "google_position": 17.18,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "kingston-fury-beast-64gb-5600mhz": {
+   "google_clicks": 0,
+   "google_impressions": 15,
+   "google_position": 9.93,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "kingston-fury-beast-rgb-16gb-6000mt-s": {
+   "google_clicks": 0,
+   "google_impressions": 5,
+   "google_position": 8,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "kingston-fury-beast-rgb-32gb-6000mhz": {
+   "google_clicks": 0,
+   "google_impressions": 17,
+   "google_position": 13.41,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "kingston-fury-beast-rgb-64gb-6400mhz": {
+   "google_clicks": 0,
+   "google_impressions": 11,
+   "google_position": 17.18,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "kingston-fury-beast-rgb-8gb-6000mt-s-ddr5": {
+   "google_clicks": 0,
+   "google_impressions": 2,
+   "google_position": 6.5,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "kingston-fury-beast-white-rgb-32gb-5600mhz": {
+   "google_clicks": 0,
+   "google_impressions": 2,
+   "google_position": 7,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "kingston-fury-impact-16gb-6400mt-s-cl38": {
+   "google_clicks": 0,
+   "google_impressions": 14,
+   "google_position": 15.21,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "kingston-fury-impact-32gb-5600mhz": {
+   "google_clicks": 0,
+   "google_impressions": 8,
+   "google_position": 11,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "kingston-fury-impact-64gb-5600mhz": {
+   "google_clicks": 0,
+   "google_impressions": 11,
+   "google_position": 14,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "kingston-fury-renegade-white-rgb-16gb-6400mhz": {
+   "google_clicks": 0,
+   "google_impressions": 2,
+   "google_position": 38.5,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "kingston-fury-renegade-white-rgb-32gb-6400mhz": {
+   "google_clicks": 0,
+   "google_impressions": 2,
+   "google_position": 5,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "kingston-nv3-1tb-m-2-2280-nvme-ssd": {
+   "google_clicks": 0,
+   "google_impressions": 21,
+   "google_position": 19.86,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "lexar-4tb-nm790-ssd-pcie-gen4-nvme-m-2": {
+   "google_clicks": 0,
+   "google_impressions": 28,
+   "google_position": 13.68,
+   "bing_impressions": 1,
+   "bing_clicks": 0
+  },
+  "lexar-oc-ddr5-ram-1x8gb-6000mhz-cl38": {
+   "google_clicks": 0,
+   "google_impressions": 31,
+   "google_position": 9.42,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "lexar-thor-z-series-rgb-ddr5-ram-32gb-6000mhz": {
+   "google_clicks": 0,
+   "google_impressions": 21,
+   "google_position": 9.05,
+   "bing_impressions": 2,
+   "bing_clicks": 0
+  },
+  "nemix-ram-16gb-2666mhz": {
+   "google_clicks": 0,
+   "google_impressions": 3,
+   "google_position": 14.67,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "patriot-memory-p400-lite-m-2-pcie-gen-4-1tb": {
+   "google_clicks": 0,
+   "google_impressions": 5,
+   "google_position": 7.8,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "patriot-memory-viper-venom-ddr5-ram-16gb-6000mhz": {
+   "google_clicks": 0,
+   "google_impressions": 11,
+   "google_position": 14.36,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "patriot-viper-elite-5-ddr5-ram-16gb-6000mhz": {
+   "google_clicks": 0,
+   "google_impressions": 17,
+   "google_position": 12.71,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "patriot-viper-steel-ddr4-ram-16gb-3200mhz": {
+   "google_clicks": 0,
+   "google_impressions": 7,
+   "google_position": 40.43,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "patriot-viper-venom-ddr5-ram-16gb-6000mhz": {
+   "google_clicks": 0,
+   "google_impressions": 29,
+   "google_position": 17.1,
+   "bing_impressions": 1,
+   "bing_clicks": 1
+  },
+  "pny-cs900-2tb-3d-nand-2-5-sata-iii": {
+   "google_clicks": 0,
+   "google_impressions": 2,
+   "google_position": 6,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "predator-m-2-ssd-2tb-gm7000-with-dram": {
+   "google_clicks": 0,
+   "google_impressions": 1,
+   "google_position": 8,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "pro-ddr5-ram-32gb-kit-6400mhz": {
+   "google_clicks": 0,
+   "google_impressions": 28,
+   "google_position": 24.61,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "puskill-32gb-kit-3200mhz": {
+   "google_clicks": 0,
+   "google_impressions": 5,
+   "google_position": 9.2,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "puskill-ddr4-32gb-3200mhz": {
+   "google_clicks": 0,
+   "google_impressions": 13,
+   "google_position": 15.92,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "puskill-ddr4-laptop-ram-32gb-kit-3200mhz": {
+   "google_clicks": 0,
+   "google_impressions": 15,
+   "google_position": 12,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "samsung-870-evo-1tb-2-5in-sata-iii": {
+   "google_clicks": 0,
+   "google_impressions": 39,
+   "google_position": 8.38,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "samsung-870-evo-1tb-sata-2-5-internal": {
+   "google_clicks": 0,
+   "google_impressions": 39,
+   "google_position": 5.54,
+   "bing_impressions": 1,
+   "bing_clicks": 0
+  },
+  "samsung-870-evo-250gb-sata-2-5": {
+   "google_clicks": 0,
+   "google_impressions": 4,
+   "google_position": 35,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "samsung-870-evo-2tb-sata-2-5-internal-ssd": {
+   "google_clicks": 0,
+   "google_impressions": 19,
+   "google_position": 20.74,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "samsung-870-evo-4tb-2-5-inch-sata-iii": {
+   "google_clicks": 0,
+   "google_impressions": 14,
+   "google_position": 15.5,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "samsung-870-evo-sata-ssd-250gb-2-5": {
+   "google_clicks": 0,
+   "google_impressions": 24,
+   "google_position": 21.12,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "samsung-870-evo-sata-ssd-500gb-2-5": {
+   "google_clicks": 0,
+   "google_impressions": 10,
+   "google_position": 5.6,
+   "bing_impressions": 5,
+   "bing_clicks": 0
+  },
+  "samsung-870-qvo-sata-iii-ssd-2tb-2-5": {
+   "google_clicks": 0,
+   "google_impressions": 2,
+   "google_position": 8,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "samsung-870-qvo-sata-iii-ssd-8tb-2-5": {
+   "google_clicks": 0,
+   "google_impressions": 15,
+   "google_position": 16.2,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "samsung-960-evo-series-250gb-pcie-nvme": {
+   "google_clicks": 0,
+   "google_impressions": 3,
+   "google_position": 24,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "samsung-980-pro-ssd-with-heatsink-2tb-pcie": {
+   "google_clicks": 0,
+   "google_impressions": 8,
+   "google_position": 14,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "samsung-990-evo-plus-ssd-2tb": {
+   "google_clicks": 0,
+   "google_impressions": 21,
+   "google_position": 8.71,
+   "bing_impressions": 2,
+   "bing_clicks": 0
+  },
+  "samsung-990-evo-plus-ssd-4tb": {
+   "google_clicks": 0,
+   "google_impressions": 27,
+   "google_position": 9.74,
+   "bing_impressions": 2,
+   "bing_clicks": 0
+  },
+  "samsung-990-pro-1tb-pcie-gen-4-0-x4": {
+   "google_clicks": 0,
+   "google_impressions": 36,
+   "google_position": 25.78,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "samsung-990-pro-2tb": {
+   "google_clicks": 0,
+   "google_impressions": 41,
+   "google_position": 11.63,
+   "bing_impressions": 2,
+   "bing_clicks": 0
+  },
+  "samsung-990-pro-2tb-pcie-gen-4-0-x4": {
+   "google_clicks": 0,
+   "google_impressions": 10,
+   "google_position": 5.7,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "samsung-990-pro-4tb-pcie-gen-4-0-x4": {
+   "google_clicks": 0,
+   "google_impressions": 23,
+   "google_position": 18.17,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "samsung-990-pro-nvme-m-2-ssd-2tb": {
+   "google_clicks": 0,
+   "google_impressions": 23,
+   "google_position": 30.7,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "samsung-990-pro-ssd-2tb-nvme-m-2-pcie": {
+   "google_clicks": 1,
+   "google_impressions": 51,
+   "google_position": 21.82,
+   "bing_impressions": 2,
+   "bing_clicks": 0
+  },
+  "samsung-990-pro-w-heatsink-ssd-1tb-pcie": {
+   "google_clicks": 0,
+   "google_impressions": 4,
+   "google_position": 11.75,
+   "bing_impressions": 1,
+   "bing_clicks": 0
+  },
+  "samsung-990-pro-w-heatsink-ssd-2tb": {
+   "google_clicks": 0,
+   "google_impressions": 45,
+   "google_position": 11.93,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "samsung-mz-v9p4t0b-am-990-pro-pcie-4-0-4tb": {
+   "google_clicks": 0,
+   "google_impressions": 1,
+   "google_position": 4,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "samsung-mz-v9p4t0b-am-990-pro-pcie-4-0-4tb-2": {
+   "google_clicks": 0,
+   "google_impressions": 2,
+   "google_position": 5,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "samsung-ssd-860-evo-2tb-2-5-inch-sata": {
+   "google_clicks": 0,
+   "google_impressions": 8,
+   "google_position": 25.88,
+   "bing_impressions": 1,
+   "bing_clicks": 0
+  },
+  "samsung-ssd-860-pro-2tb-2-5-inch-sata": {
+   "google_clicks": 0,
+   "google_impressions": 12,
+   "google_position": 24.17,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "samsung-ssd-870-evo-500gb": {
+   "google_clicks": 0,
+   "google_impressions": 12,
+   "google_position": 12.33,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "samsung-ssd-870-evo-sata-iii-2-5-1tb": {
+   "google_clicks": 0,
+   "google_impressions": 11,
+   "google_position": 6.27,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "samsung-ssd-870-evo-sata-iii-2-5-2tb": {
+   "google_clicks": 0,
+   "google_impressions": 11,
+   "google_position": 9.27,
+   "bing_impressions": 1,
+   "bing_clicks": 0
+  },
+  "samsung-ssd-870-evo-sata-iii-2-5-8tb": {
+   "google_clicks": 0,
+   "google_impressions": 8,
+   "google_position": 10.38,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "samsung-ssd-9100-pro-1tb": {
+   "google_clicks": 0,
+   "google_impressions": 23,
+   "google_position": 8,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "samsung-ssd-9100-pro-2tb": {
+   "google_clicks": 0,
+   "google_impressions": 14,
+   "google_position": 15.36,
+   "bing_impressions": 5,
+   "bing_clicks": 0
+  },
+  "samsung-ssd-9100-pro-4tb": {
+   "google_clicks": 0,
+   "google_impressions": 33,
+   "google_position": 12.09,
+   "bing_impressions": 1,
+   "bing_clicks": 0
+  },
+  "samsung-ssd-990-pro-1tb": {
+   "google_clicks": 0,
+   "google_impressions": 17,
+   "google_position": 21.88,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "samsung-ssd-990-pro-4tb": {
+   "google_clicks": 0,
+   "google_impressions": 32,
+   "google_position": 11.03,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "sandisk-ssd-plus-500gb-internal-solid": {
+   "google_clicks": 0,
+   "google_impressions": 3,
+   "google_position": 31.33,
+   "bing_impressions": 1,
+   "bing_clicks": 0
+  },
+  "silicon-power-1tb-nvme-m-2-pcie-gen3x4": {
+   "google_clicks": 0,
+   "google_impressions": 7,
+   "google_position": 18.71,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "silicon-power-2tb-nvme-m-2-pcie-gen3x4": {
+   "google_clicks": 0,
+   "google_impressions": 11,
+   "google_position": 12.27,
+   "bing_impressions": 1,
+   "bing_clicks": 0
+  },
+  "silicon-power-2tb-ssd-3d-nand-a55-slc": {
+   "google_clicks": 0,
+   "google_impressions": 2,
+   "google_position": 10.5,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "silicon-power-2tb-ud90-nvme-4-0-gen4-pcie": {
+   "google_clicks": 0,
+   "google_impressions": 10,
+   "google_position": 9.3,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "silicon-power-4tb-ud90-nvme-4-0-gen4-pcie": {
+   "google_clicks": 0,
+   "google_impressions": 3,
+   "google_position": 8,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "silicon-power-ddr4-16gb-kit-3200mhz": {
+   "google_clicks": 0,
+   "google_impressions": 13,
+   "google_position": 9.23,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "silicon-power-ddr5-64gb-6000mhz": {
+   "google_clicks": 0,
+   "google_impressions": 38,
+   "google_position": 17.79,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "silicon-power-value-gaming-ddr4-ram-16gb-3200mhz": {
+   "google_clicks": 0,
+   "google_impressions": 7,
+   "google_position": 13.43,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "six-nvme-m-2-ssd-pcie-4-0-1tb-m-2-2280": {
+   "google_clicks": 0,
+   "google_impressions": 24,
+   "google_position": 14.83,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "six-x4000-1tb-m-2-ssd-pcie-gen3x4-nvme": {
+   "google_clicks": 0,
+   "google_impressions": 4,
+   "google_position": 8.75,
+   "bing_impressions": 2,
+   "bing_clicks": 0
+  },
+  "teamgroup-elite-ddr4-32gb-kit-3200mhz": {
+   "google_clicks": 0,
+   "google_impressions": 35,
+   "google_position": 13.09,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "teamgroup-elite-sodimm-ddr5-32gb-5600mhz": {
+   "google_clicks": 2,
+   "google_impressions": 53,
+   "google_position": 9.09,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "teamgroup-elite-sodimm-ddr5-64gb-5600mhz": {
+   "google_clicks": 0,
+   "google_impressions": 46,
+   "google_position": 10.57,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "teamgroup-qx-2tb-3d-nand-qlc-2-5-inch": {
+   "google_clicks": 0,
+   "google_impressions": 12,
+   "google_position": 16.92,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "teamgroup-t-force-delta-rgb-ddr5-ram-32gb-6000mhz": {
+   "google_clicks": 0,
+   "google_impressions": 175,
+   "google_position": 11.6,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "teamgroup-t-force-delta-rgb-ddr5-ram-32gb-6000mhz-2": {
+   "google_clicks": 0,
+   "google_impressions": 123,
+   "google_position": 10.25,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "teamgroup-t-force-vulcan-ddr5-32gb-6000mhz": {
+   "google_clicks": 1,
+   "google_impressions": 70,
+   "google_position": 15.21,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "teamgroup-t-force-vulcan-z-2tb-slc-cache": {
+   "google_clicks": 0,
+   "google_impressions": 3,
+   "google_position": 13.33,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "teamgroup-t-force-vulcan-z-2tb-slc-cache-2": {
+   "google_clicks": 0,
+   "google_impressions": 1,
+   "google_position": 12,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "teamgroup-t-force-vulcan-z-ddr4-16gb-kit-3200mhz": {
+   "google_clicks": 0,
+   "google_impressions": 6,
+   "google_position": 15.5,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "teamgroup-t-force-vulcan-z-ddr4-dram-16gb-3200mhz": {
+   "google_clicks": 0,
+   "google_impressions": 11,
+   "google_position": 12.45,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "timetec-1tb-ssd-nvme-pcie-gen3x4-8gb-s-m-2": {
+   "google_clicks": 0,
+   "google_impressions": 29,
+   "google_position": 12.48,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "timetec-32gb-kit-2666mhz": {
+   "google_clicks": 0,
+   "google_impressions": 7,
+   "google_position": 11,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "timetec-32gb-kit-3200mhz": {
+   "google_clicks": 0,
+   "google_impressions": 7,
+   "google_position": 11.14,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "ultra-3d-nand-500gb-internal-ssd-sata": {
+   "google_clicks": 0,
+   "google_impressions": 6,
+   "google_position": 50.33,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "western-digital-2tb-wd-blue-sa510-sata": {
+   "google_clicks": 0,
+   "google_impressions": 24,
+   "google_position": 9.25,
+   "bing_impressions": 1,
+   "bing_clicks": 0
+  },
+  "western-digital-2tb-wd-green-sn350-nvme": {
+   "google_clicks": 0,
+   "google_impressions": 3,
+   "google_position": 46.33,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "western-digital-4tb-wd-blue-sn5000-nvme": {
+   "google_clicks": 0,
+   "google_impressions": 19,
+   "google_position": 17.05,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "western-digital-wd-black-2tb-sn770-nvme": {
+   "google_clicks": 0,
+   "google_impressions": 40,
+   "google_position": 32.2,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "western-digital-wd-black-sn7100-1tb-nvme": {
+   "google_clicks": 0,
+   "google_impressions": 5,
+   "google_position": 17.2,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "western-digital-wd-black-sn7100-2tb-nvme": {
+   "google_clicks": 0,
+   "google_impressions": 21,
+   "google_position": 7.67,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "western-digital-wd-black-sn7100-4tb-nvme": {
+   "google_clicks": 0,
+   "google_impressions": 15,
+   "google_position": 11.8,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "western-digital-wd-black-sn770m-1tb": {
+   "google_clicks": 0,
+   "google_impressions": 21,
+   "google_position": 21.33,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "western-digital-wd-black-sn8100-2tb-nvme": {
+   "google_clicks": 0,
+   "google_impressions": 12,
+   "google_position": 17.92,
+   "bing_impressions": 1,
+   "bing_clicks": 0
+  },
+  "western-digital-wd-black-sn8100-4tb-nvme": {
+   "google_clicks": 0,
+   "google_impressions": 17,
+   "google_position": 15.35,
+   "bing_impressions": 1,
+   "bing_clicks": 0
+  },
+  "western-digital-wd-black-sn850x-1tb-nvme": {
+   "google_clicks": 0,
+   "google_impressions": 13,
+   "google_position": 26.08,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "western-digital-wd-black-sn850x-2tb-nvme": {
+   "google_clicks": 0,
+   "google_impressions": 9,
+   "google_position": 13.78,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "western-digital-wd-black-sn850x-2tb-nvme-2": {
+   "google_clicks": 0,
+   "google_impressions": 8,
+   "google_position": 9.12,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "western-digital-wd-black-sn850x-4tb-nvme": {
+   "google_clicks": 0,
+   "google_impressions": 2,
+   "google_position": 11,
+   "bing_impressions": 58,
+   "bing_clicks": 0
+  },
+  "western-digital-wd-black-sn850x-4tb-nvme-2": {
+   "google_clicks": 0,
+   "google_impressions": 12,
+   "google_position": 21.92,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "western-digital-wd-black-sn850x-4tb-nvme-3": {
+   "google_clicks": 0,
+   "google_impressions": 9,
+   "google_position": 12.67,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  },
+  "western-digital-wd-black-sn850x-nvme-ssd-1tb": {
+   "google_clicks": 0,
+   "google_impressions": 18,
+   "google_position": 21.22,
+   "bing_impressions": 1,
+   "bing_clicks": 0
+  },
+  "western-digital-wd-blue-4tb-sn5100-nvme": {
+   "google_clicks": 0,
+   "google_impressions": 19,
+   "google_position": 10.21,
+   "bing_impressions": 2,
+   "bing_clicks": 0
+  },
+  "western-digital-wd-blue-sn5100-1tb-nvme": {
+   "google_clicks": 0,
+   "google_impressions": 17,
+   "google_position": 30.41,
+   "bing_impressions": 0,
+   "bing_clicks": 0
+  }
+ }
+}
