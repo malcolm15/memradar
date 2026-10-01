@@ -1087,7 +1087,7 @@ function buildIndexFamilies(pool, impressions) {
       winner: winner ? `${winner.category}/${winner.finalSlug}` : null,
       winner_basis: winner ? (gi(winner) >= FAMILY_IMPRESSION_MIN ? 'google_impressions' : 'deepest_history') : null,
       members: members.map((m) => ({
-        slug: `${m.category}/${m.finalSlug}`, sku: m.sku, readings: m.stats.days,
+        slug: `${m.category}/${m.finalSlug}`, sku: m.sku,
         google_impressions: gi(m),
         above_floor: aboveFloor(m),
         kept: tier === 1 || aboveFloor(m) || m === winner || requiredByBuild(m),
@@ -6404,7 +6404,7 @@ async function run() {
     rule: 'requiredByBuild(p) || (healthy(p) && gatesPass(p))',
     switches: { GATES_ENABLED, HEALTHY_REQUIRES_FRESH, KEEP_MIN_READINGS, IMPRESSION_FLOOR },
     rule_order: 'requiredByBuild wins outright. Otherwise: healthy AND not hard excluded AND ((readings >= KEEP_MIN_READINGS AND a fact gate) OR impressions >= IMPRESSION_FLOOR). Hard exclusions are below_min_readings, long_term_unavailable, duplicate_variant, gsc_crawled_not_indexed and family_duplicate; sparse_history is informational and does not block the demand term.',
-    note: 'Reason codes are recorded for every page whether or not they bind under the current switches, so this file reads the same shape before and after the gates go live. Written by scripts/generate-product-pages.js; do not hand-edit.',
+    note: 'Reason codes are recorded for every page whether or not they bind under the current switches, so this file reads the same shape before and after the gates go live. Written by scripts/generate-product-pages.js; do not hand-edit. NO FIELD HERE CHANGES WITHOUT A DECISION CHANGING: per-page reading counts and stale-day counts were deliberately dropped because they move every single day and would have rewritten all 235 records nightly, burying the handful of lines that mean something. Readings still decide the outcome through the long_history and sparse_history codes, and staleness through long_term_unavailable, which move only when a threshold is actually crossed. So a diff on this file is a diff worth reading: a verdict flipped, a reason appeared or went, a family winner moved, or the impressions input was replaced.',
     counts: {
       indexable: generable.filter((q) => q.stats.indexable).length,
       noindex: generable.filter((q) => !q.stats.indexable).length,
@@ -6413,9 +6413,7 @@ async function run() {
       .map((q) => [`${q.category}/${q.finalSlug}`, {
         sku: q.sku,
         indexable: !!q.stats.indexable,
-        readings: q.stats.days,
         first_tracked: q.stats.firstDay,
-        stale_days: staleDaysOf(q, buildDate),
         google_impressions: (indexCtx.impressions.get(q.finalSlug) || {}).google_impressions || 0,
         google_position: (indexCtx.impressions.get(q.finalSlug) || {}).google_position || 0,
         bing_impressions: (indexCtx.impressions.get(q.finalSlug) || {}).bing_impressions || 0,

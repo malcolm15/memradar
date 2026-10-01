@@ -1,44 +1,44 @@
 {
-  "generated": "2026-09-30",
+  "generated": "2026-10-01",
   "page": "/build-cost/",
-  "latest_month": "2026-08",
-  "year_ago_month": "2025-08",
+  "latest_month": "2026-09",
+  "year_ago_month": "2025-09",
   "note": "Written by scripts/generate-product-pages.js on every --confirm run, from the same figures it substitutes into the page. backend/lib/claimRegistry.js reads it so its build-cost entries need not hardcode a month or a dollar figure. Every sentence here is asserted present exactly once in the rendered text of the page named above; the build fails otherwise. Do not hand-edit.",
   "pins": {
     "buildcost-current-level": {
       "describes": "dollar level of the build_current basket for the latest complete month, and the same basket a year earlier",
-      "month": "2026-08",
-      "usd": "$1,024",
-      "usd_exact": "1023.61",
-      "year_ago_month": "2025-08",
-      "year_ago_usd": "$348",
-      "year_ago_usd_exact": "348.08",
-      "sentence": "Current build (32GB DDR5-6000 + 1TB NVMe + 2TB NVMe): $1,024, up from $348 in August 2025"
+      "month": "2026-09",
+      "usd": "$1,066",
+      "usd_exact": "1065.79",
+      "year_ago_month": "2025-09",
+      "year_ago_usd": "$322",
+      "year_ago_usd_exact": "321.61",
+      "sentence": "Current build (32GB DDR5-6000 + 1TB NVMe + 2TB NVMe): $1,066, up from $322 in September 2025"
     },
     "buildcost-ddr4-level": {
       "describes": "dollar level of the build_ddr4 basket for the latest complete month, and the same basket a year earlier",
-      "month": "2026-08",
-      "usd": "$388",
-      "usd_exact": "387.62",
-      "year_ago_month": "2025-08",
-      "year_ago_usd": "$161",
-      "year_ago_usd_exact": "161.45",
-      "sentence": "DDR4 build (32GB DDR4-3200 + 1TB NVMe): $388, up from $161 in August 2025"
+      "month": "2026-09",
+      "usd": "$410",
+      "usd_exact": "409.92",
+      "year_ago_month": "2025-09",
+      "year_ago_usd": "$153",
+      "year_ago_usd_exact": "153.48",
+      "sentence": "DDR4 build (32GB DDR4-3200 + 1TB NVMe): $410, up from $153 in September 2025"
     },
     "buildcost-citation": {
       "describes": "the ready-to-quote sentence, stating the current-build level and its year-earlier level as approximations with the source named",
-      "month": "2026-08",
-      "usd": "$1,024",
-      "year_ago_usd": "$348",
-      "sentence": "The memory and storage in MemRadar's current-build basket cost about $1,024 in August 2026, up from about $348 a year earlier. Source: MemRadar Build-Cost Index, August 2026."
+      "month": "2026-09",
+      "usd": "$1,066",
+      "year_ago_usd": "$322",
+      "sentence": "The memory and storage in MemRadar's current-build basket cost about $1,066 in September 2026, up from about $322 a year earlier. Source: MemRadar Build-Cost Index, September 2026."
     },
     "buildcost-yoy-range": {
       "describes": "the minimum and maximum year-over-year change of the build_current basket across every month of the published series that has a same-month predecessor, each labelled with the month it measures",
       "min_pct": -20.1,
       "min_month": "2024-01",
-      "max_pct": 210.7,
-      "max_month": "2026-05",
-      "sentence": "For the current build it has run from -20.1% in January 2024 to +210.7% in May 2026, measured across the published monthly series"
+      "max_pct": 231.4,
+      "max_month": "2026-09",
+      "sentence": "For the current build it has run from -20.1% in January 2024 to +231.4% in September 2026, measured across the published monthly series"
     }
   }
 }

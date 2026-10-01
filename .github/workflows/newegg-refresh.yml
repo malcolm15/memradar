@@ -149,12 +149,23 @@ jobs:
           # quiet day is therefore impossible, and that is fine: there are no
           # Vercel crons left for a push to collide with.
           #
+          # THE PATH LIST MUST COVER EVERY GENERATOR-WRITTEN COMMITTED FILE,
+          # AND IT APPEARS TWICE: once here for change detection and once on
+          # the `git add` below. On 2026-10-01 it covered neither
+          # build-cost-pins.json nor index-decisions.json, so the generator
+          # rewrote both on the runner and both died with it. The pins file
+          # stayed on its 2026-09-29 copy reading latest_month 2026-08 while
+          # the live page said September, and backend/lib/claimRegistry.js
+          # reads that committed copy, so the claim check reported August
+          # transcripts for a page that no longer carried them. A file left out
+          # of this list is not merely uncommitted, it is silently stale.
+          #
           # What this gate still does is avoid an empty commit, and report a
           # TRUTHFUL page count. pages_changed comes from the lastmod manifest
           # (hash diff vs HEAD), NOT from `git status`, which would also count
           # files dirty only because the shared ?v= stamp moved - exactly the
           # churn contentHash normalises away.
-          CHANGED=$(git status --porcelain frontend/ scripts/lastmod-manifest.json scripts/indexnow-state.json | wc -l | tr -d ' ')
+          CHANGED=$(git status --porcelain frontend/ scripts/lastmod-manifest.json scripts/indexnow-state.json scripts/build-cost-pins.json scripts/index-decisions.json | wc -l | tr -d ' ')
           PAGES=$(node scripts/count-content-changes.js)
           if [ "$CHANGED" = "0" ]; then
             echo "committed=false" >> "$GITHUB_OUTPUT"
@@ -163,7 +174,7 @@ jobs:
           else
             git config user.name "MemRadar"
             git config user.email "malcolmkonner@gmail.com"
-            git add -A frontend/ scripts/lastmod-manifest.json scripts/indexnow-state.json
+            git add -A frontend/ scripts/lastmod-manifest.json scripts/indexnow-state.json scripts/build-cost-pins.json scripts/index-decisions.json
             git commit -q -m "chore: daily page regeneration ($PAGES pages with content changes)"
             git push -q
             echo "committed=true" >> "$GITHUB_OUTPUT"
