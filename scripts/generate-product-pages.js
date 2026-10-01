@@ -44,6 +44,9 @@ const IS_SAMPLE = SAMPLE_SLUGS.length > 0;
 // Liberation Sans; a Mac renders Arial. This flag overrides that locally.
 // See scripts/chart-images.js.
 const RENDER_CHARTS = process.argv.includes('--render-charts');
+// Report-only: prints the three index buckets using the REAL gates and exits
+// without writing anything, so the plan can be read before the gates are live.
+const INDEX_PLAN = process.argv.includes('--index-plan');
 const FRONTEND = path.join(__dirname, '..', 'frontend');
 const TEMPLATE_PATH = path.join(FRONTEND, 'ram', 'product-template.html');
 const SITEMAP_PATH = path.join(FRONTEND, 'sitemap.xml');
@@ -90,6 +93,57 @@ const MIN_POINTS_EXTREME = 5;     // total points before ATL/ATH mean anything
 // still passes link equity to the catalog. Re-evaluated on EVERY regen from live
 // data, so a page flips back automatically the day it crosses the line.
 const MIN_DAYS_INDEXABLE = 30;
+
+// ---------------------------------------------------------------------------
+// WHAT `indexable` GOVERNS, AND WHAT IT MUST NOT (2026-10-01)
+//
+// `indexable` decides THREE things and nothing else: the meta robots tag, the
+// page's presence in sitemap.xml, and whether IndexNow is told about it. Those
+// are all search-engine instructions.
+//
+// EVERY PRODUCT SURFACE IS BUILT FROM healthy() INSTEAD. That means the listing
+// cards and their ItemList JSON-LD, the best-value tables, the homepage drops,
+// the peer-comparison pool, search-index.json (and therefore the alert modal's
+// product picker, which reads it) and raycast-v1-products.json. The two were
+// the same predicate until now, which meant a decision about what Google should
+// rank silently decided what a visitor could FIND and what they could set an
+// ALERT on. Those are different questions and they now have different answers.
+const KEEP_MIN_READINGS = 270;    // gate: readings before a percentile claim is a distribution
+const STALE_DAYS = 30;            // healthy(): days without an in-stock reading
+const IMPRESSION_FLOOR = null;    // admit-only gate; null disables it until a figure is chosen
+
+// COMMIT 4 FLIPS THESE TWO AND NOTHING ELSE. While both are false the rule
+// reproduces the legacy `readings >= MIN_DAYS_INDEXABLE` result exactly, which
+// is asserted on every run (see assertIndexParity).
+const GATES_ENABLED = false;
+// The freshness term of healthy() is implemented and one constant from live.
+// It is OFF because two currently-indexed pages are stale (measured 2026-09-30:
+// B0CRNNVYM2 at 61 days, B0H83JSCJJ at 37), so enabling it would drop two
+// sitemap URLs in a commit set whose whole point is changing nothing visible.
+const HEALTHY_REQUIRES_FRESH = false;
+
+// Pages Search Console reported as "Crawled, currently not indexed" on
+// 2026-09-30. Google has already judged these and declined; re-submitting them
+// is asking a second time for the same answer. Applied as an exclusion by
+// gatesPass, so it binds only once the gates are live.
+const GSC_CRAWLED_NOT_INDEXED = new Set([
+  'ssd/samsung-990-pro-2tb',
+  'ssd/1tb-sn850p-nvme-m-2-ssd-officially',
+  'ssd/acer-predator-gm7-4tb-ssd-m-2-2280-pcie',
+  'ssd/silicon-power-2tb-ssd-3d-nand-a55-slc',
+  'ssd/silicon-power-2tb-nvme-m-2-pcie-gen3x4',
+  'ram/crucial-ram-16gb-ddr5-5200mhz',
+  'ssd/western-digital-wd-blue-4tb-sn5100-nvme',
+  'ram/silicon-power-ddr4-16gb-kit-3200mhz',
+  'ram/corsair-vengeance-rgb-ddr5-ram-16gb-5200mhz',
+  'ram/a-tech-ddr4-ram-16gb-2666mhz-pc4-21300',
+]);
+
+// Pre-demotion window on purpose: the August 2026 demotion suppressed later
+// impressions, so a recent window would measure the penalty rather than the
+// demand. Populated by hand from a Search Console Pages export; absent is 0.
+const GSC_IMPRESSIONS_PATH = ['gsc-impressions-2026-07-01-to-08-22.json'];
+const INDEX_DECISIONS_PATH = ['index-decisions.json'];
 
 // MEMRADAR'S SIGNATURE HONESTY, restored to the BUY INDICATOR in R1 (2026-09-01).
 // A "good time to buy" verdict on a price still >= this multiple of the all-time
@@ -793,8 +847,233 @@ function computeStats(series) {
     avg90Points: in90.length,
     // ATL/ATH from a handful of sightings are not "all-time" anything.
     extremesOk: series.length >= MIN_POINTS_EXTREME,
-    indexable: series.length >= MIN_DAYS_INDEXABLE,
+    // `indexable` is NOT set here any more: the rule needs cross-catalog
+    // context ($/GB peer groups, the DDR5 latency median), so it is assigned
+    // by the indexDecision() post-pass once every product has stats.
   };
+}
+
+
+// ------------------------------------------------------ index eligibility
+// THE RULE IS A FUNCTION, NOT A LIST, AND THAT IS THE WHOLE POINT. A hand
+// list cannot express "passes a gate", so it would freeze one day's data as a
+// permanent verdict and a page that later earned its place could never
+// graduate. Everything here is recomputed from live data on every run, so
+// pages move in and out by themselves, which is the property the legacy
+// 30-reading rule already had and must not lose.
+//
+// requiredByBuild() is evaluated FIRST and can never be outvoted, because the
+// build itself throws when a pinned page goes noindex. It derives from the
+// existing pinned constants rather than a new list: those throw sites are the
+// build telling us which pages it depends on, and reading them turns two
+// latent build failures into a precondition. Note this function is defined
+// above those constants but only ever CALLED from the post-pass in main(), by
+// which time every module-level const is initialised.
+function requiredByBuild(p) {
+  if (LLMS_EXAMPLE_SKUS.includes(p.sku)) return true;        // llms.txt throws
+  if (WILL_RAM_FALL_KITS.includes(p.finalSlug || p.slug)) return true; // the post throws
+  if (p.sku === SSD_ANCHOR_SKU) return true;                 // the SSD guide cites it
+  return false;
+}
+
+function staleDaysOf(p, buildDate) {
+  if (!p.stats || !p.stats.currentDay) return Infinity;
+  const ms = new Date(buildDate + 'T00:00:00Z') - new Date(p.stats.currentDay + 'T00:00:00Z');
+  return Math.round(ms / DAY_MS);
+}
+
+// healthy(): "is this a real, buyable page with enough history to say anything".
+// It is a statement about the PRODUCT, never about search strategy, which is
+// why every product surface reads it and no surface reads `indexable`.
+function healthy(p, ctx) {
+  if (!p.stats || p.stats.current == null) return false;
+  if (p.stats.days < MIN_DAYS_INDEXABLE) return false;
+  if (p._relistingOf) return false;
+  if (HEALTHY_REQUIRES_FRESH && staleDaysOf(p, ctx.buildDate) >= STALE_DAYS) return false;
+  return true;
+}
+
+function percentileOf(p) {
+  const cur = p.stats.current;
+  const below = p.series.reduce((n, pt) => n + (pt.price < cur ? 1 : 0), 0);
+  return (below / p.series.length) * 100;
+}
+
+function latencyNs(p) {
+  const cl = /^CL(\d+)$/.exec(latency(p.name) || '');
+  const sp = parseSpeed(p.name);
+  return cl && sp ? (Number(cl[1]) * 2000) / sp : null;
+}
+
+// Gate context: the two cross-catalog facts, computed once per run.
+function buildIndexContext(pool, buildDate) {
+  // $/GB ends of each spec group. Groups of under 3 are skipped: in a pair
+  // both members are an "end", which makes the fact meaningless.
+  const groups = new Map();
+  for (const p of pool) {
+    const cap = totalCapacityGB(p.name);
+    if (!cap || !p.stats || p.stats.current == null) continue;
+    const key = [p.category, cap, p.category === 'ram' ? ramType(p.name) : ssdType(p.name),
+      p.category === 'ssd' ? formFactor(p.name) : ''].join('|');
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(p);
+  }
+  const perGbEnds = new Set();
+  const perGbRunnersUp = new Set();
+  for (const g of groups.values()) {
+    if (g.length < 3) continue;
+    const sorted = [...g].sort((a, b) =>
+      a.stats.current / totalCapacityGB(a.name) - b.stats.current / totalCapacityGB(b.name));
+    perGbEnds.add(sorted[0].sku);
+    perGbEnds.add(sorted[sorted.length - 1].sku);
+    if (sorted.length >= 5) {
+      perGbRunnersUp.add(sorted[1].sku);
+      perGbRunnersUp.add(sorted[sorted.length - 2].sku);
+    }
+  }
+  // DDR5 latency: distance from the generation median AND rarity. Distance
+  // alone is NOT a distinctness test, measured 2026-09-30: 25 products sit at
+  // exactly 10.0ns against a 12.0ns median, so "1ns from the median" would
+  // license 25 pages to print the identical sentence, which is the scaled
+  // content pattern R1 removed. Requiring the value be shared by at most two
+  // products takes the gate from 45 pages to 5.
+  const ns = new Map();
+  const shareCount = new Map();
+  for (const p of pool) {
+    if (p.category !== 'ram' || ramType(p.name) !== 'DDR5') continue;
+    const v = latencyNs(p);
+    if (v == null) continue;
+    ns.set(p.sku, v);
+    const k = v.toFixed(1);
+    shareCount.set(k, (shareCount.get(k) || 0) + 1);
+  }
+  const latMedian = ns.size ? median([...ns.values()]) : null;
+
+  let impressions = new Map();
+  try {
+    const raw = JSON.parse(fs.readFileSync(path.join(__dirname, ...GSC_IMPRESSIONS_PATH), 'utf8'));
+    for (const [slugPath, n] of Object.entries(raw.pages || {})) impressions.set(slugPath, Number(n) || 0);
+  } catch (e) {
+    // Absent or unreadable means zero impressions everywhere, which disables
+    // the admit-only gate rather than failing the build. LEFT JOIN semantics:
+    // a slug missing from the export reads 0 and is never dropped.
+    impressions = new Map();
+  }
+  return { buildDate, perGbEnds, perGbRunnersUp, ns, shareCount, latMedian, impressions };
+}
+
+const slugPathOf = (p) => `${p.category}/${p.finalSlug || p.slug}`;
+
+function gatePercentile(p) {
+  if (!p.stats.extremesOk) return false;
+  const q = percentileOf(p);
+  return q >= 95 || q <= 5;
+}
+const gatePre2021Trough = (p) => p.stats.extremesOk && p.stats.firstDay < '2021-01-01';
+const gatePerGbGroupEnd = (p, ctx) => ctx.perGbEnds.has(p.sku);
+function gateLatencyDistinct(p, ctx) {
+  const v = ctx.ns.get(p.sku);
+  if (v == null || ctx.latMedian == null) return false;
+  return Math.abs(v - ctx.latMedian) >= 1 && (ctx.shareCount.get(v.toFixed(1)) || 0) <= 2;
+}
+function gateImpressions(p, ctx) {
+  if (IMPRESSION_FLOOR == null) return false;
+  return (ctx.impressions.get(slugPathOf(p)) || 0) >= IMPRESSION_FLOOR;
+}
+
+// enabled defaults to GATES_ENABLED so production behaviour is one constant,
+// and --index-plan passes true to read the real buckets without changing output.
+function gatesPass(p, ctx, enabled = GATES_ENABLED) {
+  if (!enabled) return true;
+  if (GSC_CRAWLED_NOT_INDEXED.has(slugPathOf(p))) return false;
+  if (p.stats.days < KEEP_MIN_READINGS) return false;
+  return gatePercentile(p) || gatePre2021Trough(p) || gatePerGbGroupEnd(p, ctx)
+    || gateLatencyDistinct(p, ctx) || gateImpressions(p, ctx);
+}
+
+function keepIndexable(p, ctx, enabled = GATES_ENABLED) {
+  return requiredByBuild(p) || (healthy(p, ctx) && gatesPass(p, ctx, enabled));
+}
+
+// Reason codes are recorded for EVERY page whether or not they bind today, so
+// the file reads the same before and after commit 4 and a page's decision can
+// be inspected without re-deriving it.
+function indexReasons(p, ctx) {
+  const out = [];
+  if (requiredByBuild(p)) out.push('required_by_build');
+  if (p.stats.days < MIN_DAYS_INDEXABLE) out.push('below_min_readings');
+  else if (p.stats.days < KEEP_MIN_READINGS) out.push('sparse_history');
+  if (staleDaysOf(p, ctx.buildDate) >= STALE_DAYS) out.push('long_term_unavailable');
+  if (p._relistingOf) out.push('duplicate_variant');
+  if (GSC_CRAWLED_NOT_INDEXED.has(slugPathOf(p))) out.push('gsc_crawled_not_indexed');
+  if (p.stats.days >= KEEP_MIN_READINGS) out.push('long_history');
+  if (gatePercentile(p)) out.push('percentile_extreme');
+  if (gatePre2021Trough(p)) out.push('pre2021_trough');
+  if (gatePerGbGroupEnd(p, ctx)) out.push('pergb_group_end');
+  if (gateLatencyDistinct(p, ctx)) out.push('latency_distinct');
+  if (gateImpressions(p, ctx)) out.push('historical_demand');
+  return out;
+}
+
+// THE TRANSITION GUARD. While GATES_ENABLED and HEALTHY_REQUIRES_FRESH are both
+// false the new rule must reproduce the legacy one exactly, and this throws if
+// it ever does not. The relisting is the ONE allowed divergence and it is
+// provably unobservable: every consumer of the flag also filters _relistingOf,
+// so the array the sitemap and search index are built from is unchanged.
+function assertIndexParity(pool) {
+  if (GATES_ENABLED || HEALTHY_REQUIRES_FRESH) return null;
+  const bad = [];
+  for (const p of pool) {
+    const legacy = p.stats.days >= MIN_DAYS_INDEXABLE;
+    if (p.stats.indexable !== legacy && !p._relistingOf) {
+      bad.push(`${p.sku} (${slugPathOf(p)}): new ${p.stats.indexable} != legacy ${legacy}, days=${p.stats.days}`);
+    }
+  }
+  if (bad.length) {
+    throw new Error(`index parity: keepIndexable() disagrees with the legacy rule on ${bad.length} page(s) while both switches are off:\n  ${bad.join('\n  ')}`);
+  }
+  return pool.filter((p) => p._relistingOf).length;
+}
+
+// The three buckets, with the gates forced ON. Report only.
+function indexPlan(pool, ctx) {
+  const index = [], improve = [], no = [];
+  for (const p of pool) {
+    const r = indexReasons(p, ctx);
+    const inNow = keepIndexable(p, ctx, true);
+    if (inNow) { index.push({ p, r }); continue; }
+    const anyGate = gatePercentile(p) || gatePre2021Trough(p) || gatePerGbGroupEnd(p, ctx);
+    const q = p.stats.extremesOk ? percentileOf(p) : null;
+    const nearPct = q != null && ((q >= 90 && q < 95) || (q > 5 && q <= 10));
+    const v = ctx.ns.get(p.sku);
+    const nearLat = v != null && ctx.latMedian != null
+      && Math.abs(v - ctx.latMedian) >= 0.5 && Math.abs(v - ctx.latMedian) < 1;
+    const near = nearPct || nearLat || ctx.perGbRunnersUp.has(p.sku);
+    const improvable = healthy(p, { ...ctx }) && staleDaysOf(p, ctx.buildDate) < STALE_DAYS
+      && (anyGate || gateLatencyDistinct(p, ctx) || near || p.stats.days >= 180 || p.stats.firstDay < '2023-01-01');
+    (improvable ? improve : no).push({ p, r });
+  }
+  return { index, improve, no };
+}
+
+function printIndexPlan(plan) {
+  const tally = (rows) => {
+    const c = {};
+    for (const { r } of rows) for (const code of r) c[code] = (c[code] || 0) + 1;
+    return Object.entries(c).sort((a, b) => b[1] - a[1]).map(([k, n]) => `${k} ${n}`).join(', ');
+  };
+  const cats = (rows) => `ram ${rows.filter((x) => x.p.category === 'ram').length} / ssd ${rows.filter((x) => x.p.category === 'ssd').length}`;
+  console.log('\n==================== INDEX PLAN (gates forced ON, nothing written) ====================');
+  console.log(`KEEP_MIN_READINGS=${KEEP_MIN_READINGS}  IMPRESSION_FLOOR=${IMPRESSION_FLOOR === null ? 'unset (gate inert)' : IMPRESSION_FLOOR}`);
+  console.log(`live switches: GATES_ENABLED=${GATES_ENABLED}  HEALTHY_REQUIRES_FRESH=${HEALTHY_REQUIRES_FRESH}\n`);
+  for (const [label, rows] of [['INDEX NOW', plan.index], ['IMPROVE THEN INDEX', plan.improve], ['DO NOT INDEX', plan.no]]) {
+    console.log(`${label.padEnd(20)} ${String(rows.length).padStart(4)}   (${cats(rows)})`);
+    console.log(`  reasons: ${tally(rows) || 'none'}`);
+  }
+  console.log(`\nTOTAL ${plan.index.length + plan.improve.length + plan.no.length}  |  would flip to noindex: ${plan.improve.length + plan.no.length}`);
+  const missing = [...GSC_CRAWLED_NOT_INDEXED].filter((sp) => ![...plan.index, ...plan.improve, ...plan.no].some((x) => slugPathOf(x.p) === sp));
+  if (missing.length) console.log(`\n*** GSC_CRAWLED_NOT_INDEXED has ${missing.length} slug(s) matching no page: ${missing.join(', ')}`);
+  else console.log(`\nGSC_CRAWLED_NOT_INDEXED: all ${GSC_CRAWLED_NOT_INDEXED.size} slugs match a real page.`);
 }
 
 // --------------------------------------------------------------- page HTML
@@ -5155,9 +5434,36 @@ async function run() {
   let generable = products.filter((p) => p.stats && p.stats.current != null);
   const skipped = products.length - generable.length;
 
+  // Hoisted above its original position so the index post-pass can use it:
+  // staleDaysOf() measures against the build date and must not invent a second
+  // notion of "today".
+  const buildDate = new Date().toISOString().slice(0, 10);
+
   // Precompute unique, in-band page titles + descriptions for all pages.
   // (Run meta on the FULL set first so collision tokens are stable, then narrow.)
   computePageMeta(generable, neweggBySku);
+
+  // ---- index eligibility post-pass ----
+  // AFTER computePageMeta, not before, and the ordering is load-bearing:
+  // _relistingOf is assigned inside that function, so running this first left
+  // healthy()'s relisting term dead and duplicate_variant unable to ever fire.
+  // The gates also need cross-catalog context and every product needs its
+  // finalSlug, neither of which computeStats has, which is why the flag is no
+  // longer decided there.
+  const indexCtx = buildIndexContext(generable, buildDate);
+  for (const p of generable) {
+    p.stats.indexable = keepIndexable(p, indexCtx);
+    p.indexReasons = indexReasons(p, indexCtx);
+  }
+  const relistingDivergences = assertIndexParity(generable);
+  if (relistingDivergences != null) {
+    log(`Index rule: ${generable.filter((p) => p.stats.indexable).length} indexable, parity with the legacy rule OK (${relistingDivergences} relisting divergence, unobservable: every consumer of the flag also filters _relistingOf)`);
+  }
+  if (INDEX_PLAN) {
+    printIndexPlan(indexPlan(generable, indexCtx));
+    console.log('\n--index-plan is report only: nothing was written.');
+    return;
+  }
   const familyMap = buildFamilyMap(generable);
   log(`Capacity families: ${familyMap.size} with a capacity axis (${generable.filter((p) => p.family_id && familyMap.has(p.family_id)).length} products)`);
   if (IS_SAMPLE) {
@@ -5343,7 +5649,12 @@ async function run() {
     const rel = generable.filter((p) => p._relistingOf);
     console.log(`\n-- R1 RELISTINGS (rel=canonical, page live, out of sitemap) --`);
     rel.forEach((p) => console.log(`   /${p.category}/${p.finalSlug}/  ->  /${p._relistingOf.category}/${p._relistingOf.finalSlug}/`));
-    console.log(`\nSitemap would contain: ${(fs.readFileSync(SITEMAP_PATH, 'utf8').match(/<loc>/g) || []).length - (generable.length - noIdx.length - rel.length)} static + ${generable.length - noIdx.length - rel.length} indexable product URLs (${noIdx.length} noindex, ${rel.length} relisting excluded)`);
+    // Counted the SAME WAY the real build counts it, not by subtracting two
+    // buckets: the relisting is now in both noIdx and rel, so arithmetic double
+    // subtracted it and under-reported the sitemap by one. The build itself was
+    // always right, because it filters one array with both conditions.
+    const dryIndexable = generable.filter((q) => q.stats.indexable !== false && !q._relistingOf).length;
+    console.log(`\nSitemap would contain: ${(fs.readFileSync(SITEMAP_PATH, 'utf8').match(/<loc>/g) || []).length - dryIndexable} static + ${dryIndexable} indexable product URLs (${noIdx.length} noindex, ${rel.length} relisting excluded; the relisting is in both buckets)`);
     const dryOrphans = findOrphans(generable);
     if (dryOrphans.length) {
       console.log(`\nOrphan sweep would delete ${dryOrphans.length} page dir(s) whose slug is not in the catalog:`);
@@ -5357,7 +5668,6 @@ async function run() {
   }
 
   // ---------------- confirm: write everything ----------------
-  const buildDate = new Date().toISOString().slice(0, 10);
   const buildDateLong = longDate(new Date().toISOString());
 
   // 1) Delete previously generated dirs (marker check — never touch anything else)
@@ -5891,6 +6201,36 @@ async function run() {
   // lies is how you stop trusting the log.
   const staticCount = (fs.readFileSync(SITEMAP_PATH, 'utf8').match(/<loc>/g) || []).length - productEntries.length;
   fs.writeFileSync(LASTMOD_MANIFEST_PATH, JSON.stringify(manifest, null, 1) + '\n');
+
+  // INDEX DECISIONS, ITS OWN FILE RATHER THAN A FIELD ON THE MANIFEST.
+  // The manifest is keyed by URL and consumed by resolveLastmod, which compares
+  // hashes to decide whether a page's lastmod advances; adding an unrelated
+  // array to those records would put editorial metadata inside the structure
+  // that decides what we tell search engines changed. Keeping them apart means
+  // a reason-code change can never move a lastmod. Nothing reads this file: it
+  // exists so a page's decision can be inspected without re-deriving it.
+  const decisions = {
+    generated: buildDate,
+    rule: 'requiredByBuild(p) || (healthy(p) && gatesPass(p))',
+    switches: { GATES_ENABLED, HEALTHY_REQUIRES_FRESH, KEEP_MIN_READINGS, IMPRESSION_FLOOR },
+    note: 'Reason codes are recorded for every page whether or not they bind under the current switches, so this file reads the same shape before and after the gates go live. Written by scripts/generate-product-pages.js; do not hand-edit.',
+    counts: {
+      indexable: generable.filter((q) => q.stats.indexable).length,
+      noindex: generable.filter((q) => !q.stats.indexable).length,
+    },
+    pages: Object.fromEntries(generable
+      .map((q) => [`${q.category}/${q.finalSlug}`, {
+        sku: q.sku,
+        indexable: !!q.stats.indexable,
+        readings: q.stats.days,
+        first_tracked: q.stats.firstDay,
+        stale_days: staleDaysOf(q, buildDate),
+        reasons: q.indexReasons || [],
+      }])
+      .sort((x, y) => (x[0] < y[0] ? -1 : 1))),
+  };
+  fs.writeFileSync(path.join(__dirname, ...INDEX_DECISIONS_PATH), JSON.stringify(decisions, null, 1) + '\n');
+  log(`Index decisions written: scripts/${INDEX_DECISIONS_PATH.join('/')} (${decisions.counts.indexable} indexable, ${decisions.counts.noindex} noindex)`);
 
   // llms.txt, written AFTER the sitemap so its two sitemap assertions test the
   // file this run just produced. Skippable like every other content build: a

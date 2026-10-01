@@ -1280,6 +1280,44 @@ Two static files for the Raycast extension, written by the daily regen beside th
 
 **KNOWN UNREACHABLE AS OF 2026-09-30, and not all of them are faults:** `/privacy.html` and `/terms.html` are footer-only by convention and that is fine. **`/raycast/` is footer-only and is NOT fine**: it is a content page published the same day, and it has the exact problem the guides had. Fixing it is its own decision, not a ride-along.
 
+## Index eligibility: `keepIndexable()` (2026-10-01)
+
+**`indexable` GOVERNS THREE THINGS AND NOTHING ELSE: the meta robots tag, sitemap membership, and whether IndexNow is told about the page.** Those are all instructions to a search engine.
+
+**EVERY PRODUCT SURFACE IS BUILT FROM `healthy()` INSTEAD.** That is the listing cards and their ItemList JSON-LD, the best-value tables, the homepage drops, the peer-comparison pool, `search-index.json` and `raycast-v1-products.json`. **The two were the same predicate until now, and that is the bug this separation fixes**: a decision about what Google should rank was silently deciding what a visitor could FIND in site search, and therefore what they could set an ALERT on, since `alert-modal.js` picks products out of `search-index.json`. It also decided how many products reached the Raycast extension. Those are different questions and they now have different answers. **Do not re-merge them.** A page can be excellent for a reader and a bad bet for a search engine at the same time.
+
+`healthy(p)`: at least `MIN_DAYS_INDEXABLE` readings, not the relisting, and (once `HEALTHY_REQUIRES_FRESH` is on) an in-stock reading inside `STALE_DAYS`. It is a statement about the PRODUCT, never about search strategy.
+
+**THE RULE IS A FUNCTION, NOT A HAND LIST, AND THAT IS THE POINT.** `keepIndexable(p, ctx) = requiredByBuild(p) || (healthy(p, ctx) && gatesPass(p, ctx))`. A hand list cannot express "passes a gate", so it would freeze one day's data as a permanent verdict and a page that later earned its place could never graduate. Everything is recomputed from live data every run, which is the property the legacy 30-reading rule already had and must not lose.
+
+**`requiredByBuild()` IS EVALUATED FIRST AND CAN NEVER BE OUTVOTED, because the build throws when a pinned page goes noindex.** It derives from the existing pinned constants, never a new list: `LLMS_EXAMPLE_SKUS`, `WILL_RAM_FALL_KITS` and `SSD_ANCHOR_SKU`. Those throw sites are the build telling you which pages it depends on, so reading them turns two latent build failures into a precondition. **Measured why this matters: `B0CJ8ZHMVF` is the `llms.txt` pinned example and the explainer's $93 anchor, it sits at percentile 94.7 with zero gates passed, and a hand-maintained keep list would have shipped the throw.**
+
+**THE GATES, implemented and inert until `GATES_ENABLED` flips:**
+- **percentile of readings** at 95% or more, or 5% or less (`percentile_extreme`)
+- **all-time trough** with first tracked before 2021 (`pre2021_trough`)
+- **$/GB first or last in a peer group of 3 or more** (`pergb_group_end`); groups under 3 are skipped because in a pair both members are an end
+- **DDR5 latency 1ns or more from the generation median AND shared by at most 2 products** (`latency_distinct`)
+- **impressions at or above `IMPRESSION_FLOOR`** (`historical_demand`), admit-only
+- all gated behind `KEEP_MIN_READINGS = 270`, and `GSC_CRAWLED_NOT_INDEXED` excludes the 10 URLs Search Console reported as "Crawled, currently not indexed" on 2026-09-30
+
+**THE LATENCY GATE NEEDED THE RARITY TERM OR IT WOULD HAVE RE-CREATED THE SCALED-CONTENT PATTERN R1 REMOVED.** Distance from the median is not a distinctness test: measured 2026-09-30, **25 products sit at exactly 10.0ns against a 12.0ns median**, so "1ns from the median" would have licensed 25 pages to print the identical sentence. Requiring the value be shared by at most two products takes the gate from 45 pages to **5**.
+
+**IMPRESSIONS USE THE PRE-DEMOTION WINDOW, 2026-07-01 to 2026-08-22**, from `scripts/gsc-impressions-2026-07-01-to-08-22.json`. Impressions collapsed 96% on 2026-08-23, so a recent window would measure the penalty rather than the demand. Keyed `<category>/<slug>`, merged as a **LEFT JOIN**: a slug absent from the export reads 0 and is never dropped, and a missing file disables the gate instead of failing the build. The gate is **admit-only** by design: it can rescue a page that passes no fact gate and can never evict one that does.
+
+**Reason codes** are recorded for every page whether or not they bind today, in `scripts/index-decisions.json`. Keep: `required_by_build`, `long_history`, `percentile_extreme`, `pre2021_trough`, `pergb_group_end`, `latency_distinct`, `historical_demand`. Exclude: `below_min_readings`, `sparse_history`, `long_term_unavailable`, `duplicate_variant`, `gsc_crawled_not_indexed`.
+
+**THE DECISIONS FILE IS SEPARATE FROM THE LASTMOD MANIFEST ON PURPOSE.** The manifest is consumed by `resolveLastmod()`, which compares hashes to decide what we tell search engines changed; putting editorial metadata inside that structure would let a reason-code change move a page's `lastmod`. Keeping them apart makes that impossible.
+
+**`node scripts/generate-product-pages.js --index-plan`** prints the three buckets with the gates forced ON and writes nothing. First run, 2026-10-01: **INDEX NOW 57, IMPROVE THEN INDEX 128, DO NOT INDEX 50**, so the flip would move 178 pages. The middle bucket is the PDP improvement worklist.
+
+**COMMIT 4, THE FLIP, IS PENDING A DECISION AND IS NOT BUILT.** It flips `GATES_ENABLED` and `HEALTHY_REQUIRES_FRESH` and nothing else. While both are false, `assertIndexParity()` throws if `keepIndexable()` disagrees with the legacy `readings >= MIN_DAYS_INDEXABLE` rule on any page, so the transition cannot drift silently.
+
+**TWO THINGS THE NEUTRAL COMMIT SET COULD NOT KEEP NEUTRAL, both measured and both deliberate:**
+- **`HEALTHY_REQUIRES_FRESH` ships OFF because two currently-indexed pages are stale**: `B0CRNNVYM2` at 61 days and `B0H83JSCJJ` at 37 days without an in-stock reading, both live in the sitemap and search index on 2026-09-30. Turning the freshness term on would have dropped two sitemap URLs inside a commit set whose purpose was changing nothing.
+- **The relisting now carries `noindex,follow` where it previously carried no robots tag at all.** `healthy()` excludes it, so `indexable` is false for it, and that reaches the one surface that reads the flag directly rather than through an array. Every other consumer already paired `indexable === false` with `_relistingOf`, so nothing else moved. This is the single observable change in the set, it affects one page, and it is defensible on its own terms: a page carrying `rel=canonical` to another page should not be asking to be indexed.
+
+**ORDERING, LEARNED THE HARD WAY: the post-pass must run AFTER `computePageMeta()`.** `_relistingOf` is assigned inside that function, so an earlier post-pass left `healthy()`'s relisting term dead and `duplicate_variant` unable to fire at all, silently. The gates also need cross-catalog context and every product needs its `finalSlug`, which is why the flag is no longer decided inside `computeStats()`.
+
 ## IndexNow (Bing, 2026-09-20)
 
 Pings IndexNow from the daily regen with the URLs that **materially** changed. Google does not consume IndexNow, so this reaches Bing, Yandex, Seznam and Naver only: a side channel, not a lever on the Google recovery.

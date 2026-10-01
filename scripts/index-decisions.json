@@ -1,0 +1,2493 @@
+{
+ "generated": "2026-10-01",
+ "rule": "requiredByBuild(p) || (healthy(p) && gatesPass(p))",
+ "switches": {
+  "GATES_ENABLED": false,
+  "HEALTHY_REQUIRES_FRESH": false,
+  "KEEP_MIN_READINGS": 270,
+  "IMPRESSION_FLOOR": null
+ },
+ "note": "Reason codes are recorded for every page whether or not they bind under the current switches, so this file reads the same shape before and after the gates go live. Written by scripts/generate-product-pages.js; do not hand-edit.",
+ "counts": {
+  "indexable": 232,
+  "noindex": 3
+ },
+ "pages": {
+  "ram/16gb-1x16gb-ddr4-2666mhz-pc4-21300-2rx8": {
+   "sku": "B0GLTD99WD",
+   "indexable": true,
+   "readings": 76,
+   "first_tracked": "2026-03-14",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "percentile_extreme"
+   ]
+  },
+  "ram/16gb-2x8gb-ddr5-4800mhz-pc5-38400-1rx8": {
+   "sku": "B0GVQ3T3FR",
+   "indexable": true,
+   "readings": 75,
+   "first_tracked": "2026-04-21",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/32gb-ddr4-3200mhz-desktop-ram-memory-kit": {
+   "sku": "B0H83JSCJJ",
+   "indexable": true,
+   "readings": 35,
+   "first_tracked": "2026-07-14",
+   "stale_days": 38,
+   "reasons": [
+    "sparse_history",
+    "long_term_unavailable"
+   ]
+  },
+  "ram/a-tech-16gb-2666mhz": {
+   "sku": "B07KGMC6QQ",
+   "indexable": true,
+   "readings": 231,
+   "first_tracked": "2018-11-22",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "pre2021_trough"
+   ]
+  },
+  "ram/a-tech-16gb-3200mhz": {
+   "sku": "B08KTQWQPK",
+   "indexable": true,
+   "readings": 183,
+   "first_tracked": "2020-12-31",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "pre2021_trough"
+   ]
+  },
+  "ram/a-tech-16gb-ddr4-2400-mhz-udimm-pc4-19200": {
+   "sku": "B07KGM4B6K",
+   "indexable": true,
+   "readings": 210,
+   "first_tracked": "2018-12-10",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "pre2021_trough",
+    "pergb_group_end"
+   ]
+  },
+  "ram/a-tech-16gb-ddr4-2666-mhz-udimm-pc4-21300": {
+   "sku": "B07KGMVVDZ",
+   "indexable": true,
+   "readings": 221,
+   "first_tracked": "2018-11-26",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "pre2021_trough"
+   ]
+  },
+  "ram/a-tech-16gb-ddr4-3200-mhz-sodimm-pc4-25600": {
+   "sku": "B08KTSCYS6",
+   "indexable": true,
+   "readings": 212,
+   "first_tracked": "2020-11-25",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "pre2021_trough"
+   ]
+  },
+  "ram/a-tech-16gb-ddr5-4800mhz-pc5-38400-cl40": {
+   "sku": "B0B17GXPWH",
+   "indexable": true,
+   "readings": 172,
+   "first_tracked": "2022-05-14",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/a-tech-32gb-3200mhz": {
+   "sku": "B08KTRP13V",
+   "indexable": true,
+   "readings": 207,
+   "first_tracked": "2020-11-24",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "pre2021_trough"
+   ]
+  },
+  "ram/a-tech-ddr4-ram-16gb-2666mhz-pc4-21300": {
+   "sku": "B07KGLYHVM",
+   "indexable": true,
+   "readings": 236,
+   "first_tracked": "2018-12-14",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "gsc_crawled_not_indexed",
+    "pre2021_trough"
+   ]
+  },
+  "ram/a-tech-ddr4-ram-32gb-kit-2666mhz": {
+   "sku": "B07KGNXL2H",
+   "indexable": true,
+   "readings": 245,
+   "first_tracked": "2018-11-22",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "pre2021_trough"
+   ]
+  },
+  "ram/acer-predator-vesta-ii-rgb-ddr5-ram-32gb-6000mhz": {
+   "sku": "B0CRNNVYM2",
+   "indexable": true,
+   "readings": 35,
+   "first_tracked": "2025-01-08",
+   "stale_days": 62,
+   "reasons": [
+    "sparse_history",
+    "long_term_unavailable"
+   ]
+  },
+  "ram/corsair-vengeance-ddr5-32gb-6000mhz": {
+   "sku": "B0G5Q1XTKM",
+   "indexable": true,
+   "readings": 122,
+   "first_tracked": "2025-12-19",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "percentile_extreme"
+   ]
+  },
+  "ram/corsair-vengeance-ddr5-ram-16gb-5200mhz": {
+   "sku": "B0D2P1CVQD",
+   "indexable": true,
+   "readings": 177,
+   "first_tracked": "2024-05-16",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "percentile_extreme"
+   ]
+  },
+  "ram/corsair-vengeance-ddr5-ram-16gb-6000mhz": {
+   "sku": "B0GJFTS22V",
+   "indexable": true,
+   "readings": 86,
+   "first_tracked": "2026-04-14",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/corsair-vengeance-ddr5-ram-32gb-6000mhz": {
+   "sku": "B0CJ8ZHMVF",
+   "indexable": true,
+   "readings": 246,
+   "first_tracked": "2023-10-06",
+   "stale_days": 1,
+   "reasons": [
+    "required_by_build",
+    "sparse_history"
+   ]
+  },
+  "ram/corsair-vengeance-ddr5-ram-32gb-6000mhz-2": {
+   "sku": "B0CBRJ63RT",
+   "indexable": true,
+   "readings": 186,
+   "first_tracked": "2023-07-19",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/corsair-vengeance-ddr5-ram-32gb-6400mhz": {
+   "sku": "B0DJW4PKY3",
+   "indexable": true,
+   "readings": 195,
+   "first_tracked": "2024-10-22",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/corsair-vengeance-lpx-ddr4-ram-16gb-3200mhz": {
+   "sku": "B07RS1G6XW",
+   "indexable": true,
+   "readings": 687,
+   "first_tracked": "2019-06-07",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "pre2021_trough"
+   ]
+  },
+  "ram/corsair-vengeance-lpx-ddr4-ram-32gb-3200mhz": {
+   "sku": "B07RW6Z692",
+   "indexable": true,
+   "readings": 726,
+   "first_tracked": "2019-06-15",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "pre2021_trough"
+   ]
+  },
+  "ram/corsair-vengeance-rgb-ddr5-32gb-6000mhz": {
+   "sku": "B0G5QFNNV3",
+   "indexable": true,
+   "readings": 109,
+   "first_tracked": "2025-12-19",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/corsair-vengeance-rgb-ddr5-ram-16gb-5200mhz": {
+   "sku": "B0D9PRVBRZ",
+   "indexable": true,
+   "readings": 203,
+   "first_tracked": "2024-08-09",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "gsc_crawled_not_indexed",
+    "percentile_extreme"
+   ]
+  },
+  "ram/corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz": {
+   "sku": "B0CDY46PFK",
+   "indexable": true,
+   "readings": 368,
+   "first_tracked": "2023-08-23",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "percentile_extreme"
+   ]
+  },
+  "ram/corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz-2": {
+   "sku": "B0BZHTVHN5",
+   "indexable": true,
+   "readings": 353,
+   "first_tracked": "2023-04-04",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "percentile_extreme"
+   ]
+  },
+  "ram/corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz-3": {
+   "sku": "B0BPTKD797",
+   "indexable": true,
+   "readings": 226,
+   "first_tracked": "2022-12-26",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz-4": {
+   "sku": "B0DPJ9DJ3D",
+   "indexable": true,
+   "readings": 160,
+   "first_tracked": "2024-12-11",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/corsair-vengeance-rgb-ddr5-ram-32gb-6400mhz": {
+   "sku": "B0C4Y3DCL4",
+   "indexable": true,
+   "readings": 131,
+   "first_tracked": "2023-05-17",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/corsair-vengeance-rgb-rs-ddr5-16gb-6000mhz": {
+   "sku": "B0H6G3X783",
+   "indexable": true,
+   "readings": 65,
+   "first_tracked": "2026-06-29",
+   "stale_days": 1,
+   "reasons": [
+    "sparse_history",
+    "percentile_extreme"
+   ]
+  },
+  "ram/corsair-vengeance-rgb-rs-ddr5-32gb-6000mhz": {
+   "sku": "B0H6G4V5PC",
+   "indexable": true,
+   "readings": 68,
+   "first_tracked": "2026-06-29",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/corsair-vengeance-rgb-rs-ddr5-ram-16gb-5200mhz": {
+   "sku": "B0GQCJ2D3D",
+   "indexable": true,
+   "readings": 84,
+   "first_tracked": "2026-03-31",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/corsair-vengeance-rgb-rs-ddr5-ram-16gb-6000mhz": {
+   "sku": "B0GQC6MV6C",
+   "indexable": true,
+   "readings": 89,
+   "first_tracked": "2026-03-21",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/corsair-vengeance-rgb-rs-ddr5-ram-32gb-5600mhz": {
+   "sku": "B0GGJ2GN9K",
+   "indexable": true,
+   "readings": 93,
+   "first_tracked": "2026-02-14",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/corsair-vengeance-rgb-rs-ddr5-ram-32gb-6000mhz": {
+   "sku": "B0GGJ79NR3",
+   "indexable": true,
+   "readings": 134,
+   "first_tracked": "2026-02-14",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/corsair-vengeance-rgb-rs-ddr5-ram-64gb-6000mhz": {
+   "sku": "B0GGJ9YH2D",
+   "indexable": true,
+   "readings": 80,
+   "first_tracked": "2026-01-30",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "latency_distinct"
+   ]
+  },
+  "ram/crucial-128gb-kit-5600mhz": {
+   "sku": "B0DSQMKYLN",
+   "indexable": true,
+   "readings": 273,
+   "first_tracked": "2025-02-18",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ram/crucial-16gb-ddr4-ram-3200mhz": {
+   "sku": "B08C511GQH",
+   "indexable": true,
+   "readings": 783,
+   "first_tracked": "2020-07-25",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "pre2021_trough"
+   ]
+  },
+  "ram/crucial-16gb-ddr5-ram-4800mhz": {
+   "sku": "B09HW2JNHX",
+   "indexable": true,
+   "readings": 510,
+   "first_tracked": "2021-10-30",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ram/crucial-16gb-ddr5-ram-5600mhz": {
+   "sku": "B0BLTH3KWV",
+   "indexable": true,
+   "readings": 332,
+   "first_tracked": "2022-12-22",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ram/crucial-16gb-ddr5-ram-5600mhz-2": {
+   "sku": "B0BLTGMCB7",
+   "indexable": true,
+   "readings": 470,
+   "first_tracked": "2022-12-23",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "percentile_extreme"
+   ]
+  },
+  "ram/crucial-32gb-ddr4-ram-kit-3200mhz": {
+   "sku": "B08C4X9VR5",
+   "indexable": true,
+   "readings": 1054,
+   "first_tracked": "2020-07-25",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "pre2021_trough"
+   ]
+  },
+  "ram/crucial-32gb-ddr4-ram-kit-3200mhz-2": {
+   "sku": "B08C4LXXCJ",
+   "indexable": true,
+   "readings": 639,
+   "first_tracked": "2020-07-25",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "pre2021_trough"
+   ]
+  },
+  "ram/crucial-32gb-ddr5-ram-kit-4800mhz": {
+   "sku": "B09HW9886B",
+   "indexable": true,
+   "readings": 610,
+   "first_tracked": "2021-10-30",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ram/crucial-32gb-ddr5-ram-kit-5600mhz": {
+   "sku": "B0BLTDRRLF",
+   "indexable": true,
+   "readings": 505,
+   "first_tracked": "2023-01-04",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "percentile_extreme"
+   ]
+  },
+  "ram/crucial-64gb-ddr5-ram-5600mhz": {
+   "sku": "B0BLTG3RLR",
+   "indexable": true,
+   "readings": 443,
+   "first_tracked": "2023-07-18",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ram/crucial-64gb-ddr5-ram-kit-4800mhz": {
+   "sku": "B09HW6ZJV5",
+   "indexable": true,
+   "readings": 627,
+   "first_tracked": "2021-11-04",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "percentile_extreme"
+   ]
+  },
+  "ram/crucial-96gb-ddr5-5600mhz-laptop-memory": {
+   "sku": "B0C79K5VGZ",
+   "indexable": true,
+   "readings": 424,
+   "first_tracked": "2023-07-15",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "percentile_extreme"
+   ]
+  },
+  "ram/crucial-pro-64gb-ddr5-ram-kit-5600mhz": {
+   "sku": "B0C79H54TQ",
+   "indexable": true,
+   "readings": 412,
+   "first_tracked": "2023-08-22",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "percentile_extreme"
+   ]
+  },
+  "ram/crucial-pro-ddr5-ram-64gb-kit-6400mhz": {
+   "sku": "B0DSR14511",
+   "indexable": true,
+   "readings": 295,
+   "first_tracked": "2025-02-18",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ram/crucial-ram-16gb-ddr5-5200mhz": {
+   "sku": "B0BNXXFSBR",
+   "indexable": true,
+   "readings": 243,
+   "first_tracked": "2023-01-04",
+   "stale_days": 1,
+   "reasons": [
+    "sparse_history",
+    "gsc_crawled_not_indexed",
+    "percentile_extreme"
+   ]
+  },
+  "ram/ddr4-ram-16gb-3200mhz": {
+   "sku": "B0GYF4X5V8",
+   "indexable": true,
+   "readings": 33,
+   "first_tracked": "2026-05-01",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/ddr4-ram-laptop-only-gigastone-32gb-kit-3200mhz": {
+   "sku": "B09477S96W",
+   "indexable": true,
+   "readings": 188,
+   "first_tracked": "2021-06-21",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/g-skill-flare-x5-series-ddr5-ram-32gb-6000mhz": {
+   "sku": "B0BFGB2D2Z",
+   "indexable": true,
+   "readings": 655,
+   "first_tracked": "2022-09-26",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "percentile_extreme"
+   ]
+  },
+  "ram/g-skill-flare-x5-series-ddr5-ram-64gb-6000mhz": {
+   "sku": "B0CGQ3KS8X",
+   "indexable": true,
+   "readings": 191,
+   "first_tracked": "2023-10-16",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/g-skill-ripjaws-s5-series-ddr5-ram-64gb-6000mhz": {
+   "sku": "B0C6HWKGWV",
+   "indexable": true,
+   "readings": 182,
+   "first_tracked": "2023-07-17",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/g-skill-ripjawsv-series-ddr4-ram-16gb-3200mhz": {
+   "sku": "B015FXXBW0",
+   "indexable": true,
+   "readings": 1360,
+   "first_tracked": "2015-11-27",
+   "stale_days": 0,
+   "reasons": [
+    "required_by_build",
+    "long_history",
+    "pre2021_trough"
+   ]
+  },
+  "ram/g-skill-ripjawsv-series-ddr4-ram-16gb-3200mhz-2": {
+   "sku": "B0171GQXME",
+   "indexable": true,
+   "readings": 2059,
+   "first_tracked": "2016-02-15",
+   "stale_days": 0,
+   "reasons": [
+    "required_by_build",
+    "long_history",
+    "pre2021_trough"
+   ]
+  },
+  "ram/g-skill-ripjawsv-series-ddr4-ram-32gb-3200mhz": {
+   "sku": "B0171GQR0C",
+   "indexable": true,
+   "readings": 1464,
+   "first_tracked": "2015-11-12",
+   "stale_days": 0,
+   "reasons": [
+    "required_by_build",
+    "long_history",
+    "pre2021_trough"
+   ]
+  },
+  "ram/g-skill-trident-z-rgb-series-ddr4-ram-16gb-3600mhz": {
+   "sku": "B08176RT4G",
+   "indexable": true,
+   "readings": 181,
+   "first_tracked": "2019-11-23",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "percentile_extreme",
+    "pre2021_trough",
+    "pergb_group_end"
+   ]
+  },
+  "ram/g-skill-trident-z-rgb-series-ddr4-ram-32gb-3200mhz": {
+   "sku": "B07DMNZY56",
+   "indexable": true,
+   "readings": 489,
+   "first_tracked": "2018-11-02",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "pre2021_trough"
+   ]
+  },
+  "ram/g-skill-trident-z-rgb-series-ddr4-ram-32gb-3600mhz": {
+   "sku": "B08176KLZT",
+   "indexable": true,
+   "readings": 389,
+   "first_tracked": "2019-11-22",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "pre2021_trough",
+    "pergb_group_end"
+   ]
+  },
+  "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-32gb-6000mhz": {
+   "sku": "B0BF8FVLSL",
+   "indexable": false,
+   "readings": 189,
+   "first_tracked": "2022-09-21",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "duplicate_variant"
+   ]
+  },
+  "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-32gb-6000mhz-2": {
+   "sku": "B0BF6ZQ8MY",
+   "indexable": true,
+   "readings": 195,
+   "first_tracked": "2022-09-21",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-32gb-6000mhz-3": {
+   "sku": "B0C4G6XQQL",
+   "indexable": true,
+   "readings": 401,
+   "first_tracked": "2023-05-09",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-32gb-6000mhz-4": {
+   "sku": "B0BF8MP83M",
+   "indexable": true,
+   "readings": 124,
+   "first_tracked": "2022-09-20",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "latency_distinct"
+   ]
+  },
+  "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-64gb-6000mhz": {
+   "sku": "B0BJNTLJ5X",
+   "indexable": true,
+   "readings": 236,
+   "first_tracked": "2022-10-30",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-64gb-6000mhz-2": {
+   "sku": "B0DN3WFS52",
+   "indexable": true,
+   "readings": 123,
+   "first_tracked": "2024-11-22",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-64gb-6000mhz-3": {
+   "sku": "B0CJXBCQ7P",
+   "indexable": true,
+   "readings": 141,
+   "first_tracked": "2023-10-14",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/g-skill-trident-z5-neo-series-ddr5-ram-64gb-6000mhz": {
+   "sku": "B0BJP3MRW1",
+   "indexable": true,
+   "readings": 228,
+   "first_tracked": "2022-10-29",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/g-skill-trident-z5-rgb-32gb-2-x-16gb": {
+   "sku": "B0BQWXTDWN",
+   "indexable": true,
+   "readings": 320,
+   "first_tracked": "2023-07-03",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ram/g-skill-trident-z5-rgb-series-ddr5-ram-16gb-6000mhz": {
+   "sku": "B0G7RL6SPS",
+   "indexable": true,
+   "readings": 78,
+   "first_tracked": "2025-12-31",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/g-skill-trident-z5-rgb-series-ddr5-ram-32gb-6000mhz": {
+   "sku": "B09PTGZM6Y",
+   "indexable": true,
+   "readings": 236,
+   "first_tracked": "2022-01-19",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "percentile_extreme"
+   ]
+  },
+  "ram/g-skill-trident-z5-rgb-series-ddr5-ram-32gb-6000mhz-2": {
+   "sku": "B0CB78Y7DC",
+   "indexable": true,
+   "readings": 193,
+   "first_tracked": "2023-07-18",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/g-skill-trident-z5-rgb-series-ddr5-ram-32gb-6400mhz": {
+   "sku": "B09QS2K59B",
+   "indexable": true,
+   "readings": 183,
+   "first_tracked": "2022-01-27",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/g-skill-trident-z5-rgb-series-ddr5-ram-64gb-6000mhz": {
+   "sku": "B0C4X758YM",
+   "indexable": true,
+   "readings": 226,
+   "first_tracked": "2023-05-21",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "percentile_extreme"
+   ]
+  },
+  "ram/g-skill-trident-z5-rgb-series-ddr5-ram-64gb-6400mhz": {
+   "sku": "B0BJ7X9P1W",
+   "indexable": true,
+   "readings": 279,
+   "first_tracked": "2022-10-29",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ram/g-skill-trident-z5-royal-neo-series-ddr5-32gb-6000mhz": {
+   "sku": "B0DD2LKVMD",
+   "indexable": true,
+   "readings": 212,
+   "first_tracked": "2024-08-16",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "latency_distinct"
+   ]
+  },
+  "ram/g-skill-trident-z5-royal-neo-series-ddr5-64gb-6000mhz": {
+   "sku": "B0DTPBTGMW",
+   "indexable": true,
+   "readings": 113,
+   "first_tracked": "2025-02-14",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "pergb_group_end"
+   ]
+  },
+  "ram/kingston-fury-beast-16gb-5200mhz": {
+   "sku": "B09T97ZSVB",
+   "indexable": true,
+   "readings": 454,
+   "first_tracked": "2022-03-08",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "percentile_extreme"
+   ]
+  },
+  "ram/kingston-fury-beast-16gb-6000mt-s-ddr5": {
+   "sku": "B0CYHCNDP2",
+   "indexable": true,
+   "readings": 221,
+   "first_tracked": "2024-03-29",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/kingston-fury-beast-32gb-5200mhz": {
+   "sku": "B09KCLP63B",
+   "indexable": true,
+   "readings": 486,
+   "first_tracked": "2021-12-15",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ram/kingston-fury-beast-32gb-5600mhz": {
+   "sku": "B0BD5PN65B",
+   "indexable": true,
+   "readings": 356,
+   "first_tracked": "2022-09-30",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "percentile_extreme"
+   ]
+  },
+  "ram/kingston-fury-beast-32gb-6000mhz": {
+   "sku": "B0CYHC58P6",
+   "indexable": true,
+   "readings": 323,
+   "first_tracked": "2024-03-29",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "percentile_extreme",
+    "pergb_group_end"
+   ]
+  },
+  "ram/kingston-fury-beast-32gb-6000mt-s-ddr5": {
+   "sku": "B0BRTJGQML",
+   "indexable": true,
+   "readings": 387,
+   "first_tracked": "2023-01-11",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "percentile_extreme"
+   ]
+  },
+  "ram/kingston-fury-beast-64gb-5600mhz": {
+   "sku": "B09T8TH7PG",
+   "indexable": true,
+   "readings": 485,
+   "first_tracked": "2022-03-02",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "percentile_extreme"
+   ]
+  },
+  "ram/kingston-fury-beast-rgb-16gb-6000mt-s": {
+   "sku": "B0DCGFCHXF",
+   "indexable": true,
+   "readings": 216,
+   "first_tracked": "2024-08-14",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "pergb_group_end"
+   ]
+  },
+  "ram/kingston-fury-beast-rgb-32gb-6000mhz": {
+   "sku": "B0CYM58GFS",
+   "indexable": true,
+   "readings": 223,
+   "first_tracked": "2024-04-11",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/kingston-fury-beast-rgb-64gb-6400mhz": {
+   "sku": "B0CYM412PY",
+   "indexable": true,
+   "readings": 279,
+   "first_tracked": "2024-03-29",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ram/kingston-fury-beast-rgb-8gb-6000mt-s-ddr5": {
+   "sku": "B0CYM3TYCR",
+   "indexable": true,
+   "readings": 171,
+   "first_tracked": "2024-03-31",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/kingston-fury-beast-white-rgb-32gb-5600mhz": {
+   "sku": "B0BZJF529F",
+   "indexable": true,
+   "readings": 494,
+   "first_tracked": "2023-04-02",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "percentile_extreme"
+   ]
+  },
+  "ram/kingston-fury-impact-16gb-6400mt-s-cl38": {
+   "sku": "B0C3HTXDDB",
+   "indexable": true,
+   "readings": 348,
+   "first_tracked": "2023-05-05",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ram/kingston-fury-impact-32gb-5600mhz": {
+   "sku": "B0BRTJ4Q94",
+   "indexable": true,
+   "readings": 350,
+   "first_tracked": "2023-01-12",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ram/kingston-fury-impact-64gb-5600mhz": {
+   "sku": "B0BRTJT5P2",
+   "indexable": true,
+   "readings": 453,
+   "first_tracked": "2023-01-10",
+   "stale_days": 1,
+   "reasons": [
+    "long_history",
+    "percentile_extreme"
+   ]
+  },
+  "ram/kingston-fury-renegade-white-rgb-16gb-6400mhz": {
+   "sku": "B0BZJK6HCN",
+   "indexable": true,
+   "readings": 447,
+   "first_tracked": "2023-03-29",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "percentile_extreme"
+   ]
+  },
+  "ram/kingston-fury-renegade-white-rgb-32gb-6400mhz": {
+   "sku": "B0BZJKC2NJ",
+   "indexable": true,
+   "readings": 459,
+   "first_tracked": "2023-03-29",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ram/lexar-oc-ddr5-ram-1x8gb-6000mhz-cl38": {
+   "sku": "B0GTZSPC71",
+   "indexable": true,
+   "readings": 75,
+   "first_tracked": "2026-06-11",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "percentile_extreme"
+   ]
+  },
+  "ram/lexar-thor-z-series-rgb-ddr5-ram-32gb-6000mhz": {
+   "sku": "B0GSR1M4ZJ",
+   "indexable": true,
+   "readings": 77,
+   "first_tracked": "2026-04-27",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/nemix-ram-16gb-2666mhz": {
+   "sku": "B0C5BFW7ZN",
+   "indexable": true,
+   "readings": 115,
+   "first_tracked": "2023-05-23",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/patriot-memory-viper-venom-ddr5-ram-16gb-6000mhz": {
+   "sku": "B0DKQ6VH85",
+   "indexable": true,
+   "readings": 163,
+   "first_tracked": "2024-11-18",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "percentile_extreme"
+   ]
+  },
+  "ram/patriot-viper-elite-5-ddr5-ram-16gb-6000mhz": {
+   "sku": "B0DPR9VBWN",
+   "indexable": true,
+   "readings": 228,
+   "first_tracked": "2025-01-24",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "pergb_group_end"
+   ]
+  },
+  "ram/patriot-viper-steel-ddr4-ram-16gb-3200mhz": {
+   "sku": "B07N3Z1RP8",
+   "indexable": true,
+   "readings": 313,
+   "first_tracked": "2019-04-11",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "pre2021_trough"
+   ]
+  },
+  "ram/patriot-viper-venom-ddr5-ram-16gb-6000mhz": {
+   "sku": "B0GJ81P1YP",
+   "indexable": true,
+   "readings": 90,
+   "first_tracked": "2026-04-17",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "percentile_extreme"
+   ]
+  },
+  "ram/pro-ddr5-ram-32gb-kit-6400mhz": {
+   "sku": "B0FQMLKVLS",
+   "indexable": true,
+   "readings": 238,
+   "first_tracked": "2025-10-21",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/puskill-32gb-kit-3200mhz": {
+   "sku": "B0GT8TSFLS",
+   "indexable": true,
+   "readings": 83,
+   "first_tracked": "2026-04-20",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/puskill-ddr4-32gb-3200mhz": {
+   "sku": "B0G4BGRL9C",
+   "indexable": true,
+   "readings": 93,
+   "first_tracked": "2025-12-12",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/puskill-ddr4-laptop-ram-32gb-kit-3200mhz": {
+   "sku": "B0G3HBH1RW",
+   "indexable": true,
+   "readings": 88,
+   "first_tracked": "2025-12-08",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/silicon-power-ddr4-16gb-kit-3200mhz": {
+   "sku": "B0924LFB3Z",
+   "indexable": true,
+   "readings": 185,
+   "first_tracked": "2021-04-23",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "gsc_crawled_not_indexed"
+   ]
+  },
+  "ram/silicon-power-ddr5-64gb-6000mhz": {
+   "sku": "B0GN5MSZXJ",
+   "indexable": false,
+   "readings": 11,
+   "first_tracked": "2026-04-12",
+   "stale_days": 62,
+   "reasons": [
+    "below_min_readings",
+    "long_term_unavailable",
+    "pergb_group_end"
+   ]
+  },
+  "ram/silicon-power-value-gaming-ddr4-ram-16gb-3200mhz": {
+   "sku": "B0FYPC2MK5",
+   "indexable": true,
+   "readings": 101,
+   "first_tracked": "2025-11-05",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ram/teamgroup-elite-ddr4-32gb-kit-3200mhz": {
+   "sku": "B08T17RQ87",
+   "indexable": true,
+   "readings": 349,
+   "first_tracked": "2021-02-05",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ram/teamgroup-elite-sodimm-ddr5-32gb-5600mhz": {
+   "sku": "B0CN92HXZL",
+   "indexable": true,
+   "readings": 151,
+   "first_tracked": "2023-12-20",
+   "stale_days": 1,
+   "reasons": [
+    "sparse_history",
+    "pergb_group_end",
+    "latency_distinct"
+   ]
+  },
+  "ram/teamgroup-elite-sodimm-ddr5-64gb-5600mhz": {
+   "sku": "B0CN9376FP",
+   "indexable": true,
+   "readings": 146,
+   "first_tracked": "2023-12-11",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "latency_distinct"
+   ]
+  },
+  "ram/teamgroup-t-force-delta-rgb-ddr5-ram-32gb-6000mhz": {
+   "sku": "B0B3HGJ4V7",
+   "indexable": true,
+   "readings": 331,
+   "first_tracked": "2022-06-22",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "percentile_extreme"
+   ]
+  },
+  "ram/teamgroup-t-force-delta-rgb-ddr5-ram-32gb-6000mhz-2": {
+   "sku": "B0B3HHB3Z9",
+   "indexable": true,
+   "readings": 357,
+   "first_tracked": "2022-06-22",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "percentile_extreme"
+   ]
+  },
+  "ram/teamgroup-t-force-vulcan-ddr5-32gb-6000mhz": {
+   "sku": "B0BNTRRLYP",
+   "indexable": true,
+   "readings": 289,
+   "first_tracked": "2023-01-04",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ram/teamgroup-t-force-vulcan-z-ddr4-16gb-kit-3200mhz": {
+   "sku": "B07T637L7T",
+   "indexable": true,
+   "readings": 662,
+   "first_tracked": "2019-07-02",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "pre2021_trough"
+   ]
+  },
+  "ram/teamgroup-t-force-vulcan-z-ddr4-dram-16gb-3200mhz": {
+   "sku": "B08PJNVWNZ",
+   "indexable": true,
+   "readings": 307,
+   "first_tracked": "2020-12-31",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "pre2021_trough"
+   ]
+  },
+  "ram/timetec-32gb-kit-2666mhz": {
+   "sku": "B07CQ8FJXB",
+   "indexable": true,
+   "readings": 320,
+   "first_tracked": "2018-10-26",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "pre2021_trough",
+    "pergb_group_end"
+   ]
+  },
+  "ram/timetec-32gb-kit-3200mhz": {
+   "sku": "B098TYN671",
+   "indexable": true,
+   "readings": 441,
+   "first_tracked": "2021-07-08",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ssd/1tb-sata-ssd-2-5-ssd-sata-iii-6": {
+   "sku": "B0CM8QWND1",
+   "indexable": true,
+   "readings": 145,
+   "first_tracked": "2023-12-16",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "pergb_group_end"
+   ]
+  },
+  "ssd/1tb-sn850p-nvme-m-2-ssd-officially": {
+   "sku": "B0C48B3RGL",
+   "indexable": true,
+   "readings": 538,
+   "first_tracked": "2023-06-06",
+   "stale_days": 0,
+   "reasons": [
+    "gsc_crawled_not_indexed",
+    "long_history"
+   ]
+  },
+  "ssd/500gb-optimus-5100-nvme-ssd-pcie-4-0": {
+   "sku": "B0GJSFFLXZ",
+   "indexable": true,
+   "readings": 86,
+   "first_tracked": "2026-05-23",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/acer-predator-gm7-1tb-ssd-m-2-2280-pcie": {
+   "sku": "B0C3ZJ8T6F",
+   "indexable": true,
+   "readings": 124,
+   "first_tracked": "2025-06-20",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/acer-predator-gm7-2tb-ssd-m-2-2280-pcie": {
+   "sku": "B0CB8JJR7F",
+   "indexable": true,
+   "readings": 173,
+   "first_tracked": "2023-12-11",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/acer-predator-gm7-4tb-ssd-m-2-2280-pcie": {
+   "sku": "B0CHJG3ZSF",
+   "indexable": true,
+   "readings": 407,
+   "first_tracked": "2023-11-27",
+   "stale_days": 0,
+   "reasons": [
+    "gsc_crawled_not_indexed",
+    "long_history"
+   ]
+  },
+  "ssd/bestoss-1tb-m-2-ssd-nvme-pcie4-0-2280": {
+   "sku": "B0F3XL469M",
+   "indexable": true,
+   "readings": 102,
+   "first_tracked": "2025-06-28",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/bestoss-1tb-nvme-m-2-ssd-pcie-3-0-2280": {
+   "sku": "B0GXKN6F68",
+   "indexable": true,
+   "readings": 76,
+   "first_tracked": "2026-05-13",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "percentile_extreme"
+   ]
+  },
+  "ssd/bestoss-2tb-m-2-ssd-nvme-pcie4-0-2280": {
+   "sku": "B0F3XL1PVB",
+   "indexable": true,
+   "readings": 101,
+   "first_tracked": "2025-06-25",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/bestoss-2tb-nvme-m-2-2280-ssd-with": {
+   "sku": "B0F43H8WH7",
+   "indexable": true,
+   "readings": 107,
+   "first_tracked": "2025-12-03",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/bestoss-2tb-nvme-m-2-ssd-pcie-3-0-m-2": {
+   "sku": "B0F43VP4XF",
+   "indexable": true,
+   "readings": 98,
+   "first_tracked": "2025-06-12",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/bestoss-2tb-sata-ssd-2-5-inch-internal": {
+   "sku": "B0F47NQ8HX",
+   "indexable": true,
+   "readings": 85,
+   "first_tracked": "2025-06-12",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/bestoss-m-2-2280-nvme-ssd-2tb-pcie-4-0": {
+   "sku": "B0F43F9ZKP",
+   "indexable": true,
+   "readings": 132,
+   "first_tracked": "2025-07-04",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/biwin-black-opal-nv7400-4tb-ssd-gen4x4": {
+   "sku": "B0DM1R7KJ1",
+   "indexable": true,
+   "readings": 104,
+   "first_tracked": "2025-06-20",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/centon-2tb-ssd-internal-solid-state-drive": {
+   "sku": "B088FYT6KT",
+   "indexable": true,
+   "readings": 103,
+   "first_tracked": "2020-07-01",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "pre2021_trough"
+   ]
+  },
+  "ssd/crucial-bx500-sata-ssd-2tb": {
+   "sku": "B0CCN9QWKT",
+   "indexable": true,
+   "readings": 258,
+   "first_tracked": "2025-04-16",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/crucial-e100-2tb-m-2-nvme-pcie-gen4": {
+   "sku": "B0DQSJZTZ5",
+   "indexable": true,
+   "readings": 176,
+   "first_tracked": "2025-07-14",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/crucial-p310-1tb-232l-micron-qlc-nand-pcie": {
+   "sku": "B0DM9341L3",
+   "indexable": true,
+   "readings": 323,
+   "first_tracked": "2024-11-12",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "percentile_extreme"
+   ]
+  },
+  "ssd/crucial-p310-1tb-ssd": {
+   "sku": "B0DC8VPSHV",
+   "indexable": true,
+   "readings": 343,
+   "first_tracked": "2024-09-17",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "percentile_extreme"
+   ]
+  },
+  "ssd/crucial-p310-2tb-ssd": {
+   "sku": "B0DC8RVRBZ",
+   "indexable": true,
+   "readings": 328,
+   "first_tracked": "2024-09-17",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ssd/crucial-p310-4tb-ssd": {
+   "sku": "B0F3WLFCPL",
+   "indexable": true,
+   "readings": 242,
+   "first_tracked": "2025-04-29",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/crucial-p310-500gb-ssd": {
+   "sku": "B0DC8K6KQD",
+   "indexable": true,
+   "readings": 296,
+   "first_tracked": "2024-09-17",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ssd/crucial-p510-pcie-gen5-nvme-1tb-ssd": {
+   "sku": "B0DZ5ZK225",
+   "indexable": true,
+   "readings": 156,
+   "first_tracked": "2025-04-08",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "pergb_group_end"
+   ]
+  },
+  "ssd/crucial-t500-2tb-pcie-gen4-nvme-gaming-ps5": {
+   "sku": "B0CK2RKPBL",
+   "indexable": true,
+   "readings": 293,
+   "first_tracked": "2023-10-31",
+   "stale_days": 9,
+   "reasons": [
+    "long_history",
+    "percentile_extreme"
+   ]
+  },
+  "ssd/crucial-t500-4tb-pcie-gen4-nvme-gaming-ps5": {
+   "sku": "B0DBBJSGFQ",
+   "indexable": true,
+   "readings": 234,
+   "first_tracked": "2024-08-28",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/crucial-t500-pcie-gen4-nvme-1tb-ssd": {
+   "sku": "B0CK39YR9V",
+   "indexable": true,
+   "readings": 443,
+   "first_tracked": "2023-10-31",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "pergb_group_end"
+   ]
+  },
+  "ssd/crucial-t500-pcie-gen4-nvme-4tb-ssd": {
+   "sku": "B0DBBG7CG7",
+   "indexable": true,
+   "readings": 255,
+   "first_tracked": "2024-08-27",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/crucial-t500-pcie-gen4-nvme-500gb-ssd": {
+   "sku": "B0CK2R8YLY",
+   "indexable": true,
+   "readings": 274,
+   "first_tracked": "2023-10-31",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "percentile_extreme"
+   ]
+  },
+  "ssd/crucial-t705-pcie-gen5-nvme-1tb-ssd": {
+   "sku": "B0CTRV9CVP",
+   "indexable": true,
+   "readings": 259,
+   "first_tracked": "2024-02-29",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/fanxiang-1tb-nvme-ssd-pcie-gen-4-gaming": {
+   "sku": "B0D5M5D2XP",
+   "indexable": true,
+   "readings": 141,
+   "first_tracked": "2024-06-04",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/fanxiang-1tb-nvme-ssd-pcie-gen4-m-2": {
+   "sku": "B0CM8RVVG1",
+   "indexable": true,
+   "readings": 132,
+   "first_tracked": "2024-01-26",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/fanxiang-2tb-nvme-ssd-pcie-gen4-m-2-ssd": {
+   "sku": "B0CM941D89",
+   "indexable": true,
+   "readings": 137,
+   "first_tracked": "2024-01-27",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/fanxiang-2tb-sata-ssd-2-5-ssd-sata-iii": {
+   "sku": "B0CM8M8293",
+   "indexable": true,
+   "readings": 131,
+   "first_tracked": "2023-12-28",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/fanxiang-s501q-ssd-1tb-pcle-3-0x4": {
+   "sku": "B0CNSVG1QB",
+   "indexable": true,
+   "readings": 149,
+   "first_tracked": "2023-12-25",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/fanxiang-ssd-2tb-internal-solid-state": {
+   "sku": "B0BWXK95PY",
+   "indexable": true,
+   "readings": 165,
+   "first_tracked": "2023-04-03",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/fikwot-fn203-m-2-sata-ssd-slc-cache-1tb": {
+   "sku": "B0C3ZR818X",
+   "indexable": true,
+   "readings": 122,
+   "first_tracked": "2023-06-02",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/fikwot-fn955-2tb-nvme-ssd-m-2-2280-pcie": {
+   "sku": "B0C9DPWRZ3",
+   "indexable": true,
+   "readings": 160,
+   "first_tracked": "2023-08-16",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/fikwot-fn960-4tb-m-2-nvme-ssd-pcie-gen4": {
+   "sku": "B0FYF4HDXY",
+   "indexable": true,
+   "readings": 79,
+   "first_tracked": "2026-02-28",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/fikwot-fs810-2tb-ssd": {
+   "sku": "B0BF9DC11W",
+   "indexable": true,
+   "readings": 129,
+   "first_tracked": "2023-04-10",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/fikwot-fx815-1tb-ssd": {
+   "sku": "B0CX94D2YC",
+   "indexable": true,
+   "readings": 159,
+   "first_tracked": "2024-04-09",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/gigastone-m-2-ssd-1tb-pcie-4-0-nvme-ssd": {
+   "sku": "B0CB89SL21",
+   "indexable": true,
+   "readings": 116,
+   "first_tracked": "2023-08-07",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/intel-660p-series-m-2-2280-1tb-pcie-nvme": {
+   "sku": "B07GCL6BR4",
+   "indexable": true,
+   "readings": 980,
+   "first_tracked": "2018-09-19",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "pre2021_trough"
+   ]
+  },
+  "ssd/kingspec-2tb-2-5-inch-sata-iii-internal": {
+   "sku": "B0H2DHS2YC",
+   "indexable": true,
+   "readings": 70,
+   "first_tracked": "2026-06-25",
+   "stale_days": 4,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/kingspec-oneboom-2tb-internal-ssd-2-5": {
+   "sku": "B0FDG66SKS",
+   "indexable": true,
+   "readings": 54,
+   "first_tracked": "2025-07-18",
+   "stale_days": 24,
+   "reasons": [
+    "sparse_history",
+    "pergb_group_end"
+   ]
+  },
+  "ssd/kingspec-ssd-1tb": {
+   "sku": "B0D1R7NBB6",
+   "indexable": true,
+   "readings": 122,
+   "first_tracked": "2024-05-01",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/kingston-nv3-1tb-m-2-2280-nvme-ssd": {
+   "sku": "B0DBR3DZWG",
+   "indexable": true,
+   "readings": 199,
+   "first_tracked": "2024-08-05",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/lexar-4tb-nm790-ssd-pcie-gen4-nvme-m-2": {
+   "sku": "B0C91RNCDV",
+   "indexable": true,
+   "readings": 405,
+   "first_tracked": "2023-07-03",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ssd/patriot-memory-p400-lite-m-2-pcie-gen-4-1tb": {
+   "sku": "B0BTDP6P7Y",
+   "indexable": true,
+   "readings": 263,
+   "first_tracked": "2023-02-04",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/pny-cs900-2tb-3d-nand-2-5-sata-iii": {
+   "sku": "B08GB8S6R3",
+   "indexable": true,
+   "readings": 682,
+   "first_tracked": "2020-09-16",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "pre2021_trough"
+   ]
+  },
+  "ssd/predator-m-2-ssd-2tb-gm7000-with-dram": {
+   "sku": "B09F5W62N8",
+   "indexable": true,
+   "readings": 240,
+   "first_tracked": "2021-09-26",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/samsung-870-evo-1tb-2-5in-sata-iii": {
+   "sku": "B08W5TLTL2",
+   "indexable": true,
+   "readings": 182,
+   "first_tracked": "2024-12-28",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "pergb_group_end"
+   ]
+  },
+  "ssd/samsung-870-evo-1tb-sata-2-5-internal": {
+   "sku": "B08T1SMTF9",
+   "indexable": true,
+   "readings": 448,
+   "first_tracked": "2021-07-07",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ssd/samsung-870-evo-250gb-sata-2-5": {
+   "sku": "B08T1TWQS9",
+   "indexable": true,
+   "readings": 358,
+   "first_tracked": "2021-07-07",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ssd/samsung-870-evo-2tb-sata-2-5-internal-ssd": {
+   "sku": "B08SW72NBQ",
+   "indexable": true,
+   "readings": 158,
+   "first_tracked": "2025-05-29",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/samsung-870-evo-4tb-2-5-inch-sata-iii": {
+   "sku": "B08QBL36GF",
+   "indexable": true,
+   "readings": 973,
+   "first_tracked": "2021-01-19",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ssd/samsung-870-evo-sata-ssd-250gb-2-5": {
+   "sku": "B08QBN5J9B",
+   "indexable": true,
+   "readings": 909,
+   "first_tracked": "2021-01-19",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "percentile_extreme"
+   ]
+  },
+  "ssd/samsung-870-evo-sata-ssd-500gb-2-5": {
+   "sku": "B08QBMD6P4",
+   "indexable": true,
+   "readings": 566,
+   "first_tracked": "2021-01-18",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ssd/samsung-870-qvo-sata-iii-ssd-2tb-2-5": {
+   "sku": "B089C6LZ42",
+   "indexable": true,
+   "readings": 674,
+   "first_tracked": "2020-07-01",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "pre2021_trough"
+   ]
+  },
+  "ssd/samsung-870-qvo-sata-iii-ssd-8tb-2-5": {
+   "sku": "B089C3TZL9",
+   "indexable": true,
+   "readings": 1101,
+   "first_tracked": "2020-06-03",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "pre2021_trough"
+   ]
+  },
+  "ssd/samsung-960-evo-series-250gb-pcie-nvme": {
+   "sku": "B01LYFKX41",
+   "indexable": true,
+   "readings": 888,
+   "first_tracked": "2016-11-27",
+   "stale_days": 0,
+   "reasons": [
+    "required_by_build",
+    "long_history",
+    "percentile_extreme",
+    "pre2021_trough"
+   ]
+  },
+  "ssd/samsung-980-pro-ssd-with-heatsink-2tb-pcie": {
+   "sku": "B09JHKSNNG",
+   "indexable": true,
+   "readings": 549,
+   "first_tracked": "2021-10-22",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ssd/samsung-990-evo-plus-ssd-2tb": {
+   "sku": "B0DHLCRF91",
+   "indexable": true,
+   "readings": 260,
+   "first_tracked": "2024-10-01",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/samsung-990-evo-plus-ssd-4tb": {
+   "sku": "B0DHLBDSP7",
+   "indexable": true,
+   "readings": 303,
+   "first_tracked": "2024-10-01",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "percentile_extreme"
+   ]
+  },
+  "ssd/samsung-990-pro-1tb-pcie-gen-4-0-x4": {
+   "sku": "B0BPXQ9BDV",
+   "indexable": true,
+   "readings": 225,
+   "first_tracked": "2025-04-29",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/samsung-990-pro-2tb": {
+   "sku": "B0BXX1JJH8",
+   "indexable": true,
+   "readings": 284,
+   "first_tracked": "2023-07-23",
+   "stale_days": 0,
+   "reasons": [
+    "required_by_build",
+    "gsc_crawled_not_indexed",
+    "long_history"
+   ]
+  },
+  "ssd/samsung-990-pro-2tb-pcie-gen-4-0-x4": {
+   "sku": "B0BPXRY7N2",
+   "indexable": true,
+   "readings": 233,
+   "first_tracked": "2025-04-28",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/samsung-990-pro-4tb-pcie-gen-4-0-x4": {
+   "sku": "B0CHRSJ4LR",
+   "indexable": true,
+   "readings": 87,
+   "first_tracked": "2025-12-15",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/samsung-990-pro-nvme-m-2-ssd-2tb": {
+   "sku": "B0B9C4DKKG",
+   "indexable": true,
+   "readings": 473,
+   "first_tracked": "2023-04-27",
+   "stale_days": 1,
+   "reasons": [
+    "long_history",
+    "percentile_extreme",
+    "pergb_group_end"
+   ]
+  },
+  "ssd/samsung-990-pro-ssd-2tb-nvme-m-2-pcie": {
+   "sku": "B0BHJJ9Y77",
+   "indexable": true,
+   "readings": 614,
+   "first_tracked": "2022-11-03",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ssd/samsung-990-pro-w-heatsink-ssd-1tb-pcie": {
+   "sku": "B0BHJFNW9X",
+   "indexable": true,
+   "readings": 259,
+   "first_tracked": "2022-11-23",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/samsung-990-pro-w-heatsink-ssd-2tb": {
+   "sku": "B0BHJDY57J",
+   "indexable": true,
+   "readings": 507,
+   "first_tracked": "2022-11-13",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ssd/samsung-mz-v9p4t0b-am-990-pro-pcie-4-0-4tb": {
+   "sku": "B0CXZ153DP",
+   "indexable": true,
+   "readings": 202,
+   "first_tracked": "2024-04-02",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "pergb_group_end"
+   ]
+  },
+  "ssd/samsung-mz-v9p4t0b-am-990-pro-pcie-4-0-4tb-2": {
+   "sku": "B0CY2SZ62P",
+   "indexable": true,
+   "readings": 117,
+   "first_tracked": "2024-03-27",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/samsung-ssd-860-evo-2tb-2-5-inch-sata": {
+   "sku": "B0786QNSBD",
+   "indexable": true,
+   "readings": 874,
+   "first_tracked": "2018-01-23",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "pre2021_trough"
+   ]
+  },
+  "ssd/samsung-ssd-860-pro-2tb-2-5-inch-sata": {
+   "sku": "B07879KC15",
+   "indexable": true,
+   "readings": 596,
+   "first_tracked": "2018-01-31",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "pre2021_trough",
+    "pergb_group_end"
+   ]
+  },
+  "ssd/samsung-ssd-870-evo-500gb": {
+   "sku": "B08PC43D78",
+   "indexable": true,
+   "readings": 1001,
+   "first_tracked": "2021-01-22",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "percentile_extreme",
+    "pergb_group_end"
+   ]
+  },
+  "ssd/samsung-ssd-870-evo-sata-iii-2-5-1tb": {
+   "sku": "B08QBJ2YMG",
+   "indexable": true,
+   "readings": 791,
+   "first_tracked": "2021-01-19",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ssd/samsung-ssd-870-evo-sata-iii-2-5-2tb": {
+   "sku": "B08QB93S6R",
+   "indexable": true,
+   "readings": 653,
+   "first_tracked": "2021-01-19",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ssd/samsung-ssd-870-evo-sata-iii-2-5-8tb": {
+   "sku": "B0GQZMMN1S",
+   "indexable": true,
+   "readings": 108,
+   "first_tracked": "2026-03-11",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/samsung-ssd-9100-pro-1tb": {
+   "sku": "B0DX2G349M",
+   "indexable": true,
+   "readings": 177,
+   "first_tracked": "2025-03-14",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/samsung-ssd-9100-pro-2tb": {
+   "sku": "B0DX2DPJZ5",
+   "indexable": true,
+   "readings": 246,
+   "first_tracked": "2025-03-17",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/samsung-ssd-9100-pro-4tb": {
+   "sku": "B0DX2GJ1YR",
+   "indexable": true,
+   "readings": 282,
+   "first_tracked": "2025-03-18",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ssd/samsung-ssd-990-pro-1tb": {
+   "sku": "B0BHJF2VRN",
+   "indexable": true,
+   "readings": 406,
+   "first_tracked": "2022-11-03",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ssd/samsung-ssd-990-pro-4tb": {
+   "sku": "B0CHGT1KFJ",
+   "indexable": true,
+   "readings": 448,
+   "first_tracked": "2023-09-14",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ssd/sandisk-ssd-plus-500gb-internal-solid": {
+   "sku": "B0F4Y2VR8S",
+   "indexable": true,
+   "readings": 110,
+   "first_tracked": "2025-07-30",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "pergb_group_end"
+   ]
+  },
+  "ssd/silicon-power-1tb-nvme-m-2-pcie-gen3x4": {
+   "sku": "B07ZGJVTZK",
+   "indexable": true,
+   "readings": 429,
+   "first_tracked": "2019-11-07",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "pre2021_trough"
+   ]
+  },
+  "ssd/silicon-power-2tb-nvme-m-2-pcie-gen3x4": {
+   "sku": "B07ZQ97H3W",
+   "indexable": true,
+   "readings": 277,
+   "first_tracked": "2022-01-19",
+   "stale_days": 0,
+   "reasons": [
+    "gsc_crawled_not_indexed",
+    "long_history"
+   ]
+  },
+  "ssd/silicon-power-2tb-ssd-3d-nand-a55-slc": {
+   "sku": "B0G42YVQRJ",
+   "indexable": true,
+   "readings": 95,
+   "first_tracked": "2025-12-01",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "gsc_crawled_not_indexed"
+   ]
+  },
+  "ssd/silicon-power-2tb-ud90-nvme-4-0-gen4-pcie": {
+   "sku": "B0B996CJ64",
+   "indexable": true,
+   "readings": 250,
+   "first_tracked": "2022-12-24",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/silicon-power-4tb-ud90-nvme-4-0-gen4-pcie": {
+   "sku": "B0BYN8NHXS",
+   "indexable": true,
+   "readings": 237,
+   "first_tracked": "2023-04-03",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/six-nvme-m-2-ssd-pcie-4-0-1tb-m-2-2280": {
+   "sku": "B0FGP7W3NJ",
+   "indexable": true,
+   "readings": 155,
+   "first_tracked": "2025-08-18",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/six-x4000-1tb-m-2-ssd-pcie-gen3x4-nvme": {
+   "sku": "B0FGPTY5PJ",
+   "indexable": true,
+   "readings": 86,
+   "first_tracked": "2026-01-18",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/teamgroup-qx-2tb-3d-nand-qlc-2-5-inch": {
+   "sku": "B0C3M1YN5T",
+   "indexable": true,
+   "readings": 279,
+   "first_tracked": "2023-06-03",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ssd/teamgroup-t-force-vulcan-z-2tb-slc-cache": {
+   "sku": "B09WMSVHD4",
+   "indexable": true,
+   "readings": 472,
+   "first_tracked": "2022-06-22",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "percentile_extreme"
+   ]
+  },
+  "ssd/teamgroup-t-force-vulcan-z-2tb-slc-cache-2": {
+   "sku": "B0BYSKXGJV",
+   "indexable": true,
+   "readings": 301,
+   "first_tracked": "2023-04-13",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ssd/timetec-1tb-ssd-nvme-pcie-gen3x4-8gb-s-m-2": {
+   "sku": "B08GJBTCF6",
+   "indexable": true,
+   "readings": 257,
+   "first_tracked": "2020-09-04",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "pre2021_trough",
+    "pergb_group_end"
+   ]
+  },
+  "ssd/ultra-3d-nand-500gb-internal-ssd-sata": {
+   "sku": "B0B7VWFN4B",
+   "indexable": true,
+   "readings": 318,
+   "first_tracked": "2022-10-11",
+   "stale_days": 2,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ssd/western-digital-2tb-wd-blue-sa510-sata": {
+   "sku": "B0C14TF467",
+   "indexable": true,
+   "readings": 626,
+   "first_tracked": "2023-05-17",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ssd/western-digital-2tb-wd-green-sn350-nvme": {
+   "sku": "B09DVRBNWV",
+   "indexable": true,
+   "readings": 356,
+   "first_tracked": "2021-09-03",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "pergb_group_end"
+   ]
+  },
+  "ssd/western-digital-4tb-wd-blue-sn5000-nvme": {
+   "sku": "B0D7MLB76V",
+   "indexable": true,
+   "readings": 291,
+   "first_tracked": "2024-07-02",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "pergb_group_end"
+   ]
+  },
+  "ssd/western-digital-wd-black-2tb-sn770-nvme": {
+   "sku": "B0GV1RCHX2",
+   "indexable": false,
+   "readings": 27,
+   "first_tracked": "2026-05-06",
+   "stale_days": 49,
+   "reasons": [
+    "below_min_readings",
+    "long_term_unavailable"
+   ]
+  },
+  "ssd/western-digital-wd-black-sn7100-1tb-nvme": {
+   "sku": "B0DN7CYYSD",
+   "indexable": true,
+   "readings": 301,
+   "first_tracked": "2024-12-02",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ssd/western-digital-wd-black-sn7100-2tb-nvme": {
+   "sku": "B0DN6ZQ3PD",
+   "indexable": true,
+   "readings": 236,
+   "first_tracked": "2024-12-03",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/western-digital-wd-black-sn7100-4tb-nvme": {
+   "sku": "B0DZK9C789",
+   "indexable": true,
+   "readings": 242,
+   "first_tracked": "2025-03-19",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/western-digital-wd-black-sn770m-1tb": {
+   "sku": "B0CP626QNM",
+   "indexable": true,
+   "readings": 425,
+   "first_tracked": "2023-12-18",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "pergb_group_end"
+   ]
+  },
+  "ssd/western-digital-wd-black-sn8100-2tb-nvme": {
+   "sku": "B0F3BD1W6R",
+   "indexable": true,
+   "readings": 215,
+   "first_tracked": "2025-04-16",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/western-digital-wd-black-sn8100-4tb-nvme": {
+   "sku": "B0F3B6MZM9",
+   "indexable": true,
+   "readings": 165,
+   "first_tracked": "2025-04-16",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/western-digital-wd-black-sn850x-1tb-nvme": {
+   "sku": "B0B7CKVCCV",
+   "indexable": true,
+   "readings": 509,
+   "first_tracked": "2022-08-03",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ssd/western-digital-wd-black-sn850x-2tb-nvme": {
+   "sku": "B0B7CMZ3QH",
+   "indexable": true,
+   "readings": 670,
+   "first_tracked": "2022-08-03",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ssd/western-digital-wd-black-sn850x-2tb-nvme-2": {
+   "sku": "B0B3RQDGL7",
+   "indexable": true,
+   "readings": 374,
+   "first_tracked": "2022-11-18",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "percentile_extreme"
+   ]
+  },
+  "ssd/western-digital-wd-black-sn850x-4tb-nvme": {
+   "sku": "B0D9WTKV1B",
+   "indexable": true,
+   "readings": 245,
+   "first_tracked": "2024-08-05",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/western-digital-wd-black-sn850x-4tb-nvme-2": {
+   "sku": "B0B7CQ2CHH",
+   "indexable": true,
+   "readings": 751,
+   "first_tracked": "2022-08-03",
+   "stale_days": 0,
+   "reasons": [
+    "long_history",
+    "percentile_extreme"
+   ]
+  },
+  "ssd/western-digital-wd-black-sn850x-4tb-nvme-3": {
+   "sku": "B0B3RN5QTV",
+   "indexable": true,
+   "readings": 253,
+   "first_tracked": "2024-08-10",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  },
+  "ssd/western-digital-wd-black-sn850x-nvme-ssd-1tb": {
+   "sku": "B0B3RP4XCG",
+   "indexable": true,
+   "readings": 355,
+   "first_tracked": "2023-01-09",
+   "stale_days": 0,
+   "reasons": [
+    "long_history"
+   ]
+  },
+  "ssd/western-digital-wd-blue-4tb-sn5100-nvme": {
+   "sku": "B0FSC839RG",
+   "indexable": true,
+   "readings": 109,
+   "first_tracked": "2025-10-02",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history",
+    "gsc_crawled_not_indexed"
+   ]
+  },
+  "ssd/western-digital-wd-blue-sn5100-1tb-nvme": {
+   "sku": "B0FJ8QFWBQ",
+   "indexable": true,
+   "readings": 180,
+   "first_tracked": "2025-08-27",
+   "stale_days": 0,
+   "reasons": [
+    "sparse_history"
+   ]
+  }
+ }
+}
