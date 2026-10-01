@@ -5,8 +5,9 @@
   "GATES_ENABLED": false,
   "HEALTHY_REQUIRES_FRESH": false,
   "KEEP_MIN_READINGS": 270,
-  "IMPRESSION_FLOOR": null
+  "IMPRESSION_FLOOR": 50
  },
+ "rule_order": "requiredByBuild wins outright. Otherwise: healthy AND not hard excluded AND ((readings >= KEEP_MIN_READINGS AND a fact gate) OR impressions >= IMPRESSION_FLOOR). Hard exclusions are below_min_readings, long_term_unavailable, duplicate_variant, gsc_crawled_not_indexed and family_duplicate; sparse_history is informational and does not block the demand term.",
  "note": "Reason codes are recorded for every page whether or not they bind under the current switches, so this file reads the same shape before and after the gates go live. Written by scripts/generate-product-pages.js; do not hand-edit.",
  "counts": {
   "indexable": 232,
@@ -19,6 +20,9 @@
    "readings": 76,
    "first_tracked": "2026-03-14",
    "stale_days": 0,
+   "google_impressions": 1,
+   "google_position": 59,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "percentile_extreme"
@@ -30,6 +34,9 @@
    "readings": 75,
    "first_tracked": "2026-04-21",
    "stale_days": 0,
+   "google_impressions": 2,
+   "google_position": 44,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -40,6 +47,9 @@
    "readings": 35,
    "first_tracked": "2026-07-14",
    "stale_days": 38,
+   "google_impressions": 20,
+   "google_position": 13.1,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "long_term_unavailable"
@@ -51,6 +61,9 @@
    "readings": 231,
    "first_tracked": "2018-11-22",
    "stale_days": 0,
+   "google_impressions": 0,
+   "google_position": 0,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "pre2021_trough"
@@ -62,6 +75,9 @@
    "readings": 183,
    "first_tracked": "2020-12-31",
    "stale_days": 0,
+   "google_impressions": 3,
+   "google_position": 8,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "pre2021_trough"
@@ -73,6 +89,9 @@
    "readings": 210,
    "first_tracked": "2018-12-10",
    "stale_days": 0,
+   "google_impressions": 9,
+   "google_position": 8.89,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "pre2021_trough",
@@ -85,6 +104,9 @@
    "readings": 221,
    "first_tracked": "2018-11-26",
    "stale_days": 0,
+   "google_impressions": 12,
+   "google_position": 8.08,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "pre2021_trough"
@@ -96,6 +118,9 @@
    "readings": 212,
    "first_tracked": "2020-11-25",
    "stale_days": 0,
+   "google_impressions": 5,
+   "google_position": 9.6,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "pre2021_trough"
@@ -107,6 +132,9 @@
    "readings": 172,
    "first_tracked": "2022-05-14",
    "stale_days": 0,
+   "google_impressions": 23,
+   "google_position": 10.96,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -117,6 +145,9 @@
    "readings": 207,
    "first_tracked": "2020-11-24",
    "stale_days": 0,
+   "google_impressions": 15,
+   "google_position": 12.27,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "pre2021_trough"
@@ -128,6 +159,9 @@
    "readings": 236,
    "first_tracked": "2018-12-14",
    "stale_days": 0,
+   "google_impressions": 3,
+   "google_position": 11,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "gsc_crawled_not_indexed",
@@ -140,6 +174,9 @@
    "readings": 245,
    "first_tracked": "2018-11-22",
    "stale_days": 0,
+   "google_impressions": 11,
+   "google_position": 15.36,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "pre2021_trough"
@@ -151,6 +188,9 @@
    "readings": 35,
    "first_tracked": "2025-01-08",
    "stale_days": 62,
+   "google_impressions": 36,
+   "google_position": 10.83,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "long_term_unavailable"
@@ -162,9 +202,13 @@
    "readings": 122,
    "first_tracked": "2025-12-19",
    "stale_days": 0,
+   "google_impressions": 50,
+   "google_position": 11.12,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
-    "percentile_extreme"
+    "percentile_extreme",
+    "historical_demand"
    ]
   },
   "ram/corsair-vengeance-ddr5-ram-16gb-5200mhz": {
@@ -173,6 +217,9 @@
    "readings": 177,
    "first_tracked": "2024-05-16",
    "stale_days": 0,
+   "google_impressions": 19,
+   "google_position": 11.58,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "percentile_extreme"
@@ -184,6 +231,9 @@
    "readings": 86,
    "first_tracked": "2026-04-14",
    "stale_days": 0,
+   "google_impressions": 45,
+   "google_position": 12.31,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -194,6 +244,9 @@
    "readings": 246,
    "first_tracked": "2023-10-06",
    "stale_days": 1,
+   "google_impressions": 38,
+   "google_position": 12.55,
+   "bing_impressions": 0,
    "reasons": [
     "required_by_build",
     "sparse_history"
@@ -205,8 +258,12 @@
    "readings": 186,
    "first_tracked": "2023-07-19",
    "stale_days": 0,
+   "google_impressions": 120,
+   "google_position": 11.03,
+   "bing_impressions": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "historical_demand"
    ]
   },
   "ram/corsair-vengeance-ddr5-ram-32gb-6400mhz": {
@@ -215,6 +272,9 @@
    "readings": 195,
    "first_tracked": "2024-10-22",
    "stale_days": 0,
+   "google_impressions": 35,
+   "google_position": 17.57,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -225,6 +285,9 @@
    "readings": 687,
    "first_tracked": "2019-06-07",
    "stale_days": 0,
+   "google_impressions": 9,
+   "google_position": 33.22,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "pre2021_trough"
@@ -236,6 +299,9 @@
    "readings": 726,
    "first_tracked": "2019-06-15",
    "stale_days": 0,
+   "google_impressions": 31,
+   "google_position": 17.35,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "pre2021_trough"
@@ -247,8 +313,12 @@
    "readings": 109,
    "first_tracked": "2025-12-19",
    "stale_days": 0,
+   "google_impressions": 62,
+   "google_position": 12.06,
+   "bing_impressions": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "historical_demand"
    ]
   },
   "ram/corsair-vengeance-rgb-ddr5-ram-16gb-5200mhz": {
@@ -257,6 +327,9 @@
    "readings": 203,
    "first_tracked": "2024-08-09",
    "stale_days": 0,
+   "google_impressions": 12,
+   "google_position": 14.5,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "gsc_crawled_not_indexed",
@@ -269,6 +342,9 @@
    "readings": 368,
    "first_tracked": "2023-08-23",
    "stale_days": 0,
+   "google_impressions": 23,
+   "google_position": 12.22,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -280,6 +356,9 @@
    "readings": 353,
    "first_tracked": "2023-04-04",
    "stale_days": 0,
+   "google_impressions": 21,
+   "google_position": 11.43,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -291,6 +370,9 @@
    "readings": 226,
    "first_tracked": "2022-12-26",
    "stale_days": 0,
+   "google_impressions": 18,
+   "google_position": 15.22,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -301,8 +383,12 @@
    "readings": 160,
    "first_tracked": "2024-12-11",
    "stale_days": 0,
+   "google_impressions": 342,
+   "google_position": 10.19,
+   "bing_impressions": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "historical_demand"
    ]
   },
   "ram/corsair-vengeance-rgb-ddr5-ram-32gb-6400mhz": {
@@ -311,6 +397,9 @@
    "readings": 131,
    "first_tracked": "2023-05-17",
    "stale_days": 0,
+   "google_impressions": 23,
+   "google_position": 17.04,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -321,6 +410,9 @@
    "readings": 65,
    "first_tracked": "2026-06-29",
    "stale_days": 1,
+   "google_impressions": 13,
+   "google_position": 10.08,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "percentile_extreme"
@@ -332,6 +424,9 @@
    "readings": 68,
    "first_tracked": "2026-06-29",
    "stale_days": 0,
+   "google_impressions": 35,
+   "google_position": 11.94,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -342,6 +437,9 @@
    "readings": 84,
    "first_tracked": "2026-03-31",
    "stale_days": 0,
+   "google_impressions": 5,
+   "google_position": 9,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -352,6 +450,9 @@
    "readings": 89,
    "first_tracked": "2026-03-21",
    "stale_days": 0,
+   "google_impressions": 5,
+   "google_position": 9.8,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -362,8 +463,12 @@
    "readings": 93,
    "first_tracked": "2026-02-14",
    "stale_days": 0,
+   "google_impressions": 175,
+   "google_position": 8.97,
+   "bing_impressions": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "historical_demand"
    ]
   },
   "ram/corsair-vengeance-rgb-rs-ddr5-ram-32gb-6000mhz": {
@@ -372,6 +477,9 @@
    "readings": 134,
    "first_tracked": "2026-02-14",
    "stale_days": 0,
+   "google_impressions": 9,
+   "google_position": 10.44,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -382,6 +490,9 @@
    "readings": 80,
    "first_tracked": "2026-01-30",
    "stale_days": 0,
+   "google_impressions": 5,
+   "google_position": 6,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "latency_distinct"
@@ -393,8 +504,12 @@
    "readings": 273,
    "first_tracked": "2025-02-18",
    "stale_days": 0,
+   "google_impressions": 89,
+   "google_position": 10.75,
+   "bing_impressions": 1,
    "reasons": [
-    "long_history"
+    "long_history",
+    "historical_demand"
    ]
   },
   "ram/crucial-16gb-ddr4-ram-3200mhz": {
@@ -403,6 +518,9 @@
    "readings": 783,
    "first_tracked": "2020-07-25",
    "stale_days": 0,
+   "google_impressions": 18,
+   "google_position": 9.72,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "pre2021_trough"
@@ -414,6 +532,9 @@
    "readings": 510,
    "first_tracked": "2021-10-30",
    "stale_days": 0,
+   "google_impressions": 4,
+   "google_position": 16.5,
+   "bing_impressions": 0,
    "reasons": [
     "long_history"
    ]
@@ -424,6 +545,9 @@
    "readings": 332,
    "first_tracked": "2022-12-22",
    "stale_days": 0,
+   "google_impressions": 40,
+   "google_position": 19,
+   "bing_impressions": 0,
    "reasons": [
     "long_history"
    ]
@@ -434,7 +558,11 @@
    "readings": 470,
    "first_tracked": "2022-12-23",
    "stale_days": 0,
+   "google_impressions": 17,
+   "google_position": 16.35,
+   "bing_impressions": 0,
    "reasons": [
+    "family_duplicate",
     "long_history",
     "percentile_extreme"
    ]
@@ -445,6 +573,9 @@
    "readings": 1054,
    "first_tracked": "2020-07-25",
    "stale_days": 0,
+   "google_impressions": 9,
+   "google_position": 13.56,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "pre2021_trough"
@@ -456,7 +587,11 @@
    "readings": 639,
    "first_tracked": "2020-07-25",
    "stale_days": 0,
+   "google_impressions": 5,
+   "google_position": 12.6,
+   "bing_impressions": 0,
    "reasons": [
+    "family_duplicate",
     "long_history",
     "pre2021_trough"
    ]
@@ -467,6 +602,9 @@
    "readings": 610,
    "first_tracked": "2021-10-30",
    "stale_days": 0,
+   "google_impressions": 24,
+   "google_position": 18.71,
+   "bing_impressions": 0,
    "reasons": [
     "long_history"
    ]
@@ -477,9 +615,13 @@
    "readings": 505,
    "first_tracked": "2023-01-04",
    "stale_days": 0,
+   "google_impressions": 59,
+   "google_position": 13.27,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
-    "percentile_extreme"
+    "percentile_extreme",
+    "historical_demand"
    ]
   },
   "ram/crucial-64gb-ddr5-ram-5600mhz": {
@@ -488,8 +630,12 @@
    "readings": 443,
    "first_tracked": "2023-07-18",
    "stale_days": 0,
+   "google_impressions": 54,
+   "google_position": 17.89,
+   "bing_impressions": 0,
    "reasons": [
-    "long_history"
+    "long_history",
+    "historical_demand"
    ]
   },
   "ram/crucial-64gb-ddr5-ram-kit-4800mhz": {
@@ -498,6 +644,9 @@
    "readings": 627,
    "first_tracked": "2021-11-04",
    "stale_days": 0,
+   "google_impressions": 45,
+   "google_position": 14.53,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -509,6 +658,9 @@
    "readings": 424,
    "first_tracked": "2023-07-15",
    "stale_days": 0,
+   "google_impressions": 15,
+   "google_position": 18.2,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -520,6 +672,9 @@
    "readings": 412,
    "first_tracked": "2023-08-22",
    "stale_days": 0,
+   "google_impressions": 38,
+   "google_position": 14.45,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -531,6 +686,9 @@
    "readings": 295,
    "first_tracked": "2025-02-18",
    "stale_days": 0,
+   "google_impressions": 15,
+   "google_position": 21.4,
+   "bing_impressions": 0,
    "reasons": [
     "long_history"
    ]
@@ -541,6 +699,9 @@
    "readings": 243,
    "first_tracked": "2023-01-04",
    "stale_days": 1,
+   "google_impressions": 8,
+   "google_position": 12.75,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "gsc_crawled_not_indexed",
@@ -553,8 +714,12 @@
    "readings": 33,
    "first_tracked": "2026-05-01",
    "stale_days": 0,
+   "google_impressions": 101,
+   "google_position": 26.38,
+   "bing_impressions": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "historical_demand"
    ]
   },
   "ram/ddr4-ram-laptop-only-gigastone-32gb-kit-3200mhz": {
@@ -563,6 +728,9 @@
    "readings": 188,
    "first_tracked": "2021-06-21",
    "stale_days": 0,
+   "google_impressions": 13,
+   "google_position": 20.77,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -573,6 +741,9 @@
    "readings": 655,
    "first_tracked": "2022-09-26",
    "stale_days": 0,
+   "google_impressions": 44,
+   "google_position": 17.5,
+   "bing_impressions": 2,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -584,8 +755,12 @@
    "readings": 191,
    "first_tracked": "2023-10-16",
    "stale_days": 0,
+   "google_impressions": 280,
+   "google_position": 13.15,
+   "bing_impressions": 1,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "historical_demand"
    ]
   },
   "ram/g-skill-ripjaws-s5-series-ddr5-ram-64gb-6000mhz": {
@@ -594,6 +769,9 @@
    "readings": 182,
    "first_tracked": "2023-07-17",
    "stale_days": 0,
+   "google_impressions": 1,
+   "google_position": 10,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -604,6 +782,9 @@
    "readings": 1360,
    "first_tracked": "2015-11-27",
    "stale_days": 0,
+   "google_impressions": 6,
+   "google_position": 7.33,
+   "bing_impressions": 0,
    "reasons": [
     "required_by_build",
     "long_history",
@@ -616,6 +797,9 @@
    "readings": 2059,
    "first_tracked": "2016-02-15",
    "stale_days": 0,
+   "google_impressions": 3,
+   "google_position": 4,
+   "bing_impressions": 0,
    "reasons": [
     "required_by_build",
     "long_history",
@@ -628,6 +812,9 @@
    "readings": 1464,
    "first_tracked": "2015-11-12",
    "stale_days": 0,
+   "google_impressions": 1,
+   "google_position": 8,
+   "bing_impressions": 0,
    "reasons": [
     "required_by_build",
     "long_history",
@@ -640,6 +827,9 @@
    "readings": 181,
    "first_tracked": "2019-11-23",
    "stale_days": 0,
+   "google_impressions": 2,
+   "google_position": 23,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "percentile_extreme",
@@ -653,6 +843,9 @@
    "readings": 489,
    "first_tracked": "2018-11-02",
    "stale_days": 0,
+   "google_impressions": 2,
+   "google_position": 7,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "pre2021_trough"
@@ -664,6 +857,9 @@
    "readings": 389,
    "first_tracked": "2019-11-22",
    "stale_days": 0,
+   "google_impressions": 0,
+   "google_position": 0,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "pre2021_trough",
@@ -676,6 +872,9 @@
    "readings": 189,
    "first_tracked": "2022-09-21",
    "stale_days": 0,
+   "google_impressions": 9,
+   "google_position": 9.33,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "duplicate_variant"
@@ -687,6 +886,9 @@
    "readings": 195,
    "first_tracked": "2022-09-21",
    "stale_days": 0,
+   "google_impressions": 2,
+   "google_position": 18.5,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -697,6 +899,9 @@
    "readings": 401,
    "first_tracked": "2023-05-09",
    "stale_days": 0,
+   "google_impressions": 4,
+   "google_position": 9.25,
+   "bing_impressions": 0,
    "reasons": [
     "long_history"
    ]
@@ -707,6 +912,9 @@
    "readings": 124,
    "first_tracked": "2022-09-20",
    "stale_days": 0,
+   "google_impressions": 7,
+   "google_position": 14.14,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "latency_distinct"
@@ -718,8 +926,12 @@
    "readings": 236,
    "first_tracked": "2022-10-30",
    "stale_days": 0,
+   "google_impressions": 169,
+   "google_position": 10.92,
+   "bing_impressions": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "historical_demand"
    ]
   },
   "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-64gb-6000mhz-2": {
@@ -728,6 +940,9 @@
    "readings": 123,
    "first_tracked": "2024-11-22",
    "stale_days": 0,
+   "google_impressions": 7,
+   "google_position": 13.29,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -738,6 +953,9 @@
    "readings": 141,
    "first_tracked": "2023-10-14",
    "stale_days": 0,
+   "google_impressions": 5,
+   "google_position": 14,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -748,6 +966,9 @@
    "readings": 228,
    "first_tracked": "2022-10-29",
    "stale_days": 0,
+   "google_impressions": 13,
+   "google_position": 10.31,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -758,6 +979,9 @@
    "readings": 320,
    "first_tracked": "2023-07-03",
    "stale_days": 0,
+   "google_impressions": 4,
+   "google_position": 12.75,
+   "bing_impressions": 0,
    "reasons": [
     "long_history"
    ]
@@ -768,6 +992,9 @@
    "readings": 78,
    "first_tracked": "2025-12-31",
    "stale_days": 0,
+   "google_impressions": 13,
+   "google_position": 17.46,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -778,6 +1005,9 @@
    "readings": 236,
    "first_tracked": "2022-01-19",
    "stale_days": 0,
+   "google_impressions": 7,
+   "google_position": 12.86,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "percentile_extreme"
@@ -789,8 +1019,12 @@
    "readings": 193,
    "first_tracked": "2023-07-18",
    "stale_days": 0,
+   "google_impressions": 1,
+   "google_position": 5,
+   "bing_impressions": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "family_duplicate"
    ]
   },
   "ram/g-skill-trident-z5-rgb-series-ddr5-ram-32gb-6400mhz": {
@@ -799,6 +1033,9 @@
    "readings": 183,
    "first_tracked": "2022-01-27",
    "stale_days": 0,
+   "google_impressions": 7,
+   "google_position": 11.43,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -809,6 +1046,9 @@
    "readings": 226,
    "first_tracked": "2023-05-21",
    "stale_days": 0,
+   "google_impressions": 9,
+   "google_position": 8,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "percentile_extreme"
@@ -820,6 +1060,9 @@
    "readings": 279,
    "first_tracked": "2022-10-29",
    "stale_days": 0,
+   "google_impressions": 9,
+   "google_position": 27,
+   "bing_impressions": 0,
    "reasons": [
     "long_history"
    ]
@@ -830,6 +1073,9 @@
    "readings": 212,
    "first_tracked": "2024-08-16",
    "stale_days": 0,
+   "google_impressions": 28,
+   "google_position": 14.25,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "latency_distinct"
@@ -841,6 +1087,9 @@
    "readings": 113,
    "first_tracked": "2025-02-14",
    "stale_days": 0,
+   "google_impressions": 24,
+   "google_position": 17.08,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "pergb_group_end"
@@ -852,6 +1101,9 @@
    "readings": 454,
    "first_tracked": "2022-03-08",
    "stale_days": 0,
+   "google_impressions": 9,
+   "google_position": 15.56,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -863,6 +1115,9 @@
    "readings": 221,
    "first_tracked": "2024-03-29",
    "stale_days": 0,
+   "google_impressions": 8,
+   "google_position": 18.5,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -873,6 +1128,9 @@
    "readings": 486,
    "first_tracked": "2021-12-15",
    "stale_days": 0,
+   "google_impressions": 12,
+   "google_position": 13.58,
+   "bing_impressions": 0,
    "reasons": [
     "long_history"
    ]
@@ -883,6 +1141,9 @@
    "readings": 356,
    "first_tracked": "2022-09-30",
    "stale_days": 0,
+   "google_impressions": 14,
+   "google_position": 8.36,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -894,6 +1155,9 @@
    "readings": 323,
    "first_tracked": "2024-03-29",
    "stale_days": 0,
+   "google_impressions": 36,
+   "google_position": 12.08,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "percentile_extreme",
@@ -906,6 +1170,9 @@
    "readings": 387,
    "first_tracked": "2023-01-11",
    "stale_days": 0,
+   "google_impressions": 11,
+   "google_position": 17.18,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -917,6 +1184,9 @@
    "readings": 485,
    "first_tracked": "2022-03-02",
    "stale_days": 0,
+   "google_impressions": 15,
+   "google_position": 9.93,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -928,6 +1198,9 @@
    "readings": 216,
    "first_tracked": "2024-08-14",
    "stale_days": 0,
+   "google_impressions": 5,
+   "google_position": 8,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "pergb_group_end"
@@ -939,6 +1212,9 @@
    "readings": 223,
    "first_tracked": "2024-04-11",
    "stale_days": 0,
+   "google_impressions": 17,
+   "google_position": 13.41,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -949,6 +1225,9 @@
    "readings": 279,
    "first_tracked": "2024-03-29",
    "stale_days": 0,
+   "google_impressions": 11,
+   "google_position": 17.18,
+   "bing_impressions": 0,
    "reasons": [
     "long_history"
    ]
@@ -959,6 +1238,9 @@
    "readings": 171,
    "first_tracked": "2024-03-31",
    "stale_days": 0,
+   "google_impressions": 2,
+   "google_position": 6.5,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -969,6 +1251,9 @@
    "readings": 494,
    "first_tracked": "2023-04-02",
    "stale_days": 0,
+   "google_impressions": 2,
+   "google_position": 7,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -980,6 +1265,9 @@
    "readings": 348,
    "first_tracked": "2023-05-05",
    "stale_days": 0,
+   "google_impressions": 14,
+   "google_position": 15.21,
+   "bing_impressions": 0,
    "reasons": [
     "long_history"
    ]
@@ -990,6 +1278,9 @@
    "readings": 350,
    "first_tracked": "2023-01-12",
    "stale_days": 0,
+   "google_impressions": 8,
+   "google_position": 11,
+   "bing_impressions": 0,
    "reasons": [
     "long_history"
    ]
@@ -1000,6 +1291,9 @@
    "readings": 453,
    "first_tracked": "2023-01-10",
    "stale_days": 1,
+   "google_impressions": 11,
+   "google_position": 14,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -1011,6 +1305,9 @@
    "readings": 447,
    "first_tracked": "2023-03-29",
    "stale_days": 0,
+   "google_impressions": 2,
+   "google_position": 38.5,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -1022,6 +1319,9 @@
    "readings": 459,
    "first_tracked": "2023-03-29",
    "stale_days": 0,
+   "google_impressions": 2,
+   "google_position": 5,
+   "bing_impressions": 0,
    "reasons": [
     "long_history"
    ]
@@ -1032,6 +1332,9 @@
    "readings": 75,
    "first_tracked": "2026-06-11",
    "stale_days": 0,
+   "google_impressions": 31,
+   "google_position": 9.42,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "percentile_extreme"
@@ -1043,6 +1346,9 @@
    "readings": 77,
    "first_tracked": "2026-04-27",
    "stale_days": 0,
+   "google_impressions": 21,
+   "google_position": 9.05,
+   "bing_impressions": 2,
    "reasons": [
     "sparse_history"
    ]
@@ -1053,6 +1359,9 @@
    "readings": 115,
    "first_tracked": "2023-05-23",
    "stale_days": 0,
+   "google_impressions": 3,
+   "google_position": 14.67,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1063,6 +1372,9 @@
    "readings": 163,
    "first_tracked": "2024-11-18",
    "stale_days": 0,
+   "google_impressions": 11,
+   "google_position": 14.36,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "percentile_extreme"
@@ -1074,6 +1386,9 @@
    "readings": 228,
    "first_tracked": "2025-01-24",
    "stale_days": 0,
+   "google_impressions": 17,
+   "google_position": 12.71,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "pergb_group_end"
@@ -1085,6 +1400,9 @@
    "readings": 313,
    "first_tracked": "2019-04-11",
    "stale_days": 0,
+   "google_impressions": 7,
+   "google_position": 40.43,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "pre2021_trough"
@@ -1096,6 +1414,9 @@
    "readings": 90,
    "first_tracked": "2026-04-17",
    "stale_days": 0,
+   "google_impressions": 29,
+   "google_position": 17.1,
+   "bing_impressions": 1,
    "reasons": [
     "sparse_history",
     "percentile_extreme"
@@ -1107,6 +1428,9 @@
    "readings": 238,
    "first_tracked": "2025-10-21",
    "stale_days": 0,
+   "google_impressions": 28,
+   "google_position": 24.61,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1117,6 +1441,9 @@
    "readings": 83,
    "first_tracked": "2026-04-20",
    "stale_days": 0,
+   "google_impressions": 5,
+   "google_position": 9.2,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1127,6 +1454,9 @@
    "readings": 93,
    "first_tracked": "2025-12-12",
    "stale_days": 0,
+   "google_impressions": 13,
+   "google_position": 15.92,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1137,6 +1467,9 @@
    "readings": 88,
    "first_tracked": "2025-12-08",
    "stale_days": 0,
+   "google_impressions": 15,
+   "google_position": 12,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1147,6 +1480,9 @@
    "readings": 185,
    "first_tracked": "2021-04-23",
    "stale_days": 0,
+   "google_impressions": 13,
+   "google_position": 9.23,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "gsc_crawled_not_indexed"
@@ -1158,6 +1494,9 @@
    "readings": 11,
    "first_tracked": "2026-04-12",
    "stale_days": 62,
+   "google_impressions": 38,
+   "google_position": 17.79,
+   "bing_impressions": 0,
    "reasons": [
     "below_min_readings",
     "long_term_unavailable",
@@ -1170,6 +1509,9 @@
    "readings": 101,
    "first_tracked": "2025-11-05",
    "stale_days": 0,
+   "google_impressions": 7,
+   "google_position": 13.43,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1180,6 +1522,9 @@
    "readings": 349,
    "first_tracked": "2021-02-05",
    "stale_days": 0,
+   "google_impressions": 35,
+   "google_position": 13.09,
+   "bing_impressions": 0,
    "reasons": [
     "long_history"
    ]
@@ -1190,10 +1535,14 @@
    "readings": 151,
    "first_tracked": "2023-12-20",
    "stale_days": 1,
+   "google_impressions": 53,
+   "google_position": 9.09,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "pergb_group_end",
-    "latency_distinct"
+    "latency_distinct",
+    "historical_demand"
    ]
   },
   "ram/teamgroup-elite-sodimm-ddr5-64gb-5600mhz": {
@@ -1202,6 +1551,9 @@
    "readings": 146,
    "first_tracked": "2023-12-11",
    "stale_days": 0,
+   "google_impressions": 46,
+   "google_position": 10.57,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "latency_distinct"
@@ -1213,9 +1565,13 @@
    "readings": 331,
    "first_tracked": "2022-06-22",
    "stale_days": 0,
+   "google_impressions": 175,
+   "google_position": 11.6,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
-    "percentile_extreme"
+    "percentile_extreme",
+    "historical_demand"
    ]
   },
   "ram/teamgroup-t-force-delta-rgb-ddr5-ram-32gb-6000mhz-2": {
@@ -1224,9 +1580,13 @@
    "readings": 357,
    "first_tracked": "2022-06-22",
    "stale_days": 0,
+   "google_impressions": 123,
+   "google_position": 10.25,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
-    "percentile_extreme"
+    "percentile_extreme",
+    "historical_demand"
    ]
   },
   "ram/teamgroup-t-force-vulcan-ddr5-32gb-6000mhz": {
@@ -1235,8 +1595,12 @@
    "readings": 289,
    "first_tracked": "2023-01-04",
    "stale_days": 0,
+   "google_impressions": 70,
+   "google_position": 15.21,
+   "bing_impressions": 0,
    "reasons": [
-    "long_history"
+    "long_history",
+    "historical_demand"
    ]
   },
   "ram/teamgroup-t-force-vulcan-z-ddr4-16gb-kit-3200mhz": {
@@ -1245,6 +1609,9 @@
    "readings": 662,
    "first_tracked": "2019-07-02",
    "stale_days": 0,
+   "google_impressions": 6,
+   "google_position": 15.5,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "pre2021_trough"
@@ -1256,6 +1623,9 @@
    "readings": 307,
    "first_tracked": "2020-12-31",
    "stale_days": 0,
+   "google_impressions": 11,
+   "google_position": 12.45,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "pre2021_trough"
@@ -1267,6 +1637,9 @@
    "readings": 320,
    "first_tracked": "2018-10-26",
    "stale_days": 0,
+   "google_impressions": 7,
+   "google_position": 11,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "pre2021_trough",
@@ -1279,6 +1652,9 @@
    "readings": 441,
    "first_tracked": "2021-07-08",
    "stale_days": 0,
+   "google_impressions": 7,
+   "google_position": 11.14,
+   "bing_impressions": 0,
    "reasons": [
     "long_history"
    ]
@@ -1289,6 +1665,9 @@
    "readings": 145,
    "first_tracked": "2023-12-16",
    "stale_days": 0,
+   "google_impressions": 11,
+   "google_position": 19.64,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "pergb_group_end"
@@ -1300,6 +1679,9 @@
    "readings": 538,
    "first_tracked": "2023-06-06",
    "stale_days": 0,
+   "google_impressions": 1,
+   "google_position": 9,
+   "bing_impressions": 0,
    "reasons": [
     "gsc_crawled_not_indexed",
     "long_history"
@@ -1311,6 +1693,9 @@
    "readings": 86,
    "first_tracked": "2026-05-23",
    "stale_days": 0,
+   "google_impressions": 7,
+   "google_position": 21.14,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1321,6 +1706,9 @@
    "readings": 124,
    "first_tracked": "2025-06-20",
    "stale_days": 0,
+   "google_impressions": 9,
+   "google_position": 17.11,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1331,6 +1719,9 @@
    "readings": 173,
    "first_tracked": "2023-12-11",
    "stale_days": 0,
+   "google_impressions": 41,
+   "google_position": 26.54,
+   "bing_impressions": 1,
    "reasons": [
     "sparse_history"
    ]
@@ -1341,6 +1732,9 @@
    "readings": 407,
    "first_tracked": "2023-11-27",
    "stale_days": 0,
+   "google_impressions": 23,
+   "google_position": 29.65,
+   "bing_impressions": 40,
    "reasons": [
     "gsc_crawled_not_indexed",
     "long_history"
@@ -1352,6 +1746,9 @@
    "readings": 102,
    "first_tracked": "2025-06-28",
    "stale_days": 0,
+   "google_impressions": 5,
+   "google_position": 8.6,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1362,6 +1759,9 @@
    "readings": 76,
    "first_tracked": "2026-05-13",
    "stale_days": 0,
+   "google_impressions": 7,
+   "google_position": 10.57,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "percentile_extreme"
@@ -1373,6 +1773,9 @@
    "readings": 101,
    "first_tracked": "2025-06-25",
    "stale_days": 0,
+   "google_impressions": 5,
+   "google_position": 10.2,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1383,6 +1786,9 @@
    "readings": 107,
    "first_tracked": "2025-12-03",
    "stale_days": 0,
+   "google_impressions": 22,
+   "google_position": 15.64,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1393,6 +1799,9 @@
    "readings": 98,
    "first_tracked": "2025-06-12",
    "stale_days": 0,
+   "google_impressions": 8,
+   "google_position": 10.62,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1403,6 +1812,9 @@
    "readings": 85,
    "first_tracked": "2025-06-12",
    "stale_days": 0,
+   "google_impressions": 7,
+   "google_position": 14.57,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1413,6 +1825,9 @@
    "readings": 132,
    "first_tracked": "2025-07-04",
    "stale_days": 0,
+   "google_impressions": 3,
+   "google_position": 9,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1423,6 +1838,9 @@
    "readings": 104,
    "first_tracked": "2025-06-20",
    "stale_days": 0,
+   "google_impressions": 17,
+   "google_position": 18.88,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1433,6 +1851,9 @@
    "readings": 103,
    "first_tracked": "2020-07-01",
    "stale_days": 0,
+   "google_impressions": 7,
+   "google_position": 39.86,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "pre2021_trough"
@@ -1444,6 +1865,9 @@
    "readings": 258,
    "first_tracked": "2025-04-16",
    "stale_days": 0,
+   "google_impressions": 13,
+   "google_position": 19.85,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1454,6 +1878,9 @@
    "readings": 176,
    "first_tracked": "2025-07-14",
    "stale_days": 0,
+   "google_impressions": 6,
+   "google_position": 8,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1464,6 +1891,9 @@
    "readings": 323,
    "first_tracked": "2024-11-12",
    "stale_days": 0,
+   "google_impressions": 2,
+   "google_position": 8.5,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -1475,6 +1905,9 @@
    "readings": 343,
    "first_tracked": "2024-09-17",
    "stale_days": 0,
+   "google_impressions": 34,
+   "google_position": 15.12,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -1486,6 +1919,9 @@
    "readings": 328,
    "first_tracked": "2024-09-17",
    "stale_days": 0,
+   "google_impressions": 19,
+   "google_position": 15.95,
+   "bing_impressions": 10,
    "reasons": [
     "long_history"
    ]
@@ -1496,6 +1932,9 @@
    "readings": 242,
    "first_tracked": "2025-04-29",
    "stale_days": 0,
+   "google_impressions": 8,
+   "google_position": 8,
+   "bing_impressions": 1,
    "reasons": [
     "sparse_history"
    ]
@@ -1506,6 +1945,9 @@
    "readings": 296,
    "first_tracked": "2024-09-17",
    "stale_days": 0,
+   "google_impressions": 2,
+   "google_position": 20.5,
+   "bing_impressions": 0,
    "reasons": [
     "long_history"
    ]
@@ -1516,6 +1958,9 @@
    "readings": 156,
    "first_tracked": "2025-04-08",
    "stale_days": 0,
+   "google_impressions": 6,
+   "google_position": 19.5,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "pergb_group_end"
@@ -1527,6 +1972,9 @@
    "readings": 293,
    "first_tracked": "2023-10-31",
    "stale_days": 9,
+   "google_impressions": 10,
+   "google_position": 9.2,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -1538,6 +1986,9 @@
    "readings": 234,
    "first_tracked": "2024-08-28",
    "stale_days": 0,
+   "google_impressions": 2,
+   "google_position": 7,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1548,6 +1999,9 @@
    "readings": 443,
    "first_tracked": "2023-10-31",
    "stale_days": 0,
+   "google_impressions": 9,
+   "google_position": 22.33,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "pergb_group_end"
@@ -1559,6 +2013,9 @@
    "readings": 255,
    "first_tracked": "2024-08-27",
    "stale_days": 0,
+   "google_impressions": 19,
+   "google_position": 15.42,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1569,6 +2026,9 @@
    "readings": 274,
    "first_tracked": "2023-10-31",
    "stale_days": 0,
+   "google_impressions": 26,
+   "google_position": 17.19,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -1580,6 +2040,9 @@
    "readings": 259,
    "first_tracked": "2024-02-29",
    "stale_days": 0,
+   "google_impressions": 9,
+   "google_position": 31.89,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1590,6 +2053,9 @@
    "readings": 141,
    "first_tracked": "2024-06-04",
    "stale_days": 0,
+   "google_impressions": 10,
+   "google_position": 18.2,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1600,6 +2066,9 @@
    "readings": 132,
    "first_tracked": "2024-01-26",
    "stale_days": 0,
+   "google_impressions": 14,
+   "google_position": 11.57,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1610,6 +2079,9 @@
    "readings": 137,
    "first_tracked": "2024-01-27",
    "stale_days": 0,
+   "google_impressions": 1,
+   "google_position": 10,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1620,6 +2092,9 @@
    "readings": 131,
    "first_tracked": "2023-12-28",
    "stale_days": 0,
+   "google_impressions": 2,
+   "google_position": 12.5,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1630,6 +2105,9 @@
    "readings": 149,
    "first_tracked": "2023-12-25",
    "stale_days": 0,
+   "google_impressions": 8,
+   "google_position": 20.12,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1640,6 +2118,9 @@
    "readings": 165,
    "first_tracked": "2023-04-03",
    "stale_days": 0,
+   "google_impressions": 12,
+   "google_position": 13.17,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1650,6 +2131,9 @@
    "readings": 122,
    "first_tracked": "2023-06-02",
    "stale_days": 0,
+   "google_impressions": 12,
+   "google_position": 10,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1660,6 +2144,9 @@
    "readings": 160,
    "first_tracked": "2023-08-16",
    "stale_days": 0,
+   "google_impressions": 2,
+   "google_position": 23,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1670,6 +2157,9 @@
    "readings": 79,
    "first_tracked": "2026-02-28",
    "stale_days": 0,
+   "google_impressions": 6,
+   "google_position": 8.5,
+   "bing_impressions": 2,
    "reasons": [
     "sparse_history"
    ]
@@ -1680,6 +2170,9 @@
    "readings": 129,
    "first_tracked": "2023-04-10",
    "stale_days": 0,
+   "google_impressions": 9,
+   "google_position": 11,
+   "bing_impressions": 1,
    "reasons": [
     "sparse_history"
    ]
@@ -1690,6 +2183,9 @@
    "readings": 159,
    "first_tracked": "2024-04-09",
    "stale_days": 0,
+   "google_impressions": 6,
+   "google_position": 9.67,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1700,6 +2196,9 @@
    "readings": 116,
    "first_tracked": "2023-08-07",
    "stale_days": 0,
+   "google_impressions": 3,
+   "google_position": 8.67,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1710,6 +2209,9 @@
    "readings": 980,
    "first_tracked": "2018-09-19",
    "stale_days": 0,
+   "google_impressions": 0,
+   "google_position": 0,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "pre2021_trough"
@@ -1721,6 +2223,9 @@
    "readings": 70,
    "first_tracked": "2026-06-25",
    "stale_days": 4,
+   "google_impressions": 9,
+   "google_position": 6.33,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1731,6 +2236,9 @@
    "readings": 54,
    "first_tracked": "2025-07-18",
    "stale_days": 24,
+   "google_impressions": 3,
+   "google_position": 33.67,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "pergb_group_end"
@@ -1742,6 +2250,9 @@
    "readings": 122,
    "first_tracked": "2024-05-01",
    "stale_days": 0,
+   "google_impressions": 12,
+   "google_position": 8.33,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1752,6 +2263,9 @@
    "readings": 199,
    "first_tracked": "2024-08-05",
    "stale_days": 0,
+   "google_impressions": 21,
+   "google_position": 19.86,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1762,6 +2276,9 @@
    "readings": 405,
    "first_tracked": "2023-07-03",
    "stale_days": 0,
+   "google_impressions": 28,
+   "google_position": 13.68,
+   "bing_impressions": 1,
    "reasons": [
     "long_history"
    ]
@@ -1772,6 +2289,9 @@
    "readings": 263,
    "first_tracked": "2023-02-04",
    "stale_days": 0,
+   "google_impressions": 5,
+   "google_position": 7.8,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1782,6 +2302,9 @@
    "readings": 682,
    "first_tracked": "2020-09-16",
    "stale_days": 0,
+   "google_impressions": 2,
+   "google_position": 6,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "pre2021_trough"
@@ -1793,6 +2316,9 @@
    "readings": 240,
    "first_tracked": "2021-09-26",
    "stale_days": 0,
+   "google_impressions": 1,
+   "google_position": 8,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1803,6 +2329,9 @@
    "readings": 182,
    "first_tracked": "2024-12-28",
    "stale_days": 0,
+   "google_impressions": 39,
+   "google_position": 8.38,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "pergb_group_end"
@@ -1814,6 +2343,9 @@
    "readings": 448,
    "first_tracked": "2021-07-07",
    "stale_days": 0,
+   "google_impressions": 39,
+   "google_position": 5.54,
+   "bing_impressions": 1,
    "reasons": [
     "long_history"
    ]
@@ -1824,6 +2356,9 @@
    "readings": 358,
    "first_tracked": "2021-07-07",
    "stale_days": 0,
+   "google_impressions": 4,
+   "google_position": 35,
+   "bing_impressions": 0,
    "reasons": [
     "long_history"
    ]
@@ -1834,6 +2369,9 @@
    "readings": 158,
    "first_tracked": "2025-05-29",
    "stale_days": 0,
+   "google_impressions": 19,
+   "google_position": 20.74,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1844,6 +2382,9 @@
    "readings": 973,
    "first_tracked": "2021-01-19",
    "stale_days": 0,
+   "google_impressions": 14,
+   "google_position": 15.5,
+   "bing_impressions": 0,
    "reasons": [
     "long_history"
    ]
@@ -1854,6 +2395,9 @@
    "readings": 909,
    "first_tracked": "2021-01-19",
    "stale_days": 0,
+   "google_impressions": 24,
+   "google_position": 21.12,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -1865,6 +2409,9 @@
    "readings": 566,
    "first_tracked": "2021-01-18",
    "stale_days": 0,
+   "google_impressions": 10,
+   "google_position": 5.6,
+   "bing_impressions": 5,
    "reasons": [
     "long_history"
    ]
@@ -1875,6 +2422,9 @@
    "readings": 674,
    "first_tracked": "2020-07-01",
    "stale_days": 0,
+   "google_impressions": 2,
+   "google_position": 8,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "pre2021_trough"
@@ -1886,6 +2436,9 @@
    "readings": 1101,
    "first_tracked": "2020-06-03",
    "stale_days": 0,
+   "google_impressions": 15,
+   "google_position": 16.2,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "pre2021_trough"
@@ -1897,6 +2450,9 @@
    "readings": 888,
    "first_tracked": "2016-11-27",
    "stale_days": 0,
+   "google_impressions": 3,
+   "google_position": 24,
+   "bing_impressions": 0,
    "reasons": [
     "required_by_build",
     "long_history",
@@ -1910,6 +2466,9 @@
    "readings": 549,
    "first_tracked": "2021-10-22",
    "stale_days": 0,
+   "google_impressions": 8,
+   "google_position": 14,
+   "bing_impressions": 0,
    "reasons": [
     "long_history"
    ]
@@ -1920,6 +2479,9 @@
    "readings": 260,
    "first_tracked": "2024-10-01",
    "stale_days": 0,
+   "google_impressions": 21,
+   "google_position": 8.71,
+   "bing_impressions": 2,
    "reasons": [
     "sparse_history"
    ]
@@ -1930,6 +2492,9 @@
    "readings": 303,
    "first_tracked": "2024-10-01",
    "stale_days": 0,
+   "google_impressions": 27,
+   "google_position": 9.74,
+   "bing_impressions": 2,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -1941,6 +2506,9 @@
    "readings": 225,
    "first_tracked": "2025-04-29",
    "stale_days": 0,
+   "google_impressions": 36,
+   "google_position": 25.78,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1951,6 +2519,9 @@
    "readings": 284,
    "first_tracked": "2023-07-23",
    "stale_days": 0,
+   "google_impressions": 41,
+   "google_position": 11.63,
+   "bing_impressions": 2,
    "reasons": [
     "required_by_build",
     "gsc_crawled_not_indexed",
@@ -1963,6 +2534,9 @@
    "readings": 233,
    "first_tracked": "2025-04-28",
    "stale_days": 0,
+   "google_impressions": 10,
+   "google_position": 5.7,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1973,6 +2547,9 @@
    "readings": 87,
    "first_tracked": "2025-12-15",
    "stale_days": 0,
+   "google_impressions": 23,
+   "google_position": 18.17,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1983,6 +2560,9 @@
    "readings": 473,
    "first_tracked": "2023-04-27",
    "stale_days": 1,
+   "google_impressions": 23,
+   "google_position": 30.7,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "percentile_extreme",
@@ -1995,8 +2575,12 @@
    "readings": 614,
    "first_tracked": "2022-11-03",
    "stale_days": 0,
+   "google_impressions": 51,
+   "google_position": 21.82,
+   "bing_impressions": 2,
    "reasons": [
-    "long_history"
+    "long_history",
+    "historical_demand"
    ]
   },
   "ssd/samsung-990-pro-w-heatsink-ssd-1tb-pcie": {
@@ -2005,6 +2589,9 @@
    "readings": 259,
    "first_tracked": "2022-11-23",
    "stale_days": 0,
+   "google_impressions": 4,
+   "google_position": 11.75,
+   "bing_impressions": 1,
    "reasons": [
     "sparse_history"
    ]
@@ -2015,6 +2602,9 @@
    "readings": 507,
    "first_tracked": "2022-11-13",
    "stale_days": 0,
+   "google_impressions": 45,
+   "google_position": 11.93,
+   "bing_impressions": 0,
    "reasons": [
     "long_history"
    ]
@@ -2025,6 +2615,9 @@
    "readings": 202,
    "first_tracked": "2024-04-02",
    "stale_days": 0,
+   "google_impressions": 1,
+   "google_position": 4,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "pergb_group_end"
@@ -2036,8 +2629,12 @@
    "readings": 117,
    "first_tracked": "2024-03-27",
    "stale_days": 0,
+   "google_impressions": 2,
+   "google_position": 5,
+   "bing_impressions": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "family_duplicate"
    ]
   },
   "ssd/samsung-ssd-860-evo-2tb-2-5-inch-sata": {
@@ -2046,6 +2643,9 @@
    "readings": 874,
    "first_tracked": "2018-01-23",
    "stale_days": 0,
+   "google_impressions": 8,
+   "google_position": 25.88,
+   "bing_impressions": 1,
    "reasons": [
     "long_history",
     "pre2021_trough"
@@ -2057,6 +2657,9 @@
    "readings": 596,
    "first_tracked": "2018-01-31",
    "stale_days": 0,
+   "google_impressions": 12,
+   "google_position": 24.17,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "pre2021_trough",
@@ -2069,6 +2672,9 @@
    "readings": 1001,
    "first_tracked": "2021-01-22",
    "stale_days": 0,
+   "google_impressions": 12,
+   "google_position": 12.33,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "percentile_extreme",
@@ -2081,6 +2687,9 @@
    "readings": 791,
    "first_tracked": "2021-01-19",
    "stale_days": 0,
+   "google_impressions": 11,
+   "google_position": 6.27,
+   "bing_impressions": 0,
    "reasons": [
     "long_history"
    ]
@@ -2091,6 +2700,9 @@
    "readings": 653,
    "first_tracked": "2021-01-19",
    "stale_days": 0,
+   "google_impressions": 11,
+   "google_position": 9.27,
+   "bing_impressions": 1,
    "reasons": [
     "long_history"
    ]
@@ -2101,6 +2713,9 @@
    "readings": 108,
    "first_tracked": "2026-03-11",
    "stale_days": 0,
+   "google_impressions": 8,
+   "google_position": 10.38,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -2111,6 +2726,9 @@
    "readings": 177,
    "first_tracked": "2025-03-14",
    "stale_days": 0,
+   "google_impressions": 23,
+   "google_position": 8,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -2121,6 +2739,9 @@
    "readings": 246,
    "first_tracked": "2025-03-17",
    "stale_days": 0,
+   "google_impressions": 14,
+   "google_position": 15.36,
+   "bing_impressions": 5,
    "reasons": [
     "sparse_history"
    ]
@@ -2131,6 +2752,9 @@
    "readings": 282,
    "first_tracked": "2025-03-18",
    "stale_days": 0,
+   "google_impressions": 33,
+   "google_position": 12.09,
+   "bing_impressions": 1,
    "reasons": [
     "long_history"
    ]
@@ -2141,6 +2765,9 @@
    "readings": 406,
    "first_tracked": "2022-11-03",
    "stale_days": 0,
+   "google_impressions": 17,
+   "google_position": 21.88,
+   "bing_impressions": 0,
    "reasons": [
     "long_history"
    ]
@@ -2151,6 +2778,9 @@
    "readings": 448,
    "first_tracked": "2023-09-14",
    "stale_days": 0,
+   "google_impressions": 32,
+   "google_position": 11.03,
+   "bing_impressions": 0,
    "reasons": [
     "long_history"
    ]
@@ -2161,6 +2791,9 @@
    "readings": 110,
    "first_tracked": "2025-07-30",
    "stale_days": 0,
+   "google_impressions": 3,
+   "google_position": 31.33,
+   "bing_impressions": 1,
    "reasons": [
     "sparse_history",
     "pergb_group_end"
@@ -2172,6 +2805,9 @@
    "readings": 429,
    "first_tracked": "2019-11-07",
    "stale_days": 0,
+   "google_impressions": 7,
+   "google_position": 18.71,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "pre2021_trough"
@@ -2183,6 +2819,9 @@
    "readings": 277,
    "first_tracked": "2022-01-19",
    "stale_days": 0,
+   "google_impressions": 11,
+   "google_position": 12.27,
+   "bing_impressions": 1,
    "reasons": [
     "gsc_crawled_not_indexed",
     "long_history"
@@ -2194,6 +2833,9 @@
    "readings": 95,
    "first_tracked": "2025-12-01",
    "stale_days": 0,
+   "google_impressions": 2,
+   "google_position": 10.5,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "gsc_crawled_not_indexed"
@@ -2205,6 +2847,9 @@
    "readings": 250,
    "first_tracked": "2022-12-24",
    "stale_days": 0,
+   "google_impressions": 10,
+   "google_position": 9.3,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -2215,6 +2860,9 @@
    "readings": 237,
    "first_tracked": "2023-04-03",
    "stale_days": 0,
+   "google_impressions": 3,
+   "google_position": 8,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -2225,6 +2873,9 @@
    "readings": 155,
    "first_tracked": "2025-08-18",
    "stale_days": 0,
+   "google_impressions": 24,
+   "google_position": 14.83,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -2235,6 +2886,9 @@
    "readings": 86,
    "first_tracked": "2026-01-18",
    "stale_days": 0,
+   "google_impressions": 4,
+   "google_position": 8.75,
+   "bing_impressions": 2,
    "reasons": [
     "sparse_history"
    ]
@@ -2245,6 +2899,9 @@
    "readings": 279,
    "first_tracked": "2023-06-03",
    "stale_days": 0,
+   "google_impressions": 12,
+   "google_position": 16.92,
+   "bing_impressions": 0,
    "reasons": [
     "long_history"
    ]
@@ -2255,6 +2912,9 @@
    "readings": 472,
    "first_tracked": "2022-06-22",
    "stale_days": 0,
+   "google_impressions": 3,
+   "google_position": 13.33,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -2266,7 +2926,11 @@
    "readings": 301,
    "first_tracked": "2023-04-13",
    "stale_days": 0,
+   "google_impressions": 1,
+   "google_position": 12,
+   "bing_impressions": 0,
    "reasons": [
+    "family_duplicate",
     "long_history"
    ]
   },
@@ -2276,6 +2940,9 @@
    "readings": 257,
    "first_tracked": "2020-09-04",
    "stale_days": 0,
+   "google_impressions": 29,
+   "google_position": 12.48,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history",
     "pre2021_trough",
@@ -2288,6 +2955,9 @@
    "readings": 318,
    "first_tracked": "2022-10-11",
    "stale_days": 2,
+   "google_impressions": 6,
+   "google_position": 50.33,
+   "bing_impressions": 0,
    "reasons": [
     "long_history"
    ]
@@ -2298,6 +2968,9 @@
    "readings": 626,
    "first_tracked": "2023-05-17",
    "stale_days": 0,
+   "google_impressions": 24,
+   "google_position": 9.25,
+   "bing_impressions": 1,
    "reasons": [
     "long_history"
    ]
@@ -2308,6 +2981,9 @@
    "readings": 356,
    "first_tracked": "2021-09-03",
    "stale_days": 0,
+   "google_impressions": 3,
+   "google_position": 46.33,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "pergb_group_end"
@@ -2319,6 +2995,9 @@
    "readings": 291,
    "first_tracked": "2024-07-02",
    "stale_days": 0,
+   "google_impressions": 19,
+   "google_position": 17.05,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "pergb_group_end"
@@ -2330,6 +3009,9 @@
    "readings": 27,
    "first_tracked": "2026-05-06",
    "stale_days": 49,
+   "google_impressions": 40,
+   "google_position": 32.2,
+   "bing_impressions": 0,
    "reasons": [
     "below_min_readings",
     "long_term_unavailable"
@@ -2341,6 +3023,9 @@
    "readings": 301,
    "first_tracked": "2024-12-02",
    "stale_days": 0,
+   "google_impressions": 5,
+   "google_position": 17.2,
+   "bing_impressions": 0,
    "reasons": [
     "long_history"
    ]
@@ -2351,6 +3036,9 @@
    "readings": 236,
    "first_tracked": "2024-12-03",
    "stale_days": 0,
+   "google_impressions": 21,
+   "google_position": 7.67,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -2361,6 +3049,9 @@
    "readings": 242,
    "first_tracked": "2025-03-19",
    "stale_days": 0,
+   "google_impressions": 15,
+   "google_position": 11.8,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -2371,6 +3062,9 @@
    "readings": 425,
    "first_tracked": "2023-12-18",
    "stale_days": 0,
+   "google_impressions": 21,
+   "google_position": 21.33,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "pergb_group_end"
@@ -2382,6 +3076,9 @@
    "readings": 215,
    "first_tracked": "2025-04-16",
    "stale_days": 0,
+   "google_impressions": 12,
+   "google_position": 17.92,
+   "bing_impressions": 1,
    "reasons": [
     "sparse_history"
    ]
@@ -2392,6 +3089,9 @@
    "readings": 165,
    "first_tracked": "2025-04-16",
    "stale_days": 0,
+   "google_impressions": 17,
+   "google_position": 15.35,
+   "bing_impressions": 1,
    "reasons": [
     "sparse_history"
    ]
@@ -2402,6 +3102,9 @@
    "readings": 509,
    "first_tracked": "2022-08-03",
    "stale_days": 0,
+   "google_impressions": 13,
+   "google_position": 26.08,
+   "bing_impressions": 0,
    "reasons": [
     "long_history"
    ]
@@ -2412,6 +3115,9 @@
    "readings": 670,
    "first_tracked": "2022-08-03",
    "stale_days": 0,
+   "google_impressions": 9,
+   "google_position": 13.78,
+   "bing_impressions": 0,
    "reasons": [
     "long_history"
    ]
@@ -2422,7 +3128,11 @@
    "readings": 374,
    "first_tracked": "2022-11-18",
    "stale_days": 0,
+   "google_impressions": 8,
+   "google_position": 9.12,
+   "bing_impressions": 0,
    "reasons": [
+    "family_duplicate",
     "long_history",
     "percentile_extreme"
    ]
@@ -2433,8 +3143,12 @@
    "readings": 245,
    "first_tracked": "2024-08-05",
    "stale_days": 0,
+   "google_impressions": 2,
+   "google_position": 11,
+   "bing_impressions": 58,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "family_duplicate"
    ]
   },
   "ssd/western-digital-wd-black-sn850x-4tb-nvme-2": {
@@ -2443,6 +3157,9 @@
    "readings": 751,
    "first_tracked": "2022-08-03",
    "stale_days": 0,
+   "google_impressions": 12,
+   "google_position": 21.92,
+   "bing_impressions": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -2454,8 +3171,12 @@
    "readings": 253,
    "first_tracked": "2024-08-10",
    "stale_days": 0,
+   "google_impressions": 9,
+   "google_position": 12.67,
+   "bing_impressions": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "family_duplicate"
    ]
   },
   "ssd/western-digital-wd-black-sn850x-nvme-ssd-1tb": {
@@ -2464,6 +3185,9 @@
    "readings": 355,
    "first_tracked": "2023-01-09",
    "stale_days": 0,
+   "google_impressions": 18,
+   "google_position": 21.22,
+   "bing_impressions": 1,
    "reasons": [
     "long_history"
    ]
@@ -2474,6 +3198,9 @@
    "readings": 109,
    "first_tracked": "2025-10-02",
    "stale_days": 0,
+   "google_impressions": 19,
+   "google_position": 10.21,
+   "bing_impressions": 2,
    "reasons": [
     "sparse_history",
     "gsc_crawled_not_indexed"
@@ -2485,9 +3212,414 @@
    "readings": 180,
    "first_tracked": "2025-08-27",
    "stale_days": 0,
+   "google_impressions": 17,
+   "google_position": 30.41,
+   "bing_impressions": 0,
    "reasons": [
     "sparse_history"
    ]
   }
- }
+ },
+ "families": [
+  {
+   "base": "corsair-vengeance-ddr5-ram-32gb-6000mhz",
+   "tier": 1,
+   "differs_by": [
+    "cl"
+   ],
+   "needs_review": false,
+   "winner": null,
+   "winner_basis": null,
+   "members": [
+    {
+     "slug": "ram/corsair-vengeance-ddr5-ram-32gb-6000mhz",
+     "sku": "B0CJ8ZHMVF",
+     "readings": 246,
+     "google_impressions": 38,
+     "above_floor": false,
+     "kept": true
+    },
+    {
+     "slug": "ram/corsair-vengeance-ddr5-ram-32gb-6000mhz-2",
+     "sku": "B0CBRJ63RT",
+     "readings": 186,
+     "google_impressions": 120,
+     "above_floor": true,
+     "kept": true
+    }
+   ]
+  },
+  {
+   "base": "corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz",
+   "tier": 1,
+   "differs_by": [
+    "cl"
+   ],
+   "needs_review": false,
+   "winner": null,
+   "winner_basis": null,
+   "members": [
+    {
+     "slug": "ram/corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz",
+     "sku": "B0CDY46PFK",
+     "readings": 368,
+     "google_impressions": 23,
+     "above_floor": false,
+     "kept": true
+    },
+    {
+     "slug": "ram/corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz-2",
+     "sku": "B0BZHTVHN5",
+     "readings": 353,
+     "google_impressions": 21,
+     "above_floor": false,
+     "kept": true
+    },
+    {
+     "slug": "ram/corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz-3",
+     "sku": "B0BPTKD797",
+     "readings": 226,
+     "google_impressions": 18,
+     "above_floor": false,
+     "kept": true
+    },
+    {
+     "slug": "ram/corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz-4",
+     "sku": "B0DPJ9DJ3D",
+     "readings": 160,
+     "google_impressions": 342,
+     "above_floor": true,
+     "kept": true
+    }
+   ]
+  },
+  {
+   "base": "crucial-16gb-ddr5-ram-5600mhz",
+   "tier": 3,
+   "differs_by": [],
+   "needs_review": true,
+   "winner": "ram/crucial-16gb-ddr5-ram-5600mhz",
+   "winner_basis": "google_impressions",
+   "members": [
+    {
+     "slug": "ram/crucial-16gb-ddr5-ram-5600mhz",
+     "sku": "B0BLTH3KWV",
+     "readings": 332,
+     "google_impressions": 40,
+     "above_floor": false,
+     "kept": true
+    },
+    {
+     "slug": "ram/crucial-16gb-ddr5-ram-5600mhz-2",
+     "sku": "B0BLTGMCB7",
+     "readings": 470,
+     "google_impressions": 17,
+     "above_floor": false,
+     "kept": false
+    }
+   ]
+  },
+  {
+   "base": "crucial-32gb-ddr4-ram-kit-3200mhz",
+   "tier": 3,
+   "differs_by": [],
+   "needs_review": true,
+   "winner": "ram/crucial-32gb-ddr4-ram-kit-3200mhz",
+   "winner_basis": "deepest_history",
+   "members": [
+    {
+     "slug": "ram/crucial-32gb-ddr4-ram-kit-3200mhz",
+     "sku": "B08C4X9VR5",
+     "readings": 1054,
+     "google_impressions": 9,
+     "above_floor": false,
+     "kept": true
+    },
+    {
+     "slug": "ram/crucial-32gb-ddr4-ram-kit-3200mhz-2",
+     "sku": "B08C4LXXCJ",
+     "readings": 639,
+     "google_impressions": 5,
+     "above_floor": false,
+     "kept": false
+    }
+   ]
+  },
+  {
+   "base": "g-skill-ripjawsv-series-ddr4-ram-16gb-3200mhz",
+   "tier": 1,
+   "differs_by": [
+    "kit"
+   ],
+   "needs_review": false,
+   "winner": null,
+   "winner_basis": null,
+   "members": [
+    {
+     "slug": "ram/g-skill-ripjawsv-series-ddr4-ram-16gb-3200mhz",
+     "sku": "B015FXXBW0",
+     "readings": 1360,
+     "google_impressions": 6,
+     "above_floor": false,
+     "kept": true
+    },
+    {
+     "slug": "ram/g-skill-ripjawsv-series-ddr4-ram-16gb-3200mhz-2",
+     "sku": "B0171GQXME",
+     "readings": 2059,
+     "google_impressions": 3,
+     "above_floor": false,
+     "kept": true
+    }
+   ]
+  },
+  {
+   "base": "g-skill-trident-z5-neo-rgb-series-ddr5-ram-32gb-6000mhz",
+   "tier": 1,
+   "differs_by": [
+    "cl"
+   ],
+   "needs_review": false,
+   "winner": null,
+   "winner_basis": null,
+   "members": [
+    {
+     "slug": "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-32gb-6000mhz",
+     "sku": "B0BF8FVLSL",
+     "readings": 189,
+     "google_impressions": 9,
+     "above_floor": false,
+     "kept": true
+    },
+    {
+     "slug": "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-32gb-6000mhz-2",
+     "sku": "B0BF6ZQ8MY",
+     "readings": 195,
+     "google_impressions": 2,
+     "above_floor": false,
+     "kept": true
+    },
+    {
+     "slug": "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-32gb-6000mhz-3",
+     "sku": "B0C4G6XQQL",
+     "readings": 401,
+     "google_impressions": 4,
+     "above_floor": false,
+     "kept": true
+    },
+    {
+     "slug": "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-32gb-6000mhz-4",
+     "sku": "B0BF8MP83M",
+     "readings": 124,
+     "google_impressions": 7,
+     "above_floor": false,
+     "kept": true
+    }
+   ]
+  },
+  {
+   "base": "g-skill-trident-z5-neo-rgb-series-ddr5-ram-64gb-6000mhz",
+   "tier": 1,
+   "differs_by": [
+    "cl"
+   ],
+   "needs_review": false,
+   "winner": null,
+   "winner_basis": null,
+   "members": [
+    {
+     "slug": "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-64gb-6000mhz",
+     "sku": "B0BJNTLJ5X",
+     "readings": 236,
+     "google_impressions": 169,
+     "above_floor": true,
+     "kept": true
+    },
+    {
+     "slug": "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-64gb-6000mhz-2",
+     "sku": "B0DN3WFS52",
+     "readings": 123,
+     "google_impressions": 7,
+     "above_floor": false,
+     "kept": true
+    },
+    {
+     "slug": "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-64gb-6000mhz-3",
+     "sku": "B0CJXBCQ7P",
+     "readings": 141,
+     "google_impressions": 5,
+     "above_floor": false,
+     "kept": true
+    }
+   ]
+  },
+  {
+   "base": "g-skill-trident-z5-rgb-series-ddr5-ram-32gb-6000mhz",
+   "tier": 2,
+   "differs_by": [
+    "color"
+   ],
+   "needs_review": false,
+   "winner": "ram/g-skill-trident-z5-rgb-series-ddr5-ram-32gb-6000mhz",
+   "winner_basis": "deepest_history",
+   "members": [
+    {
+     "slug": "ram/g-skill-trident-z5-rgb-series-ddr5-ram-32gb-6000mhz",
+     "sku": "B09PTGZM6Y",
+     "readings": 236,
+     "google_impressions": 7,
+     "above_floor": false,
+     "kept": true
+    },
+    {
+     "slug": "ram/g-skill-trident-z5-rgb-series-ddr5-ram-32gb-6000mhz-2",
+     "sku": "B0CB78Y7DC",
+     "readings": 193,
+     "google_impressions": 1,
+     "above_floor": false,
+     "kept": false
+    }
+   ]
+  },
+  {
+   "base": "samsung-mz-v9p4t0b-am-990-pro-pcie-4-0-4tb",
+   "tier": 3,
+   "differs_by": [],
+   "needs_review": true,
+   "winner": "ssd/samsung-mz-v9p4t0b-am-990-pro-pcie-4-0-4tb",
+   "winner_basis": "deepest_history",
+   "members": [
+    {
+     "slug": "ssd/samsung-mz-v9p4t0b-am-990-pro-pcie-4-0-4tb",
+     "sku": "B0CXZ153DP",
+     "readings": 202,
+     "google_impressions": 1,
+     "above_floor": false,
+     "kept": true
+    },
+    {
+     "slug": "ssd/samsung-mz-v9p4t0b-am-990-pro-pcie-4-0-4tb-2",
+     "sku": "B0CY2SZ62P",
+     "readings": 117,
+     "google_impressions": 2,
+     "above_floor": false,
+     "kept": false
+    }
+   ]
+  },
+  {
+   "base": "teamgroup-t-force-delta-rgb-ddr5-ram-32gb-6000mhz",
+   "tier": 2,
+   "differs_by": [
+    "color"
+   ],
+   "needs_review": false,
+   "winner": null,
+   "winner_basis": null,
+   "members": [
+    {
+     "slug": "ram/teamgroup-t-force-delta-rgb-ddr5-ram-32gb-6000mhz",
+     "sku": "B0B3HGJ4V7",
+     "readings": 331,
+     "google_impressions": 175,
+     "above_floor": true,
+     "kept": true
+    },
+    {
+     "slug": "ram/teamgroup-t-force-delta-rgb-ddr5-ram-32gb-6000mhz-2",
+     "sku": "B0B3HHB3Z9",
+     "readings": 357,
+     "google_impressions": 123,
+     "above_floor": true,
+     "kept": true
+    }
+   ]
+  },
+  {
+   "base": "teamgroup-t-force-vulcan-z-2tb-slc-cache",
+   "tier": 3,
+   "differs_by": [],
+   "needs_review": true,
+   "winner": "ssd/teamgroup-t-force-vulcan-z-2tb-slc-cache",
+   "winner_basis": "deepest_history",
+   "members": [
+    {
+     "slug": "ssd/teamgroup-t-force-vulcan-z-2tb-slc-cache",
+     "sku": "B09WMSVHD4",
+     "readings": 472,
+     "google_impressions": 3,
+     "above_floor": false,
+     "kept": true
+    },
+    {
+     "slug": "ssd/teamgroup-t-force-vulcan-z-2tb-slc-cache-2",
+     "sku": "B0BYSKXGJV",
+     "readings": 301,
+     "google_impressions": 1,
+     "above_floor": false,
+     "kept": false
+    }
+   ]
+  },
+  {
+   "base": "western-digital-wd-black-sn850x-2tb-nvme",
+   "tier": 3,
+   "differs_by": [],
+   "needs_review": true,
+   "winner": "ssd/western-digital-wd-black-sn850x-2tb-nvme",
+   "winner_basis": "deepest_history",
+   "members": [
+    {
+     "slug": "ssd/western-digital-wd-black-sn850x-2tb-nvme",
+     "sku": "B0B7CMZ3QH",
+     "readings": 670,
+     "google_impressions": 9,
+     "above_floor": false,
+     "kept": true
+    },
+    {
+     "slug": "ssd/western-digital-wd-black-sn850x-2tb-nvme-2",
+     "sku": "B0B3RQDGL7",
+     "readings": 374,
+     "google_impressions": 8,
+     "above_floor": false,
+     "kept": false
+    }
+   ]
+  },
+  {
+   "base": "western-digital-wd-black-sn850x-4tb-nvme",
+   "tier": 3,
+   "differs_by": [],
+   "needs_review": true,
+   "winner": "ssd/western-digital-wd-black-sn850x-4tb-nvme-2",
+   "winner_basis": "google_impressions",
+   "members": [
+    {
+     "slug": "ssd/western-digital-wd-black-sn850x-4tb-nvme",
+     "sku": "B0D9WTKV1B",
+     "readings": 245,
+     "google_impressions": 2,
+     "above_floor": false,
+     "kept": false
+    },
+    {
+     "slug": "ssd/western-digital-wd-black-sn850x-4tb-nvme-2",
+     "sku": "B0B7CQ2CHH",
+     "readings": 751,
+     "google_impressions": 12,
+     "above_floor": false,
+     "kept": true
+    },
+    {
+     "slug": "ssd/western-digital-wd-black-sn850x-4tb-nvme-3",
+     "sku": "B0B3RN5QTV",
+     "readings": 253,
+     "google_impressions": 9,
+     "above_floor": false,
+     "kept": false
+    }
+   ]
+  }
+ ]
 }

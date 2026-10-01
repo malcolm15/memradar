@@ -110,7 +110,12 @@ const MIN_DAYS_INDEXABLE = 30;
 // ALERT on. Those are different questions and they now have different answers.
 const KEEP_MIN_READINGS = 270;    // gate: readings before a percentile claim is a distribution
 const STALE_DAYS = 30;            // healthy(): days without an in-stock reading
-const IMPRESSION_FLOOR = null;    // admit-only gate; null disables it until a figure is chosen
+const IMPRESSION_FLOOR = 50;      // Google impressions in the pre-demotion window
+// Family winner selection reads impressions only when the leading member has at
+// least this many. Below it the ordering is deciding on noise: two tier-3
+// families were separated by 2 against 1 and 12 against 9, where the deeper
+// history is the better evidence of which page to keep.
+const FAMILY_IMPRESSION_MIN = 10;
 
 // COMMIT 4 FLIPS THESE TWO AND NOTHING ELSE. While both are false the rule
 // reproduces the legacy `readings >= MIN_DAYS_INDEXABLE` result exactly, which
@@ -142,7 +147,7 @@ const GSC_CRAWLED_NOT_INDEXED = new Set([
 // Pre-demotion window on purpose: the August 2026 demotion suppressed later
 // impressions, so a recent window would measure the penalty rather than the
 // demand. Populated by hand from a Search Console Pages export; absent is 0.
-const GSC_IMPRESSIONS_PATH = ['gsc-impressions-2026-07-01-to-08-22.json'];
+const GSC_IMPRESSIONS_PATH = ['gsc-impressions-2026-q3.json'];
 const INDEX_DECISIONS_PATH = ['index-decisions.json'];
 
 // MEMRADAR'S SIGNATURE HONESTY, restored to the BUY INDICATOR in R1 (2026-09-01).
@@ -949,17 +954,147 @@ function buildIndexContext(pool, buildDate) {
   }
   const latMedian = ns.size ? median([...ns.values()]) : null;
 
+  // DEMAND. Keyed by BARE SLUG, and the whole record is kept so the decisions
+  // file can report position and the Bing figure beside the number the gate
+  // reads. A missing file disables the gate; a file that is PRESENT and loads
+  // to nothing throws, see below.
   let impressions = new Map();
+  let impressionsFile = null;
   try {
-    const raw = JSON.parse(fs.readFileSync(path.join(__dirname, ...GSC_IMPRESSIONS_PATH), 'utf8'));
-    for (const [slugPath, n] of Object.entries(raw.pages || {})) impressions.set(slugPath, Number(n) || 0);
+    impressionsFile = path.join(__dirname, ...GSC_IMPRESSIONS_PATH);
+    const raw = JSON.parse(fs.readFileSync(impressionsFile, 'utf8'));
+    for (const [slug, v] of Object.entries(raw.pages || {})) {
+      impressions.set(slug, {
+        google_impressions: Number(v && v.google_impressions) || 0,
+        google_position: Number(v && v.google_position) || 0,
+        bing_impressions: Number(v && v.bing_impressions) || 0,
+      });
+    }
   } catch (e) {
     // Absent or unreadable means zero impressions everywhere, which disables
     // the admit-only gate rather than failing the build. LEFT JOIN semantics:
     // a slug missing from the export reads 0 and is never dropped.
     impressions = new Map();
+    impressionsFile = null;
   }
-  return { buildDate, perGbEnds, perGbRunnersUp, ns, shareCount, latMedian, impressions };
+
+  // A PRESENT BUT INERT INPUT IS A BUG, NEVER A FALLBACK. The first version of
+  // this loader did `Number(n) || 0` against what is actually an object, so
+  // every page read 0, the try/catch never fired, and three runs at three
+  // different floors returned identical buckets. Nothing was broken enough to
+  // notice. If the file parses and still yields no demand at all, that is the
+  // same failure wearing a different coat, so it stops the build and names the
+  // file rather than quietly gating on zeros.
+  if (impressionsFile && ![...impressions.values()].some((v) => v.google_impressions > 0)) {
+    throw new Error(`${impressionsFile} loaded ${impressions.size} page(s) and not one carries a nonzero google_impressions. A present-but-inert impressions input is a bug, not a fallback: check the field names in that file against gateImpressions().`);
+  }
+
+  // Keys are bare slugs, so a slug used in BOTH categories would collide and
+  // one product would silently read the other's demand. Asserted rather than
+  // assumed: slugs are deduped per category, not globally.
+  const seen = new Map();
+  for (const p of pool) {
+    const slug = p.finalSlug || p.slug;
+    if (seen.has(slug) && seen.get(slug) !== p.category) {
+      throw new Error(`index impressions: slug "${slug}" exists in both ${seen.get(slug)}/ and ${p.category}/, so a bare-slug key is ambiguous. Key the impressions file by "<category>/<slug>" instead.`);
+    }
+    seen.set(slug, p.category);
+  }
+
+  const fam = buildIndexFamilies(pool, impressions);
+  return { buildDate, perGbEnds, perGbRunnersUp, ns, shareCount, latMedian, impressions, familyDuplicates: fam.duplicates, families: fam.families };
+}
+
+// VARIANT FAMILIES: slugs that differ only by a trailing -N. Three tiers, and
+// the tier decides whether the family may hold more than one indexed page.
+//
+// Tier 1, members differ by capacity, speed, CL or kit configuration: ALL
+// eligible, because those pages can state different facts and CL feeds the
+// latency gate. Tier 2, colour only, and Tier 3, nothing parseable: ONE
+// eligible. Colour changes no price fact this site publishes, so two pages
+// whose only difference is a word in the name are the duplicate shape R1 removed.
+//
+// THE WINNER IS THE MEMBER GOOGLE ALREADY CHOSE, which is a deliberate
+// departure from the capacity-family canonical rule (deepest history, tiebreak
+// ASIN). Measured 2026-10-01: in the largest family the 342-impression page has
+// 160 readings while a 368-reading sibling drew 23, so picking on history picks
+// the page nobody was shown. History and ASIN remain the tiebreaks, which keeps
+// the choice deterministic when demand is absent or tied.
+//
+// Tier is read through tokenValue(), the SAME extractor the title
+// disambiguator uses, rather than a second colour regex. Note it treats "Gray"
+// and "Grey" as different values; that quirk is inherited on purpose, because
+// one source of truth that is slightly blunt beats two that can disagree.
+function familyBase(slug) { return slug.replace(/-(\d+)$/, ''); }
+
+function buildIndexFamilies(pool, impressions) {
+  const byBase = new Map();
+  for (const p of pool) {
+    const base = familyBase(p.finalSlug || p.slug);
+    if (!byBase.has(base)) byBase.set(base, []);
+    byBase.get(base).push(p);
+  }
+  const duplicates = new Set();
+  const families = [];
+  const gi = (p) => {
+    const r = impressions.get(p.finalSlug || p.slug);
+    return r ? r.google_impressions : 0;
+  };
+  // DEMAND OUTRANKS THE FAMILY RULE. A member that clears IMPRESSION_FLOOR on
+  // its own is a page Google is already showing, and deduping it away would
+  // discard measured demand to satisfy a tidiness rule. Dedup therefore applies
+  // only AMONG MEMBERS BELOW THE FLOOR. The worked case: the Delta RGB family
+  // holds white at 175 impressions and black at 123, both above 50, so both
+  // stay; under the first version black was marked family_duplicate and the
+  // site would have stopped competing for 123 impressions a quarter.
+  const aboveFloor = (m) => IMPRESSION_FLOOR != null && gi(m) >= IMPRESSION_FLOOR;
+  // requiredByBuild ALWAYS wins: the build throws on those pages, so a family
+  // rule must never be the thing that noindexes one.
+  const pickWinner = (cands) => {
+    const req = cands.filter(requiredByBuild);
+    const pool2 = req.length ? req : cands;
+    const byImpr = [...pool2].sort((a, b) =>
+      gi(b) - gi(a) || b.stats.days - a.stats.days || (a.sku < b.sku ? -1 : 1));
+    if (byImpr.length && gi(byImpr[0]) >= FAMILY_IMPRESSION_MIN) return byImpr[0];
+    // Too little demand to rank on: fall back to depth, which is the evidence
+    // we actually have, then ASIN so the choice stays deterministic.
+    return [...pool2].sort((a, b) => b.stats.days - a.stats.days || (a.sku < b.sku ? -1 : 1))[0];
+  };
+  for (const [base, members] of byBase) {
+    if (members.length < 2) continue;
+    const varies = (type) => new Set(members.map((m) => tokenValue(m, type))).size > 1;
+    const specVaries = varies('capacity') || varies('speed') || varies('cl') || varies('kit');
+    const tier = specVaries ? 1 : (varies('color') ? 2 : 3);
+    let winner = null;
+    if (tier > 1) {
+      const contested = members.filter((m) => !aboveFloor(m));
+      if (contested.length) {
+        winner = pickWinner(contested);
+        for (const m of contested) if (m !== winner && !requiredByBuild(m)) duplicates.add(m.sku);
+      }
+    }
+    families.push({
+      base,
+      tier,
+      differs_by: tier === 1 ? ['capacity', 'speed', 'cl', 'kit'].filter(varies)
+        : (tier === 2 ? ['color'] : []),
+      // Tier 3 cannot be told apart from the NAME, which is not the same as the
+      // products being identical: a heatsink or revision difference carries no
+      // parseable token. Flagged for a human rather than asserted as a duplicate.
+      needs_review: tier === 3,
+      // The one member retained from those BELOW the floor. Members above the
+      // floor are kept on their own demand and are not in this contest.
+      winner: winner ? `${winner.category}/${winner.finalSlug}` : null,
+      winner_basis: winner ? (gi(winner) >= FAMILY_IMPRESSION_MIN ? 'google_impressions' : 'deepest_history') : null,
+      members: members.map((m) => ({
+        slug: `${m.category}/${m.finalSlug}`, sku: m.sku, readings: m.stats.days,
+        google_impressions: gi(m),
+        above_floor: aboveFloor(m),
+        kept: tier === 1 || aboveFloor(m) || m === winner || requiredByBuild(m),
+      })),
+    });
+  }
+  return { duplicates, families: families.sort((a, b) => (a.base < b.base ? -1 : 1)) };
 }
 
 const slugPathOf = (p) => `${p.category}/${p.finalSlug || p.slug}`;
@@ -978,17 +1113,42 @@ function gateLatencyDistinct(p, ctx) {
 }
 function gateImpressions(p, ctx) {
   if (IMPRESSION_FLOOR == null) return false;
-  return (ctx.impressions.get(slugPathOf(p)) || 0) >= IMPRESSION_FLOOR;
+  const r = ctx.impressions.get(p.finalSlug || p.slug);
+  return !!r && r.google_impressions >= IMPRESSION_FLOOR;
 }
 
-// enabled defaults to GATES_ENABLED so production behaviour is one constant,
-// and --index-plan passes true to read the real buckets without changing output.
+// A FACT GATE says the page can state something distinctive. It is what
+// KEEP_MIN_READINGS qualifies, because a percentile claim off 90 readings is
+// arithmetic rather than a distribution.
+function factGate(p, ctx) {
+  return gatePercentile(p) || gatePre2021Trough(p) || gatePerGbGroupEnd(p, ctx)
+    || gateLatencyDistinct(p, ctx);
+}
+
+// HARD EXCLUSIONS outrank every gate including demand. Note what is NOT here:
+// sparse_history. Thin history is a reason the page cannot make a FACT claim,
+// and it used to sit in front of the gate union where it also silenced demand.
+// Measured 2026-10-01, that cost 75% of the pages with 100 or more impressions,
+// including the site's two best, so a page Google ranked could never be
+// admitted for being ranked. Sparse history is now informational only.
+function hardExcluded(p, ctx) {
+  if (p.stats.days < MIN_DAYS_INDEXABLE) return true;             // below_min_readings
+  if (staleDaysOf(p, ctx.buildDate) >= STALE_DAYS) return true;   // long_term_unavailable
+  if (p._relistingOf) return true;                                // duplicate_variant
+  if (GSC_CRAWLED_NOT_INDEXED.has(slugPathOf(p))) return true;    // gsc_crawled_not_indexed
+  if (ctx.familyDuplicates && ctx.familyDuplicates.has(p.sku)) return true; // family_duplicate
+  return false;
+}
+
+// DEMAND IS A FIRST-CLASS ADMIT TERM, not a tiebreak behind the fact gates:
+// either the page can say something distinctive on enough history, OR Google
+// was already showing it. enabled defaults to GATES_ENABLED so production
+// behaviour is one constant, and --index-plan passes true to read the real
+// buckets without changing output.
 function gatesPass(p, ctx, enabled = GATES_ENABLED) {
   if (!enabled) return true;
-  if (GSC_CRAWLED_NOT_INDEXED.has(slugPathOf(p))) return false;
-  if (p.stats.days < KEEP_MIN_READINGS) return false;
-  return gatePercentile(p) || gatePre2021Trough(p) || gatePerGbGroupEnd(p, ctx)
-    || gateLatencyDistinct(p, ctx) || gateImpressions(p, ctx);
+  if (hardExcluded(p, ctx)) return false;
+  return (p.stats.days >= KEEP_MIN_READINGS && factGate(p, ctx)) || gateImpressions(p, ctx);
 }
 
 function keepIndexable(p, ctx, enabled = GATES_ENABLED) {
@@ -1006,6 +1166,7 @@ function indexReasons(p, ctx) {
   if (staleDaysOf(p, ctx.buildDate) >= STALE_DAYS) out.push('long_term_unavailable');
   if (p._relistingOf) out.push('duplicate_variant');
   if (GSC_CRAWLED_NOT_INDEXED.has(slugPathOf(p))) out.push('gsc_crawled_not_indexed');
+  if (ctx.familyDuplicates && ctx.familyDuplicates.has(p.sku)) out.push('family_duplicate');
   if (p.stats.days >= KEEP_MIN_READINGS) out.push('long_history');
   if (gatePercentile(p)) out.push('percentile_extreme');
   if (gatePre2021Trough(p)) out.push('pre2021_trough');
@@ -1042,7 +1203,7 @@ function indexPlan(pool, ctx) {
     const r = indexReasons(p, ctx);
     const inNow = keepIndexable(p, ctx, true);
     if (inNow) { index.push({ p, r }); continue; }
-    const anyGate = gatePercentile(p) || gatePre2021Trough(p) || gatePerGbGroupEnd(p, ctx);
+    const anyGate = factGate(p, ctx);
     const q = p.stats.extremesOk ? percentileOf(p) : null;
     const nearPct = q != null && ((q >= 90 && q < 95) || (q > 5 && q <= 10));
     const v = ctx.ns.get(p.sku);
@@ -6242,6 +6403,7 @@ async function run() {
     generated: buildDate,
     rule: 'requiredByBuild(p) || (healthy(p) && gatesPass(p))',
     switches: { GATES_ENABLED, HEALTHY_REQUIRES_FRESH, KEEP_MIN_READINGS, IMPRESSION_FLOOR },
+    rule_order: 'requiredByBuild wins outright. Otherwise: healthy AND not hard excluded AND ((readings >= KEEP_MIN_READINGS AND a fact gate) OR impressions >= IMPRESSION_FLOOR). Hard exclusions are below_min_readings, long_term_unavailable, duplicate_variant, gsc_crawled_not_indexed and family_duplicate; sparse_history is informational and does not block the demand term.',
     note: 'Reason codes are recorded for every page whether or not they bind under the current switches, so this file reads the same shape before and after the gates go live. Written by scripts/generate-product-pages.js; do not hand-edit.',
     counts: {
       indexable: generable.filter((q) => q.stats.indexable).length,
@@ -6254,12 +6416,21 @@ async function run() {
         readings: q.stats.days,
         first_tracked: q.stats.firstDay,
         stale_days: staleDaysOf(q, buildDate),
+        google_impressions: (indexCtx.impressions.get(q.finalSlug) || {}).google_impressions || 0,
+        google_position: (indexCtx.impressions.get(q.finalSlug) || {}).google_position || 0,
+        bing_impressions: (indexCtx.impressions.get(q.finalSlug) || {}).bing_impressions || 0,
         reasons: q.indexReasons || [],
       }])
       .sort((x, y) => (x[0] < y[0] ? -1 : 1))),
+    // Variant families, with the tier-3 ones flagged. needs_review means the
+    // members cannot be told apart from their NAMES, which is not a claim that
+    // the products are identical: a heatsink or revision difference carries no
+    // parseable token, so a human decides rather than the tokenizer.
+    families: indexCtx.families,
   };
   fs.writeFileSync(path.join(__dirname, ...INDEX_DECISIONS_PATH), JSON.stringify(decisions, null, 1) + '\n');
-  log(`Index decisions written: scripts/${INDEX_DECISIONS_PATH.join('/')} (${decisions.counts.indexable} indexable, ${decisions.counts.noindex} noindex)`);
+  const review = indexCtx.families.filter((f) => f.needs_review).length;
+  log(`Index decisions written: scripts/${INDEX_DECISIONS_PATH.join('/')} (${decisions.counts.indexable} indexable, ${decisions.counts.noindex} noindex, ${indexCtx.families.length} variant families, ${review} needing review)`);
 
   // llms.txt, written AFTER the sitemap so its two sitemap assertions test the
   // file this run just produced. Skippable like every other content build: a

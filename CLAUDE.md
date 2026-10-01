@@ -1292,23 +1292,50 @@ Two static files for the Raycast extension, written by the daily regen beside th
 
 **`requiredByBuild()` IS EVALUATED FIRST AND CAN NEVER BE OUTVOTED, because the build throws when a pinned page goes noindex.** It derives from the existing pinned constants, never a new list: `LLMS_EXAMPLE_SKUS`, `WILL_RAM_FALL_KITS` and `SSD_ANCHOR_SKU`. Those throw sites are the build telling you which pages it depends on, so reading them turns two latent build failures into a precondition. **Measured why this matters: `B0CJ8ZHMVF` is the `llms.txt` pinned example and the explainer's $93 anchor, it sits at percentile 94.7 with zero gates passed, and a hand-maintained keep list would have shipped the throw.**
 
+**THE RULE IS ORDERED SO DEMAND IS A FIRST-CLASS ADMIT TERM (2026-10-01):**
+
+```
+requiredByBuild(p) || ( healthy(p) && !hardExcluded(p)
+                        && ( (readings >= KEEP_MIN_READINGS && factGate(p)) || gateImpressions(p) ) )
+```
+
+**THE FIRST VERSION PUT THE READINGS FLOOR IN FRONT OF THE WHOLE GATE UNION, WHICH SILENCED DEMAND, and the measurement is why it moved.** With 270 readings gating everything, **75% of the pages with 100 or more Google impressions could never be admitted**, including the site's two best: 342 impressions on 160 readings and 280 on 191. A page Google was already ranking could not qualify for being ranked. `KEEP_MIN_READINGS` now qualifies only the FACT gates, where it belongs, because a percentile claim off 90 readings is arithmetic rather than a distribution. **`sparse_history` is informational and blocks nothing.**
+
+**HARD EXCLUSIONS outrank every gate including demand**: `below_min_readings`, `long_term_unavailable`, `duplicate_variant` (the relisting), `gsc_crawled_not_indexed` and `family_duplicate`. `requiredByBuild` still wins outright over all of it.
+
+**THE DEMAND FINDING THAT DROVE THIS, measured 2026-10-01 over the pre-demotion quarter.** The fact gates are close to orthogonal to what Google actually showed: **the 57 pages they kept held 23% of product-page impressions, and the 178 they dropped held 77%.** Only 3 of the 16 pages with 50 or more impressions survived on facts alone, and the single highest-impression product page on the site, at 342, sat in DO NOT INDEX. **`IMPRESSION_FLOOR = 50`**, which puts all 13 of the dropped-but-ranked pages back in and moves the buckets from 57/128/50 to **66/122/47**. Floor 20 would give 98/97/40.
+
+**A PRESENT BUT INERT IMPRESSIONS FILE NOW THROWS, NAMING THE FILE.** The first loader did `Number(n) || 0` against what is actually an object, so every page read 0, the `try/catch` never fired, and three runs at three different floors returned identical buckets. Nothing was broken enough to notice. **An absent file still disables the gate, which is a real state; a file that parses and yields no demand at all is a bug wearing that state's clothes.** Verified by zeroing a copy: the build stops and prints the path.
+
+**THE IMPRESSIONS FILE IS KEYED BY BARE SLUG, and that is asserted, not assumed.** Slugs are deduped per category, not globally, so a slug present in both `ram/` and `ssd/` would make one product silently read the other's demand. The loader throws and tells you to re-key by `<category>/<slug>`. Measured clean today across all 235.
+
+**VARIANT FAMILIES, three tiers, applied as a hard exclusion after the gates.** Slugs differing only by a trailing `-N`: **13 families, 32 pages**. Tier 1, members differ by capacity, speed, CL or kit configuration: **all eligible**, since those pages state different facts and CL feeds the latency gate (5 families). Tier 2, colour only (2 families), and Tier 3, nothing parseable (6 families): **one eligible among the members below the impressions floor**, the rest get `family_duplicate`. Eight pages are excluded that way today.
+
+**DEMAND OUTRANKS THE FAMILY RULE: a member that clears `IMPRESSION_FLOOR` on its own is never marked `family_duplicate`, and the dedup contest runs only AMONG MEMBERS BELOW THE FLOOR.** The first version did not have this carve-out and the cost was immediate: the Delta RGB family holds white at 175 impressions and black at 123, both above 50, and black was being deduped away. **Discarding a page Google shows 123 times a quarter to satisfy a tidiness rule is the wrong trade**, so both stay. This moved the buckets from 66/122/47 to **67/121/47** and `family_duplicate` from 9 to 8.
+
+**THE FAMILY WINNER IS THE MEMBER GOOGLE ALREADY CHOSE, BUT ONLY WHEN THERE IS ENOUGH DEMAND TO READ.** Impressions decide when the leading member has at least `FAMILY_IMPRESSION_MIN = 10`; below that the ordering is deciding on noise, so it falls back to deepest history, then ASIN. Two tier-3 families were being separated by **2 impressions against 1** and **9 against 8**, where the deeper history is plainly the better evidence. Where demand IS readable this deliberately departs from the capacity-family canonical rule (deepest history, tiebreak ASIN), because measured here that rule picks the wrong page: in the largest family the 342-impression member has 160 readings while a 368-reading sibling drew 23. `winner_basis` in `scripts/index-decisions.json` records which of the two paths chose each winner. **`requiredByBuild` members are never marked `family_duplicate`.**
+
+**TIER IS READ THROUGH `tokenValue()`, the same extractor the title disambiguator uses**, never a second colour regex. It treats "Gray" and "Grey" as different values; that bluntness is inherited on purpose, because one source of truth that is slightly wrong beats two that can disagree.
+
+**TIER 3 IS FLAGGED, NOT ASSERTED.** `needs_review: true` on those 6 families in `scripts/index-decisions.json` means the members cannot be told apart from their NAMES, which is not a claim that the products are identical: a heatsink or revision difference carries no parseable token. A human decides, not the tokenizer.
+
 **THE GATES, implemented and inert until `GATES_ENABLED` flips:**
 - **percentile of readings** at 95% or more, or 5% or less (`percentile_extreme`)
 - **all-time trough** with first tracked before 2021 (`pre2021_trough`)
 - **$/GB first or last in a peer group of 3 or more** (`pergb_group_end`); groups under 3 are skipped because in a pair both members are an end
 - **DDR5 latency 1ns or more from the generation median AND shared by at most 2 products** (`latency_distinct`)
-- **impressions at or above `IMPRESSION_FLOOR`** (`historical_demand`), admit-only
-- all gated behind `KEEP_MIN_READINGS = 270`, and `GSC_CRAWLED_NOT_INDEXED` excludes the 10 URLs Search Console reported as "Crawled, currently not indexed" on 2026-09-30
+- **impressions at or above `IMPRESSION_FLOOR`** (`historical_demand`), admit-only and NOT behind the readings floor
+- the four FACT gates are behind `KEEP_MIN_READINGS = 270`; `GSC_CRAWLED_NOT_INDEXED` excludes the 10 URLs Search Console reported as "Crawled, currently not indexed" on 2026-09-30
 
 **THE LATENCY GATE NEEDED THE RARITY TERM OR IT WOULD HAVE RE-CREATED THE SCALED-CONTENT PATTERN R1 REMOVED.** Distance from the median is not a distinctness test: measured 2026-09-30, **25 products sit at exactly 10.0ns against a 12.0ns median**, so "1ns from the median" would have licensed 25 pages to print the identical sentence. Requiring the value be shared by at most two products takes the gate from 45 pages to **5**.
 
-**IMPRESSIONS USE THE PRE-DEMOTION WINDOW, 2026-07-01 to 2026-08-22**, from `scripts/gsc-impressions-2026-07-01-to-08-22.json`. Impressions collapsed 96% on 2026-08-23, so a recent window would measure the penalty rather than the demand. Keyed `<category>/<slug>`, merged as a **LEFT JOIN**: a slug absent from the export reads 0 and is never dropped, and a missing file disables the gate instead of failing the build. The gate is **admit-only** by design: it can rescue a page that passes no fact gate and can never evict one that does.
+**IMPRESSIONS USE THE PRE-DEMOTION QUARTER, 2026-06-29 to 2026-09-28**, from `scripts/gsc-impressions-2026-q3.json`, which also carries Bing figures for July 1 to September 28 and the Google position. **94% of that window's 6,156 Google impressions fall on or before 2026-08-23**, so the totals measure demand the pages had before the demotion rather than after it; the file states that with the numbers. **Bing adds nothing at the product level** (largest figure in the top 25 is 2), which is the engine inversion recorded above, so the gate reads Google. Impressions collapsed 96% on 2026-08-23, so a recent window would measure the penalty rather than the demand. Keyed `<category>/<slug>`, merged as a **LEFT JOIN**: a slug absent from the export reads 0 and is never dropped, and a missing file disables the gate instead of failing the build. The gate is **admit-only** by design: it can rescue a page that passes no fact gate and can never evict one that does.
 
-**Reason codes** are recorded for every page whether or not they bind today, in `scripts/index-decisions.json`. Keep: `required_by_build`, `long_history`, `percentile_extreme`, `pre2021_trough`, `pergb_group_end`, `latency_distinct`, `historical_demand`. Exclude: `below_min_readings`, `sparse_history`, `long_term_unavailable`, `duplicate_variant`, `gsc_crawled_not_indexed`.
+**Reason codes** are recorded for every page whether or not they bind today, in `scripts/index-decisions.json`. Keep: `required_by_build`, `long_history`, `percentile_extreme`, `pre2021_trough`, `pergb_group_end`, `latency_distinct`, `historical_demand`. Exclude: `below_min_readings`, `sparse_history` (informational only), `long_term_unavailable`, `duplicate_variant`, `gsc_crawled_not_indexed`, `family_duplicate`.
 
 **THE DECISIONS FILE IS SEPARATE FROM THE LASTMOD MANIFEST ON PURPOSE.** The manifest is consumed by `resolveLastmod()`, which compares hashes to decide what we tell search engines changed; putting editorial metadata inside that structure would let a reason-code change move a page's `lastmod`. Keeping them apart makes that impossible.
 
-**`node scripts/generate-product-pages.js --index-plan`** prints the three buckets with the gates forced ON and writes nothing. First run, 2026-10-01: **INDEX NOW 57, IMPROVE THEN INDEX 128, DO NOT INDEX 50**, so the flip would move 178 pages. The middle bucket is the PDP improvement worklist.
+**`node scripts/generate-product-pages.js --index-plan`** prints the three buckets with the gates forced ON and writes nothing. With the ordered rule and floor 50: **INDEX NOW 67, IMPROVE THEN INDEX 121, DO NOT INDEX 47**, so the flip would move 168 pages. The middle bucket is the PDP improvement worklist. (Fact gates alone gave 57/128/50; floor 20 gives 98/97/40.)
 
 **COMMIT 4, THE FLIP, IS PENDING A DECISION AND IS NOT BUILT.** It flips `GATES_ENABLED` and `HEALTHY_REQUIRES_FRESH` and nothing else. While both are false, `assertIndexParity()` throws if `keepIndexable()` disagrees with the legacy `readings >= MIN_DAYS_INDEXABLE` rule on any page, so the transition cannot drift silently.
 
