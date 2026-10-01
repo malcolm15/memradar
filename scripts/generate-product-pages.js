@@ -5226,6 +5226,12 @@ function indexNowMaterial(prevState, productState, sitemapXml) {
       if (was.atl !== s.atl) reasons.push(`all-time low ${money(was.atl)} to ${money(s.atl)}`);
       if (was.ath !== s.ath) reasons.push(`all-time high ${money(was.ath)} to ${money(s.ath)}`);
       if (was.buy !== s.buy) reasons.push(`buy state ${was.buy || 'none'} to ${s.buy || 'none'}`);
+      // STRICTLY `=== false`, never falsy. Every state record written before
+      // this field existed has `indexable` undefined, and treating absent as
+      // "was not indexable" would call the whole sitemap a re-entry on the
+      // first run after deploy, which is the 429 case the seeding rule exists
+      // to avoid. Absent means no information, so it reports nothing.
+      if (was.indexable === false && s.indexable === true) reasons.push('back in the sitemap');
     }
     if (reasons.length) items.push({ url, reasons });
   }
@@ -5782,6 +5788,12 @@ async function run() {
         atl: p.stats.atl ? p.stats.atl.price : null,
         ath: p.stats.ath ? p.stats.ath.price : null,
         buy: buyState(p.stats.current, p.stats.avg90),
+        // Carried so that RE-ENTERING the sitemap is itself a submission
+        // reason. Without it a page that spent months noindexed and then
+        // qualified again was announced to Bing only if its price happened to
+        // move on the same day, because state keeps updating while a page is
+        // out of the sitemap and the comparison then found nothing changed.
+        indexable: !!p.stats.indexable,
       });
       written++;
     } catch (err) {
