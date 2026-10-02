@@ -980,24 +980,38 @@ Three things changed together, and the middle one is the load-bearing idea:
 
 **A calendar rule has no fixed point**, because "has today produced a compute?" resets at midnight regardless of when yesterday's answer was written. **Forced runs are asymmetric and that falls out of the date test rather than needing a special case**: a forced run counts as today's compute so the rest of today skips, and it never blocks tomorrow because tomorrow asks about a different date. Yesterday's 16:26 forced run would not have delayed this morning's compute by a minute. If the today-check query itself fails, the run falls back to the **bare hour test** and **says so loudly**, naming whether that fallback matched; it never skips silently.
 
-**MEASURED DELIVERY, 18 days, 80 scheduled price-fetch runs.** Worth keeping because every scheduling decision here argues from it:
+**MEASURED DELIVERY. EVERY FIGURE NAMES ITS WINDOW AND ITS n, because this table is what the supervisor thresholds are derived from.** Price-fetch slots below are **n=35 per slot at most, measured 2026-08-27 to 2026-10-02** (the supervisor's own lifetime). Delays are nominal slot to run creation.
 
-| nominal slot | n | median delay | max | observed arrival |
-|---|---|---|---|---|
-| 00:00 | 17 | 2.82h | 3.03h | 02:47-03:03 |
-| **04:00** | **0** | - | - | **never delivered, 18 days running** |
-| 08:00 | 17 | **0.84h** | 1.52h | 08:27-09:31 |
-| 12:00 | 12 | 3.71h | 3.97h | 15:13-15:58 |
-| 16:00 | 17 | 2.35h | 3.44h | 16:04-19:26 |
-| 20:00 | 17 | 2.20h | 2.96h | 22:03-22:57 |
+| nominal slot | n | median delay | p95 | max | observed arrival |
+|---|---|---|---|---|---|
+| 00:00 | 36 | 2.95h | 3.72h | 3.98h | 00:07-03:58 |
+| **04:00** | **1 clear, 1 ambiguous** | - | - | - | **see below** |
+| 08:00 | **35** | **1.00h** | **2.67h** | **3.77h** | 08:17-11:45 |
+| 12:00 | 19 | 3.68h | 3.97h | 3.97h | 14:25-15:58 |
+| 16:00 | 37 | 2.35h | 3.44h | 3.50h | 16:04-19:30 |
+| 20:00 | 33 | 2.31h | 3.57h | 3.64h | 21:50-23:38 |
 
-The grid is **five slots, not six**. The 08:00 slot is by far the most punctual, which is why it is the anchor.
+**"04:00 NEVER DELIVERS" IS NOT TRUE OVER THE FULL WINDOW, AND THE CORRECTION IS SMALL BUT THE OLD CLAIM WAS ABSOLUTE.** It fired **once unambiguously, on 2026-09-05**, the only day all six slots delivered (02:34, 07:59, 11:45, 14:25, 17:51, 21:50). One further candidate, 2026-08-27 at 06:51, is **ambiguous**: that day produced only two runs during the acute outage, so 06:51 is equally readable as the 00:00 cron 6.85h late or the 04:00 cron 2.85h late, and it is not counted. So the grid is **effectively five slots and should still be planned as five**, but it is not structurally four-slot-plus-dead: the 04:00 cron can fire, and has.
 
-**2026-10-01 BEAT BOTH RELEVANT MAXIMA AND IS RECORDED HERE RATHER THAN FOLDED INTO THE MEDIANS**, which n=1 cannot honestly move: the **08:00 fetch arrived 10:39, a 2.66h delay against a 1.52h previous max**, and **`regenerate-pages` arrived 16:12, a 7.21h delay against a p95 of 6.80h and a previous max of 6.81h**. Both runs succeeded and the calendar rule held (`computed_date=2026-10-01`, 3h33m before the regen read it), so nothing was wrong that day. **What it costs is margin**: the anchor slot is the one the stats gate depends on, and a 2.66h arrival is most of the way to the 12:00 slot. **The supervisor's `regenerate-pages` threshold was NOT touched**, because `max_age_hours` is asserted from `interval + p95 + margin` and moving it needs the p95 recomputed over real history, not one day. **Re-measure both p95 values before the next scheduling decision argues from the table above.**
+**THE EARLIER TABLE HERE (08:00 median 0.84h, max 1.52h, n=17) WAS MEASURED ON A WINDOW THAT EXCLUDED BOTH ENDS OF THE DISTRIBUTION.** Full history contains a **3.77h** 08:00 delay in early September, well above that stated max, and the last eight observations run 1.75h to 2.66h, all at or above it. So the old figure was neither a bad measurement nor merely stale: it was a true description of a lucky stretch, quoted afterwards as though it described the slot. The grid is still **five slots, not six**, and 08:00 is still the most punctual, which is why it remains the anchor.
+
+**REGEN DELIVERY, AND THE ASSERTED p95 USES A NARROWER WINDOW THAN THE TABLE ABOVE ON PURPOSE.** `regenerate-pages` against its `0 9 * * *` cron:
+
+| window | n | median | p90 | p95 | max |
+|---|---|---|---|---|---|
+| full history, 2026-08-27 to 2026-10-02 | 37 | 5.13h | 7.95h | **10.72h, outage-inflated** | 11.79h |
+| **asserted: 2026-08-29 to 2026-10-02** | **35** | **5.12h** | **6.81h** | **7.95h** | **8.51h** |
+| last 14 days, 2026-09-18 on | 15 | 5.52h | 7.21h | 8.51h | 8.51h |
+
+**The full-history p95 is inflated by exactly two observations**, 10.72h and 11.79h on 2026-08-27 and 08-28, which are the acute Actions outage the supervisor exists to catch. Tuning the alarm on them makes it about 3h slower to catch the next one, so the asserted window excludes those two days and nothing else. The independent 14-day window lands within 0.6h, which is the corroboration. **`max_age_hours` is therefore 37.95** (`24 + 7.950 + 6`), up from 36.80.
+
+**THE WORST GAP BETWEEN CONSECUTIVE REGEN SUCCESSES IS 26.88h** (2026-09-27 to 09-28), measured n=36, median 23.97h, p95 26.60h. The figure recorded here previously was 26.27h. Against 37.95h that leaves **11.07h of headroom**, so the threshold cannot fire on anything observed, while a genuinely missed regen still reaches its roughly 48h signature with about 10h to spare.
 
 **THE REGEN CRON STAYS AT `0 9 * * *`, DECIDED 2026-09-23 AGAINST MOVING IT.** Moving it to 11:00 was proposed and rejected on the data: `regenerate-pages` already arrives **12:46-15:48** (n=15, median 13:44, min delay 3.77h, p95 6.80h), so it already lands 3 to 7 hours after the 08:00 fetch. The ordering problem was never the regen's slot, it was the compute drifting past it. With the calendar rule the worst observed case is a **3h15m** margin (latest 08:00 arrival 09:31 against earliest regen 12:46). Moving to 11:00 would shift arrivals to 14:46-17:48, buy no margin, collide with the 16:00 fetch slot and delay the deploy by two hours.
 
-**THE SUPERVISOR'S `regenerate-pages` p95 WAS WRONG BY A FACTOR OF EIGHT, corrected 2026-09-23.** It read **49.0 minutes from a single observation**, a placeholder nobody went back for. Measured over **n=15**: p50 4.74h, p90 6.18h, **p95 6.80h (408.1 min)**, max 6.81h. `max_age_hours` recomputed by the file's own asserted arithmetic from 30.82 to **36.80** (`24 + 6.802 + 6`). **The margin stays 0.25x / 6h**, because the reasoning behind it did not change, only the delivery measurement. **No false alarm ever fired**, which is why it went unnoticed: the largest observed gap between consecutive successes is 26.27h, inside the old threshold. The correction is about the number being right, not a bug it caused. **The lesson generalises: an `n=1` placeholder inside an asserted arithmetic is worse than no number, because the assertion goes on faithfully checking a wrong input and reads as verification.**
+**THE SUPERVISOR'S `regenerate-pages` p95 WENT 49.0 MINUTES, THEN 408.1, THEN 477.0, AND THE MIDDLE STEP WAS DESCRIBED WRONGLY HERE UNTIL 2026-10-02.** It read **49.0 minutes from a single observation**, and this file used to call that a placeholder nobody went back for. **It was not.** The job and its cron were added 2026-08-25, the config's rule required the p95 to come from slots strictly before the 2026-08-26 20:00 degradation, and that window contained exactly one occurrence: 2026-08-26T09:49:19Z, a 49.3 minute delay. The 49.0 was the only reading the stated rule allowed, and the supervisor's own REVISIT block said so at the time. **The actual defect was the 2026-09-23 fix: it measured post-degradation data without amending the rule that forbade doing so**, leaving the file asserting an arithmetic whose p95 contradicted the comment forty lines above it. Both are now consistent, and the rule reads "current operating regime" because no healthy period exists to return to. The 2026-09-23 reading itself was sound (n=15: p50 4.74h, p90 6.18h, p95 6.80h, max 6.81h) and no false alarm ever fired at any of the three values; the defect was the window, not the arithmetic.
+
+**THE LESSON, RESTATED CORRECTLY: a p95 comment must name its window and its n, and that window must be the one the assertion is derived from.** The original failure was not an `n=1` placeholder, it was an `n=1` that nobody labelled as the whole of its permitted window, so a later reader could not tell a complete measurement from a stub. The second failure was changing the measurement without changing the stated rule, which left the file asserting against a rule it broke. **Both are the same defect: a number separated from the window that produced it.** Any future retune states both, in the comment, beside the figure.
 
 **The `claim-floor` label is created only when absent** (`price-fetch.yml`). `gh label create ... || true` worked but printed `label with name "claim-floor" already exists` on every run: an error-shaped line in a healthy log, which is how people learn to skim past error-shaped lines.
 

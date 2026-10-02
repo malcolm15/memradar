@@ -49,10 +49,28 @@ const HARD_RUN_CAP = 40;
 // assertion exists so a future session cannot retune a threshold by taste: to
 // change max_age_hours you must change one of the three inputs and say why.
 //
-// The p95 figures come from the healthy period only, meaning every scheduled
-// slot whose nominal time is strictly before 2026-08-26 20:00 UTC, which is
-// when this repo's scheduling degraded. Delays are nominal-slot to actual
-// run creation, in minutes.
+// The p95 figures come from the CURRENT OPERATING REGIME, not from a healthy
+// period. Scheduling degraded on 2026-08-26 20:00 UTC and has NOT recovered:
+// as of 2026-10-02 the 04:00 slot has never delivered in 37 days. Delays are
+// nominal-slot to actual run creation, in minutes.
+//
+// THE OLD RULE SAID "strictly before 2026-08-26 20:00 UTC", AND FOR THIS JOB
+// THAT ADMITTED EXACTLY ONE RUN. `regenerate-pages` and its 0 9 * * * cron
+// were added on 2026-08-25 (09a1f742f), about 1.5 days before the cutoff, so
+// the healthy window contained a single occurrence: 2026-08-26T09:49:19Z, a
+// 49.3 minute delay. That is where the original `p95_minutes: 49.0, n=1` came
+// from. It was not a placeholder nobody went back for; it was the only
+// observation the stated rule permitted, and the REVISIT block below said so
+// at the time.
+//
+// The 2026-09-23 correction to 6.80h measured POST-degradation data without
+// amending this comment, so the file asserted an arithmetic whose p95
+// contradicted the rule printed above it. Fixed here by changing the rule to
+// match how the numbers are actually derived.
+//
+// A p95 COMMENT MUST NAME ITS WINDOW AND ITS n, and that window must be the
+// one the assertion is derived from. A percentile without a window is not a
+// measurement, and this file asserts arithmetic on it at tick time.
 //
 // The MARGIN differs per pair on purpose. A uniform margin was measured
 // against the real 2026-08-26/27 degradation and rejected: at one full
@@ -95,31 +113,57 @@ const WATCH = [
     job_id: 'regenerate-pages',
     cron: '0 9 * * *',
     interval_hours: 24,
-    p95_minutes: 408.1, // n=15, measured 2026-09-23
+    p95_minutes: 477.0, // n=35, measured 2026-08-29 to 2026-10-02
     margin_hours: 6, // 0.25x interval
-    max_age_hours: 36.80, // 24 + 6.802 + 6 = 36.802
-    // P95 CORRECTED 2026-09-23, AND IT WAS WRONG BY A FACTOR OF EIGHT. It read
-    // 49.0 minutes from a SINGLE observation. Measured over n=15 runs this job
-    // arrives between 12:46 and 15:48 against a 09:00 cron: p50 4.74h, p90
-    // 6.18h, p95 6.80h (408.1 min), max 6.81h. The old figure was a
-    // placeholder that nobody went back for, and it sat inside an arithmetic
-    // the file asserts at tick time, so the assertion was faithfully checking
-    // a wrong input.
+    max_age_hours: 37.95, // 24 + 7.950 + 6 = 37.950
+    // P95 RECOMPUTED 2026-10-02 over the current regime, n=35, window
+    // 2026-08-29 to 2026-10-02: min 3.51h, median 5.12h, p90 6.81h, p95 7.95h,
+    // max 8.51h. Arrivals 12:30 to 20:47 against a 09:00 cron.
     //
-    // NO FALSE ALARM EVER FIRED, which is why it went unnoticed: the largest
-    // observed gap between consecutive successes is 26.27h, still inside the
-    // old 30.82h. The correction is about the number being right, not about a
-    // bug it caused.
+    // FOUR WINDOWS WERE COMPUTED AND THE CHOICE BETWEEN THEM MATTERS MORE THAN
+    // THE ARITHMETIC:
+    //   A  healthy period per the old rule (< 2026-08-26 20:00)  n=1   -> 30.82
+    //   B  full history since the supervisor shipped (08-27 on)  n=37  -> 40.72
+    //   C  post acute incident (2026-08-29 on)            n=35  -> 37.95  CHOSEN
+    //   D  last 14 days (2026-09-18 on)                   n=15  -> 38.51
     //
-    // MARGIN 0.25x, the tightest on the board and deliberately so, unchanged.
-    // Per CLAUDE.md the guides and Price Index ARGUE from baked values, rank
+    // B IS REJECTED EVEN THOUGH IT IS THE LITERAL "FULL HISTORY" ANSWER. Its
+    // p95 of 10.72h is set entirely by its first two observations, 10.72h and
+    // 11.79h on 2026-08-27 and 08-28, which ARE the acute Actions outage this
+    // supervisor was built in response to, when five scheduled slots were
+    // never created at all. Tuning the alarm on the worst outage on record
+    // makes it roughly 3h slower to catch the next identical one. C excludes
+    // only those two days and is corroborated by D, which is an independent
+    // 15-run window landing within 0.6h of it.
+    //
+    // THE REAL FALSE-ALARM METRIC IS THE GAP BETWEEN CONSECUTIVE SUCCESSES,
+    // not the delay. Measured n=36: median 23.97h, p95 26.60h, max 26.88h
+    // (2026-09-27 to 09-28). Against 37.95h that leaves 11.07h of headroom, so
+    // this threshold cannot fire on anything yet observed, while a genuinely
+    // missed regen still shows as roughly 48h and alerts with about 10h to
+    // spare.
+    //
+    // MARGIN UNCHANGED AT 0.25x / 6h, and the measurement strengthens that
+    // rather than weakening it. The margin is sized by how much staleness the
+    // pages can absorb before saying something untrue, not by delivery
+    // variance, and that reasoning has not changed. What changed is that
+    // delivery now eats more of the interval, so cutting the margin would
+    // narrow the 48h-miss detection window exactly as arrivals creep later.
+    //
+    // WHY THE MARGIN IS 0.25x AND STAYS THERE, unchanged since it was set:
+    // per CLAUDE.md the guides and Price Index ARGUE from baked values, rank
     // products, print their own build date and tell the reader they update
     // automatically. A stale build is therefore a page making a false claim
     // about itself, which makes a single miss already a correctness problem
-    // rather than a latency problem. The margin is unchanged BECAUSE the
-    // reasoning behind it is unchanged; only the delivery measurement moved,
-    // and 36.80h still alerts within a day of a genuine miss (a miss shows as
-    // ~48h since the last success).
+    // rather than a latency problem.
+    //
+    // HISTORY: this entry read p95 49.0 min (n=1) until 2026-09-23, then
+    // 408.1 min (6.802h, n=15) with max_age_hours 36.80, until this recompute.
+    // The superseded commentary is deliberately NOT kept verbatim: it called
+    // 49.0 "a placeholder that nobody went back for", which the window note at
+    // the top of this file now shows to be false, and it quoted a largest
+    // consecutive-success gap of 26.27h that is now 26.88h. Leaving a
+    // known-false claim in place as history would be worse than losing it.
   },
   {
     workflow_file: 'bluesky-posts.yml',
@@ -155,6 +199,11 @@ const WATCH = [
 // there should be a real distribution to fit; recompute all four p95 values
 // from the healthy history then and update margin reasoning if the shape
 // disagrees with the assumptions above.
+//
+// PARTIALLY DONE 2026-10-02: `regenerate-pages` recomputed over n=35 of the
+// current regime (see its entry). `bluesky-posts` / `post` STILL RESTS ON n=1
+// and remains open, as does the premise above that a "healthy history" exists
+// to measure against; it does not, so recomputes now use the current regime.
 
 // ---------------------------------------------------------------------------
 
