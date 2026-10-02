@@ -35,13 +35,34 @@ async function sendEmail({ to, subject, html, text }) {
   }
 }
 
+// THE <head> IS LOAD-BEARING AND THERE DID NOT USED TO BE ONE. Without a
+// viewport meta, iOS Mail lays the message out on a ~980px canvas and then
+// zooms the whole thing down to fit the screen, which shrank every size
+// proportionally and left the card narrower than the phone. The old card also
+// carried a fixed width="480" ATTRIBUTE, which pinned it at 480px inside that
+// canvas; width:100% with max-width:480px keeps the same desktop width while
+// letting the card fill a phone. Do not reintroduce the attribute.
+//
+// The media query only narrows the side padding on small screens. It is a
+// progressive enhancement: a client that ignores it still gets a readable
+// message at 28px padding, which is why no size depends on it.
 function shell(innerHtml) {
-  return `<!doctype html><html><body style="margin:0;background:#f3f4f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  return `<!doctype html><html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    @media only screen and (max-width:480px) {
+      .px { padding-left:16px !important; padding-right:16px !important; }
+    }
+  </style>
+</head>
+<body style="margin:0;background:#f3f4f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:1.5;color:#374151;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6;padding:24px 0;">
     <tr><td align="center">
-      <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
-        <tr><td style="padding:24px 28px 8px;">
-          <span style="font-size:20px;font-weight:800;color:#111827;">Mem<span style="color:#3A5BC7;">Radar</span></span>
+      <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;max-width:480px;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
+        <tr><td class="px" style="padding:24px 28px 8px;">
+          <span style="font-size:20px;font-weight:800;line-height:1.2;color:#111827;">Mem<span style="color:#3A5BC7;">Radar</span></span>
         </td></tr>
         ${innerHtml}
       </table>
@@ -51,12 +72,12 @@ function shell(innerHtml) {
 }
 
 function button(href, label) {
-  return `<a href="${href}" style="display:inline-block;background:#3A5BC7;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:12px 24px;border-radius:8px;">${label}</a>`;
+  return `<a href="${href}" style="display:inline-block;background:#3A5BC7;color:#ffffff;text-decoration:none;font-weight:600;font-size:16px;line-height:1.2;padding:12px 24px;border-radius:8px;">${label}</a>`;
 }
 
 function unsubLineHtml(unsubUrl) {
-  return `<tr><td style="padding:16px 28px 24px;border-top:1px solid #f3f4f6;">
-    <p style="margin:0;font-size:12px;color:#9ca3af;line-height:1.6;">
+  return `<tr><td class="px" style="padding:16px 28px 24px;border-top:1px solid #f3f4f6;">
+    <p style="margin:0;font-size:13px;color:#9ca3af;line-height:1.6;">
       You're receiving this because someone entered this email at MemRadar.
       <a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe</a> at any time.
     </p></td></tr>`;
@@ -70,12 +91,12 @@ function confirmationEmail({ productName, targetPrice, confirmToken, unsubscribe
   const price = money(targetPrice);
 
   const html = shell(`
-        <tr><td style="padding:8px 28px 0;">
-          <h1 style="margin:0 0 12px;font-size:19px;color:#111827;">Confirm your price alert</h1>
-          <p style="margin:0 0 8px;font-size:14px;color:#374151;line-height:1.6;">You asked to be alerted when this product drops to your target:</p>
-          <p style="margin:0 0 4px;font-size:15px;color:#111827;font-weight:600;line-height:1.4;">${name}</p>
-          <p style="margin:0 0 20px;font-size:14px;color:#374151;">Target price: <strong>${price}</strong></p>
-          <p style="margin:0 0 20px;">${button(confirmUrl, 'Confirm my alert')}</p>
+        <tr><td class="px" style="padding:8px 28px 0;">
+          <h1 style="margin:0 0 12px;font-size:19px;line-height:1.3;color:#111827;">Confirm your price alert</h1>
+          <p style="margin:0 0 8px;font-size:16px;color:#374151;line-height:1.5;">You asked to be alerted when this product drops to your target:</p>
+          <p style="margin:0 0 12px;font-size:17px;color:#111827;font-weight:700;line-height:1.4;">${name}</p>
+          <p style="margin:0 0 20px;font-size:16px;color:#374151;line-height:1.5;">Target price: <strong>${price}</strong></p>
+          <p style="margin:0 0 20px;line-height:1.2;">${button(confirmUrl, 'Confirm my alert')}</p>
           <p style="margin:0 0 16px;font-size:13px;color:#6b7280;line-height:1.6;">This link expires in 48 hours. If you didn't request this, you can ignore this email. No alert will be set.</p>
         </td></tr>
         ${unsubLineHtml(unsubUrl)}`);
@@ -105,22 +126,22 @@ function priceDropEmail({ productName, currentPrice, targetPrice, allTimeLow, pr
   const pdpUrl = `${SITE}/${category}/${slug}/`;
   const unsubUrl = `${API_BASE}/api/unsubscribe?token=${unsubscribeToken}`;
   const atlLine = allTimeLow != null
-    ? `<p style="margin:0 0 20px;font-size:13px;color:#6b7280;">All-time low we've tracked: <strong>${money(allTimeLow)}</strong></p>`
+    ? `<p style="margin:0 0 20px;font-size:13px;color:#6b7280;line-height:1.5;">All-time low we've tracked: <strong>${money(allTimeLow)}</strong></p>`
     : '';
 
   const html = shell(`
-        <tr><td style="padding:8px 28px 0;">
-          <h1 style="margin:0 0 12px;font-size:19px;color:#16a34a;">📉 Price drop!</h1>
-          <p style="margin:0 0 4px;font-size:15px;color:#111827;font-weight:600;line-height:1.4;">${name}</p>
-          <p style="margin:0 0 4px;font-size:22px;color:#111827;font-weight:800;">${cur}</p>
-          <p style="margin:0 0 16px;font-size:13px;color:#6b7280;">Now at or below your target of ${target}.</p>
+        <tr><td class="px" style="padding:8px 28px 0;">
+          <h1 style="margin:0 0 12px;font-size:19px;line-height:1.3;color:#16a34a;">📉 Price drop!</h1>
+          <p style="margin:0 0 12px;font-size:17px;color:#111827;font-weight:700;line-height:1.4;">${name}</p>
+          <p style="margin:0 0 4px;font-size:22px;color:#111827;font-weight:800;line-height:1.2;">${cur}</p>
+          <p style="margin:0 0 16px;font-size:13px;color:#6b7280;line-height:1.5;">Now at or below your target of ${target}.</p>
           ${atlLine}
-          <p style="margin:0 0 12px;">${button(amazonUrl, 'View on Amazon →')}</p>
-          <p style="margin:0 0 16px;font-size:13px;"><a href="${pdpUrl}" style="color:#3A5BC7;">See full price history on MemRadar</a></p>
+          <p style="margin:0 0 12px;line-height:1.2;">${button(amazonUrl, 'View on Amazon →')}</p>
+          <p style="margin:0 0 16px;font-size:13px;line-height:1.5;"><a href="${pdpUrl}" style="color:#3A5BC7;">See full price history on MemRadar</a></p>
         </td></tr>
         ${unsubLineHtml(unsubUrl)}`);
 
-  const text = `Price drop: ${productName} is now ${cur}
+  const text = `Price drop: ${cur} for ${productName}
 
 Now at or below your target of ${target}.${allTimeLow != null ? `\nAll-time low we've tracked: ${money(allTimeLow)}` : ''}
 
@@ -129,7 +150,7 @@ Full price history: ${pdpUrl}
 
 Unsubscribe: ${unsubUrl}`;
 
-  return { subject: `Price drop: ${productName} is now ${cur}`, html, text };
+  return { subject: `Price drop: ${cur} for ${productName}`, html, text };
 }
 
 module.exports = { sendEmail, confirmationEmail, priceDropEmail };
