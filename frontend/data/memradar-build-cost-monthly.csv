@@ -15,7 +15,7 @@
 #
 # SOURCES: Amazon price history licensed from Keepa. These figures are medians computed by MemRadar from that history, not the raw licensed data. Newegg prices are not included: MemRadar records Newegg as a current price only and holds no Newegg history.
 #
-# Generated 2026-10-01. Regenerated daily.
+# Generated 2026-10-02. Regenerated daily.
 # Source: MemRadar Build-Cost Index, memradar.com/build-cost/
 basket,month,total_usd,ram_usd,ssd1_usd,ssd2_usd,ram_n,ssd1_n,ssd2_n
 build_current,2023-01,453.47,179.99,90.99,182.49,8,5,8

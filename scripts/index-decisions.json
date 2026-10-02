@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-01",
+ "generated": "2026-10-02",
  "rule": "requiredByBuild(p) || (healthy(p) && gatesPass(p))",
  "switches": {
   "GATES_ENABLED": false,
@@ -191,8 +191,7 @@
    "google_position": 11.58,
    "bing_impressions": 0,
    "reasons": [
-    "sparse_history",
-    "percentile_extreme"
+    "sparse_history"
    ]
   },
   "ram/corsair-vengeance-ddr5-ram-16gb-6000mhz": {
@@ -217,7 +216,8 @@
    "reasons": [
     "required_by_build",
     "sparse_history",
-    "percentile_extreme"
+    "percentile_extreme",
+    "pergb_group_end"
    ]
   },
   "ram/corsair-vengeance-ddr5-ram-32gb-6000mhz-2": {
@@ -276,6 +276,7 @@
    "bing_impressions": 0,
    "reasons": [
     "sparse_history",
+    "percentile_extreme",
     "historical_demand"
    ]
   },
@@ -473,7 +474,8 @@
    "google_position": 19,
    "bing_impressions": 0,
    "reasons": [
-    "long_history"
+    "long_history",
+    "percentile_extreme"
    ]
   },
   "ram/crucial-16gb-ddr5-ram-5600mhz-2": {
@@ -755,7 +757,8 @@
    "bing_impressions": 0,
    "reasons": [
     "sparse_history",
-    "duplicate_variant"
+    "duplicate_variant",
+    "percentile_extreme"
    ]
   },
   "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-32gb-6000mhz-2": {
@@ -998,8 +1001,7 @@
    "bing_impressions": 0,
    "reasons": [
     "long_history",
-    "percentile_extreme",
-    "pergb_group_end"
+    "percentile_extreme"
    ]
   },
   "ram/kingston-fury-beast-32gb-6000mt-s-ddr5": {
@@ -1279,8 +1281,7 @@
    "bing_impressions": 0,
    "reasons": [
     "sparse_history",
-    "gsc_crawled_not_indexed",
-    "percentile_extreme"
+    "gsc_crawled_not_indexed"
    ]
   },
   "ram/silicon-power-ddr5-64gb-6000mhz": {
@@ -1642,8 +1643,7 @@
    "google_position": 15.12,
    "bing_impressions": 0,
    "reasons": [
-    "long_history",
-    "percentile_extreme"
+    "long_history"
    ]
   },
   "ssd/crucial-p310-2tb-ssd": {
@@ -2435,7 +2435,8 @@
    "bing_impressions": 0,
    "reasons": [
     "sparse_history",
-    "gsc_crawled_not_indexed"
+    "gsc_crawled_not_indexed",
+    "percentile_extreme"
    ]
   },
   "ssd/silicon-power-2tb-ud90-nvme-4-0-gen4-pcie": {
