@@ -77,3 +77,29 @@ jobs:
           fi
           npm i --no-save --no-audit --no-fund puppeteer@25
           node scripts/hydration-check.js
+
+          # RENDERED PAGE vs SERVED HTML, same step so it reuses the puppeteer
+          # install and the Chrome above. It answers the question the hydration
+          # check structurally cannot: that check corrupts what a page writes and
+          # asserts it is restored, so a surface which hydrates PERFECTLY INTO
+          # THE WRONG VALUE passes, because the value it compares against is
+          # whatever hydration produced. That is exactly the 2026-10-03 listing
+          # regression, which ran for three and a half weeks with correct served
+          # HTML and a rendered DOM full of raw Amazon titles.
+          #
+          # --gate narrows --strict to the three checks that cannot false-positive
+          # on live copy or live prices: card-count parity, per-card name fidelity
+          # against search-index.json, and head-field immutability. The block,
+          # heading, link and JSON-LD diffs still print and are advisory, because
+          # their EXPECTED classifier is a heuristic over live prose and a gate
+          # that cries wolf gets switched off.
+          #
+          # THIS CANNOT BLOCK THE REGEN COMMIT. The regen lives in
+          # newegg-refresh.yml, commits and pushes there, and this workflow only
+          # triggers on the push that follows, after Pages has already published.
+          # So a failure here is a red Deploy Frontend run, which is how it is
+          # meant to be visible (the supervisor watches this workflow and job),
+          # and never a reason the day's prices went uncommitted. Stale beats
+          # wrong applies to publishing, not to reporting.
+          node scripts/render-audit.js --strict --gate \
+            --pages=/,/ram/,/ssd/,/ram/ddr4-ram-laptop-only-gigastone-32gb-kit-3200mhz/

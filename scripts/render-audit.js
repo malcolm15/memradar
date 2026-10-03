@@ -35,6 +35,7 @@
 //   node scripts/render-audit.js --pages=/ram/,/ssd/
 //   node scripts/render-audit.js --json=scripts/output/render-audit.json
 //   node scripts/render-audit.js --quiet-ms=1500 --verbose
+//   node scripts/render-audit.js --strict --gate --pages=/,/ram/,/ssd/,<pdp>
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
@@ -837,10 +838,39 @@ async function loadPage(browser, url, { js }) {
   // heuristic and an unrecognised EXPECTED pattern is a report to read rather
   // than a deploy to fail. --strict exits nonzero and is what a gate would use,
   // narrowed with --pages to the checks worth blocking a deploy over.
-  if (flag('strict') && defects.length) {
+  // --gate NARROWS WHAT --strict WILL FAIL ON, to the three checks that cannot
+  // produce a false positive from live copy or live prices:
+  //   1. card-count parity, served == rendered. One integer.
+  //   2. per-card name fidelity against search-index.json, where short_name is
+  //      the PDP h1 by construction. This is the check that would have caught
+  //      the 2026-10-03 regression on its first day.
+  //   3. head-field immutability. No script on this site writes <title>, the
+  //      meta description, the canonical, robots or og:title, so any movement
+  //      is a defect by definition.
+  // The block, heading, link and JSON-LD diffs stay OUT of the gate on purpose.
+  // They are worth reading but their EXPECTED classifier is a heuristic over
+  // live copy, so a new figure appearing in a sentence would fail a deploy for
+  // no reason, and a gate that cries wolf gets switched off.
+  const GATED = [
+    { name: 'card-count parity', test: (d) => d.where === 'card count' },
+    { name: 'per-card name fidelity', test: (d) => /^(served|rendered) card /.test(d.where) },
+    { name: 'head-field immutability', test: (d) => /^(<title>|meta description|rel=canonical|meta robots|og:title)$/.test(d.where) },
+  ];
+  if (flag('strict')) {
+    const gateOnly = flag('gate');
+    const blocking = gateOnly ? defects.filter((d) => GATED.some((g) => g.test(d))) : defects;
     log('');
-    log(`*** --strict: exiting 1 on ${defects.length} defect(s)`);
-    process.exit(1);
+    if (gateOnly) {
+      log(`--gate: blocking on ${GATED.map((g) => g.name).join(', ')} only`);
+      const advisory = defects.length - blocking.length;
+      if (advisory) log(`        ${advisory} further defect(s) reported above are advisory and do not fail this run`);
+    }
+    if (blocking.length) {
+      log(`*** --strict: exiting 1 on ${blocking.length} blocking defect(s)`);
+      blocking.forEach((d) => log(`      ${d.page}  [${d.where}] ${d.reason}`));
+      process.exit(1);
+    }
+    log('--strict: no blocking defects');
   }
   process.exit(0);
 })();
