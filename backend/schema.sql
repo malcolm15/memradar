@@ -41,7 +41,10 @@ CREATE TABLE price_history (
 -- VERIFIED against `select indexname, indexdef from pg_indexes where tablename
 -- = 'alerts'` run in the Supabase SQL editor, because PostgREST does not expose
 -- the catalog to this project's credentials (pg_indexes returns PGRST205 and no
--- exec_sql helper exists). Column names and types come from a live row.
+-- exec_sql helper exists). Column names and types come from a live row. That
+-- listing proves which unique objects EXIST but not whether each one is
+-- constraint-backed; see the lesson beside alerts_email_product_target_unique
+-- in the index section below.
 -- NOT NULL and DEFAULT clauses below are RECONSTRUCTED from the code that
 -- writes the table rather than read from the catalog, so treat those two
 -- qualifiers as the one unverified part of this block.
@@ -316,14 +319,33 @@ CREATE INDEX IF NOT EXISTS idx_alerts_unsubscribe_token ON alerts(unsubscribe_to
 CREATE INDEX IF NOT EXISTS idx_alerts_active ON alerts(confirmed, triggered)
   WHERE confirmed = true AND triggered = false;
 
--- SEVERAL THRESHOLDS PER PRODUCT PER ADDRESS (2026-10-03). The old
--- alerts_email_product_unique on (email, product_id) permitted exactly one
--- alert per person per product, and api/alerts.js upserts with
--- ignoreDuplicates, so a second signup on the same product was DISCARDED in
--- silence: no confirmation email, no update to the target, and a neutral 200
--- that reads identically to success. Uniqueness now includes target_price, so a
+-- SEVERAL THRESHOLDS PER PRODUCT PER ADDRESS (2026-10-03), AND THE TWO RULES
+-- ARE DIFFERENT KINDS OF OBJECT.
+--   OLD: a TABLE CONSTRAINT, alerts_email_product_unique on
+--        (email, product_id). Dropped 2026-10-03 UTC with
+--          ALTER TABLE public.alerts DROP CONSTRAINT alerts_email_product_unique;
+--   NEW: a UNIQUE INDEX, alerts_email_product_target_unique on
+--        (email, product_id, target_price). Created 2026-10-03 UTC.
+-- The asymmetry is only what was actually run; a UNIQUE CONSTRAINT would serve
+-- ON CONFLICT equally well, and converting it later is a free change.
+--
+-- WHY THE OLD RULE PERMITTED A SILENT FAILURE: it allowed exactly one alert per
+-- person per product, and api/alerts.js upserts with ignoreDuplicates, so a
+-- second signup on a product you already watched was DISCARDED in silence, with
+-- no confirmation email, no update to the stored target, and a neutral 200 that
+-- reads identically to success. Uniqueness now includes target_price, so a
 -- ladder of thresholds is allowed while an exact duplicate is still ignored
--- silently, which is the behaviour the neutral response promises.
+-- silently, which is the only thing the neutral response actually promises.
+--
+-- LESSON, LEARNED BY GETTING IT WRONG ON 2026-10-03: a hand-chosen name does
+-- NOT mean an object is a bare index, and the pg_indexes listing CANNOT tell
+-- you which it is. Every unique object renders there as "CREATE UNIQUE INDEX"
+-- whether or not a constraint owns it: alerts_pkey and alerts_confirm_token_key
+-- print the same shape as a standalone index. DROP INDEX on a constraint-backed
+-- one fails with 2BP01, "cannot drop index ... because constraint ... requires
+-- it". To know BEFORE running anything, read pg_constraint, not pg_indexes:
+--   select conname, contype, pg_get_constraintdef(oid) from pg_constraint
+--    where conrelid = 'public.alerts'::regclass;
 CREATE UNIQUE INDEX IF NOT EXISTS alerts_email_product_target_unique
   ON alerts(email, product_id, target_price);
 
