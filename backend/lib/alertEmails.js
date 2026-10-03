@@ -42,17 +42,45 @@ function money(v) {
 // unknown sku or an unreadable file degrades to exactly the behaviour shipped
 // before this change, never to a blank name, and logs which sku did it.
 const SHORT_BY_SKU = Object.create(null);
+const ATL_BY_SKU = Object.create(null);
 try {
   for (const e of require('../../frontend/search-index.json')) {
-    if (e && e.sku && e.short_name) SHORT_BY_SKU[e.sku] = e.short_name;
+    if (!e || !e.sku) continue;
+    if (e.short_name) SHORT_BY_SKU[e.sku] = e.short_name;
+    if (e.all_time_low != null) ATL_BY_SKU[e.sku] = Number(e.all_time_low);
   }
 } catch (err) {
-  console.error(`[alertEmails] search index unreadable (${err.message}); every email falls back to the raw listing title`);
+  console.error(`[alertEmails] search index unreadable (${err.message}); every email falls back to the raw listing title and to the price_history query for the all-time low`);
+}
+
+// Null when the index has no name for this sku, so a caller can tell the two
+// cases apart. displayName() is the one that logs and falls back; this one
+// answers the plain question, which the confirmation subject needs in order to
+// choose between a per-product line and the generic one.
+function shortNameFor(sku) {
+  return (sku && SHORT_BY_SKU[sku]) || null;
 }
 function displayName(sku, rawName) {
-  const short = sku && SHORT_BY_SKU[sku];
+  const short = shortNameFor(sku);
   if (!short) console.log(`[alertEmails] no short_name for sku=${sku || '?'}; using the raw listing title`);
   return short || rawName;
+}
+
+// THE ALL-TIME LOW NOW COMES FROM THE SAME FILE AS THE NAME, so the figure in
+// an email and the figure on the page have one source. Null means the index
+// could not answer and the caller should run its own query; it is never a
+// claim that the product has no low.
+//
+// ZERO FIGURES MOVE TODAY. Measured 2026-10-03 across all 235 products: the
+// index's all_time_low agrees with the page's rule (min of last-reading-per-UTC-day,
+// in-stock only) on every one, and agrees with alertCheck's old unfiltered
+// query on every one too, because the backfill's in_stock=false rows are exact
+// copies of prices already observed in stock and so can never be strictly
+// lower. This change buys a single source of truth going forward, not a
+// correction today.
+function allTimeLowFor(sku) {
+  const v = sku && ATL_BY_SKU[sku];
+  return typeof v === 'number' && isFinite(v) ? v : null;
 }
 
 // Model number, faint, under the content and above the unsubscribe line. From
@@ -131,7 +159,7 @@ function unsubLineHtml(unsubUrl) {
   return `<tr><td class="px" style="padding:16px 28px 24px;border-top:1px solid #f3f4f6;">
     <p style="margin:0;font-size:13px;color:#9ca3af;line-height:1.6;">
       You're receiving this because someone entered this email at MemRadar.
-      <a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe</a> at any time.
+      <a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe this alert</a> at any time.
     </p></td></tr>`;
 }
 
@@ -139,6 +167,14 @@ function unsubLineHtml(unsubUrl) {
 function confirmationEmail({ productName, productSku, targetPrice, confirmToken, unsubscribeToken }) {
   const disp = displayName(productSku, productName);
   const name = esc(disp);
+  // PER-PRODUCT SUBJECT, because Gmail threads by subject and every
+  // confirmation carried the same one: a second alert set minutes after a first
+  // collapsed into the same conversation and was missed. The raw listing title
+  // is NOT usable here (median 150 characters, so the product would be cut off
+  // anyway), which is why this falls back to the old generic subject rather
+  // than to the long name when the index cannot name the product.
+  const short = shortNameFor(productSku);
+  const subject = short ? `Confirm your MemRadar alert for ${short}` : 'Confirm your MemRadar price alert';
   const confirmUrl = `${API_BASE}/api/confirm?token=${confirmToken}`;
   const unsubUrl = `${API_BASE}/api/unsubscribe?token=${unsubscribeToken}`;
   const price = money(targetPrice);
@@ -165,9 +201,9 @@ ${confirmUrl}
 
 If you didn't request this, ignore this email. No alert will be set.
 
-Unsubscribe: ${unsubUrl}`;
+Unsubscribe this alert: ${unsubUrl}`;
 
-  return { subject: 'Confirm your MemRadar price alert', html, text };
+  return { subject, html, text };
 }
 
 // ---- Alert email (sent from the daily cron when target is hit) ----
@@ -204,9 +240,9 @@ Now at or below your target of ${target}.${allTimeLow != null ? `\nAll-time low 
 View on Amazon: ${amazonUrl}
 Full price history: ${pdpUrl}
 
-Unsubscribe: ${unsubUrl}`;
+Unsubscribe this alert: ${unsubUrl}`;
 
   return { subject: `Price drop: ${cur} for ${disp}`, html, text };
 }
 
-module.exports = { sendEmail, confirmationEmail, priceDropEmail };
+module.exports = { sendEmail, confirmationEmail, priceDropEmail, allTimeLowFor };

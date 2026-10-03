@@ -4,7 +4,7 @@
 // schedule the privacy policy promises: pending after 48h, fired once the
 // email is sent, and any alert 12 months old. All DB access is via
 // parameterized Supabase client methods.
-const { sendEmail, priceDropEmail } = require('./alertEmails');
+const { sendEmail, priceDropEmail, allTimeLowFor } = require('./alertEmails');
 
 const HOUR_MS = 3600000;
 // "Deleted ... after 12 months of inactivity" (privacy.html). An alert has no
@@ -68,15 +68,27 @@ async function checkAlerts(supabase, priceByProductId, log, logError) {
     const prod = a.products;
     if (!prod) { logError('alert product missing', { message: `alert ${a.id} product_id ${a.product_id}` }); continue; }
 
-    // All-time low for context (cheap single-row lookup).
-    let atl = null;
-    const { data: low } = await supabase
-      .from('price_history')
-      .select('price')
-      .eq('product_id', a.product_id)
-      .order('price', { ascending: true })
-      .limit(1);
-    if (low && low.length) atl = Number(low[0].price);
+    // All-time low for context. The search index first, so the email and the
+    // PDP quote one figure from one place; its own query only when the index
+    // cannot answer. THE FALLBACK NOW FILTERS in_stock, which the original did
+    // not: every price_history consumer is supposed to exclude the backfill's
+    // in_stock=false copies, and this one silently did not. It changes no
+    // figure today (0 of 235 differ, because those copies repeat a price
+    // already seen in stock) and brings the query under the standing rule.
+    let atl = allTimeLowFor(prod.sku);
+    let atlPath = 'search-index';
+    if (atl == null) {
+      atlPath = 'price_history';
+      const { data: low } = await supabase
+        .from('price_history')
+        .select('price')
+        .eq('product_id', a.product_id)
+        .eq('in_stock', true)
+        .order('price', { ascending: true })
+        .limit(1);
+      if (low && low.length) atl = Number(low[0].price);
+    }
+    console.log(`[alertCheck] all-time low for ${prod.sku}: ${atl == null ? 'none' : '$' + atl} via ${atlPath}`);
 
     const tmpl = priceDropEmail({
       productName: prod.name,
