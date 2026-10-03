@@ -47,6 +47,7 @@ const RENDER_CHARTS = process.argv.includes('--render-charts');
 // Report-only: prints the three index buckets using the REAL gates and exits
 // without writing anything, so the plan can be read before the gates are live.
 const INDEX_PLAN = process.argv.includes('--index-plan');
+const INDEX_PLAN_VERBOSE = INDEX_PLAN && process.argv.includes('--verbose');
 const FRONTEND = path.join(__dirname, '..', 'frontend');
 const TEMPLATE_PATH = path.join(FRONTEND, 'ram', 'product-template.html');
 const SITEMAP_PATH = path.join(FRONTEND, 'sitemap.xml');
@@ -1217,7 +1218,7 @@ function indexPlan(pool, ctx) {
   return { index, improve, no };
 }
 
-function printIndexPlan(plan) {
+function printIndexPlan(plan, ctx) {
   const tally = (rows) => {
     const c = {};
     for (const { r } of rows) for (const code of r) c[code] = (c[code] || 0) + 1;
@@ -1232,6 +1233,27 @@ function printIndexPlan(plan) {
     console.log(`  reasons: ${tally(rows) || 'none'}`);
   }
   console.log(`\nTOTAL ${plan.index.length + plan.improve.length + plan.no.length}  |  would flip to noindex: ${plan.improve.length + plan.no.length}`);
+  // PER-SLUG, so the flip's blast radius can be reviewed one page at a time.
+  // It reads the SAME rows indexPlan() already bucketed: no second
+  // implementation of the rule, and no verdict recomputed here.
+  if (INDEX_PLAN_VERBOSE) {
+    console.log('\n-------------------- PER-SLUG (bucket, reasons, readings, pre-demotion impressions) --------------------');
+    const rows = [
+      ...plan.index.map((x) => ({ ...x, b: 'INDEX_NOW' })),
+      ...plan.improve.map((x) => ({ ...x, b: 'IMPROVE' })),
+      ...plan.no.map((x) => ({ ...x, b: 'DO_NOT_INDEX' })),
+    ].sort((a, b) => slugPathOf(a.p).localeCompare(slugPathOf(b.p)));
+    console.log(['slug', 'bucket', 'readings', 'google_impressions', 'google_position', 'reasons'].join('\t'));
+    for (const { p, r, b } of rows) {
+      const imp = (ctx && ctx.impressions.get(p.finalSlug || p.slug)) || {};
+      console.log([
+        slugPathOf(p), b, p.stats.days,
+        imp.google_impressions || 0, imp.google_position || 0,
+        r.join('|') || 'none',
+      ].join('\t'));
+    }
+    console.log('-------------------- end per-slug --------------------');
+  }
   const missing = [...GSC_CRAWLED_NOT_INDEXED].filter((sp) => ![...plan.index, ...plan.improve, ...plan.no].some((x) => slugPathOf(x.p) === sp));
   if (missing.length) console.log(`\n*** GSC_CRAWLED_NOT_INDEXED has ${missing.length} slug(s) matching no page: ${missing.join(', ')}`);
   else console.log(`\nGSC_CRAWLED_NOT_INDEXED: all ${GSC_CRAWLED_NOT_INDEXED.size} slugs match a real page.`);
@@ -5641,7 +5663,7 @@ async function run() {
     log(`Index rule: ${generable.filter((p) => p.stats.indexable).length} indexable, parity with the legacy rule OK (${relistingDivergences} relisting divergence, unobservable: every consumer of the flag also filters _relistingOf)`);
   }
   if (INDEX_PLAN) {
-    printIndexPlan(indexPlan(generable, indexCtx));
+    printIndexPlan(indexPlan(generable, indexCtx), indexCtx);
     console.log('\n--index-plan is report only: nothing was written.');
     return;
   }

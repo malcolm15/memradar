@@ -1378,6 +1378,8 @@ requiredByBuild(p) || ( healthy(p) && !hardExcluded(p)
 
 **`node scripts/generate-product-pages.js --index-plan`** prints the three buckets with the gates forced ON and writes nothing. With the ordered rule and floor 50: **INDEX NOW 67, IMPROVE THEN INDEX 121, DO NOT INDEX 47**, so the flip would move 168 pages. The middle bucket is the PDP improvement worklist. (Fact gates alone gave 57/128/50; floor 20 gives 98/97/40.)
 
+**`scripts/index-plan-2026-10-03.tsv` IS A DATED REVIEW SNAPSHOT, NOT A SOURCE THE CODE READS.** It is the output of `--index-plan --verbose` on that date, committed so the 167 pages can be read one at a time in an editor. Nothing requires it, the generator never writes it in CI, and it is therefore deliberately absent from the regen workflow's path lists. Regenerate it by hand when a fresh review is wanted.
+
 **COMMIT 4, THE FLIP, IS PENDING A DECISION AND IS NOT BUILT.** It flips `GATES_ENABLED` and `HEALTHY_REQUIRES_FRESH` and nothing else. While both are false, `assertIndexParity()` throws if `keepIndexable()` disagrees with the legacy `readings >= MIN_DAYS_INDEXABLE` rule on any page, so the transition cannot drift silently.
 
 **TWO THINGS THE NEUTRAL COMMIT SET COULD NOT KEEP NEUTRAL, both measured and both deliberate:**
