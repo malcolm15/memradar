@@ -2206,7 +2206,7 @@ function relatedCard(rp) {
   const cap = totalCapacityGB(rp.name);
   const gbLine = cap && rp.stats ? `<span class="pdp-related-per-gb">${perGb(rp.stats.current / cap)}</span>` : '';
   const brand = rp.brand ? `<span class="listing-card-brand">${esc(rp.brand)}</span>` : '';
-  const img = rp.image_url ? `<img src="${esc(rp.image_url)}" alt="${esc(shortName(rp))}" loading="lazy" class="listing-card-img-el" onerror="this.style.display='none'">` : '';
+  const img = rp.image_url ? `<img src="${esc(rp.image_url)}" alt="${esc(rp._titleName)}" loading="lazy" class="listing-card-img-el" onerror="this.style.display='none'">` : '';
   let change = '';
   if (rp.stats && rp.stats.change30 != null) {
     const r = Math.round(rp.stats.change30);
@@ -2217,7 +2217,7 @@ function relatedCard(rp) {
             <a href="${url}" class="listing-card-img" aria-hidden="true" tabindex="-1">${img}</a>
             <div class="listing-card-body">
               ${brand}
-              <h3 class="listing-card-name"><a href="${url}">${esc(shortName(rp))}</a></h3>
+              <h3 class="listing-card-name"><a href="${url}">${esc(rp._titleName)}</a></h3>
               <div class="listing-card-pricing">
                 <span class="listing-card-price">${money(rp.stats ? rp.stats.current : null)}</span>
                 ${change}
@@ -3299,7 +3299,7 @@ function buildGuideRamNow(ctx) {
   const atl = nearAtl(products, neweggBySku, 'ram').map((r) => {
     const url = `../../${r.p.category}/${r.p.finalSlug}/`;
     return `        <li class="guide-atl-row" data-sku="${esc(r.p.sku)}">
-          <a class="guide-atl-name" href="${url}">${esc(shortName(r.p))}</a>
+          <a class="guide-atl-name" href="${url}">${esc(r.p._titleName)}</a>
           <span class="guide-atl-price" data-role="price">${money(r.cur)}</span>
           <span class="guide-atl-gap" data-role="gap" data-atl="${r.atl}">${esc(atlPhrase(r.gap))} of ${money(r.atl)}</span>
         </li>`;
@@ -3316,7 +3316,7 @@ function buildGuideRamNow(ctx) {
   const metaDesc = esc(d5pct
     ? `Should you buy RAM now? DDR5 is up ${d5pct} year over year and still grinding higher. What a decade of real price data says about buying in this market.`
     : 'Should you buy RAM now? What a decade of real price data says about buying memory in this market.');
-  const chartCaption = `${esc(shortName(chartProduct))}, tracked since ${chartProduct.series[0].day.slice(0, 4)}. Both DRAM spikes are visible: the 2017-18 climb and decline, and the late-2025 surge.`;
+  const chartCaption = `${esc(chartProduct._titleName)}, tracked since ${chartProduct.series[0].day.slice(0, 4)}. Both DRAM spikes are visible: the 2017-18 climb and decline, and the late-2025 surge.`;
 
   const jsonld = JSON.stringify({
     '@context': 'https://schema.org',
@@ -3414,7 +3414,7 @@ function buildGuideSsdNow(ctx) {
   const atl = nearAtl(products, neweggBySku, 'ssd').map((r) => {
     const url = `../../${r.p.category}/${r.p.finalSlug}/`;
     return `        <li class="guide-atl-row" data-sku="${esc(r.p.sku)}">
-          <a class="guide-atl-name" href="${url}">${esc(shortName(r.p))}</a>
+          <a class="guide-atl-name" href="${url}">${esc(r.p._titleName)}</a>
           <span class="guide-atl-price" data-role="price">${money(r.cur)}</span>
           <span class="guide-atl-gap" data-role="gap" data-atl="${r.atl}">${esc(atlPhrase(r.gap))} of ${money(r.atl)}</span>
         </li>`;
@@ -3455,7 +3455,7 @@ function buildGuideSsdNow(ctx) {
     ? `SSD prices are up more than ${floorPct}% year over year. What a decade of tracked price history says about waiting, and how to spot a fair drive price today.`
     : 'What a decade of tracked SSD price history says about waiting, and how to spot a fair drive price today.');
 
-  const chartCaption = `${esc(shortName(chartProduct))}, tracked since ${chartProduct.series[0].day.slice(0, 4)}. The long slide and the late-2025 surge are both visible: years of drifting cheaper, then a hard reprice.`;
+  const chartCaption = `${esc(chartProduct._titleName)}, tracked since ${chartProduct.series[0].day.slice(0, 4)}. The long slide and the late-2025 surge are both visible: years of drifting cheaper, then a hard reprice.`;
 
   const jsonld = JSON.stringify({
     '@context': 'https://schema.org',
@@ -3566,7 +3566,7 @@ function buildExplainer(ctx) {
 
   const url = `${SITE}/blog/${EXPLAINER_SLUG}/`;
   const firstYear = new Date(chartP.series[0].day + 'T00:00:00Z').getUTCFullYear();
-  const caption = `${shortName(chartP)}, tracked continuously since ${firstYear}. The 2017 to 2018 spike, the long slide to 2024, and the 2025 surge on one axis.`;
+  const caption = `${esc(chartP._titleName)}, tracked continuously since ${firstYear}. The 2017 to 2018 spike, the long slide to 2024, and the 2025 surge on one axis.`;
 
   // TITLE FROM THE H1, so the two cannot drift.
   const h1 = 'Why Is RAM So Expensive in 2026?';
@@ -6316,7 +6316,10 @@ async function run() {
         segMedianPerGb: segPerGb[p.segment] || null,
         familyChips: familyChips(p, familyMap),
         neweggOffer: neweggBySku.get(p.sku) || null,
-        short: shortName(p),
+        // The h1 string, so the crumb and the heading cannot disagree. NOT
+        // shortName(p): that reads the raw Amazon title, dropped mandatory
+        // tokens on 45 pages and left 53 pages sharing a crumb with another.
+        short: p._titleName,
         url,
         catLabel: p.category === 'ram' ? 'RAM' : 'SSD',
         inStock: p.inStock,
