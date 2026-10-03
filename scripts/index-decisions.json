@@ -324,8 +324,7 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "long_history",
-    "percentile_extreme"
+    "long_history"
    ]
   },
   "ram/corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz-2": {
@@ -1390,7 +1389,8 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
-    "gsc_crawled_not_indexed"
+    "gsc_crawled_not_indexed",
+    "percentile_extreme"
    ]
   },
   "ram/silicon-power-ddr5-64gb-6000mhz": {

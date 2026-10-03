@@ -3435,26 +3435,25 @@ html.dark .faq-answer-body a { color: var(--brand-light); }
 .pdp-milestone dt { font-weight: 600; min-width: 15rem; }
 .pdp-milestone dd { margin: 0; color: var(--text-secondary, #475569); }
 
-/* Per-product spec rows (2026-10-03), which replaced the fixed glossary prose
-   on PDPs. Same visual idiom as the glossary pull they succeed, so the page
-   shape is unchanged for a reader: a label in brand colour linking to its
-   /glossary/ anchor, the product's own values beside it. */
-.pdp-specrows { margin: 18px 0 0; display: grid; gap: 10px; }
-.pdp-specrow { display: grid; grid-template-columns: 148px 1fr; gap: 12px; align-items: baseline; }
-.pdp-specrow dt { font-weight: 600; font-size: 0.88rem; margin: 0; }
-.pdp-specrow dt a { color: var(--brand-primary, #3A5BC7); text-decoration: none; }
-.pdp-specrow dt a:hover { text-decoration: underline; }
-.pdp-specrow dd { margin: 0; font-size: 0.88rem; line-height: 1.55; color: var(--text-secondary, #475569); }
-@media (max-width: 560px) {
-  .pdp-specrow { grid-template-columns: 1fr; gap: 2px; }
+/* Specifications table, 2026-10-03: labels link to their glossary term and a
+   value cell may carry a notable-only note on a SECOND LINE. The note was
+   briefly appended inline after the value, which ran straight on from the
+   figure with no separator and inherited the cell's weight; a block with its
+   own muted colour reads as the aside it is. */
+.pdp-spec-row dt a { color: var(--brand-primary, #3A5BC7); text-decoration: none; }
+.pdp-spec-row dt a:hover { text-decoration: underline; }
+.pdp-spec-note {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.82rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--text-secondary, #64748b);
 }
-/* Notable-only note on a row, and the compound line under the rows. Both are
-   rare by construction (5, 7 and 4 pages), so they read as an aside rather
-   than as part of the row's value. */
-.pdp-specrow-flag { color: var(--text-primary, #0f172a); font-weight: 500; }
+/* The compound percentile line sits below the table, not in a cell: it is
+   about the page rather than about any one spec. 4 pages today. */
 .pdp-specrow-note { margin: 12px 0 0; font-size: 0.86rem; line-height: 1.55; color: var(--text-secondary, #475569); }
-html.dark .pdp-specrow dd { color: #94a3b8; }
-html.dark .pdp-specrow-flag { color: #f1f5f9; }
+html.dark .pdp-spec-note { color: #94a3b8; }
 html.dark .pdp-specrow-note { color: #94a3b8; }
 
 .pdp-glossary-list { margin: 0; display: grid; gap: 14px; }
