@@ -1182,19 +1182,66 @@ function indexReasons(p, ctx) {
 // it ever does not. The relisting is the ONE allowed divergence and it is
 // provably unobservable: every consumer of the flag also filters _relistingOf,
 // so the array the sitemap and search index are built from is unchanged.
+// THE GUARD CHANGES WHAT IT ASSERTS WHEN THE GATES COME ON; IT DOES NOT GO
+// QUIET. It used to `return null` the moment either switch flipped, which is
+// right about legacy parity (the gates exist to break it) and wrong as a
+// design: the first gated run, the one that most needs checking, would have
+// had no check at all. That is the probe-guard shape recorded in this file, a
+// guard that stops meaning "not yet" and starts meaning "carry on without it".
+//
+// WHAT IS ASSERTED IN EACH STATE:
+//   both switches off -> keepIndexable() equals the legacy readings rule on
+//                        every page, exactly, because that commit set was
+//                        meant to change nothing.
+//   either switch on  -> legacy parity is expected to break, so instead the
+//                        properties that must hold whatever the gates decide:
+//                        (1) every requiredByBuild() page is indexable, which
+//                            turns two latent build throws into a precondition;
+//                        (2) no page is indexable while unhealthy unless it is
+//                            requiredByBuild();
+//                        (3) no relisting is indexable;
+//                        plus monotonicity: the gated set is a SUBSET of the
+//                        legacy set, since every gate is a filter and only
+//                        requiredByBuild() may add one back.
+// Returns a summary so the caller states which mode ran, rather than implying
+// legacy parity was checked when it was not.
 function assertIndexParity(pool) {
-  if (GATES_ENABLED || HEALTHY_REQUIRES_FRESH) return null;
+  const legacyOf = (p) => p.stats.days >= MIN_DAYS_INDEXABLE;
+  const relistings = pool.filter((p) => p._relistingOf).length;
   const bad = [];
+  if (!GATES_ENABLED && !HEALTHY_REQUIRES_FRESH) {
+    for (const p of pool) {
+      if (p._relistingOf) continue;
+      const legacy = legacyOf(p);
+      if (p.stats.indexable !== legacy) {
+        bad.push(`${p.sku} (${slugPathOf(p)}): new ${p.stats.indexable} != legacy ${legacy}, days=${p.stats.days}`);
+      }
+    }
+    if (bad.length) {
+      throw new Error(`index parity: keepIndexable() disagrees with the legacy rule on ${bad.length} page(s) while both switches are off:\n  ${bad.join('\n  ')}`);
+    }
+    return { mode: 'legacy-parity', relistings, indexable: pool.filter((p) => p.stats.indexable && !p._relistingOf).length };
+  }
   for (const p of pool) {
-    const legacy = p.stats.days >= MIN_DAYS_INDEXABLE;
-    if (p.stats.indexable !== legacy && !p._relistingOf) {
-      bad.push(`${p.sku} (${slugPathOf(p)}): new ${p.stats.indexable} != legacy ${legacy}, days=${p.stats.days}`);
+    if (requiredByBuild(p) && p.stats.indexable !== true) {
+      bad.push(`${p.sku} (${slugPathOf(p)}): requiredByBuild() but not indexable; a pinned page going noindex throws later in the build`);
+    }
+    if (p.stats.indexable === true && !p.isHealthy && !requiredByBuild(p)) {
+      bad.push(`${p.sku} (${slugPathOf(p)}): indexable while not healthy and not required`);
+    }
+    if (p.stats.indexable === true && p._relistingOf) {
+      bad.push(`${p.sku} (${slugPathOf(p)}): relisting marked indexable`);
     }
   }
-  if (bad.length) {
-    throw new Error(`index parity: keepIndexable() disagrees with the legacy rule on ${bad.length} page(s) while both switches are off:\n  ${bad.join('\n  ')}`);
+  const gated = pool.filter((p) => p.stats.indexable && !p._relistingOf).length;
+  const legacy = pool.filter((p) => legacyOf(p) && !p._relistingOf).length;
+  if (gated > legacy) {
+    bad.push(`gated indexable ${gated} exceeds legacy ${legacy}: gates may only remove pages, and only requiredByBuild() may add one back`);
   }
-  return pool.filter((p) => p._relistingOf).length;
+  if (bad.length) {
+    throw new Error(`index parity (gated: GATES_ENABLED=${GATES_ENABLED} HEALTHY_REQUIRES_FRESH=${HEALTHY_REQUIRES_FRESH}): ${bad.length} violation(s):\n  ${bad.join('\n  ')}`);
+  }
+  return { mode: 'gated', relistings, indexable: gated, legacy };
 }
 
 // The three buckets, with the gates forced ON. Report only.
@@ -5658,9 +5705,11 @@ async function run() {
     p.stats.indexable = keepIndexable(p, indexCtx);
     p.indexReasons = indexReasons(p, indexCtx);
   }
-  const relistingDivergences = assertIndexParity(generable);
-  if (relistingDivergences != null) {
-    log(`Index rule: ${generable.filter((p) => p.stats.indexable).length} indexable, parity with the legacy rule OK (${relistingDivergences} relisting divergence, unobservable: every consumer of the flag also filters _relistingOf)`);
+  const parity = assertIndexParity(generable);
+  if (parity.mode === 'legacy-parity') {
+    log(`Index rule: ${generable.filter((p) => p.stats.indexable).length} indexable, parity with the legacy rule OK (${parity.relistings} relisting divergence, unobservable: every consumer of the flag also filters _relistingOf)`);
+  } else {
+    log(`Index rule: ${parity.indexable} indexable of ${parity.legacy} under the legacy rule (GATES_ENABLED=${GATES_ENABLED} HEALTHY_REQUIRES_FRESH=${HEALTHY_REQUIRES_FRESH}); required-by-build, healthy-superset and relisting checks OK`);
   }
   if (INDEX_PLAN) {
     printIndexPlan(indexPlan(generable, indexCtx), indexCtx);
