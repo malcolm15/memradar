@@ -5356,8 +5356,14 @@ function buildRaycastMarket(msRows, segPerGb, segPrice, buildDate, figures) {
 
 // One entry per INDEXABLE product: the same set the sitemap and search index
 // carry, so a client never links to a page we tell search engines to skip.
-function buildRaycastProducts(indexable, buildDate) {
-  const products = indexable.map((p) => {
+// The pool is healthyProducts, NOT the indexable set: this file is a PRODUCT
+// surface and builds from healthy(), like search-index.json and the listing
+// cards. The parameter was named `indexable` until 2026-10-03, left over from
+// before the two predicates were split, and it cost a wrong answer: reading
+// the body alone gives "this file falls from 232 entries to 67 at the index
+// flip", which is false. Call sites decide, parameter names do not.
+function buildRaycastProducts(healthyPool, buildDate) {
+  const products = healthyPool.map((p) => {
     const s = p.stats;
     const e = {
       sku: p.sku,
