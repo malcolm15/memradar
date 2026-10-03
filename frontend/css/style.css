@@ -3424,15 +3424,24 @@ html.dark .faq-answer-body a { color: var(--brand-light); }
 .pdp-peer-down { color: var(--success, #16a34a); }
 
 .pdp-milestones { margin: 0; display: grid; gap: 10px; }
+/* FIXED LABEL COLUMN SO EVERY VALUE STARTS AT THE SAME x, 2026-10-03. This was
+   flex with `dt { min-width: 15rem }`, which is a FLOOR and not a column: a
+   label longer than 240px simply pushed its own value right, so "Longest
+   stretch without a real move" at 35 characters sat out of line with the
+   values above and below it. 18rem (288px) is the longest label plus room;
+   15rem was the width that failed on it. A two-column grid also wraps a long
+   label inside its own column instead of displacing the value.
+   PDP-only: 235 built pages, emitted in one place in the generator, used by no
+   other HTML file, so the rule needs no further scoping. */
 .pdp-milestone {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 18rem 1fr;
   gap: 4px 12px;
   padding-bottom: 10px;
   border-bottom: 1px solid var(--border, #e2e8f0);
 }
 .pdp-milestone:last-child { border-bottom: 0; padding-bottom: 0; }
-.pdp-milestone dt { font-weight: 600; min-width: 15rem; }
+.pdp-milestone dt { font-weight: 600; }
 .pdp-milestone dd { margin: 0; color: var(--text-secondary, #475569); }
 
 /* Specifications table, 2026-10-03: labels link to their glossary term and a
@@ -3507,7 +3516,11 @@ html.dark .pdp-milestone { border-color: #2d3f55; }
 html.dark .glossary-toc a { border-color: #2d3f55; color: #94a3b8; }
 
 @media (max-width: 768px) {
-  .pdp-milestone dt { min-width: 100%; }
+  /* Mobile is unchanged: label on its own row, value beneath. Under flex that
+     was `dt { min-width: 100% }`; the grid equivalent is a single column, and
+     the 4px row gap carries over. This block already sits AFTER the base rule,
+     which it has to, since a media query adds no specificity. */
+  .pdp-milestone { grid-template-columns: 1fr; }
   .pdp-data-table { font-size: 0.8rem; }
 }
 
