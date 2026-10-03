@@ -6511,6 +6511,12 @@ async function run() {
     slug: p.finalSlug,
     category: p.category,
     brand: p.brand,
+    // The PDP's own h1. `name` above stays the raw Amazon title because the
+    // typeahead matches against it, but the alert emails render THIS, so the
+    // name in an inbox is the name on the page. Keyed on healthyProducts, so
+    // the pending noindex flip cannot thin it the way an indexable-keyed file
+    // would. backend/lib/alertEmails.js falls back to `name` when it is absent.
+    short_name: p._titleName,
     current_price: p.stats.current,
     all_time_low: p.stats.atl.price, // used by the homepage drops fallback
     image_url: p.image_url,
