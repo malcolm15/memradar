@@ -5,6 +5,8 @@
 // rendered in the body - product name, prices, URLs - comes from OUR database.
 // Product names originate from Amazon (not the user) but are still HTML-escaped
 // because they contain & and " characters.
+const { parseMpn } = require('./productParsers');
+
 const FROM = 'MemRadar <hello@memradar.com>';
 const API_BASE = 'https://memradar-three.vercel.app'; // Vercel serves the API; GitHub Pages can't
 const SITE = 'https://memradar.com';
@@ -14,6 +16,56 @@ function esc(s) {
 }
 function money(v) {
   return v == null ? '' : Number(v).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+}
+
+// DISPLAY NAME: THE PDP'S OWN h1, NEVER THE RAW AMAZON TITLE. `products.name`
+// is the merchant's marketing title (median 150 chars), which R1 demoted out
+// of every heading on the site and the P1 pass deleted from the pages
+// entirely. Emails were still sending it, so a 137-character name wrapped to
+// four lines on a phone and the price-drop subject ran to 160 characters,
+// truncating before the figure.
+//
+// IT IS READ, NOT RECOMPUTED, AND THAT IS THE WHOLE POINT. `_titleName` is
+// built in the generator from shortName() plus filler stripping, the
+// mandatory-token append, title overrides and sibling disambiguation.
+// Recomputing it here was measured against all 235 built pages and matched
+// only 49: the other 186 lost their speed token or their disambiguator, so a
+// second computation is a second public name for the same product. The
+// generator writes it to search-index.json as `short_name`, and reading that
+// field means an email and the page it links cannot disagree.
+//
+// search-index.json is keyed on healthyProducts, NOT on `indexable`,
+// deliberately: the pending noindex flip would cut an indexable-keyed file
+// from 232 names to 67 and silently return 165 products to raw titles.
+//
+// FALLBACK IS THE RAW TITLE AND IT ANNOUNCES ITSELF. An absent field, an
+// unknown sku or an unreadable file degrades to exactly the behaviour shipped
+// before this change, never to a blank name, and logs which sku did it.
+const SHORT_BY_SKU = Object.create(null);
+try {
+  for (const e of require('../../frontend/search-index.json')) {
+    if (e && e.sku && e.short_name) SHORT_BY_SKU[e.sku] = e.short_name;
+  }
+} catch (err) {
+  console.error(`[alertEmails] search index unreadable (${err.message}); every email falls back to the raw listing title`);
+}
+function displayName(sku, rawName) {
+  const short = sku && SHORT_BY_SKU[sku];
+  if (!short) console.log(`[alertEmails] no short_name for sku=${sku || '?'}; using the raw listing title`);
+  return short || rawName;
+}
+
+// Model number, faint, under the content and above the unsubscribe line. From
+// the SAME parseMpn() that prints the PDP's "Part number" row, so the two
+// cannot disagree. It parses on 158 of 235 products; the rest render no line
+// at all rather than a guess. Never the ASIN: that is an Amazon identifier,
+// not this product's part number.
+function modelLineHtml(rawName) {
+  const mpn = parseMpn(rawName);
+  return mpn
+    ? `<tr><td class="px" style="padding:0 28px 8px;">
+    <p style="margin:0;font-size:12px;color:#9ca3af;line-height:1.5;">Model ${esc(mpn)}</p></td></tr>`
+    : '';
 }
 
 // Low-level send. Returns { ok, id } or { ok:false, error }. Never throws so
@@ -84,8 +136,9 @@ function unsubLineHtml(unsubUrl) {
 }
 
 // ---- Confirmation email (sent from POST /api/alerts) ----
-function confirmationEmail({ productName, targetPrice, confirmToken, unsubscribeToken }) {
-  const name = esc(productName);
+function confirmationEmail({ productName, productSku, targetPrice, confirmToken, unsubscribeToken }) {
+  const disp = displayName(productSku, productName);
+  const name = esc(disp);
   const confirmUrl = `${API_BASE}/api/confirm?token=${confirmToken}`;
   const unsubUrl = `${API_BASE}/api/unsubscribe?token=${unsubscribeToken}`;
   const price = money(targetPrice);
@@ -99,11 +152,12 @@ function confirmationEmail({ productName, targetPrice, confirmToken, unsubscribe
           <p style="margin:0 0 20px;line-height:1.2;">${button(confirmUrl, 'Confirm my alert')}</p>
           <p style="margin:0 0 16px;font-size:13px;color:#6b7280;line-height:1.6;">This link expires in 48 hours. If you didn't request this, you can ignore this email. No alert will be set.</p>
         </td></tr>
+        ${modelLineHtml(productName)}
         ${unsubLineHtml(unsubUrl)}`);
 
   const text = `Confirm your MemRadar price alert
 
-Product: ${productName}
+Product: ${disp}
 Target price: ${price}
 
 Confirm your alert (link expires in 48 hours):
@@ -117,8 +171,9 @@ Unsubscribe: ${unsubUrl}`;
 }
 
 // ---- Alert email (sent from the daily cron when target is hit) ----
-function priceDropEmail({ productName, currentPrice, targetPrice, allTimeLow, productUrl, category, slug, unsubscribeToken }) {
-  const name = esc(productName);
+function priceDropEmail({ productName, productSku, currentPrice, targetPrice, allTimeLow, productUrl, category, slug, unsubscribeToken }) {
+  const disp = displayName(productSku, productName);
+  const name = esc(disp);
   const cur = money(currentPrice);
   const target = money(targetPrice);
   // Plain product link since 2026-09-30: no Associates tag is appended.
@@ -139,9 +194,10 @@ function priceDropEmail({ productName, currentPrice, targetPrice, allTimeLow, pr
           <p style="margin:0 0 12px;line-height:1.2;">${button(amazonUrl, 'View on Amazon →')}</p>
           <p style="margin:0 0 16px;font-size:13px;line-height:1.5;"><a href="${pdpUrl}" style="color:#3A5BC7;">See full price history on MemRadar</a></p>
         </td></tr>
+        ${modelLineHtml(productName)}
         ${unsubLineHtml(unsubUrl)}`);
 
-  const text = `Price drop: ${cur} for ${productName}
+  const text = `Price drop: ${cur} for ${disp}
 
 Now at or below your target of ${target}.${allTimeLow != null ? `\nAll-time low we've tracked: ${money(allTimeLow)}` : ''}
 
@@ -150,7 +206,7 @@ Full price history: ${pdpUrl}
 
 Unsubscribe: ${unsubUrl}`;
 
-  return { subject: `Price drop: ${cur} for ${productName}`, html, text };
+  return { subject: `Price drop: ${cur} for ${disp}`, html, text };
 }
 
 module.exports = { sendEmail, confirmationEmail, priceDropEmail };

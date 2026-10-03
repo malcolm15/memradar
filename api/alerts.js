@@ -104,7 +104,7 @@ module.exports = async (req, res) => {
     // products exist to a prober.
     const { data: product, error: prodErr } = await supabase
       .from('products')
-      .select('id, name')
+      .select('id, sku, name')
       .eq('sku', productId)
       .maybeSingle();
     if (prodErr) { logError('product lookup', prodErr.message); neutral(res, 'internal_error', email); return; }
@@ -165,6 +165,7 @@ module.exports = async (req, res) => {
     if (newlyInserted && !breakerTripped) {
       const tmpl = confirmationEmail({
         productName: product.name,
+        productSku: product.sku,
         targetPrice,
         confirmToken,
         unsubscribeToken,

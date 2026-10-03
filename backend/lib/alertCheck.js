@@ -52,7 +52,7 @@ async function checkAlerts(supabase, priceByProductId, log, logError) {
   // 2. Confirmed, not-yet-triggered alerts, with their product joined.
   const { data: alerts, error } = await supabase
     .from('alerts')
-    .select('id, email, target_price, unsubscribe_token, product_id, products(name, product_url, category, slug)')
+    .select('id, email, target_price, unsubscribe_token, product_id, products(sku, name, product_url, category, slug)')
     .eq('confirmed', true)
     .eq('triggered', false);
   if (error) { logError('alert query', error); return stats; }
@@ -80,6 +80,7 @@ async function checkAlerts(supabase, priceByProductId, log, logError) {
 
     const tmpl = priceDropEmail({
       productName: prod.name,
+      productSku: prod.sku,
       currentPrice: current,
       targetPrice: Number(a.target_price),
       allTimeLow: atl,
