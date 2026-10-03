@@ -66,4 +66,28 @@ module.exports = {
   // should see, and it is stated plainly in both raw titles.
   B09WMSVHD4: 'TEAMGROUP Vulcan Z SATA 2TB TLC',     // 3D NAND TLC, 550/500 MB/s
   B0BYSKXGJV: 'TEAMGROUP Vulcan Z SATA 2TB QLC',     // 3D NAND QLC, 550/470 MB/s
+
+  // --- Gigastone DDR4 SODIMM 32GB: NOT a collision, which makes this the first
+  // entry here for a different reason. The seller's raw title opens with a
+  // marketing banner in CJK lenticular brackets, and shortName() cuts a name at
+  // the first ASCII "(" or ",", so the banner survived the cut and became the
+  // product's name everywhere: the h1, the <title>, og:title, twitter:title, the
+  // JSON-LD Product name, the meta description, search-index.json and the
+  // Raycast payload all read "【DDR4 Laptop Only】 GIGASTONE 32GB 3200MHz". Every
+  // one of those is faithful to _titleName, so the single-source design was
+  // working; it propagated one bad input. It is the only product of 235 whose
+  // name contains U+3010, and `brand` is null so no brand prefix displaced it.
+  //
+  // SODIMM is read from the raw title, not inferred: it says "SODIMM 260 Pin",
+  // and formFactor() returns M.2 or 2.5" only, so it cannot answer for RAM.
+  // Mandatory tokens present: 32GB, DDR4, 3200MHz. Token order follows the
+  // PUSKILL sibling ("PUSKILL DDR4 Laptop 32GB 3200MHz"); the TEAMGROUP Elite
+  // siblings put the form factor before the generation instead, and the site
+  // carries both forms today.
+  //
+  // THE PARSER FIX IS DELIBERATELY NOT HERE. Stripping a leading bracketed
+  // banner in shortName() is one line, but shortName also drives slugs and is
+  // shared with build-families and match-newegg, so it needs the family-id
+  // determinism check and its own commit. Recorded as open in CLAUDE.md.
+  B09477S96W: 'GIGASTONE DDR4 SODIMM 32GB 3200MHz',  // 【DDR4 RAM Laptop Only】 ... CL22 1.2V SODIMM 260 Pin
 };
