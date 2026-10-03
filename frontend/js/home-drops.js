@@ -145,7 +145,17 @@
       var loaded = await Promise.all([window.memradarProductData.load(sb), fetchIndexMap()]);
       var products = loaded[0];
       indexMap = loaded[1];
-      var priced = products.filter(function (p) { return p.price != null; });
+      // MEMBERSHIP IS THE INDEX, FOR BOTH SLOT TYPES. The ATL fallback below has
+      // always been index-filtered, because it reads all_time_low out of the same
+      // map, but the drops path ranked the whole priced feed and so could pick a
+      // product the generator left off this surface. It would then have no PDP h1
+      // to show and would fall back to the raw Amazon title, linking to a page we
+      // tell crawlers to ignore. Measured 2026-10-03: 1 of 224 priced products is
+      // absent from the index (the relisting B0BF8FVLSL) and it held no 30-day
+      // drop, so the homepage was correct by the shape of the data rather than by
+      // design. An empty map (index fetch failed) yields no candidates on either
+      // path, which falls through to degrade() and keeps the baked four.
+      var priced = products.filter(function (p) { return p.price != null && indexMap.has(p.sku); });
 
       var drops = priced.filter(function (p) { return p.change30 != null && p.change30 < 0; })
         .sort(function (a, b) { return a.change30 - b.change30; }); // most negative first
@@ -173,7 +183,15 @@
         }
       }
 
-      if (!chosen.length) { degrade('no products qualified'); return; }
+      // NAME THE REAL CAUSE. Membership now comes from the index, so an empty map
+      // produces zero candidates on both paths and would otherwise be reported as
+      // "no products qualified", which describes the data when the fault is the
+      // fetch. A fallback that misdescribes why it fired is the same hazard as one
+      // that fires silently.
+      if (!chosen.length) {
+        degrade(indexMap.size ? 'no products qualified' : 'search index unavailable, so no product could be named');
+        return;
+      }
 
       chosenBySku = {};
       chosen.forEach(function (p) { chosenBySku[p.sku] = p; });
