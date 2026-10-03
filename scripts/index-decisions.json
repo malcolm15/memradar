@@ -2,7 +2,7 @@
  "generated": "2026-10-03",
  "rule": "requiredByBuild(p) || (healthy(p) && gatesPass(p))",
  "switches": {
-  "GATES_ENABLED": false,
+  "GATES_ENABLED": true,
   "HEALTHY_REQUIRES_FRESH": false,
   "KEEP_MIN_READINGS": 270,
   "IMPRESSION_FLOOR": 50,
@@ -11,13 +11,13 @@
  "rule_order": "requiredByBuild wins outright. Otherwise: healthy AND not hard excluded AND ((readings >= KEEP_MIN_READINGS AND a fact gate) OR google impressions >= IMPRESSION_FLOOR OR bing AI citations >= CITATION_FLOOR). Both demand terms are admit-only. Hard exclusions are below_min_readings, long_term_unavailable, duplicate_variant, gsc_crawled_not_indexed and family_duplicate; sparse_history is informational and does not block either demand term. The family rule carves out members above EITHER demand floor, so a heavily cited or heavily shown family member is never marked family_duplicate.",
  "note": "Reason codes are recorded for every page whether or not they bind under the current switches, so this file reads the same shape before and after the gates go live. Written by scripts/generate-product-pages.js; do not hand-edit. NO FIELD HERE CHANGES WITHOUT A DECISION CHANGING: per-page reading counts and stale-day counts were deliberately dropped because they move every single day and would have rewritten all 235 records nightly, burying the handful of lines that mean something. Readings still decide the outcome through the long_history and sparse_history codes, and staleness through long_term_unavailable, which move only when a threshold is actually crossed. So a diff on this file is a diff worth reading: a verdict flipped, a reason appeared or went, a family winner moved, or the impressions input was replaced.",
  "counts": {
-  "indexable": 232,
-  "noindex": 3
+  "indexable": 81,
+  "noindex": 154
  },
  "pages": {
   "ram/16gb-1x16gb-ddr4-2666mhz-pc4-21300-2rx8": {
    "sku": "B0GLTD99WD",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2026-03-14",
    "google_impressions": 1,
    "google_position": 59,
@@ -30,7 +30,7 @@
   },
   "ram/16gb-2x8gb-ddr5-4800mhz-pc5-38400-1rx8": {
    "sku": "B0GVQ3T3FR",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2026-04-21",
    "google_impressions": 2,
    "google_position": 44,
@@ -42,7 +42,7 @@
   },
   "ram/32gb-ddr4-3200mhz-desktop-ram-memory-kit": {
    "sku": "B0H83JSCJJ",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2026-07-14",
    "google_impressions": 20,
    "google_position": 13.1,
@@ -55,7 +55,7 @@
   },
   "ram/a-tech-16gb-2666mhz": {
    "sku": "B07KGMC6QQ",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2018-11-22",
    "google_impressions": 0,
    "google_position": 0,
@@ -68,7 +68,7 @@
   },
   "ram/a-tech-16gb-3200mhz": {
    "sku": "B08KTQWQPK",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2020-12-31",
    "google_impressions": 3,
    "google_position": 8,
@@ -81,7 +81,7 @@
   },
   "ram/a-tech-16gb-ddr4-2400-mhz-udimm-pc4-19200": {
    "sku": "B07KGM4B6K",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2018-12-10",
    "google_impressions": 9,
    "google_position": 8.89,
@@ -95,7 +95,7 @@
   },
   "ram/a-tech-16gb-ddr4-2666-mhz-udimm-pc4-21300": {
    "sku": "B07KGMVVDZ",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2018-11-26",
    "google_impressions": 12,
    "google_position": 8.08,
@@ -108,7 +108,7 @@
   },
   "ram/a-tech-16gb-ddr4-3200-mhz-sodimm-pc4-25600": {
    "sku": "B08KTSCYS6",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2020-11-25",
    "google_impressions": 5,
    "google_position": 9.6,
@@ -121,7 +121,7 @@
   },
   "ram/a-tech-16gb-ddr5-4800mhz-pc5-38400-cl40": {
    "sku": "B0B17GXPWH",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2022-05-14",
    "google_impressions": 23,
    "google_position": 10.96,
@@ -133,7 +133,7 @@
   },
   "ram/a-tech-32gb-3200mhz": {
    "sku": "B08KTRP13V",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2020-11-24",
    "google_impressions": 15,
    "google_position": 12.27,
@@ -146,7 +146,7 @@
   },
   "ram/a-tech-ddr4-ram-16gb-2666mhz-pc4-21300": {
    "sku": "B07KGLYHVM",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2018-12-14",
    "google_impressions": 3,
    "google_position": 11,
@@ -160,7 +160,7 @@
   },
   "ram/a-tech-ddr4-ram-32gb-kit-2666mhz": {
    "sku": "B07KGNXL2H",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2018-11-22",
    "google_impressions": 11,
    "google_position": 15.36,
@@ -173,7 +173,7 @@
   },
   "ram/acer-predator-vesta-ii-rgb-ddr5-ram-32gb-6000mhz": {
    "sku": "B0CRNNVYM2",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-01-08",
    "google_impressions": 36,
    "google_position": 10.83,
@@ -199,7 +199,7 @@
   },
   "ram/corsair-vengeance-ddr5-ram-16gb-5200mhz": {
    "sku": "B0D2P1CVQD",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2024-05-16",
    "google_impressions": 19,
    "google_position": 11.58,
@@ -211,7 +211,7 @@
   },
   "ram/corsair-vengeance-ddr5-ram-16gb-6000mhz": {
    "sku": "B0GJFTS22V",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2026-04-14",
    "google_impressions": 45,
    "google_position": 12.31,
@@ -250,7 +250,7 @@
   },
   "ram/corsair-vengeance-ddr5-ram-32gb-6400mhz": {
    "sku": "B0DJW4PKY3",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2024-10-22",
    "google_impressions": 35,
    "google_position": 17.57,
@@ -302,7 +302,7 @@
   },
   "ram/corsair-vengeance-rgb-ddr5-ram-16gb-5200mhz": {
    "sku": "B0D9PRVBRZ",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2024-08-09",
    "google_impressions": 12,
    "google_position": 14.5,
@@ -342,7 +342,7 @@
   },
   "ram/corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz-3": {
    "sku": "B0BPTKD797",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2022-12-26",
    "google_impressions": 18,
    "google_position": 15.22,
@@ -367,7 +367,7 @@
   },
   "ram/corsair-vengeance-rgb-ddr5-ram-32gb-6400mhz": {
    "sku": "B0C4Y3DCL4",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2023-05-17",
    "google_impressions": 23,
    "google_position": 17.04,
@@ -379,7 +379,7 @@
   },
   "ram/corsair-vengeance-rgb-rs-ddr5-16gb-6000mhz": {
    "sku": "B0H6G3X783",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2026-06-29",
    "google_impressions": 13,
    "google_position": 10.08,
@@ -392,7 +392,7 @@
   },
   "ram/corsair-vengeance-rgb-rs-ddr5-32gb-6000mhz": {
    "sku": "B0H6G4V5PC",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2026-06-29",
    "google_impressions": 35,
    "google_position": 11.94,
@@ -404,7 +404,7 @@
   },
   "ram/corsair-vengeance-rgb-rs-ddr5-ram-16gb-5200mhz": {
    "sku": "B0GQCJ2D3D",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2026-03-31",
    "google_impressions": 5,
    "google_position": 9,
@@ -416,7 +416,7 @@
   },
   "ram/corsair-vengeance-rgb-rs-ddr5-ram-16gb-6000mhz": {
    "sku": "B0GQC6MV6C",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2026-03-21",
    "google_impressions": 5,
    "google_position": 9.8,
@@ -441,7 +441,7 @@
   },
   "ram/corsair-vengeance-rgb-rs-ddr5-ram-32gb-6000mhz": {
    "sku": "B0GGJ79NR3",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2026-02-14",
    "google_impressions": 9,
    "google_position": 10.44,
@@ -453,7 +453,7 @@
   },
   "ram/corsair-vengeance-rgb-rs-ddr5-ram-64gb-6000mhz": {
    "sku": "B0GGJ9YH2D",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2026-01-30",
    "google_impressions": 5,
    "google_position": 6,
@@ -492,7 +492,7 @@
   },
   "ram/crucial-16gb-ddr5-ram-4800mhz": {
    "sku": "B09HW2JNHX",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2021-10-30",
    "google_impressions": 4,
    "google_position": 16.5,
@@ -518,7 +518,7 @@
   },
   "ram/crucial-16gb-ddr5-ram-5600mhz-2": {
    "sku": "B0BLTGMCB7",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2022-12-23",
    "google_impressions": 17,
    "google_position": 16.35,
@@ -543,7 +543,7 @@
   },
   "ram/crucial-32gb-ddr4-ram-kit-3200mhz-2": {
    "sku": "B08C4LXXCJ",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2020-07-25",
    "google_impressions": 5,
    "google_position": 12.6,
@@ -557,7 +557,7 @@
   },
   "ram/crucial-32gb-ddr5-ram-kit-4800mhz": {
    "sku": "B09HW9886B",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2021-10-30",
    "google_impressions": 24,
    "google_position": 18.71,
@@ -638,7 +638,7 @@
   },
   "ram/crucial-pro-ddr5-ram-64gb-kit-6400mhz": {
    "sku": "B0DSR14511",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-02-18",
    "google_impressions": 15,
    "google_position": 21.4,
@@ -650,7 +650,7 @@
   },
   "ram/crucial-ram-16gb-ddr5-5200mhz": {
    "sku": "B0BNXXFSBR",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2023-01-04",
    "google_impressions": 8,
    "google_position": 12.75,
@@ -677,7 +677,7 @@
   },
   "ram/ddr4-ram-laptop-only-gigastone-32gb-kit-3200mhz": {
    "sku": "B09477S96W",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2021-06-21",
    "google_impressions": 13,
    "google_position": 20.77,
@@ -770,7 +770,7 @@
   },
   "ram/g-skill-trident-z-rgb-series-ddr4-ram-16gb-3600mhz": {
    "sku": "B08176RT4G",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2019-11-23",
    "google_impressions": 2,
    "google_position": 23,
@@ -826,7 +826,7 @@
   },
   "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-32gb-6000mhz-2": {
    "sku": "B0BF6ZQ8MY",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2022-09-21",
    "google_impressions": 2,
    "google_position": 18.5,
@@ -839,7 +839,7 @@
   },
   "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-32gb-6000mhz-3": {
    "sku": "B0C4G6XQQL",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2023-05-09",
    "google_impressions": 4,
    "google_position": 9.25,
@@ -851,7 +851,7 @@
   },
   "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-32gb-6000mhz-4": {
    "sku": "B0BF8MP83M",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2022-09-20",
    "google_impressions": 7,
    "google_position": 14.14,
@@ -878,7 +878,7 @@
   },
   "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-64gb-6000mhz-2": {
    "sku": "B0DN3WFS52",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2024-11-22",
    "google_impressions": 7,
    "google_position": 13.29,
@@ -903,7 +903,7 @@
   },
   "ram/g-skill-trident-z5-neo-series-ddr5-ram-64gb-6000mhz": {
    "sku": "B0BJP3MRW1",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2022-10-29",
    "google_impressions": 13,
    "google_position": 10.31,
@@ -915,7 +915,7 @@
   },
   "ram/g-skill-trident-z5-rgb-32gb-2-x-16gb": {
    "sku": "B0BQWXTDWN",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2023-07-03",
    "google_impressions": 4,
    "google_position": 12.75,
@@ -927,7 +927,7 @@
   },
   "ram/g-skill-trident-z5-rgb-series-ddr5-ram-16gb-6000mhz": {
    "sku": "B0G7RL6SPS",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-12-31",
    "google_impressions": 13,
    "google_position": 17.46,
@@ -940,7 +940,7 @@
   },
   "ram/g-skill-trident-z5-rgb-series-ddr5-ram-32gb-6000mhz": {
    "sku": "B09PTGZM6Y",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2022-01-19",
    "google_impressions": 7,
    "google_position": 12.86,
@@ -953,7 +953,7 @@
   },
   "ram/g-skill-trident-z5-rgb-series-ddr5-ram-32gb-6000mhz-2": {
    "sku": "B0CB78Y7DC",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2023-07-18",
    "google_impressions": 1,
    "google_position": 5,
@@ -966,7 +966,7 @@
   },
   "ram/g-skill-trident-z5-rgb-series-ddr5-ram-32gb-6400mhz": {
    "sku": "B09QS2K59B",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2022-01-27",
    "google_impressions": 7,
    "google_position": 11.43,
@@ -978,7 +978,7 @@
   },
   "ram/g-skill-trident-z5-rgb-series-ddr5-ram-64gb-6000mhz": {
    "sku": "B0C4X758YM",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2023-05-21",
    "google_impressions": 9,
    "google_position": 8,
@@ -991,7 +991,7 @@
   },
   "ram/g-skill-trident-z5-rgb-series-ddr5-ram-64gb-6400mhz": {
    "sku": "B0BJ7X9P1W",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2022-10-29",
    "google_impressions": 9,
    "google_position": 27,
@@ -1003,7 +1003,7 @@
   },
   "ram/g-skill-trident-z5-royal-neo-series-ddr5-32gb-6000mhz": {
    "sku": "B0DD2LKVMD",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2024-08-16",
    "google_impressions": 28,
    "google_position": 14.25,
@@ -1017,7 +1017,7 @@
   },
   "ram/g-skill-trident-z5-royal-neo-series-ddr5-64gb-6000mhz": {
    "sku": "B0DTPBTGMW",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-02-14",
    "google_impressions": 24,
    "google_position": 17.08,
@@ -1043,7 +1043,7 @@
   },
   "ram/kingston-fury-beast-16gb-6000mt-s-ddr5": {
    "sku": "B0CYHCNDP2",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2024-03-29",
    "google_impressions": 8,
    "google_position": 18.5,
@@ -1055,7 +1055,7 @@
   },
   "ram/kingston-fury-beast-32gb-5200mhz": {
    "sku": "B09KCLP63B",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2021-12-15",
    "google_impressions": 12,
    "google_position": 13.58,
@@ -1080,7 +1080,7 @@
   },
   "ram/kingston-fury-beast-32gb-6000mhz": {
    "sku": "B0CYHC58P6",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2024-03-29",
    "google_impressions": 36,
    "google_position": 12.08,
@@ -1118,7 +1118,7 @@
   },
   "ram/kingston-fury-beast-rgb-16gb-6000mt-s": {
    "sku": "B0DCGFCHXF",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2024-08-14",
    "google_impressions": 5,
    "google_position": 8,
@@ -1131,7 +1131,7 @@
   },
   "ram/kingston-fury-beast-rgb-32gb-6000mhz": {
    "sku": "B0CYM58GFS",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2024-04-11",
    "google_impressions": 17,
    "google_position": 13.41,
@@ -1144,7 +1144,7 @@
   },
   "ram/kingston-fury-beast-rgb-64gb-6400mhz": {
    "sku": "B0CYM412PY",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2024-03-29",
    "google_impressions": 11,
    "google_position": 17.18,
@@ -1156,7 +1156,7 @@
   },
   "ram/kingston-fury-beast-rgb-8gb-6000mt-s-ddr5": {
    "sku": "B0CYM3TYCR",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2024-03-31",
    "google_impressions": 2,
    "google_position": 6.5,
@@ -1181,7 +1181,7 @@
   },
   "ram/kingston-fury-impact-16gb-6400mt-s-cl38": {
    "sku": "B0C3HTXDDB",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2023-05-05",
    "google_impressions": 14,
    "google_position": 15.21,
@@ -1193,7 +1193,7 @@
   },
   "ram/kingston-fury-impact-32gb-5600mhz": {
    "sku": "B0BRTJ4Q94",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2023-01-12",
    "google_impressions": 8,
    "google_position": 11,
@@ -1244,7 +1244,7 @@
   },
   "ram/lexar-oc-ddr5-ram-1x8gb-6000mhz-cl38": {
    "sku": "B0GTZSPC71",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2026-06-11",
    "google_impressions": 31,
    "google_position": 9.42,
@@ -1257,7 +1257,7 @@
   },
   "ram/lexar-thor-z-series-rgb-ddr5-ram-32gb-6000mhz": {
    "sku": "B0GSR1M4ZJ",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2026-04-27",
    "google_impressions": 21,
    "google_position": 9.05,
@@ -1269,7 +1269,7 @@
   },
   "ram/nemix-ram-16gb-2666mhz": {
    "sku": "B0C5BFW7ZN",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2023-05-23",
    "google_impressions": 3,
    "google_position": 14.67,
@@ -1281,7 +1281,7 @@
   },
   "ram/patriot-memory-viper-venom-ddr5-ram-16gb-6000mhz": {
    "sku": "B0DKQ6VH85",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2024-11-18",
    "google_impressions": 11,
    "google_position": 14.36,
@@ -1294,7 +1294,7 @@
   },
   "ram/patriot-viper-elite-5-ddr5-ram-16gb-6000mhz": {
    "sku": "B0DPR9VBWN",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-01-24",
    "google_impressions": 17,
    "google_position": 12.71,
@@ -1320,7 +1320,7 @@
   },
   "ram/patriot-viper-venom-ddr5-ram-16gb-6000mhz": {
    "sku": "B0GJ81P1YP",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2026-04-17",
    "google_impressions": 29,
    "google_position": 17.1,
@@ -1333,7 +1333,7 @@
   },
   "ram/pro-ddr5-ram-32gb-kit-6400mhz": {
    "sku": "B0FQMLKVLS",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-10-21",
    "google_impressions": 28,
    "google_position": 24.61,
@@ -1346,7 +1346,7 @@
   },
   "ram/puskill-32gb-kit-3200mhz": {
    "sku": "B0GT8TSFLS",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2026-04-20",
    "google_impressions": 5,
    "google_position": 9.2,
@@ -1358,7 +1358,7 @@
   },
   "ram/puskill-ddr4-32gb-3200mhz": {
    "sku": "B0G4BGRL9C",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-12-12",
    "google_impressions": 13,
    "google_position": 15.92,
@@ -1370,7 +1370,7 @@
   },
   "ram/puskill-ddr4-laptop-ram-32gb-kit-3200mhz": {
    "sku": "B0G3HBH1RW",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-12-08",
    "google_impressions": 15,
    "google_position": 12,
@@ -1382,7 +1382,7 @@
   },
   "ram/silicon-power-ddr4-16gb-kit-3200mhz": {
    "sku": "B0924LFB3Z",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2021-04-23",
    "google_impressions": 13,
    "google_position": 9.23,
@@ -1410,7 +1410,7 @@
   },
   "ram/silicon-power-value-gaming-ddr4-ram-16gb-3200mhz": {
    "sku": "B0FYPC2MK5",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-11-05",
    "google_impressions": 7,
    "google_position": 13.43,
@@ -1422,7 +1422,7 @@
   },
   "ram/teamgroup-elite-ddr4-32gb-kit-3200mhz": {
    "sku": "B08T17RQ87",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2021-02-05",
    "google_impressions": 35,
    "google_position": 13.09,
@@ -1450,7 +1450,7 @@
   },
   "ram/teamgroup-elite-sodimm-ddr5-64gb-5600mhz": {
    "sku": "B0CN9376FP",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2023-12-11",
    "google_impressions": 46,
    "google_position": 10.57,
@@ -1544,7 +1544,7 @@
   },
   "ram/timetec-32gb-kit-3200mhz": {
    "sku": "B098TYN671",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2021-07-08",
    "google_impressions": 7,
    "google_position": 11.14,
@@ -1556,7 +1556,7 @@
   },
   "ssd/1tb-sata-ssd-2-5-ssd-sata-iii-6": {
    "sku": "B0CM8QWND1",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2023-12-16",
    "google_impressions": 11,
    "google_position": 19.64,
@@ -1569,7 +1569,7 @@
   },
   "ssd/1tb-sn850p-nvme-m-2-ssd-officially": {
    "sku": "B0C48B3RGL",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2023-06-06",
    "google_impressions": 1,
    "google_position": 9,
@@ -1582,7 +1582,7 @@
   },
   "ssd/500gb-optimus-5100-nvme-ssd-pcie-4-0": {
    "sku": "B0GJSFFLXZ",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2026-05-23",
    "google_impressions": 7,
    "google_position": 21.14,
@@ -1594,7 +1594,7 @@
   },
   "ssd/acer-predator-gm7-1tb-ssd-m-2-2280-pcie": {
    "sku": "B0C3ZJ8T6F",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-06-20",
    "google_impressions": 9,
    "google_position": 17.11,
@@ -1619,7 +1619,7 @@
   },
   "ssd/acer-predator-gm7-4tb-ssd-m-2-2280-pcie": {
    "sku": "B0CHJG3ZSF",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2023-11-27",
    "google_impressions": 23,
    "google_position": 29.65,
@@ -1632,7 +1632,7 @@
   },
   "ssd/bestoss-1tb-m-2-ssd-nvme-pcie4-0-2280": {
    "sku": "B0F3XL469M",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-06-28",
    "google_impressions": 5,
    "google_position": 8.6,
@@ -1644,7 +1644,7 @@
   },
   "ssd/bestoss-1tb-nvme-m-2-ssd-pcie-3-0-2280": {
    "sku": "B0GXKN6F68",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2026-05-13",
    "google_impressions": 7,
    "google_position": 10.57,
@@ -1657,7 +1657,7 @@
   },
   "ssd/bestoss-2tb-m-2-ssd-nvme-pcie4-0-2280": {
    "sku": "B0F3XL1PVB",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-06-25",
    "google_impressions": 5,
    "google_position": 10.2,
@@ -1669,7 +1669,7 @@
   },
   "ssd/bestoss-2tb-nvme-m-2-2280-ssd-with": {
    "sku": "B0F43H8WH7",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-12-03",
    "google_impressions": 22,
    "google_position": 15.64,
@@ -1681,7 +1681,7 @@
   },
   "ssd/bestoss-2tb-nvme-m-2-ssd-pcie-3-0-m-2": {
    "sku": "B0F43VP4XF",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-06-12",
    "google_impressions": 8,
    "google_position": 10.62,
@@ -1693,7 +1693,7 @@
   },
   "ssd/bestoss-2tb-sata-ssd-2-5-inch-internal": {
    "sku": "B0F47NQ8HX",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-06-12",
    "google_impressions": 7,
    "google_position": 14.57,
@@ -1705,7 +1705,7 @@
   },
   "ssd/bestoss-m-2-2280-nvme-ssd-2tb-pcie-4-0": {
    "sku": "B0F43F9ZKP",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-07-04",
    "google_impressions": 3,
    "google_position": 9,
@@ -1717,7 +1717,7 @@
   },
   "ssd/biwin-black-opal-nv7400-4tb-ssd-gen4x4": {
    "sku": "B0DM1R7KJ1",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-06-20",
    "google_impressions": 17,
    "google_position": 18.88,
@@ -1729,7 +1729,7 @@
   },
   "ssd/centon-2tb-ssd-internal-solid-state-drive": {
    "sku": "B088FYT6KT",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2020-07-01",
    "google_impressions": 7,
    "google_position": 39.86,
@@ -1742,7 +1742,7 @@
   },
   "ssd/crucial-bx500-sata-ssd-2tb": {
    "sku": "B0CCN9QWKT",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-04-16",
    "google_impressions": 13,
    "google_position": 19.85,
@@ -1754,7 +1754,7 @@
   },
   "ssd/crucial-e100-2tb-m-2-nvme-pcie-gen4": {
    "sku": "B0DQSJZTZ5",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-07-14",
    "google_impressions": 6,
    "google_position": 8,
@@ -1779,7 +1779,7 @@
   },
   "ssd/crucial-p310-1tb-ssd": {
    "sku": "B0DC8VPSHV",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2024-09-17",
    "google_impressions": 34,
    "google_position": 15.12,
@@ -1791,7 +1791,7 @@
   },
   "ssd/crucial-p310-2tb-ssd": {
    "sku": "B0DC8RVRBZ",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2024-09-17",
    "google_impressions": 19,
    "google_position": 15.95,
@@ -1803,7 +1803,7 @@
   },
   "ssd/crucial-p310-4tb-ssd": {
    "sku": "B0F3WLFCPL",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-04-29",
    "google_impressions": 8,
    "google_position": 8,
@@ -1815,7 +1815,7 @@
   },
   "ssd/crucial-p310-500gb-ssd": {
    "sku": "B0DC8K6KQD",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2024-09-17",
    "google_impressions": 2,
    "google_position": 20.5,
@@ -1827,7 +1827,7 @@
   },
   "ssd/crucial-p510-pcie-gen5-nvme-1tb-ssd": {
    "sku": "B0DZ5ZK225",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-04-08",
    "google_impressions": 6,
    "google_position": 19.5,
@@ -1853,7 +1853,7 @@
   },
   "ssd/crucial-t500-4tb-pcie-gen4-nvme-gaming-ps5": {
    "sku": "B0DBBJSGFQ",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2024-08-28",
    "google_impressions": 2,
    "google_position": 7,
@@ -1879,7 +1879,7 @@
   },
   "ssd/crucial-t500-pcie-gen4-nvme-4tb-ssd": {
    "sku": "B0DBBG7CG7",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2024-08-27",
    "google_impressions": 19,
    "google_position": 15.42,
@@ -1904,7 +1904,7 @@
   },
   "ssd/crucial-t705-pcie-gen5-nvme-1tb-ssd": {
    "sku": "B0CTRV9CVP",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2024-02-29",
    "google_impressions": 9,
    "google_position": 31.89,
@@ -1916,7 +1916,7 @@
   },
   "ssd/fanxiang-1tb-nvme-ssd-pcie-gen-4-gaming": {
    "sku": "B0D5M5D2XP",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2024-06-04",
    "google_impressions": 10,
    "google_position": 18.2,
@@ -1928,7 +1928,7 @@
   },
   "ssd/fanxiang-1tb-nvme-ssd-pcie-gen4-m-2": {
    "sku": "B0CM8RVVG1",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2024-01-26",
    "google_impressions": 14,
    "google_position": 11.57,
@@ -1940,7 +1940,7 @@
   },
   "ssd/fanxiang-2tb-nvme-ssd-pcie-gen4-m-2-ssd": {
    "sku": "B0CM941D89",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2024-01-27",
    "google_impressions": 1,
    "google_position": 10,
@@ -1952,7 +1952,7 @@
   },
   "ssd/fanxiang-2tb-sata-ssd-2-5-ssd-sata-iii": {
    "sku": "B0CM8M8293",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2023-12-28",
    "google_impressions": 2,
    "google_position": 12.5,
@@ -1964,7 +1964,7 @@
   },
   "ssd/fanxiang-s501q-ssd-1tb-pcle-3-0x4": {
    "sku": "B0CNSVG1QB",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2023-12-25",
    "google_impressions": 8,
    "google_position": 20.12,
@@ -1976,7 +1976,7 @@
   },
   "ssd/fanxiang-ssd-2tb-internal-solid-state": {
    "sku": "B0BWXK95PY",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2023-04-03",
    "google_impressions": 12,
    "google_position": 13.17,
@@ -1988,7 +1988,7 @@
   },
   "ssd/fikwot-fn203-m-2-sata-ssd-slc-cache-1tb": {
    "sku": "B0C3ZR818X",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2023-06-02",
    "google_impressions": 12,
    "google_position": 10,
@@ -2000,7 +2000,7 @@
   },
   "ssd/fikwot-fn955-2tb-nvme-ssd-m-2-2280-pcie": {
    "sku": "B0C9DPWRZ3",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2023-08-16",
    "google_impressions": 2,
    "google_position": 23,
@@ -2012,7 +2012,7 @@
   },
   "ssd/fikwot-fn960-4tb-m-2-nvme-ssd-pcie-gen4": {
    "sku": "B0FYF4HDXY",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2026-02-28",
    "google_impressions": 6,
    "google_position": 8.5,
@@ -2024,7 +2024,7 @@
   },
   "ssd/fikwot-fs810-2tb-ssd": {
    "sku": "B0BF9DC11W",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2023-04-10",
    "google_impressions": 9,
    "google_position": 11,
@@ -2036,7 +2036,7 @@
   },
   "ssd/fikwot-fx815-1tb-ssd": {
    "sku": "B0CX94D2YC",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2024-04-09",
    "google_impressions": 6,
    "google_position": 9.67,
@@ -2048,7 +2048,7 @@
   },
   "ssd/gigastone-m-2-ssd-1tb-pcie-4-0-nvme-ssd": {
    "sku": "B0CB89SL21",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2023-08-07",
    "google_impressions": 3,
    "google_position": 8.67,
@@ -2073,7 +2073,7 @@
   },
   "ssd/kingspec-2tb-2-5-inch-sata-iii-internal": {
    "sku": "B0H2DHS2YC",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2026-06-25",
    "google_impressions": 9,
    "google_position": 6.33,
@@ -2085,7 +2085,7 @@
   },
   "ssd/kingspec-oneboom-2tb-internal-ssd-2-5": {
    "sku": "B0FDG66SKS",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-07-18",
    "google_impressions": 3,
    "google_position": 33.67,
@@ -2098,7 +2098,7 @@
   },
   "ssd/kingspec-ssd-1tb": {
    "sku": "B0D1R7NBB6",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2024-05-01",
    "google_impressions": 12,
    "google_position": 8.33,
@@ -2110,7 +2110,7 @@
   },
   "ssd/kingston-nv3-1tb-m-2-2280-nvme-ssd": {
    "sku": "B0DBR3DZWG",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2024-08-05",
    "google_impressions": 21,
    "google_position": 19.86,
@@ -2135,7 +2135,7 @@
   },
   "ssd/patriot-memory-p400-lite-m-2-pcie-gen-4-1tb": {
    "sku": "B0BTDP6P7Y",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2023-02-04",
    "google_impressions": 5,
    "google_position": 7.8,
@@ -2160,7 +2160,7 @@
   },
   "ssd/predator-m-2-ssd-2tb-gm7000-with-dram": {
    "sku": "B09F5W62N8",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2021-09-26",
    "google_impressions": 1,
    "google_position": 8,
@@ -2186,7 +2186,7 @@
   },
   "ssd/samsung-870-evo-1tb-sata-2-5-internal": {
    "sku": "B08T1SMTF9",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2021-07-07",
    "google_impressions": 39,
    "google_position": 5.54,
@@ -2198,7 +2198,7 @@
   },
   "ssd/samsung-870-evo-250gb-sata-2-5": {
    "sku": "B08T1TWQS9",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2021-07-07",
    "google_impressions": 4,
    "google_position": 35,
@@ -2249,7 +2249,7 @@
   },
   "ssd/samsung-870-evo-sata-ssd-500gb-2-5": {
    "sku": "B08QBMD6P4",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2021-01-18",
    "google_impressions": 10,
    "google_position": 5.6,
@@ -2302,7 +2302,7 @@
   },
   "ssd/samsung-980-pro-ssd-with-heatsink-2tb-pcie": {
    "sku": "B09JHKSNNG",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2021-10-22",
    "google_impressions": 8,
    "google_position": 14,
@@ -2340,7 +2340,7 @@
   },
   "ssd/samsung-990-pro-1tb-pcie-gen-4-0-x4": {
    "sku": "B0BPXQ9BDV",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-04-29",
    "google_impressions": 36,
    "google_position": 25.78,
@@ -2367,7 +2367,7 @@
   },
   "ssd/samsung-990-pro-2tb-pcie-gen-4-0-x4": {
    "sku": "B0BPXRY7N2",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-04-28",
    "google_impressions": 10,
    "google_position": 5.7,
@@ -2421,7 +2421,7 @@
   },
   "ssd/samsung-990-pro-w-heatsink-ssd-1tb-pcie": {
    "sku": "B0BHJFNW9X",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2022-11-23",
    "google_impressions": 4,
    "google_position": 11.75,
@@ -2433,7 +2433,7 @@
   },
   "ssd/samsung-990-pro-w-heatsink-ssd-2tb": {
    "sku": "B0BHJDY57J",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2022-11-13",
    "google_impressions": 45,
    "google_position": 11.93,
@@ -2445,7 +2445,7 @@
   },
   "ssd/samsung-mz-v9p4t0b-am-990-pro-pcie-4-0-4tb": {
    "sku": "B0CXZ153DP",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2024-04-02",
    "google_impressions": 1,
    "google_position": 4,
@@ -2513,7 +2513,7 @@
   },
   "ssd/samsung-ssd-870-evo-sata-iii-2-5-1tb": {
    "sku": "B08QBJ2YMG",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2021-01-19",
    "google_impressions": 11,
    "google_position": 6.27,
@@ -2538,7 +2538,7 @@
   },
   "ssd/samsung-ssd-870-evo-sata-iii-2-5-8tb": {
    "sku": "B0GQZMMN1S",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2026-03-11",
    "google_impressions": 8,
    "google_position": 10.38,
@@ -2550,7 +2550,7 @@
   },
   "ssd/samsung-ssd-9100-pro-1tb": {
    "sku": "B0DX2G349M",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-03-14",
    "google_impressions": 23,
    "google_position": 8,
@@ -2575,7 +2575,7 @@
   },
   "ssd/samsung-ssd-9100-pro-4tb": {
    "sku": "B0DX2GJ1YR",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-03-18",
    "google_impressions": 33,
    "google_position": 12.09,
@@ -2600,7 +2600,7 @@
   },
   "ssd/samsung-ssd-990-pro-4tb": {
    "sku": "B0CHGT1KFJ",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2023-09-14",
    "google_impressions": 32,
    "google_position": 11.03,
@@ -2612,7 +2612,7 @@
   },
   "ssd/sandisk-ssd-plus-500gb-internal-solid": {
    "sku": "B0F4Y2VR8S",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-07-30",
    "google_impressions": 3,
    "google_position": 31.33,
@@ -2638,7 +2638,7 @@
   },
   "ssd/silicon-power-2tb-nvme-m-2-pcie-gen3x4": {
    "sku": "B07ZQ97H3W",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2022-01-19",
    "google_impressions": 11,
    "google_position": 12.27,
@@ -2651,7 +2651,7 @@
   },
   "ssd/silicon-power-2tb-ssd-3d-nand-a55-slc": {
    "sku": "B0G42YVQRJ",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-12-01",
    "google_impressions": 2,
    "google_position": 10.5,
@@ -2665,7 +2665,7 @@
   },
   "ssd/silicon-power-2tb-ud90-nvme-4-0-gen4-pcie": {
    "sku": "B0B996CJ64",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2022-12-24",
    "google_impressions": 10,
    "google_position": 9.3,
@@ -2677,7 +2677,7 @@
   },
   "ssd/silicon-power-4tb-ud90-nvme-4-0-gen4-pcie": {
    "sku": "B0BYN8NHXS",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2023-04-03",
    "google_impressions": 3,
    "google_position": 8,
@@ -2689,7 +2689,7 @@
   },
   "ssd/six-nvme-m-2-ssd-pcie-4-0-1tb-m-2-2280": {
    "sku": "B0FGP7W3NJ",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-08-18",
    "google_impressions": 24,
    "google_position": 14.83,
@@ -2701,7 +2701,7 @@
   },
   "ssd/six-x4000-1tb-m-2-ssd-pcie-gen3x4-nvme": {
    "sku": "B0FGPTY5PJ",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2026-01-18",
    "google_impressions": 4,
    "google_position": 8.75,
@@ -2713,7 +2713,7 @@
   },
   "ssd/teamgroup-qx-2tb-3d-nand-qlc-2-5-inch": {
    "sku": "B0C3M1YN5T",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2023-06-03",
    "google_impressions": 12,
    "google_position": 16.92,
@@ -2738,7 +2738,7 @@
   },
   "ssd/teamgroup-t-force-vulcan-z-2tb-slc-cache-2": {
    "sku": "B0BYSKXGJV",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2023-04-13",
    "google_impressions": 1,
    "google_position": 12,
@@ -2751,7 +2751,7 @@
   },
   "ssd/timetec-1tb-ssd-nvme-pcie-gen3x4-8gb-s-m-2": {
    "sku": "B08GJBTCF6",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2020-09-04",
    "google_impressions": 29,
    "google_position": 12.48,
@@ -2765,7 +2765,7 @@
   },
   "ssd/ultra-3d-nand-500gb-internal-ssd-sata": {
    "sku": "B0B7VWFN4B",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2022-10-11",
    "google_impressions": 6,
    "google_position": 50.33,
@@ -2777,7 +2777,7 @@
   },
   "ssd/western-digital-2tb-wd-blue-sa510-sata": {
    "sku": "B0C14TF467",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2023-05-17",
    "google_impressions": 24,
    "google_position": 9.25,
@@ -2829,7 +2829,7 @@
   },
   "ssd/western-digital-wd-black-sn7100-1tb-nvme": {
    "sku": "B0DN7CYYSD",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2024-12-02",
    "google_impressions": 5,
    "google_position": 17.2,
@@ -2841,7 +2841,7 @@
   },
   "ssd/western-digital-wd-black-sn7100-2tb-nvme": {
    "sku": "B0DN6ZQ3PD",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2024-12-03",
    "google_impressions": 21,
    "google_position": 7.67,
@@ -2853,7 +2853,7 @@
   },
   "ssd/western-digital-wd-black-sn7100-4tb-nvme": {
    "sku": "B0DZK9C789",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-03-19",
    "google_impressions": 15,
    "google_position": 11.8,
@@ -2878,7 +2878,7 @@
   },
   "ssd/western-digital-wd-black-sn8100-2tb-nvme": {
    "sku": "B0F3BD1W6R",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-04-16",
    "google_impressions": 12,
    "google_position": 17.92,
@@ -2890,7 +2890,7 @@
   },
   "ssd/western-digital-wd-black-sn8100-4tb-nvme": {
    "sku": "B0F3B6MZM9",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-04-16",
    "google_impressions": 17,
    "google_position": 15.35,
@@ -2902,7 +2902,7 @@
   },
   "ssd/western-digital-wd-black-sn850x-1tb-nvme": {
    "sku": "B0B7CKVCCV",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2022-08-03",
    "google_impressions": 13,
    "google_position": 26.08,
@@ -2914,7 +2914,7 @@
   },
   "ssd/western-digital-wd-black-sn850x-2tb-nvme": {
    "sku": "B0B7CMZ3QH",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2022-08-03",
    "google_impressions": 9,
    "google_position": 13.78,
@@ -2926,7 +2926,7 @@
   },
   "ssd/western-digital-wd-black-sn850x-2tb-nvme-2": {
    "sku": "B0B3RQDGL7",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2022-11-18",
    "google_impressions": 8,
    "google_position": 9.12,
@@ -2966,7 +2966,7 @@
   },
   "ssd/western-digital-wd-black-sn850x-4tb-nvme-3": {
    "sku": "B0B3RN5QTV",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2024-08-10",
    "google_impressions": 9,
    "google_position": 12.67,
@@ -2979,7 +2979,7 @@
   },
   "ssd/western-digital-wd-black-sn850x-nvme-ssd-1tb": {
    "sku": "B0B3RP4XCG",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2023-01-09",
    "google_impressions": 18,
    "google_position": 21.22,
@@ -2991,7 +2991,7 @@
   },
   "ssd/western-digital-wd-blue-4tb-sn5100-nvme": {
    "sku": "B0FSC839RG",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-10-02",
    "google_impressions": 19,
    "google_position": 10.21,
@@ -3004,7 +3004,7 @@
   },
   "ssd/western-digital-wd-blue-sn5100-1tb-nvme": {
    "sku": "B0FJ8QFWBQ",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2025-08-27",
    "google_impressions": 17,
    "google_position": 30.41,

@@ -128,7 +128,7 @@ const CITATION_FLOOR = 5;
 // COMMIT 4 FLIPS THESE TWO AND NOTHING ELSE. While both are false the rule
 // reproduces the legacy `readings >= MIN_DAYS_INDEXABLE` result exactly, which
 // is asserted on every run (see assertIndexParity).
-const GATES_ENABLED = false;
+const GATES_ENABLED = true;
 // The freshness term of healthy() is implemented and one constant from live.
 // It is OFF because two currently-indexed pages are stale (measured 2026-09-30:
 // B0CRNNVYM2 at 61 days, B0H83JSCJJ at 37), so enabling it would drop two
