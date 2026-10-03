@@ -1315,6 +1315,27 @@ Two static files for the Raycast extension, written by the daily regen beside th
 
 **KNOWN UNREACHABLE AS OF 2026-09-30, and not all of them are faults:** `/privacy.html` and `/terms.html` are footer-only by convention and that is fine. **`/raycast/` is footer-only and is NOT fine**: it is a content page published the same day, and it has the exact problem the guides had. Fixing it is its own decision, not a ride-along.
 
+## PDP distinctness: the Jaccard method (`scripts/jaccard.js`, 2026-10-03)
+
+**`node scripts/jaccard.js` is the measurement, and it is a committed script precisely because the previous baseline was not.** A distinctness audit on 2026-10-03 was asked to reproduce "0.48 RAM / 0.39 SSD" from 2026-09-25 and could not: **the method behind those two numbers is recorded nowhere**, not in this file, not in `scripts/`, not in `docs/`. Four defensible methods over the same pages that day gave means from 0.435 to 0.745, so the old pair could not be compared with anything. **A number whose method is unrecorded is an anecdote, not a baseline.**
+
+**THE METHOD, fixed in code:** read every built PDP carrying the generator marker; take `<main>` only, so nav, header and footer boilerplate cannot inflate the score; strip `<script>`, `<style>` and comments; replace tags and entities with spaces; lowercase; tokenise on `/[a-z0-9][a-z0-9.$/%-]*/g`, which keeps `32gb`, `$18.44`, `6000mhz` and `cl30` whole because the digits ARE the distinctness; take a SET per page; Jaccard over every unordered same-category pair.
+
+**BIGRAM SHINGLES ARE THE HEADLINE METRIC GOING FORWARD.** Unigram sets reward a page for merely mentioning different numbers; shingles measure whether the SENTENCES differ, which is what the August 2026 spam update was about. Both are printed, because the unigram figure moves when values are interpolated into fixed prose while the shingle figure moves when the prose itself changes, and those are different kinds of improvement.
+
+**BASELINE, 2026-10-03, 119 RAM and 116 SSD pages:**
+
+| category | metric | pairs | mean | median | p90 | min | max |
+|---|---|---|---|---|---|---|---|
+| RAM | **shingle** | 7,021 | **0.435** | 0.423 | 0.558 | 0.195 | 0.756 |
+| RAM | unigram | 7,021 | 0.560 | 0.550 | 0.667 | 0.347 | 0.842 |
+| SSD | **shingle** | 6,670 | **0.358** | 0.369 | 0.516 | 0.154 | 0.759 |
+| SSD | unigram | 6,670 | 0.494 | 0.500 | 0.642 | 0.287 | 0.848 |
+
+Two method variants measured and rejected as the headline: dropping digit-bearing tokens gives RAM 0.745, which flatters fixed prose by discarding exactly the per-product values; including the full page rather than `<main>` gives RAM 0.588, which counts the footer against the pages.
+
+**WHERE THE OVERLAP IS, measured the same day.** `Specs explained` contributes **42.7% of the RAM overlap and 18.1% of the SSD overlap**, being 405 and 314 median words of fixed authored prose with no product values in it at all (`grep -c '\${' scripts/glossary.js` returns 0). The alert form, buy-now block and chart caption are 86 to 99.7% shared but small. **The hero and stats card are already 2.9% shared on RAM**, which is R1 working as intended. Removing `Specs explained` moves RAM shingle 0.435 to 0.318; rewriting its sentences to carry the product's own values measured 0.308, within 0.01 of removal, so the editorial choice between them is not a Jaccard question.
+
 ## Index eligibility: `keepIndexable()` (2026-10-01)
 
 **`indexable` GOVERNS THREE THINGS AND NOTHING ELSE: the meta robots tag, sitemap membership, and whether IndexNow is told about the page.** Those are all instructions to a search engine.
