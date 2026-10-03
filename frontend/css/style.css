@@ -3440,8 +3440,28 @@ html.dark .faq-answer-body a { color: var(--brand-light); }
    briefly appended inline after the value, which ran straight on from the
    figure with no separator and inherited the cell's weight; a block with its
    own muted colour reads as the aside it is. */
-.pdp-spec-row dt a { color: var(--brand-primary, #3A5BC7); text-decoration: none; }
-.pdp-spec-row dt a:hover { text-decoration: underline; }
+/* A LINKED LABEL KEEPS THE LABEL COLOUR AND IS MARKED BY A DOTTED UNDERLINE,
+   not by being blue. Seven of the nine spec labels link to a glossary term and
+   two do not, so colouring the links brand blue left the label column reading
+   as two different kinds of thing: blue, grey, blue, blue, grey. `color:
+   inherit` keeps every label the same muted colour in both themes without
+   restating either value, so the dt rules above stay the single source. The
+   dotted underline is the affordance, and it resolves to solid plus the link
+   colour on hover and keyboard focus. This class is PDP-only: the generator
+   emits it in one place and no other page uses it, so the rule needs no
+   further scoping. */
+.pdp-spec-row dt a {
+  color: inherit;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+.pdp-spec-row dt a:hover,
+.pdp-spec-row dt a:focus-visible {
+  color: var(--brand-primary, #3A5BC7);
+  text-decoration: underline solid;
+}
+html.dark .pdp-spec-row dt a:hover,
+html.dark .pdp-spec-row dt a:focus-visible { color: var(--brand-light, #a4c0ec); }
 .pdp-spec-note {
   display: block;
   margin-top: 4px;
