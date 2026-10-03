@@ -99,7 +99,7 @@
               <label class="modal-label" for="modalPriceInput">Alert me when the price drops below:</label>
               <div class="modal-price-wrap">
                 <span class="modal-price-symbol">$</span>
-                <input type="number" class="modal-input modal-price-input" id="modalPriceInput" min="1" step="1" placeholder="0">
+                <input type="number" class="modal-input modal-price-input" id="modalPriceInput" min="1" max="10000" step="0.01" placeholder="0">
               </div>
               <span class="modal-field-error" id="priceError"></span>
             </div>
@@ -210,7 +210,16 @@
         document.getElementById('modalSelectedProduct').innerHTML =
           '<span class="modal-badge modal-badge--' + esc(selectedProduct.category) + '">' + catLabel + '</span>' +
           '<span class="modal-selected-name">' + esc(selectedProduct.name) + '</span>';
-        var suggested = selectedProduct.current_price ? Math.max(1, Math.floor(selectedProduct.current_price * 0.9)) : '';
+        // Suggested target: 10% below current, rounded DOWN to the nearest x.99,
+        // floored at $1. Integer-cent math, because 0.9 * 139.99 is
+        // 125.99100000000001 in floating point. THE IDENTICAL EXPRESSION LIVES IN
+        // THREE PLACES and must stay in step, or one product suggests a different
+        // price depending on which form the reader opened: here, the
+        // openForProduct path below, and `alertPrefill` in
+        // scripts/generate-product-pages.js (the PDP inline form).
+        var suggested = selectedProduct.current_price
+          ? Math.max(1, (Math.floor((Math.floor(selectedProduct.current_price * 90) - 99) / 100) * 100 + 99) / 100)
+          : '';
         document.getElementById('modalPriceInput').value = suggested;
         document.getElementById('priceError').textContent = '';
         document.getElementById('emailError').textContent = '';
@@ -220,9 +229,25 @@
     });
   }
 
+  // ONE SOURCE FOR THE TYPED PRICE. The validation pass and the submit both
+  // read it through here, so they cannot disagree about what the user entered.
+  // Rounded to two decimals because target_price is NUMERIC(10,2): without this
+  // a 3-decimal entry is accepted, silently rounded by Postgres, and the stored
+  // threshold is not the one the reader typed. The normalised value is written
+  // back only when it actually changed, so "128" does not become "128.00"
+  // under the cursor mid-edit.
+  function readPrice() {
+    var el = document.getElementById('modalPriceInput');
+    var raw = parseFloat(el.value);
+    if (isNaN(raw)) return NaN;
+    var rounded = Math.round(raw * 100) / 100;
+    if (rounded !== raw) el.value = String(rounded);
+    return rounded;
+  }
+
   function validate() {
     var valid = true;
-    var price = parseFloat(document.getElementById('modalPriceInput').value);
+    var price = readPrice();
     var email = document.getElementById('modalEmailInput').value.trim();
     document.getElementById('priceError').textContent = '';
     document.getElementById('emailError').textContent = '';
@@ -265,8 +290,11 @@
     document.getElementById('modalSelectedProduct').innerHTML =
       '<span class="modal-badge modal-badge--' + esc(product.category) + '">' + catLabel + '</span>' +
       '<span class="modal-selected-name">' + esc(product.name) + '</span>';
+    // Same rule as the result-card path above and as `alertPrefill` in
+    // scripts/generate-product-pages.js. Keep all three identical.
     document.getElementById('modalPriceInput').value = product.current_price
-      ? Math.max(1, Math.floor(product.current_price * 0.9)) : '';
+      ? Math.max(1, (Math.floor((Math.floor(product.current_price * 90) - 99) / 100) * 100 + 99) / 100)
+      : '';
     document.getElementById('modalEmailInput').value = '';
     document.getElementById('priceError').textContent = '';
     document.getElementById('emailError').textContent = '';
@@ -313,7 +341,7 @@
     var token = window.memradarAlert.turnstileToken(document.getElementById('modalStep3'));
     if (!token) { submitError.textContent = 'Please complete the “I’m human” check.'; return; }
 
-    var price = parseFloat(document.getElementById('modalPriceInput').value);
+    var price = readPrice();
     var email = document.getElementById('modalEmailInput').value.trim();
     var btn = document.getElementById('modalSetAlertBtn');
     btn.disabled = true; btn.textContent = 'Setting…';

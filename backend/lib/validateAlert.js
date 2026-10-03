@@ -23,6 +23,11 @@ function validateAlert({ email, targetPrice, productId, honeypot }) {
     if (isNaN(price)) errors.push('Target price must be a number');
     else if (price < 1) errors.push('Target price must be at least $1');
     else if (price > 10000) errors.push('Target price must be under $10,000');
+    // target_price is NUMERIC(10,2). Without this a 3-decimal value is accepted
+    // and silently rounded by Postgres, so the stored threshold is not the one
+    // the user submitted. Tested on the RAW input, never on parseFloat's output,
+    // because parseFloat has already discarded the distinction.
+    else if (!/^\d+(\.\d{1,2})?$/.test(String(targetPrice).trim())) errors.push('Target price can have at most two decimals');
   }
 
   // Product ID validation

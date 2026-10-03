@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-02",
+ "generated": "2026-10-03",
  "rule": "requiredByBuild(p) || (healthy(p) && gatesPass(p))",
  "switches": {
   "GATES_ENABLED": false,
@@ -202,8 +202,7 @@
    "google_position": 12.31,
    "bing_impressions": 0,
    "reasons": [
-    "sparse_history",
-    "percentile_extreme"
+    "sparse_history"
    ]
   },
   "ram/corsair-vengeance-ddr5-ram-32gb-6000mhz": {
@@ -301,8 +300,7 @@
    "google_position": 12.22,
    "bing_impressions": 0,
    "reasons": [
-    "long_history",
-    "percentile_extreme"
+    "long_history"
    ]
   },
   "ram/corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz-2": {
@@ -487,8 +485,7 @@
    "bing_impressions": 0,
    "reasons": [
     "family_duplicate",
-    "long_history",
-    "percentile_extreme"
+    "long_history"
    ]
   },
   "ram/crucial-32gb-ddr4-ram-kit-3200mhz": {
@@ -549,6 +546,7 @@
    "bing_impressions": 0,
    "reasons": [
     "long_history",
+    "percentile_extreme",
     "historical_demand"
    ]
   },
@@ -1000,8 +998,7 @@
    "google_position": 12.08,
    "bing_impressions": 0,
    "reasons": [
-    "long_history",
-    "percentile_extreme"
+    "long_history"
    ]
   },
   "ram/kingston-fury-beast-32gb-6000mt-s-ddr5": {
@@ -1117,8 +1114,7 @@
    "google_position": 14,
    "bing_impressions": 0,
    "reasons": [
-    "long_history",
-    "percentile_extreme"
+    "long_history"
    ]
   },
   "ram/kingston-fury-renegade-white-rgb-16gb-6400mhz": {
@@ -2422,8 +2418,7 @@
    "bing_impressions": 1,
    "reasons": [
     "gsc_crawled_not_indexed",
-    "long_history",
-    "percentile_extreme"
+    "long_history"
    ]
   },
   "ssd/silicon-power-2tb-ssd-3d-nand-a55-slc": {
@@ -2435,8 +2430,7 @@
    "bing_impressions": 0,
    "reasons": [
     "sparse_history",
-    "gsc_crawled_not_indexed",
-    "percentile_extreme"
+    "gsc_crawled_not_indexed"
    ]
   },
   "ssd/silicon-power-2tb-ud90-nvme-4-0-gen4-pcie": {
