@@ -2832,7 +2832,12 @@ html.dark .pdp-amazon-disclaimer { color: #64748b; }
   color: #9ca3af;
   margin-top: 8px;
 }
-.pdp-retailers-meta a { color: #6b7280; }
+/* The affiliate link is the same colour as the text it sits in and is marked
+   by a visible underline at rest. It used to be a DARKER grey than the
+   surrounding #9ca3af with no underline, which read as emphasis in light mode
+   and, in dark mode, was set to the same #64748b as the text and so was not
+   discoverable as a link at all until hover. */
+.pdp-retailers-meta a { color: inherit; text-decoration: underline; }
 .pdp-retailers-meta a:hover { color: var(--brand-primary); text-decoration: underline; }
 .pdp-retailers-updated { font-weight: 500; }
 
@@ -3147,7 +3152,7 @@ html.dark .pdp-retailers-table tbody td { color: #94a3b8; }
 html.dark .pdp-retailer-name { color: #f1f5f9; }
 html.dark .pdp-retailer-price { color: #f1f5f9; }
 html.dark .pdp-retailers-meta { color: #64748b; }
-html.dark .pdp-retailers-meta a { color: #64748b; }
+
 html.dark .pdp-retailers-meta a:hover { color: var(--brand-light); }
 
 html.dark .pdp-alert-section { border-bottom-color: #2d3f55; }

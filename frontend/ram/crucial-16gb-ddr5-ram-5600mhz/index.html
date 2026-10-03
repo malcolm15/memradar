@@ -49,8 +49,8 @@
             "url": "https://memradar.com/ram/crucial-16gb-ddr5-ram-5600mhz/",
             "availability": "https://schema.org/InStock",
             "itemCondition": "https://schema.org/NewCondition",
-            "validFrom": "2026-10-03T19:19:55.131Z",
-            "priceValidUntil": "2026-10-03T21:30:00.000Z",
+            "validFrom": "2026-10-03T20:01:38.127Z",
+            "priceValidUntil": "2026-10-04T01:30:00.000Z",
             "seller": {
               "@type": "Organization",
               "name": "Amazon"
@@ -62,8 +62,8 @@
             "priceCurrency": "USD",
             "url": "https://memradar.com/ram/crucial-16gb-ddr5-ram-5600mhz/",
             "itemCondition": "https://schema.org/NewCondition",
-            "validFrom": "2026-10-03T19:19:55.131Z",
-            "priceValidUntil": "2026-10-03T21:30:00.000Z",
+            "validFrom": "2026-10-03T20:01:38.127Z",
+            "priceValidUntil": "2026-10-04T01:30:00.000Z",
             "seller": {
               "@type": "Organization",
               "name": "Newegg"
@@ -358,6 +358,28 @@
           </table>
         </div>
         <p class="pdp-amazon-disclaimer">Prices may have changed at the retailers since our last check.</p>
+        <!-- THE AFFILIATE SENTENCE RENDERS ONLY WHERE AN AFFILIATE LINK EXISTS,
+             from 2026-10-03. It was unconditional, so 84 of 235 pages, 36% of
+             the catalog, disclosed an affiliate relationship beside a Buy Now
+             table holding nothing but a plain Amazon link, which has carried no
+             Associates tag since 2026-09-30. A disclosure on a page with
+             nothing to disclose is not a harmless extra: it tells a reader the
+             link they are about to click is paid when it is not.
+
+             EVALUATED AT BUILD TIME, WHICH IS EXACT RATHER THAN AN
+             APPROXIMATION. The row set is fixed by the generator:
+             buildRetailerRows bakes one tr per retailer and pdp-hydrate.js only
+             refreshes price and stock, with no path that adds or removes a row.
+             The only way a Newegg row appears or disappears is a regen, which
+             re-evaluates this condition in the same pass, so no client code is
+             involved and none should be added.
+
+             OUT OF STOCK STILL COUNTS. 38 of the 151 Newegg rows are out of
+             stock today and keep a clickable affiliate link, so the sentence
+             stays: the link is paid whether or not the item is buyable, the
+             same reasoning that keeps an unavailable retailer visible in the
+             header strip. The condition is ctx.neweggOffer, the field the
+             staleness line above already branches on. -->
         <div class="pdp-retailers-meta">
           <span class="pdp-retailers-updated" id="pdpLastUpdated">Last updated: October 3, 2026</span>
           <span>Prices update every few hours. Some retailer links are <a href="/affiliate.html">affiliate links</a> and support MemRadar at no extra cost to you.</span>
