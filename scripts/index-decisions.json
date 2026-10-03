@@ -5,9 +5,10 @@
   "GATES_ENABLED": false,
   "HEALTHY_REQUIRES_FRESH": false,
   "KEEP_MIN_READINGS": 270,
-  "IMPRESSION_FLOOR": 50
+  "IMPRESSION_FLOOR": 50,
+  "CITATION_FLOOR": 5
  },
- "rule_order": "requiredByBuild wins outright. Otherwise: healthy AND not hard excluded AND ((readings >= KEEP_MIN_READINGS AND a fact gate) OR impressions >= IMPRESSION_FLOOR). Hard exclusions are below_min_readings, long_term_unavailable, duplicate_variant, gsc_crawled_not_indexed and family_duplicate; sparse_history is informational and does not block the demand term.",
+ "rule_order": "requiredByBuild wins outright. Otherwise: healthy AND not hard excluded AND ((readings >= KEEP_MIN_READINGS AND a fact gate) OR google impressions >= IMPRESSION_FLOOR OR bing AI citations >= CITATION_FLOOR). Both demand terms are admit-only. Hard exclusions are below_min_readings, long_term_unavailable, duplicate_variant, gsc_crawled_not_indexed and family_duplicate; sparse_history is informational and does not block either demand term. The family rule carves out members above EITHER demand floor, so a heavily cited or heavily shown family member is never marked family_duplicate.",
  "note": "Reason codes are recorded for every page whether or not they bind under the current switches, so this file reads the same shape before and after the gates go live. Written by scripts/generate-product-pages.js; do not hand-edit. NO FIELD HERE CHANGES WITHOUT A DECISION CHANGING: per-page reading counts and stale-day counts were deliberately dropped because they move every single day and would have rewritten all 235 records nightly, burying the handful of lines that mean something. Readings still decide the outcome through the long_history and sparse_history codes, and staleness through long_term_unavailable, which move only when a threshold is actually crossed. So a diff on this file is a diff worth reading: a verdict flipped, a reason appeared or went, a family winner moved, or the impressions input was replaced.",
  "counts": {
   "indexable": 232,
@@ -21,6 +22,7 @@
    "google_impressions": 1,
    "google_position": 59,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "percentile_extreme"
@@ -33,6 +35,7 @@
    "google_impressions": 2,
    "google_position": 44,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -44,6 +47,7 @@
    "google_impressions": 20,
    "google_position": 13.1,
    "bing_impressions": 0,
+   "bing_citations": 1,
    "reasons": [
     "sparse_history",
     "long_term_unavailable"
@@ -56,6 +60,7 @@
    "google_impressions": 0,
    "google_position": 0,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "pre2021_history"
@@ -68,6 +73,7 @@
    "google_impressions": 3,
    "google_position": 8,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "pre2021_history"
@@ -80,6 +86,7 @@
    "google_impressions": 9,
    "google_position": 8.89,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "pre2021_history",
@@ -93,6 +100,7 @@
    "google_impressions": 12,
    "google_position": 8.08,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "pre2021_history"
@@ -105,6 +113,7 @@
    "google_impressions": 5,
    "google_position": 9.6,
    "bing_impressions": 0,
+   "bing_citations": 1,
    "reasons": [
     "sparse_history",
     "pre2021_history"
@@ -117,6 +126,7 @@
    "google_impressions": 23,
    "google_position": 10.96,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -128,6 +138,7 @@
    "google_impressions": 15,
    "google_position": 12.27,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "pre2021_history"
@@ -140,6 +151,7 @@
    "google_impressions": 3,
    "google_position": 11,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "gsc_crawled_not_indexed",
@@ -153,6 +165,7 @@
    "google_impressions": 11,
    "google_position": 15.36,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "pre2021_history"
@@ -165,6 +178,7 @@
    "google_impressions": 36,
    "google_position": 10.83,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "long_term_unavailable"
@@ -177,6 +191,7 @@
    "google_impressions": 50,
    "google_position": 11.12,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "percentile_extreme",
@@ -190,6 +205,7 @@
    "google_impressions": 19,
    "google_position": 11.58,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -201,6 +217,7 @@
    "google_impressions": 45,
    "google_position": 12.31,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -212,6 +229,7 @@
    "google_impressions": 38,
    "google_position": 12.55,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "required_by_build",
     "sparse_history",
@@ -225,6 +243,7 @@
    "google_impressions": 120,
    "google_position": 11.03,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "historical_demand"
@@ -237,6 +256,7 @@
    "google_impressions": 35,
    "google_position": 17.57,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -248,6 +268,7 @@
    "google_impressions": 9,
    "google_position": 33.22,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "pre2021_history"
@@ -260,6 +281,7 @@
    "google_impressions": 31,
    "google_position": 17.35,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "pre2021_history"
@@ -272,6 +294,7 @@
    "google_impressions": 62,
    "google_position": 12.06,
    "bing_impressions": 0,
+   "bing_citations": 2,
    "reasons": [
     "sparse_history",
     "percentile_extreme",
@@ -285,6 +308,7 @@
    "google_impressions": 12,
    "google_position": 14.5,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "gsc_crawled_not_indexed",
@@ -298,6 +322,7 @@
    "google_impressions": 23,
    "google_position": 12.22,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -310,6 +335,7 @@
    "google_impressions": 21,
    "google_position": 11.43,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -322,6 +348,7 @@
    "google_impressions": 18,
    "google_position": 15.22,
    "bing_impressions": 0,
+   "bing_citations": 3,
    "reasons": [
     "sparse_history"
    ]
@@ -333,6 +360,7 @@
    "google_impressions": 342,
    "google_position": 10.19,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "historical_demand"
@@ -345,6 +373,7 @@
    "google_impressions": 23,
    "google_position": 17.04,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -356,6 +385,7 @@
    "google_impressions": 13,
    "google_position": 10.08,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "percentile_extreme"
@@ -368,6 +398,7 @@
    "google_impressions": 35,
    "google_position": 11.94,
    "bing_impressions": 0,
+   "bing_citations": 1,
    "reasons": [
     "sparse_history"
    ]
@@ -379,6 +410,7 @@
    "google_impressions": 5,
    "google_position": 9,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -390,6 +422,7 @@
    "google_impressions": 5,
    "google_position": 9.8,
    "bing_impressions": 0,
+   "bing_citations": 1,
    "reasons": [
     "sparse_history"
    ]
@@ -401,6 +434,7 @@
    "google_impressions": 175,
    "google_position": 8.97,
    "bing_impressions": 0,
+   "bing_citations": 1,
    "reasons": [
     "sparse_history",
     "historical_demand"
@@ -413,6 +447,7 @@
    "google_impressions": 9,
    "google_position": 10.44,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -424,6 +459,7 @@
    "google_impressions": 5,
    "google_position": 6,
    "bing_impressions": 0,
+   "bing_citations": 4,
    "reasons": [
     "sparse_history",
     "latency_distinct"
@@ -436,6 +472,7 @@
    "google_impressions": 89,
    "google_position": 10.75,
    "bing_impressions": 1,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "historical_demand"
@@ -448,6 +485,7 @@
    "google_impressions": 18,
    "google_position": 9.72,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "pre2021_history"
@@ -460,6 +498,7 @@
    "google_impressions": 4,
    "google_position": 16.5,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history"
    ]
@@ -471,9 +510,11 @@
    "google_impressions": 40,
    "google_position": 19,
    "bing_impressions": 0,
+   "bing_citations": 8,
    "reasons": [
     "long_history",
-    "percentile_extreme"
+    "percentile_extreme",
+    "bing_citations"
    ]
   },
   "ram/crucial-16gb-ddr5-ram-5600mhz-2": {
@@ -483,8 +524,8 @@
    "google_impressions": 17,
    "google_position": 16.35,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
-    "family_duplicate",
     "long_history"
    ]
   },
@@ -495,6 +536,7 @@
    "google_impressions": 9,
    "google_position": 13.56,
    "bing_impressions": 0,
+   "bing_citations": 4,
    "reasons": [
     "long_history",
     "pre2021_history"
@@ -507,6 +549,7 @@
    "google_impressions": 5,
    "google_position": 12.6,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "family_duplicate",
     "long_history",
@@ -520,6 +563,7 @@
    "google_impressions": 24,
    "google_position": 18.71,
    "bing_impressions": 0,
+   "bing_citations": 2,
    "reasons": [
     "long_history"
    ]
@@ -531,10 +575,12 @@
    "google_impressions": 59,
    "google_position": 13.27,
    "bing_impressions": 0,
+   "bing_citations": 17,
    "reasons": [
     "long_history",
     "percentile_extreme",
-    "historical_demand"
+    "historical_demand",
+    "bing_citations"
    ]
   },
   "ram/crucial-64gb-ddr5-ram-5600mhz": {
@@ -544,6 +590,7 @@
    "google_impressions": 54,
    "google_position": 17.89,
    "bing_impressions": 0,
+   "bing_citations": 1,
    "reasons": [
     "long_history",
     "percentile_extreme",
@@ -557,6 +604,7 @@
    "google_impressions": 45,
    "google_position": 14.53,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -569,6 +617,7 @@
    "google_impressions": 15,
    "google_position": 18.2,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -581,9 +630,11 @@
    "google_impressions": 38,
    "google_position": 14.45,
    "bing_impressions": 0,
+   "bing_citations": 7,
    "reasons": [
     "long_history",
-    "percentile_extreme"
+    "percentile_extreme",
+    "bing_citations"
    ]
   },
   "ram/crucial-pro-ddr5-ram-64gb-kit-6400mhz": {
@@ -593,6 +644,7 @@
    "google_impressions": 15,
    "google_position": 21.4,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history"
    ]
@@ -604,6 +656,7 @@
    "google_impressions": 8,
    "google_position": 12.75,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "gsc_crawled_not_indexed",
@@ -617,6 +670,7 @@
    "google_impressions": 101,
    "google_position": 26.38,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "historical_demand"
@@ -629,6 +683,7 @@
    "google_impressions": 13,
    "google_position": 20.77,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -640,6 +695,7 @@
    "google_impressions": 44,
    "google_position": 17.5,
    "bing_impressions": 2,
+   "bing_citations": 3,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -652,6 +708,7 @@
    "google_impressions": 280,
    "google_position": 13.15,
    "bing_impressions": 1,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "historical_demand"
@@ -664,8 +721,10 @@
    "google_impressions": 1,
    "google_position": 10,
    "bing_impressions": 0,
+   "bing_citations": 11,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "bing_citations"
    ]
   },
   "ram/g-skill-ripjawsv-series-ddr4-ram-16gb-3200mhz": {
@@ -675,6 +734,7 @@
    "google_impressions": 6,
    "google_position": 7.33,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "required_by_build",
     "long_history",
@@ -688,6 +748,7 @@
    "google_impressions": 3,
    "google_position": 4,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "required_by_build",
     "long_history",
@@ -701,6 +762,7 @@
    "google_impressions": 1,
    "google_position": 8,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "required_by_build",
     "long_history",
@@ -714,6 +776,7 @@
    "google_impressions": 2,
    "google_position": 23,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "percentile_extreme",
@@ -728,6 +791,7 @@
    "google_impressions": 2,
    "google_position": 7,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "pre2021_history"
@@ -740,6 +804,7 @@
    "google_impressions": 0,
    "google_position": 0,
    "bing_impressions": 0,
+   "bing_citations": 1,
    "reasons": [
     "long_history",
     "pre2021_history",
@@ -753,6 +818,7 @@
    "google_impressions": 9,
    "google_position": 9.33,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "duplicate_variant",
@@ -766,6 +832,7 @@
    "google_impressions": 2,
    "google_position": 18.5,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "percentile_extreme"
@@ -778,6 +845,7 @@
    "google_impressions": 4,
    "google_position": 9.25,
    "bing_impressions": 0,
+   "bing_citations": 4,
    "reasons": [
     "long_history"
    ]
@@ -789,6 +857,7 @@
    "google_impressions": 7,
    "google_position": 14.14,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "latency_distinct"
@@ -801,9 +870,11 @@
    "google_impressions": 169,
    "google_position": 10.92,
    "bing_impressions": 0,
+   "bing_citations": 7,
    "reasons": [
     "sparse_history",
-    "historical_demand"
+    "historical_demand",
+    "bing_citations"
    ]
   },
   "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-64gb-6000mhz-2": {
@@ -813,6 +884,7 @@
    "google_impressions": 7,
    "google_position": 13.29,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -824,8 +896,10 @@
    "google_impressions": 5,
    "google_position": 14,
    "bing_impressions": 0,
+   "bing_citations": 5,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "bing_citations"
    ]
   },
   "ram/g-skill-trident-z5-neo-series-ddr5-ram-64gb-6000mhz": {
@@ -835,6 +909,7 @@
    "google_impressions": 13,
    "google_position": 10.31,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -846,6 +921,7 @@
    "google_impressions": 4,
    "google_position": 12.75,
    "bing_impressions": 0,
+   "bing_citations": 1,
    "reasons": [
     "long_history"
    ]
@@ -857,6 +933,7 @@
    "google_impressions": 13,
    "google_position": 17.46,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "percentile_extreme"
@@ -869,6 +946,7 @@
    "google_impressions": 7,
    "google_position": 12.86,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "percentile_extreme"
@@ -881,6 +959,7 @@
    "google_impressions": 1,
    "google_position": 5,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "family_duplicate"
@@ -893,6 +972,7 @@
    "google_impressions": 7,
    "google_position": 11.43,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -904,6 +984,7 @@
    "google_impressions": 9,
    "google_position": 8,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "percentile_extreme"
@@ -916,6 +997,7 @@
    "google_impressions": 9,
    "google_position": 27,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history"
    ]
@@ -927,6 +1009,7 @@
    "google_impressions": 28,
    "google_position": 14.25,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "pergb_group_end",
@@ -940,6 +1023,7 @@
    "google_impressions": 24,
    "google_position": 17.08,
    "bing_impressions": 0,
+   "bing_citations": 1,
    "reasons": [
     "sparse_history",
     "pergb_group_end"
@@ -952,6 +1036,7 @@
    "google_impressions": 9,
    "google_position": 15.56,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -964,6 +1049,7 @@
    "google_impressions": 8,
    "google_position": 18.5,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -975,6 +1061,7 @@
    "google_impressions": 12,
    "google_position": 13.58,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history"
    ]
@@ -986,6 +1073,7 @@
    "google_impressions": 14,
    "google_position": 8.36,
    "bing_impressions": 0,
+   "bing_citations": 1,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -998,6 +1086,7 @@
    "google_impressions": 36,
    "google_position": 12.08,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history"
    ]
@@ -1009,6 +1098,7 @@
    "google_impressions": 11,
    "google_position": 17.18,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -1021,6 +1111,7 @@
    "google_impressions": 15,
    "google_position": 9.93,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -1033,6 +1124,7 @@
    "google_impressions": 5,
    "google_position": 8,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "pergb_group_end"
@@ -1045,6 +1137,7 @@
    "google_impressions": 17,
    "google_position": 13.41,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1056,6 +1149,7 @@
    "google_impressions": 11,
    "google_position": 17.18,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history"
    ]
@@ -1067,6 +1161,7 @@
    "google_impressions": 2,
    "google_position": 6.5,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1078,6 +1173,7 @@
    "google_impressions": 2,
    "google_position": 7,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -1090,6 +1186,7 @@
    "google_impressions": 14,
    "google_position": 15.21,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history"
    ]
@@ -1101,6 +1198,7 @@
    "google_impressions": 8,
    "google_position": 11,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history"
    ]
@@ -1112,6 +1210,7 @@
    "google_impressions": 11,
    "google_position": 14,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -1124,6 +1223,7 @@
    "google_impressions": 2,
    "google_position": 38.5,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -1136,6 +1236,7 @@
    "google_impressions": 2,
    "google_position": 5,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -1148,6 +1249,7 @@
    "google_impressions": 31,
    "google_position": 9.42,
    "bing_impressions": 0,
+   "bing_citations": 2,
    "reasons": [
     "sparse_history",
     "percentile_extreme"
@@ -1160,6 +1262,7 @@
    "google_impressions": 21,
    "google_position": 9.05,
    "bing_impressions": 2,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1171,6 +1274,7 @@
    "google_impressions": 3,
    "google_position": 14.67,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1182,6 +1286,7 @@
    "google_impressions": 11,
    "google_position": 14.36,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "percentile_extreme"
@@ -1194,6 +1299,7 @@
    "google_impressions": 17,
    "google_position": 12.71,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "pergb_group_end"
@@ -1206,6 +1312,7 @@
    "google_impressions": 7,
    "google_position": 40.43,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "pre2021_history"
@@ -1218,6 +1325,7 @@
    "google_impressions": 29,
    "google_position": 17.1,
    "bing_impressions": 1,
+   "bing_citations": 4,
    "reasons": [
     "sparse_history",
     "percentile_extreme"
@@ -1230,6 +1338,7 @@
    "google_impressions": 28,
    "google_position": 24.61,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "percentile_extreme"
@@ -1242,6 +1351,7 @@
    "google_impressions": 5,
    "google_position": 9.2,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1253,6 +1363,7 @@
    "google_impressions": 13,
    "google_position": 15.92,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1264,6 +1375,7 @@
    "google_impressions": 15,
    "google_position": 12,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1275,6 +1387,7 @@
    "google_impressions": 13,
    "google_position": 9.23,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "gsc_crawled_not_indexed"
@@ -1287,6 +1400,7 @@
    "google_impressions": 38,
    "google_position": 17.79,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "below_min_readings",
     "long_term_unavailable",
@@ -1300,6 +1414,7 @@
    "google_impressions": 7,
    "google_position": 13.43,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1311,6 +1426,7 @@
    "google_impressions": 35,
    "google_position": 13.09,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history"
    ]
@@ -1322,6 +1438,7 @@
    "google_impressions": 53,
    "google_position": 9.09,
    "bing_impressions": 0,
+   "bing_citations": 4,
    "reasons": [
     "sparse_history",
     "percentile_extreme",
@@ -1337,6 +1454,7 @@
    "google_impressions": 46,
    "google_position": 10.57,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "latency_distinct"
@@ -1349,6 +1467,7 @@
    "google_impressions": 175,
    "google_position": 11.6,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "percentile_extreme",
@@ -1362,6 +1481,7 @@
    "google_impressions": 123,
    "google_position": 10.25,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "percentile_extreme",
@@ -1375,6 +1495,7 @@
    "google_impressions": 70,
    "google_position": 15.21,
    "bing_impressions": 0,
+   "bing_citations": 1,
    "reasons": [
     "long_history",
     "historical_demand"
@@ -1387,6 +1508,7 @@
    "google_impressions": 6,
    "google_position": 15.5,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "pre2021_history"
@@ -1399,6 +1521,7 @@
    "google_impressions": 11,
    "google_position": 12.45,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "pre2021_history"
@@ -1411,6 +1534,7 @@
    "google_impressions": 7,
    "google_position": 11,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "pre2021_history",
@@ -1424,6 +1548,7 @@
    "google_impressions": 7,
    "google_position": 11.14,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history"
    ]
@@ -1435,6 +1560,7 @@
    "google_impressions": 11,
    "google_position": 19.64,
    "bing_impressions": 0,
+   "bing_citations": 2,
    "reasons": [
     "sparse_history",
     "pergb_group_end"
@@ -1447,6 +1573,7 @@
    "google_impressions": 1,
    "google_position": 9,
    "bing_impressions": 0,
+   "bing_citations": 4,
    "reasons": [
     "gsc_crawled_not_indexed",
     "long_history"
@@ -1459,6 +1586,7 @@
    "google_impressions": 7,
    "google_position": 21.14,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1470,6 +1598,7 @@
    "google_impressions": 9,
    "google_position": 17.11,
    "bing_impressions": 0,
+   "bing_citations": 1,
    "reasons": [
     "sparse_history"
    ]
@@ -1481,8 +1610,10 @@
    "google_impressions": 41,
    "google_position": 26.54,
    "bing_impressions": 1,
+   "bing_citations": 6,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "bing_citations"
    ]
   },
   "ssd/acer-predator-gm7-4tb-ssd-m-2-2280-pcie": {
@@ -1492,6 +1623,7 @@
    "google_impressions": 23,
    "google_position": 29.65,
    "bing_impressions": 40,
+   "bing_citations": 0,
    "reasons": [
     "gsc_crawled_not_indexed",
     "long_history"
@@ -1504,6 +1636,7 @@
    "google_impressions": 5,
    "google_position": 8.6,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1515,6 +1648,7 @@
    "google_impressions": 7,
    "google_position": 10.57,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "percentile_extreme"
@@ -1527,6 +1661,7 @@
    "google_impressions": 5,
    "google_position": 10.2,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1538,6 +1673,7 @@
    "google_impressions": 22,
    "google_position": 15.64,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1549,6 +1685,7 @@
    "google_impressions": 8,
    "google_position": 10.62,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1560,6 +1697,7 @@
    "google_impressions": 7,
    "google_position": 14.57,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1571,6 +1709,7 @@
    "google_impressions": 3,
    "google_position": 9,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1582,6 +1721,7 @@
    "google_impressions": 17,
    "google_position": 18.88,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1593,6 +1733,7 @@
    "google_impressions": 7,
    "google_position": 39.86,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "pre2021_history"
@@ -1605,6 +1746,7 @@
    "google_impressions": 13,
    "google_position": 19.85,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1616,6 +1758,7 @@
    "google_impressions": 6,
    "google_position": 8,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1627,6 +1770,7 @@
    "google_impressions": 2,
    "google_position": 8.5,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -1639,6 +1783,7 @@
    "google_impressions": 34,
    "google_position": 15.12,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history"
    ]
@@ -1650,6 +1795,7 @@
    "google_impressions": 19,
    "google_position": 15.95,
    "bing_impressions": 10,
+   "bing_citations": 0,
    "reasons": [
     "long_history"
    ]
@@ -1661,6 +1807,7 @@
    "google_impressions": 8,
    "google_position": 8,
    "bing_impressions": 1,
+   "bing_citations": 1,
    "reasons": [
     "sparse_history"
    ]
@@ -1672,6 +1819,7 @@
    "google_impressions": 2,
    "google_position": 20.5,
    "bing_impressions": 0,
+   "bing_citations": 2,
    "reasons": [
     "long_history"
    ]
@@ -1683,6 +1831,7 @@
    "google_impressions": 6,
    "google_position": 19.5,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "pergb_group_end"
@@ -1695,6 +1844,7 @@
    "google_impressions": 10,
    "google_position": 9.2,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -1707,6 +1857,7 @@
    "google_impressions": 2,
    "google_position": 7,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1718,9 +1869,11 @@
    "google_impressions": 9,
    "google_position": 22.33,
    "bing_impressions": 0,
+   "bing_citations": 5,
    "reasons": [
     "long_history",
-    "pergb_group_end"
+    "pergb_group_end",
+    "bing_citations"
    ]
   },
   "ssd/crucial-t500-pcie-gen4-nvme-4tb-ssd": {
@@ -1730,6 +1883,7 @@
    "google_impressions": 19,
    "google_position": 15.42,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1741,6 +1895,7 @@
    "google_impressions": 26,
    "google_position": 17.19,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -1753,6 +1908,7 @@
    "google_impressions": 9,
    "google_position": 31.89,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1764,6 +1920,7 @@
    "google_impressions": 10,
    "google_position": 18.2,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1775,6 +1932,7 @@
    "google_impressions": 14,
    "google_position": 11.57,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1786,6 +1944,7 @@
    "google_impressions": 1,
    "google_position": 10,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1797,6 +1956,7 @@
    "google_impressions": 2,
    "google_position": 12.5,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1808,6 +1968,7 @@
    "google_impressions": 8,
    "google_position": 20.12,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1819,6 +1980,7 @@
    "google_impressions": 12,
    "google_position": 13.17,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1830,6 +1992,7 @@
    "google_impressions": 12,
    "google_position": 10,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1841,6 +2004,7 @@
    "google_impressions": 2,
    "google_position": 23,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1852,6 +2016,7 @@
    "google_impressions": 6,
    "google_position": 8.5,
    "bing_impressions": 2,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1863,6 +2028,7 @@
    "google_impressions": 9,
    "google_position": 11,
    "bing_impressions": 1,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1874,6 +2040,7 @@
    "google_impressions": 6,
    "google_position": 9.67,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1885,6 +2052,7 @@
    "google_impressions": 3,
    "google_position": 8.67,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1896,6 +2064,7 @@
    "google_impressions": 0,
    "google_position": 0,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "pre2021_history"
@@ -1908,6 +2077,7 @@
    "google_impressions": 9,
    "google_position": 6.33,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1919,6 +2089,7 @@
    "google_impressions": 3,
    "google_position": 33.67,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "pergb_group_end"
@@ -1931,6 +2102,7 @@
    "google_impressions": 12,
    "google_position": 8.33,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1942,6 +2114,7 @@
    "google_impressions": 21,
    "google_position": 19.86,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1953,8 +2126,10 @@
    "google_impressions": 28,
    "google_position": 13.68,
    "bing_impressions": 1,
+   "bing_citations": 6,
    "reasons": [
-    "long_history"
+    "long_history",
+    "bing_citations"
    ]
   },
   "ssd/patriot-memory-p400-lite-m-2-pcie-gen-4-1tb": {
@@ -1964,6 +2139,7 @@
    "google_impressions": 5,
    "google_position": 7.8,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1975,6 +2151,7 @@
    "google_impressions": 2,
    "google_position": 6,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "pre2021_history"
@@ -1987,6 +2164,7 @@
    "google_impressions": 1,
    "google_position": 8,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -1998,9 +2176,11 @@
    "google_impressions": 39,
    "google_position": 8.38,
    "bing_impressions": 0,
+   "bing_citations": 13,
    "reasons": [
     "sparse_history",
-    "pergb_group_end"
+    "pergb_group_end",
+    "bing_citations"
    ]
   },
   "ssd/samsung-870-evo-1tb-sata-2-5-internal": {
@@ -2010,6 +2190,7 @@
    "google_impressions": 39,
    "google_position": 5.54,
    "bing_impressions": 1,
+   "bing_citations": 3,
    "reasons": [
     "long_history"
    ]
@@ -2021,6 +2202,7 @@
    "google_impressions": 4,
    "google_position": 35,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history"
    ]
@@ -2032,8 +2214,10 @@
    "google_impressions": 19,
    "google_position": 20.74,
    "bing_impressions": 0,
+   "bing_citations": 6,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "bing_citations"
    ]
   },
   "ssd/samsung-870-evo-4tb-2-5-inch-sata-iii": {
@@ -2043,6 +2227,7 @@
    "google_impressions": 14,
    "google_position": 15.5,
    "bing_impressions": 0,
+   "bing_citations": 2,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -2055,6 +2240,7 @@
    "google_impressions": 24,
    "google_position": 21.12,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -2067,6 +2253,7 @@
    "google_impressions": 10,
    "google_position": 5.6,
    "bing_impressions": 5,
+   "bing_citations": 0,
    "reasons": [
     "long_history"
    ]
@@ -2078,6 +2265,7 @@
    "google_impressions": 2,
    "google_position": 8,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "pre2021_history"
@@ -2090,6 +2278,7 @@
    "google_impressions": 15,
    "google_position": 16.2,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "pre2021_history"
@@ -2102,6 +2291,7 @@
    "google_impressions": 3,
    "google_position": 24,
    "bing_impressions": 0,
+   "bing_citations": 3,
    "reasons": [
     "required_by_build",
     "long_history",
@@ -2116,6 +2306,7 @@
    "google_impressions": 8,
    "google_position": 14,
    "bing_impressions": 0,
+   "bing_citations": 2,
    "reasons": [
     "long_history"
    ]
@@ -2127,8 +2318,10 @@
    "google_impressions": 21,
    "google_position": 8.71,
    "bing_impressions": 2,
+   "bing_citations": 21,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "bing_citations"
    ]
   },
   "ssd/samsung-990-evo-plus-ssd-4tb": {
@@ -2138,6 +2331,7 @@
    "google_impressions": 27,
    "google_position": 9.74,
    "bing_impressions": 2,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -2150,6 +2344,7 @@
    "google_impressions": 36,
    "google_position": 25.78,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -2161,10 +2356,12 @@
    "google_impressions": 41,
    "google_position": 11.63,
    "bing_impressions": 2,
+   "bing_citations": 5,
    "reasons": [
     "required_by_build",
     "gsc_crawled_not_indexed",
-    "long_history"
+    "long_history",
+    "bing_citations"
    ]
   },
   "ssd/samsung-990-pro-2tb-pcie-gen-4-0-x4": {
@@ -2174,6 +2371,7 @@
    "google_impressions": 10,
    "google_position": 5.7,
    "bing_impressions": 0,
+   "bing_citations": 1,
    "reasons": [
     "sparse_history"
    ]
@@ -2185,8 +2383,10 @@
    "google_impressions": 23,
    "google_position": 18.17,
    "bing_impressions": 0,
+   "bing_citations": 7,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "bing_citations"
    ]
   },
   "ssd/samsung-990-pro-nvme-m-2-ssd-2tb": {
@@ -2196,10 +2396,12 @@
    "google_impressions": 23,
    "google_position": 30.7,
    "bing_impressions": 0,
+   "bing_citations": 6,
    "reasons": [
     "long_history",
     "percentile_extreme",
-    "pergb_group_end"
+    "pergb_group_end",
+    "bing_citations"
    ]
   },
   "ssd/samsung-990-pro-ssd-2tb-nvme-m-2-pcie": {
@@ -2209,9 +2411,11 @@
    "google_impressions": 51,
    "google_position": 21.82,
    "bing_impressions": 2,
+   "bing_citations": 44,
    "reasons": [
     "long_history",
-    "historical_demand"
+    "historical_demand",
+    "bing_citations"
    ]
   },
   "ssd/samsung-990-pro-w-heatsink-ssd-1tb-pcie": {
@@ -2221,6 +2425,7 @@
    "google_impressions": 4,
    "google_position": 11.75,
    "bing_impressions": 1,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -2232,6 +2437,7 @@
    "google_impressions": 45,
    "google_position": 11.93,
    "bing_impressions": 0,
+   "bing_citations": 3,
    "reasons": [
     "long_history"
    ]
@@ -2243,6 +2449,7 @@
    "google_impressions": 1,
    "google_position": 4,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "pergb_group_end"
@@ -2255,9 +2462,10 @@
    "google_impressions": 2,
    "google_position": 5,
    "bing_impressions": 0,
+   "bing_citations": 17,
    "reasons": [
     "sparse_history",
-    "family_duplicate"
+    "bing_citations"
    ]
   },
   "ssd/samsung-ssd-860-evo-2tb-2-5-inch-sata": {
@@ -2267,9 +2475,11 @@
    "google_impressions": 8,
    "google_position": 25.88,
    "bing_impressions": 1,
+   "bing_citations": 6,
    "reasons": [
     "long_history",
-    "pre2021_history"
+    "pre2021_history",
+    "bing_citations"
    ]
   },
   "ssd/samsung-ssd-860-pro-2tb-2-5-inch-sata": {
@@ -2279,6 +2489,7 @@
    "google_impressions": 12,
    "google_position": 24.17,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "pre2021_history",
@@ -2292,6 +2503,7 @@
    "google_impressions": 12,
    "google_position": 12.33,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "percentile_extreme",
@@ -2305,6 +2517,7 @@
    "google_impressions": 11,
    "google_position": 6.27,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history"
    ]
@@ -2316,8 +2529,10 @@
    "google_impressions": 11,
    "google_position": 9.27,
    "bing_impressions": 1,
+   "bing_citations": 7,
    "reasons": [
-    "long_history"
+    "long_history",
+    "bing_citations"
    ]
   },
   "ssd/samsung-ssd-870-evo-sata-iii-2-5-8tb": {
@@ -2327,6 +2542,7 @@
    "google_impressions": 8,
    "google_position": 10.38,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -2338,6 +2554,7 @@
    "google_impressions": 23,
    "google_position": 8,
    "bing_impressions": 0,
+   "bing_citations": 2,
    "reasons": [
     "sparse_history"
    ]
@@ -2349,8 +2566,10 @@
    "google_impressions": 14,
    "google_position": 15.36,
    "bing_impressions": 5,
+   "bing_citations": 13,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "bing_citations"
    ]
   },
   "ssd/samsung-ssd-9100-pro-4tb": {
@@ -2360,6 +2579,7 @@
    "google_impressions": 33,
    "google_position": 12.09,
    "bing_impressions": 1,
+   "bing_citations": 0,
    "reasons": [
     "long_history"
    ]
@@ -2371,8 +2591,10 @@
    "google_impressions": 17,
    "google_position": 21.88,
    "bing_impressions": 0,
+   "bing_citations": 21,
    "reasons": [
-    "long_history"
+    "long_history",
+    "bing_citations"
    ]
   },
   "ssd/samsung-ssd-990-pro-4tb": {
@@ -2382,6 +2604,7 @@
    "google_impressions": 32,
    "google_position": 11.03,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history"
    ]
@@ -2393,6 +2616,7 @@
    "google_impressions": 3,
    "google_position": 31.33,
    "bing_impressions": 1,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "pergb_group_end"
@@ -2405,6 +2629,7 @@
    "google_impressions": 7,
    "google_position": 18.71,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "pre2021_history"
@@ -2417,10 +2642,10 @@
    "google_impressions": 11,
    "google_position": 12.27,
    "bing_impressions": 1,
+   "bing_citations": 0,
    "reasons": [
     "gsc_crawled_not_indexed",
-    "long_history",
-    "percentile_extreme"
+    "long_history"
    ]
   },
   "ssd/silicon-power-2tb-ssd-3d-nand-a55-slc": {
@@ -2430,6 +2655,7 @@
    "google_impressions": 2,
    "google_position": 10.5,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "gsc_crawled_not_indexed"
@@ -2442,6 +2668,7 @@
    "google_impressions": 10,
    "google_position": 9.3,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -2453,6 +2680,7 @@
    "google_impressions": 3,
    "google_position": 8,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -2464,6 +2692,7 @@
    "google_impressions": 24,
    "google_position": 14.83,
    "bing_impressions": 0,
+   "bing_citations": 3,
    "reasons": [
     "sparse_history"
    ]
@@ -2475,6 +2704,7 @@
    "google_impressions": 4,
    "google_position": 8.75,
    "bing_impressions": 2,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -2486,6 +2716,7 @@
    "google_impressions": 12,
    "google_position": 16.92,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history"
    ]
@@ -2497,6 +2728,7 @@
    "google_impressions": 3,
    "google_position": 13.33,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "percentile_extreme"
@@ -2509,6 +2741,7 @@
    "google_impressions": 1,
    "google_position": 12,
    "bing_impressions": 0,
+   "bing_citations": 2,
    "reasons": [
     "family_duplicate",
     "long_history"
@@ -2521,6 +2754,7 @@
    "google_impressions": 29,
    "google_position": 12.48,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "pre2021_history",
@@ -2534,6 +2768,7 @@
    "google_impressions": 6,
    "google_position": 50.33,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history"
    ]
@@ -2545,6 +2780,7 @@
    "google_impressions": 24,
    "google_position": 9.25,
    "bing_impressions": 1,
+   "bing_citations": 0,
    "reasons": [
     "long_history"
    ]
@@ -2556,9 +2792,11 @@
    "google_impressions": 3,
    "google_position": 46.33,
    "bing_impressions": 0,
+   "bing_citations": 8,
    "reasons": [
     "long_history",
-    "pergb_group_end"
+    "pergb_group_end",
+    "bing_citations"
    ]
   },
   "ssd/western-digital-4tb-wd-blue-sn5000-nvme": {
@@ -2568,6 +2806,7 @@
    "google_impressions": 19,
    "google_position": 17.05,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history",
     "pergb_group_end"
@@ -2580,6 +2819,7 @@
    "google_impressions": 40,
    "google_position": 32.2,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "below_min_readings",
     "long_term_unavailable"
@@ -2592,6 +2832,7 @@
    "google_impressions": 5,
    "google_position": 17.2,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history"
    ]
@@ -2603,6 +2844,7 @@
    "google_impressions": 21,
    "google_position": 7.67,
    "bing_impressions": 0,
+   "bing_citations": 3,
    "reasons": [
     "sparse_history"
    ]
@@ -2614,6 +2856,7 @@
    "google_impressions": 15,
    "google_position": 11.8,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -2625,6 +2868,7 @@
    "google_impressions": 21,
    "google_position": 21.33,
    "bing_impressions": 0,
+   "bing_citations": 1,
    "reasons": [
     "long_history",
     "pergb_group_end"
@@ -2637,6 +2881,7 @@
    "google_impressions": 12,
    "google_position": 17.92,
    "bing_impressions": 1,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -2648,6 +2893,7 @@
    "google_impressions": 17,
    "google_position": 15.35,
    "bing_impressions": 1,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -2659,6 +2905,7 @@
    "google_impressions": 13,
    "google_position": 26.08,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "long_history"
    ]
@@ -2670,6 +2917,7 @@
    "google_impressions": 9,
    "google_position": 13.78,
    "bing_impressions": 0,
+   "bing_citations": 1,
    "reasons": [
     "long_history"
    ]
@@ -2681,6 +2929,7 @@
    "google_impressions": 8,
    "google_position": 9.12,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "family_duplicate",
     "long_history",
@@ -2694,9 +2943,10 @@
    "google_impressions": 2,
    "google_position": 11,
    "bing_impressions": 58,
+   "bing_citations": 9,
    "reasons": [
     "sparse_history",
-    "family_duplicate"
+    "bing_citations"
    ]
   },
   "ssd/western-digital-wd-black-sn850x-4tb-nvme-2": {
@@ -2706,8 +2956,10 @@
    "google_impressions": 12,
    "google_position": 21.92,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
-    "long_history"
+    "long_history",
+    "percentile_extreme"
    ]
   },
   "ssd/western-digital-wd-black-sn850x-4tb-nvme-3": {
@@ -2717,6 +2969,7 @@
    "google_impressions": 9,
    "google_position": 12.67,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history",
     "family_duplicate"
@@ -2729,6 +2982,7 @@
    "google_impressions": 18,
    "google_position": 21.22,
    "bing_impressions": 1,
+   "bing_citations": 0,
    "reasons": [
     "long_history"
    ]
@@ -2740,6 +2994,7 @@
    "google_impressions": 19,
    "google_position": 10.21,
    "bing_impressions": 2,
+   "bing_citations": 2,
    "reasons": [
     "sparse_history",
     "gsc_crawled_not_indexed"
@@ -2752,6 +3007,7 @@
    "google_impressions": 17,
    "google_position": 30.41,
    "bing_impressions": 0,
+   "bing_citations": 0,
    "reasons": [
     "sparse_history"
    ]
@@ -2773,6 +3029,7 @@
      "sku": "B0CJ8ZHMVF",
      "google_impressions": 38,
      "above_floor": false,
+     "bing_citations": 0,
      "kept": true
     },
     {
@@ -2780,6 +3037,7 @@
      "sku": "B0CBRJ63RT",
      "google_impressions": 120,
      "above_floor": true,
+     "bing_citations": 0,
      "kept": true
     }
    ]
@@ -2799,6 +3057,7 @@
      "sku": "B0CDY46PFK",
      "google_impressions": 23,
      "above_floor": false,
+     "bing_citations": 0,
      "kept": true
     },
     {
@@ -2806,6 +3065,7 @@
      "sku": "B0BZHTVHN5",
      "google_impressions": 21,
      "above_floor": false,
+     "bing_citations": 0,
      "kept": true
     },
     {
@@ -2813,6 +3073,7 @@
      "sku": "B0BPTKD797",
      "google_impressions": 18,
      "above_floor": false,
+     "bing_citations": 3,
      "kept": true
     },
     {
@@ -2820,6 +3081,7 @@
      "sku": "B0DPJ9DJ3D",
      "google_impressions": 342,
      "above_floor": true,
+     "bing_citations": 0,
      "kept": true
     }
    ]
@@ -2829,14 +3091,15 @@
    "tier": 3,
    "differs_by": [],
    "needs_review": true,
-   "winner": "ram/crucial-16gb-ddr5-ram-5600mhz",
+   "winner": "ram/crucial-16gb-ddr5-ram-5600mhz-2",
    "winner_basis": "google_impressions",
    "members": [
     {
      "slug": "ram/crucial-16gb-ddr5-ram-5600mhz",
      "sku": "B0BLTH3KWV",
      "google_impressions": 40,
-     "above_floor": false,
+     "above_floor": true,
+     "bing_citations": 8,
      "kept": true
     },
     {
@@ -2844,7 +3107,8 @@
      "sku": "B0BLTGMCB7",
      "google_impressions": 17,
      "above_floor": false,
-     "kept": false
+     "bing_citations": 0,
+     "kept": true
     }
    ]
   },
@@ -2861,6 +3125,7 @@
      "sku": "B08C4X9VR5",
      "google_impressions": 9,
      "above_floor": false,
+     "bing_citations": 4,
      "kept": true
     },
     {
@@ -2868,6 +3133,7 @@
      "sku": "B08C4LXXCJ",
      "google_impressions": 5,
      "above_floor": false,
+     "bing_citations": 0,
      "kept": false
     }
    ]
@@ -2887,6 +3153,7 @@
      "sku": "B015FXXBW0",
      "google_impressions": 6,
      "above_floor": false,
+     "bing_citations": 0,
      "kept": true
     },
     {
@@ -2894,6 +3161,7 @@
      "sku": "B0171GQXME",
      "google_impressions": 3,
      "above_floor": false,
+     "bing_citations": 0,
      "kept": true
     }
    ]
@@ -2913,6 +3181,7 @@
      "sku": "B0BF8FVLSL",
      "google_impressions": 9,
      "above_floor": false,
+     "bing_citations": 0,
      "kept": true
     },
     {
@@ -2920,6 +3189,7 @@
      "sku": "B0BF6ZQ8MY",
      "google_impressions": 2,
      "above_floor": false,
+     "bing_citations": 0,
      "kept": true
     },
     {
@@ -2927,6 +3197,7 @@
      "sku": "B0C4G6XQQL",
      "google_impressions": 4,
      "above_floor": false,
+     "bing_citations": 4,
      "kept": true
     },
     {
@@ -2934,6 +3205,7 @@
      "sku": "B0BF8MP83M",
      "google_impressions": 7,
      "above_floor": false,
+     "bing_citations": 0,
      "kept": true
     }
    ]
@@ -2953,6 +3225,7 @@
      "sku": "B0BJNTLJ5X",
      "google_impressions": 169,
      "above_floor": true,
+     "bing_citations": 7,
      "kept": true
     },
     {
@@ -2960,13 +3233,15 @@
      "sku": "B0DN3WFS52",
      "google_impressions": 7,
      "above_floor": false,
+     "bing_citations": 0,
      "kept": true
     },
     {
      "slug": "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-64gb-6000mhz-3",
      "sku": "B0CJXBCQ7P",
      "google_impressions": 5,
-     "above_floor": false,
+     "above_floor": true,
+     "bing_citations": 5,
      "kept": true
     }
    ]
@@ -2986,6 +3261,7 @@
      "sku": "B09PTGZM6Y",
      "google_impressions": 7,
      "above_floor": false,
+     "bing_citations": 0,
      "kept": true
     },
     {
@@ -2993,6 +3269,7 @@
      "sku": "B0CB78Y7DC",
      "google_impressions": 1,
      "above_floor": false,
+     "bing_citations": 0,
      "kept": false
     }
    ]
@@ -3010,14 +3287,16 @@
      "sku": "B0CXZ153DP",
      "google_impressions": 1,
      "above_floor": false,
+     "bing_citations": 0,
      "kept": true
     },
     {
      "slug": "ssd/samsung-mz-v9p4t0b-am-990-pro-pcie-4-0-4tb-2",
      "sku": "B0CY2SZ62P",
      "google_impressions": 2,
-     "above_floor": false,
-     "kept": false
+     "above_floor": true,
+     "bing_citations": 17,
+     "kept": true
     }
    ]
   },
@@ -3036,6 +3315,7 @@
      "sku": "B0B3HGJ4V7",
      "google_impressions": 175,
      "above_floor": true,
+     "bing_citations": 0,
      "kept": true
     },
     {
@@ -3043,6 +3323,7 @@
      "sku": "B0B3HHB3Z9",
      "google_impressions": 123,
      "above_floor": true,
+     "bing_citations": 0,
      "kept": true
     }
    ]
@@ -3060,6 +3341,7 @@
      "sku": "B09WMSVHD4",
      "google_impressions": 3,
      "above_floor": false,
+     "bing_citations": 0,
      "kept": true
     },
     {
@@ -3067,6 +3349,7 @@
      "sku": "B0BYSKXGJV",
      "google_impressions": 1,
      "above_floor": false,
+     "bing_citations": 2,
      "kept": false
     }
    ]
@@ -3084,6 +3367,7 @@
      "sku": "B0B7CMZ3QH",
      "google_impressions": 9,
      "above_floor": false,
+     "bing_citations": 1,
      "kept": true
     },
     {
@@ -3091,6 +3375,7 @@
      "sku": "B0B3RQDGL7",
      "google_impressions": 8,
      "above_floor": false,
+     "bing_citations": 0,
      "kept": false
     }
    ]
@@ -3107,14 +3392,16 @@
      "slug": "ssd/western-digital-wd-black-sn850x-4tb-nvme",
      "sku": "B0D9WTKV1B",
      "google_impressions": 2,
-     "above_floor": false,
-     "kept": false
+     "above_floor": true,
+     "bing_citations": 9,
+     "kept": true
     },
     {
      "slug": "ssd/western-digital-wd-black-sn850x-4tb-nvme-2",
      "sku": "B0B7CQ2CHH",
      "google_impressions": 12,
      "above_floor": false,
+     "bing_citations": 0,
      "kept": true
     },
     {
@@ -3122,6 +3409,7 @@
      "sku": "B0B3RN5QTV",
      "google_impressions": 9,
      "above_floor": false,
+     "bing_citations": 0,
      "kept": false
     }
    ]

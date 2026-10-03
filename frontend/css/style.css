@@ -3435,6 +3435,21 @@ html.dark .faq-answer-body a { color: var(--brand-light); }
 .pdp-milestone dt { font-weight: 600; min-width: 15rem; }
 .pdp-milestone dd { margin: 0; color: var(--text-secondary, #475569); }
 
+/* Per-product spec rows (2026-10-03), which replaced the fixed glossary prose
+   on PDPs. Same visual idiom as the glossary pull they succeed, so the page
+   shape is unchanged for a reader: a label in brand colour linking to its
+   /glossary/ anchor, the product's own values beside it. */
+.pdp-specrows { margin: 18px 0 0; display: grid; gap: 10px; }
+.pdp-specrow { display: grid; grid-template-columns: 148px 1fr; gap: 12px; align-items: baseline; }
+.pdp-specrow dt { font-weight: 600; font-size: 0.88rem; margin: 0; }
+.pdp-specrow dt a { color: var(--brand-primary, #3A5BC7); text-decoration: none; }
+.pdp-specrow dt a:hover { text-decoration: underline; }
+.pdp-specrow dd { margin: 0; font-size: 0.88rem; line-height: 1.55; color: var(--text-secondary, #475569); }
+@media (max-width: 560px) {
+  .pdp-specrow { grid-template-columns: 1fr; gap: 2px; }
+}
+html.dark .pdp-specrow dd { color: #94a3b8; }
+
 .pdp-glossary-list { margin: 0; display: grid; gap: 14px; }
 .pdp-glossary-item dt { font-weight: 600; margin-bottom: 4px; }
 .pdp-glossary-item dt a { color: var(--brand-primary, #3A5BC7); text-decoration: none; }
