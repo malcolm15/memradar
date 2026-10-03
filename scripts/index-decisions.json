@@ -215,8 +215,7 @@
    "reasons": [
     "required_by_build",
     "sparse_history",
-    "percentile_extreme",
-    "pergb_group_end"
+    "percentile_extreme"
    ]
   },
   "ram/corsair-vengeance-ddr5-ram-32gb-6000mhz-2": {
@@ -300,7 +299,8 @@
    "google_position": 12.22,
    "bing_impressions": 0,
    "reasons": [
-    "long_history"
+    "long_history",
+    "percentile_extreme"
    ]
   },
   "ram/corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz-2": {
@@ -929,6 +929,7 @@
    "bing_impressions": 0,
    "reasons": [
     "sparse_history",
+    "pergb_group_end",
     "latency_distinct"
    ]
   },
@@ -1045,8 +1046,7 @@
    "google_position": 13.41,
    "bing_impressions": 0,
    "reasons": [
-    "sparse_history",
-    "percentile_extreme"
+    "sparse_history"
    ]
   },
   "ram/kingston-fury-beast-rgb-64gb-6400mhz": {
@@ -1102,8 +1102,7 @@
    "google_position": 11,
    "bing_impressions": 0,
    "reasons": [
-    "long_history",
-    "pergb_group_end"
+    "long_history"
    ]
   },
   "ram/kingston-fury-impact-64gb-5600mhz": {
@@ -1114,7 +1113,8 @@
    "google_position": 14,
    "bing_impressions": 0,
    "reasons": [
-    "long_history"
+    "long_history",
+    "percentile_extreme"
    ]
   },
   "ram/kingston-fury-renegade-white-rgb-16gb-6400mhz": {
@@ -1325,6 +1325,7 @@
    "reasons": [
     "sparse_history",
     "percentile_extreme",
+    "pergb_group_end",
     "latency_distinct",
     "historical_demand"
    ]
@@ -2418,7 +2419,8 @@
    "bing_impressions": 1,
    "reasons": [
     "gsc_crawled_not_indexed",
-    "long_history"
+    "long_history",
+    "percentile_extreme"
    ]
   },
   "ssd/silicon-power-2tb-ssd-3d-nand-a55-slc": {
@@ -2705,8 +2707,7 @@
    "google_position": 21.92,
    "bing_impressions": 0,
    "reasons": [
-    "long_history",
-    "percentile_extreme"
+    "long_history"
    ]
   },
   "ssd/western-digital-wd-black-sn850x-4tb-nvme-3": {
