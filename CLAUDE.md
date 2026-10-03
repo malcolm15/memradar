@@ -1332,6 +1332,19 @@ Two static files for the Raycast extension, written by the daily regen beside th
 | SSD | **shingle** | 6,670 | **0.358** | 0.369 | 0.516 | 0.154 | 0.759 |
 | SSD | unigram | 6,670 | 0.494 | 0.500 | 0.642 | 0.287 | 0.848 |
 
+**AFTER THE SPEC ROWS SHIPPED, 2026-10-03** (`Specs explained` prose replaced by per-product rows, seven no-value terms moved to `/glossary/` only):
+
+| category | metric | baseline | after | change |
+|---|---|---|---|---|
+| RAM | **shingle** | 0.435 | **0.315** | **-0.120** |
+| RAM | unigram | 0.560 | 0.471 | -0.089 |
+| SSD | **shingle** | 0.358 | **0.319** | **-0.039** |
+| SSD | unigram | 0.494 | 0.478 | -0.016 |
+
+**THE TAILS MOVED FURTHER THAN THE MEANS, which is the better news:** RAM shingle p90 **0.558 to 0.373** and max **0.756 to 0.605**, so the worst-overlapping pairs improved most. **RAM gained three times what SSD did**, because the block it replaced was 405 median words on a RAM page against 314 on an SSD page and was 56.6% shared on RAM against 23.9% on SSD.
+
+**THE RESIDUAL IS CONCENTRATED IN FOUR LOW-CARDINALITY ROWS, measured per row across all 235 pages.** `Price per GB` is unique on every page, 119 distinct values of 119 on RAM and 116 of 116 on SSD, because it carries a price and a rank. The others repeat: `Interface: NVMe` on 82 pages, `Kit: 2 x 16GB · dual channel` on 54, `Form factor: UDIMM` on 51, `Form factor: M.2 2280` on 50, and `Speed: 6000 MT/s · faster than 32% of DDR5 kits tracked` on 45, because 45 of 81 DDR5 kits sit at the modal speed. **The Speed row is the candidate for further work**: naming the modal speed as such would replace 45 identical percentile clauses with something unique to that band. The notable-only notes moved the metric by 0.001 and were never expected to, since 16 notes cannot move a mean over 13,691 pairs; they exist for the reader on 13 pages.
+
 Two method variants measured and rejected as the headline: dropping digit-bearing tokens gives RAM 0.745, which flatters fixed prose by discarding exactly the per-product values; including the full page rather than `<main>` gives RAM 0.588, which counts the footer against the pages.
 
 **WHERE THE OVERLAP IS, measured the same day.** `Specs explained` contributes **42.7% of the RAM overlap and 18.1% of the SSD overlap**, being 405 and 314 median words of fixed authored prose with no product values in it at all (`grep -c '\${' scripts/glossary.js` returns 0). The alert form, buy-now block and chart caption are 86 to 99.7% shared but small. **The hero and stats card are already 2.9% shared on RAM**, which is R1 working as intended. Removing `Specs explained` moves RAM shingle 0.435 to 0.318; rewriting its sentences to carry the product's own values measured 0.308, within 0.01 of removal, so the editorial choice between them is not a Jaccard question.

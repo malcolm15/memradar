@@ -1930,6 +1930,10 @@ function buildPeers(ctx) {
 //
 // glossary.js IS NOT TOUCHED and /glossary/ still carries all 23 entries with
 // their anchors: this is a PDP decision, not a content deletion.
+// The group-end note needs a gap wide enough to be worth a sentence. 20% was
+// measured: the bare $/GB end gate is 23 healthy pages, and a 20% gap cuts it
+// to 7. Below that the "cheapest in its group" claim is true and trivial.
+const PERGB_NOTE_GAP_PCT = 20;
 const GLOSSARY_PDP_EXCLUDE = new Set([
   'xmp', 'expo', 'sequential-speeds', 'slc-cache', 'tlc', 'qlc', 'dram-cache',
 ]);
@@ -2038,13 +2042,67 @@ function specRowsFor(ctx) {
   return rows;
 }
 
+// NOTABLE-ONLY NOTES. Each reads the EXISTING gate predicate rather than a
+// condition of its own, so a note can never appear on a page the rule does not
+// consider notable, and the gate and the sentence cannot drift. Rare by
+// construction: 5, 7 and 4 pages today.
+//
+// TWO OF THE THREE SENTENCES AS FIRST DRAFTED WERE FALSE, AND THE POPULATIONS
+// ARE WHY. "Only one other kit tracked is this quick" assumed both a direction
+// and a count: measured 2026-10-03, 3 of the 5 latency pages are SLOWER than
+// the DDR5 median, not quicker (16.4, 13.3 and 16.4 ns against 12.0), and 3 of
+// the 5 share their value with NO other kit, so "only one other" names a kit
+// that does not exist. The sentence was true on zero of five pages. It now
+// states the rarity only, because the CAS row beside it already prints this
+// kit's latency and the generation median, so a reader sees the direction
+// without being told it.
+//
+// "Cheapest in its group" assumed the cheap end: 5 of the 7 qualifying pages
+// are the MOST EXPENSIVE end of their group, where the gap is above the next
+// product rather than below it. The note branches on rank instead.
+function specNotes(ctx) {
+  const n = ctx.notes || {};
+  const out = { cas: null, perGb: null, compound: null };
+
+  if (n.latencyDistinct && n.latShare) {
+    const gen = ramType(ctx.p.name);
+    out.cas = n.latShare === 1
+      ? `No other ${gen} kit we track has this latency.`
+      : `Only one other ${gen} kit we track has this latency.`;
+  }
+
+  const rk = ctx.perGbRank;
+  if (n.perGbEnd && rk && rk.gapPct != null && rk.gapPct > PERGB_NOTE_GAP_PCT) {
+    const gap = Math.round(rk.gapPct);
+    if (rk.rank === 1) out.perGb = `Cheapest in its group, ${gap}% below the next.`;
+    else if (rk.rank === rk.size) out.perGb = `Most expensive in its group, ${gap}% above the next.`;
+  }
+
+  if (n.percentileExtreme && n.perGbEnd && n.percentile != null && rk) {
+    const dearer = n.percentile >= 50;
+    const end = rk.rank === 1 ? 'cheap' : 'expensive';
+    out.compound = `At ${money(ctx.stats.current)} this is ${dearer ? 'more' : 'less'} expensive than `
+      + `${Math.round(dearer ? n.percentile : 100 - n.percentile)}% of the ${ctx.stats.days} days we have `
+      + `prices for, and it sits at the ${end} end of its group.`;
+  }
+  return out;
+}
+
 function buildSpecRows(ctx) {
   const rows = specRowsFor(ctx);
   if (!rows.length) return '';
+  const notes = specNotes(ctx);
+  const withNote = rows.map((r) => {
+    const note = r.anchor === 'cas-latency' ? notes.cas : r.anchor === 'price-per-gb' ? notes.perGb : null;
+    return { ...r, note };
+  });
+  const compound = notes.compound
+    ? `\n        <p class="pdp-specrow-note">${esc(notes.compound)}</p>`
+    : '';
   return `
         <dl class="pdp-specrows">
-          ${rows.map((r) => `<div class="pdp-specrow"><dt><a href="/glossary/#${r.anchor}">${esc(r.label)}</a></dt><dd>${esc(r.value)}</dd></div>`).join('\n          ')}
-        </dl>`;
+          ${withNote.map((r) => `<div class="pdp-specrow"><dt><a href="/glossary/#${r.anchor}">${esc(r.label)}</a></dt><dd>${esc(r.value)}${r.note ? ` <span class="pdp-specrow-flag">${esc(r.note)}</span>` : ''}</dd></div>`).join('\n          ')}
+        </dl>${compound}`;
 }
 
 function buildGlossaryPull(ctx) {
@@ -6284,6 +6342,18 @@ async function run() {
       ctx.perGbRank = indexCtx.perGbRank.get(p.sku) || null;
       ctx.speedPct = indexCtx.speedPct.get(p.sku) || null;
       ctx.latMedianByGen = indexCtx.latMedianByGen;
+      // THE NOTES READ THE GATE PREDICATES THEMSELVES, never a copy of their
+      // conditions. percentileOf and the three gate functions are the same ones
+      // indexReasons() calls, so a note cannot appear where the rule says the
+      // page is unremarkable.
+      const nsv = latencyNs(p);
+      ctx.notes = {
+        latencyDistinct: gateLatencyDistinct(p, indexCtx),
+        latShare: nsv == null ? 0 : (indexCtx.shareCount.get(nsv.toFixed(1)) || 0),
+        perGbEnd: gatePerGbGroupEnd(p, indexCtx),
+        percentileExtreme: gatePercentile(p),
+        percentile: p.stats.extremesOk ? percentileOf(p) : null,
+      };
       const html = buildPage(template, ctx);
       const dir = path.join(FRONTEND, p.category, p.finalSlug);
       fs.mkdirSync(dir, { recursive: true });

@@ -3448,7 +3448,14 @@ html.dark .faq-answer-body a { color: var(--brand-light); }
 @media (max-width: 560px) {
   .pdp-specrow { grid-template-columns: 1fr; gap: 2px; }
 }
+/* Notable-only note on a row, and the compound line under the rows. Both are
+   rare by construction (5, 7 and 4 pages), so they read as an aside rather
+   than as part of the row's value. */
+.pdp-specrow-flag { color: var(--text-primary, #0f172a); font-weight: 500; }
+.pdp-specrow-note { margin: 12px 0 0; font-size: 0.86rem; line-height: 1.55; color: var(--text-secondary, #475569); }
 html.dark .pdp-specrow dd { color: #94a3b8; }
+html.dark .pdp-specrow-flag { color: #f1f5f9; }
+html.dark .pdp-specrow-note { color: #94a3b8; }
 
 .pdp-glossary-list { margin: 0; display: grid; gap: 14px; }
 .pdp-glossary-item dt { font-weight: 600; margin-bottom: 4px; }
