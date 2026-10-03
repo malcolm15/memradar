@@ -347,14 +347,79 @@
     if (countEl) countEl.textContent = '';
   }
 
+  // ---------- the healthy set ----------
+  // THE PAGE IS A PRODUCT SURFACE AND THE GENERATOR DECIDES ITS MEMBERSHIP.
+  // buildListingPage filters on isHealthy, so /ram/ bakes 117 cards of 119
+  // tracked RAM products. The client feed selects the whole category with no
+  // health filter, so a re-render used to put the excluded ones back: measured
+  // 2026-10-03, 119 rendered against 117 served on /ram/ and 116 against 115 on
+  // /ssd/. Two faults at once, a surface disagreeing with itself between served
+  // and rendered, and three cards with no PDP h1 to show so they fell back to
+  // the raw Amazon title.
+  //
+  // search-index.json IS that healthy set: the generator keys it on
+  // healthyProducts, by the same decision that stops the pending noindex flip
+  // thinning it. So membership needs no second rule here and no health logic
+  // reimplemented in the browser, only a lookup in a file this page already has
+  // a loader for. It goes through memradarSearch.loadIndex so the typeahead and
+  // this share ONE cached fetch rather than requesting 136KB twice.
+  //
+  // loadIndex NEVER CALLS BACK ON FAILURE: its catch clears indexWaiters, so a
+  // bare callback would leave this awaiting forever. Hence the timeout, and
+  // hence a resolve rather than a reject, because an unavailable index is a
+  // degraded state with a correct answer, not an error.
+  var INDEX_TIMEOUT_MS = 8000;
+  function healthySkus() {
+    return new Promise(function (resolve) {
+      if (!window.memradarSearch) { resolve(null); return; }
+      var done = false;
+      var timer = setTimeout(function () { if (!done) { done = true; resolve(null); } }, INDEX_TIMEOUT_MS);
+      try {
+        window.memradarSearch.loadIndex(function (rows) {
+          if (done) return;
+          done = true;
+          clearTimeout(timer);
+          resolve(rows && rows.length ? new Set(rows.map(function (e) { return e.sku; })) : null);
+        });
+      } catch (e) {
+        if (!done) { done = true; clearTimeout(timer); resolve(null); }
+      }
+    });
+  }
+
   // ---------- data loading (shared three-query loader) ----------
   async function load() {
     showSkeleton();
     if (!sb || !window.memradarProductData) { showFailure('data layer not initialized'); return; }
     try {
-      var products = await window.memradarProductData.load(sb, category);
+      // In parallel: prices and membership. Neither waits on the other, and the
+      // render needs both, so awaiting them separately would only add latency.
+      var loaded = await Promise.all([window.memradarProductData.load(sb, category), healthySkus()]);
+      var products = loaded[0];
+      var healthy = loaded[1];
       if (!products.length) { showFailure('no products returned'); return; }
-      state.products = products;
+
+      // FALLBACK WHEN THE INDEX IS UNAVAILABLE: fall back to the BAKED set, the
+      // skus this page was actually built with, rather than to the unfiltered
+      // feed. The feed is the thing being guarded against, so degrading to it
+      // would make a failed lookup render exactly the defect this fixes. Live
+      // prices still apply; only membership comes from the baked cards.
+      var keep = healthy;
+      if (!keep) {
+        keep = new Set(Object.keys(bakedMeta));
+        console.log('Product listing: search index unavailable; rendering the '
+          + keep.size + ' baked products with live prices.');
+      }
+      var filtered = products.filter(function (p) { return keep.has(p.sku); });
+      var dropped = products.length - filtered.length;
+      if (dropped) {
+        console.log('Product listing: dropped ' + dropped + ' product(s) the generator left off this surface.');
+      }
+      // A membership source that matched nothing is a bug in the source, not a
+      // reason to blank the page. Keep the baked list and say so.
+      if (!filtered.length) { showFailure('no products survived the healthy-set filter'); return; }
+
+      state.products = filtered;
       applyAndRender();  // fresh prices replace the baked ones; bakedMeta rides along
     } catch (err) {
       showFailure(err.message);
