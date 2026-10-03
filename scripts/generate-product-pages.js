@@ -117,6 +117,13 @@ const IMPRESSION_FLOOR = 50;      // Google impressions in the pre-demotion wind
 // families were separated by 2 against 1 and 12 against 9, where the deeper
 // history is the better evidence of which page to keep.
 const FAMILY_IMPRESSION_MIN = 10;
+// Bing AI citations in the window named in the citations file's meta block. A
+// SECOND demand signal, not a louder version of the first: measured 2026-10-03,
+// classic Bing search showed PDPs 154 times while Bing AI answers cited them
+// 336 times, and depth of history does not predict it (the 2,061-reading
+// RipjawsV page has zero citations; a 119-reading Samsung variant has 17).
+// Floor 5, which admits 13 pages; 10 would admit 6.
+const CITATION_FLOOR = 5;
 
 // COMMIT 4 FLIPS THESE TWO AND NOTHING ELSE. While both are false the rule
 // reproduces the legacy `readings >= MIN_DAYS_INDEXABLE` result exactly, which
@@ -149,6 +156,11 @@ const GSC_CRAWLED_NOT_INDEXED = new Set([
 // impressions, so a recent window would measure the penalty rather than the
 // demand. Populated by hand from a Search Console Pages export; absent is 0.
 const GSC_IMPRESSIONS_PATH = ['gsc-impressions-2026-q3.json'];
+// Keyed "<category>/<slug>", deliberately unlike the impressions file's bare
+// slug: the collision that file has to ASSERT against is structurally
+// impossible here, so the loader asserts the key FORMAT instead, which is the
+// stronger check.
+const BING_CITATIONS_PATH = ['bing-ai-citations-2026-10-03.json'];
 const INDEX_DECISIONS_PATH = ['index-decisions.json'];
 
 // MEMRADAR'S SIGNATURE HONESTY, restored to the BUY INDICATOR in R1 (2026-09-01).
@@ -955,6 +967,38 @@ function buildIndexContext(pool, buildDate) {
   }
   const latMedian = ns.size ? median([...ns.values()]) : null;
 
+  // BING AI CITATION DEMAND. Same shape as the impressions loader below and
+  // for the same reasons: a missing file disables the gate, a present-but-inert
+  // file throws. The key difference is the key: "<category>/<slug>", so a slug
+  // living in both categories cannot read the wrong product's demand and the
+  // assert is on the key format rather than on collisions.
+  let citations = new Map();
+  let citationsFile = null;
+  try {
+    citationsFile = path.join(__dirname, ...BING_CITATIONS_PATH);
+    const raw = JSON.parse(fs.readFileSync(citationsFile, 'utf8'));
+    for (const [key, v] of Object.entries(raw.pages || {})) {
+      citations.set(key, { bing_citations: Number(v && v.bing_citations) || 0 });
+    }
+  } catch (e) {
+    citations = new Map();
+    citationsFile = null;
+  }
+  if (citationsFile) {
+    // A PRESENT BUT INERT INPUT IS A BUG, NEVER A FALLBACK. Same throw as the
+    // impressions loader, which shipped silently inert for three runs at three
+    // different floors before anyone noticed the buckets were identical.
+    if (![...citations.values()].some((v) => v.bing_citations > 0)) {
+      throw new Error(`${citationsFile} loaded ${citations.size} page(s) and not one carries a nonzero bing_citations. A present-but-inert citations input is a bug, not a fallback: check the field names in that file against gateCitations().`);
+    }
+    // Keys must carry the category, or a bare slug would silently read as a
+    // miss and the gate would be quietly inert for that page.
+    const badKey = [...citations.keys()].find((k) => !/^(ram|ssd)\/[^/]+$/.test(k));
+    if (badKey) {
+      throw new Error(`${citationsFile} key "${badKey}" is not "<category>/<slug>". Re-key the file; a bare slug reads as a miss and silently disables the gate for that page.`);
+    }
+  }
+
   // DEMAND. Keyed by BARE SLUG, and the whole record is kept so the decisions
   // file can report position and the Bing figure beside the number the gate
   // reads. A missing file disables the gate; a file that is PRESENT and loads
@@ -1002,8 +1046,8 @@ function buildIndexContext(pool, buildDate) {
     seen.set(slug, p.category);
   }
 
-  const fam = buildIndexFamilies(pool, impressions);
-  return { buildDate, perGbEnds, perGbRunnersUp, ns, shareCount, latMedian, impressions, familyDuplicates: fam.duplicates, families: fam.families };
+  const fam = buildIndexFamilies(pool, impressions, citations);
+  return { buildDate, perGbEnds, perGbRunnersUp, ns, shareCount, latMedian, impressions, citations, familyDuplicates: fam.duplicates, families: fam.families };
 }
 
 // VARIANT FAMILIES: slugs that differ only by a trailing -N. Three tiers, and
@@ -1028,7 +1072,7 @@ function buildIndexContext(pool, buildDate) {
 // one source of truth that is slightly blunt beats two that can disagree.
 function familyBase(slug) { return slug.replace(/-(\d+)$/, ''); }
 
-function buildIndexFamilies(pool, impressions) {
+function buildIndexFamilies(pool, impressions, citations) {
   const byBase = new Map();
   for (const p of pool) {
     const base = familyBase(p.finalSlug || p.slug);
@@ -1041,6 +1085,10 @@ function buildIndexFamilies(pool, impressions) {
     const r = impressions.get(p.finalSlug || p.slug);
     return r ? r.google_impressions : 0;
   };
+  const ci = (p) => {
+    const r = citations && citations.get(`${p.category}/${p.finalSlug || p.slug}`);
+    return r ? r.bing_citations : 0;
+  };
   // DEMAND OUTRANKS THE FAMILY RULE. A member that clears IMPRESSION_FLOOR on
   // its own is a page Google is already showing, and deduping it away would
   // discard measured demand to satisfy a tidiness rule. Dedup therefore applies
@@ -1048,7 +1096,16 @@ function buildIndexFamilies(pool, impressions) {
   // holds white at 175 impressions and black at 123, both above 50, so both
   // stay; under the first version black was marked family_duplicate and the
   // site would have stopped competing for 123 impressions a quarter.
-  const aboveFloor = (m) => IMPRESSION_FLOOR != null && gi(m) >= IMPRESSION_FLOOR;
+  //
+  // EITHER DEMAND SIGNAL COUNTS, from 2026-10-03. The citation floor was added
+  // as an admit term first and left out of this carve-out, which immediately
+  // cost the two pages the carve-out exists to protect: a Samsung 990 PRO 4TB
+  // variant with 17 Bing AI citations and a WD SN850X 4TB with 9 were still
+  // marked family_duplicate, and a hard exclusion outranks an admit term, so
+  // the gate could never reach them. Discarding 17 citations a quarter for a
+  // tidiness rule is the same wrong trade as discarding 123 impressions.
+  const aboveFloor = (m) => (IMPRESSION_FLOOR != null && gi(m) >= IMPRESSION_FLOOR)
+    || (CITATION_FLOOR != null && ci(m) >= CITATION_FLOOR);
   // requiredByBuild ALWAYS wins: the build throws on those pages, so a family
   // rule must never be the thing that noindexes one.
   const pickWinner = (cands) => {
@@ -1091,6 +1148,7 @@ function buildIndexFamilies(pool, impressions) {
         slug: `${m.category}/${m.finalSlug}`, sku: m.sku,
         google_impressions: gi(m),
         above_floor: aboveFloor(m),
+        bing_citations: ci(m),
         kept: tier === 1 || aboveFloor(m) || m === winner || requiredByBuild(m),
       })),
     });
@@ -1105,7 +1163,16 @@ function gatePercentile(p) {
   const q = percentileOf(p);
   return q >= 95 || q <= 5;
 }
-const gatePre2021Trough = (p) => p.stats.extremesOk && p.stats.firstDay < '2021-01-01';
+// NAMED FOR WHAT IT TESTS, from 2026-10-03. This was `gatePre2021Trough` with
+// the reason code `pre2021_trough`, and the predicate has never contained a
+// trough condition: it asks only whether the extremes are trustworthy and the
+// history starts before 2021. The old name cost a real error. An audit
+// re-derived it as "at or below the all-time low and first tracked pre-2021",
+// got 0 pages against a recorded 33, and reported the recorded figure as
+// unreproducible. Adding a genuine trough term was then measured and gives
+// ZERO pages: in the 2026 surge not one pre-2021 product sits within 10% of
+// its all-time low. There is no trough to name, so the name says history.
+const gatePre2021History = (p) => p.stats.extremesOk && p.stats.firstDay < '2021-01-01';
 const gatePerGbGroupEnd = (p, ctx) => ctx.perGbEnds.has(p.sku);
 function gateLatencyDistinct(p, ctx) {
   const v = ctx.ns.get(p.sku);
@@ -1118,11 +1185,17 @@ function gateImpressions(p, ctx) {
   return !!r && r.google_impressions >= IMPRESSION_FLOOR;
 }
 
+function gateCitations(p, ctx) {
+  if (CITATION_FLOOR == null) return false;
+  const r = ctx.citations.get(slugPathOf(p));
+  return !!r && r.bing_citations >= CITATION_FLOOR;
+}
+
 // A FACT GATE says the page can state something distinctive. It is what
 // KEEP_MIN_READINGS qualifies, because a percentile claim off 90 readings is
 // arithmetic rather than a distribution.
 function factGate(p, ctx) {
-  return gatePercentile(p) || gatePre2021Trough(p) || gatePerGbGroupEnd(p, ctx)
+  return gatePercentile(p) || gatePre2021History(p) || gatePerGbGroupEnd(p, ctx)
     || gateLatencyDistinct(p, ctx);
 }
 
@@ -1149,7 +1222,7 @@ function hardExcluded(p, ctx) {
 function gatesPass(p, ctx, enabled = GATES_ENABLED) {
   if (!enabled) return true;
   if (hardExcluded(p, ctx)) return false;
-  return (p.stats.days >= KEEP_MIN_READINGS && factGate(p, ctx)) || gateImpressions(p, ctx);
+  return (p.stats.days >= KEEP_MIN_READINGS && factGate(p, ctx)) || gateImpressions(p, ctx) || gateCitations(p, ctx);
 }
 
 function keepIndexable(p, ctx, enabled = GATES_ENABLED) {
@@ -1170,10 +1243,11 @@ function indexReasons(p, ctx) {
   if (ctx.familyDuplicates && ctx.familyDuplicates.has(p.sku)) out.push('family_duplicate');
   if (p.stats.days >= KEEP_MIN_READINGS) out.push('long_history');
   if (gatePercentile(p)) out.push('percentile_extreme');
-  if (gatePre2021Trough(p)) out.push('pre2021_trough');
+  if (gatePre2021History(p)) out.push('pre2021_history');
   if (gatePerGbGroupEnd(p, ctx)) out.push('pergb_group_end');
   if (gateLatencyDistinct(p, ctx)) out.push('latency_distinct');
   if (gateImpressions(p, ctx)) out.push('historical_demand');
+  if (gateCitations(p, ctx)) out.push('bing_citations');
   return out;
 }
 
@@ -1273,7 +1347,7 @@ function printIndexPlan(plan, ctx) {
   };
   const cats = (rows) => `ram ${rows.filter((x) => x.p.category === 'ram').length} / ssd ${rows.filter((x) => x.p.category === 'ssd').length}`;
   console.log('\n==================== INDEX PLAN (gates forced ON, nothing written) ====================');
-  console.log(`KEEP_MIN_READINGS=${KEEP_MIN_READINGS}  IMPRESSION_FLOOR=${IMPRESSION_FLOOR === null ? 'unset (gate inert)' : IMPRESSION_FLOOR}`);
+  console.log(`KEEP_MIN_READINGS=${KEEP_MIN_READINGS}  IMPRESSION_FLOOR=${IMPRESSION_FLOOR === null ? 'unset (gate inert)' : IMPRESSION_FLOOR}  CITATION_FLOOR=${CITATION_FLOOR === null ? 'unset (gate inert)' : CITATION_FLOOR}`);
   console.log(`live switches: GATES_ENABLED=${GATES_ENABLED}  HEALTHY_REQUIRES_FRESH=${HEALTHY_REQUIRES_FRESH}\n`);
   for (const [label, rows] of [['INDEX NOW', plan.index], ['IMPROVE THEN INDEX', plan.improve], ['DO NOT INDEX', plan.no]]) {
     console.log(`${label.padEnd(20)} ${String(rows.length).padStart(4)}   (${cats(rows)})`);
@@ -1290,12 +1364,14 @@ function printIndexPlan(plan, ctx) {
       ...plan.improve.map((x) => ({ ...x, b: 'IMPROVE' })),
       ...plan.no.map((x) => ({ ...x, b: 'DO_NOT_INDEX' })),
     ].sort((a, b) => slugPathOf(a.p).localeCompare(slugPathOf(b.p)));
-    console.log(['slug', 'bucket', 'readings', 'google_impressions', 'google_position', 'reasons'].join('\t'));
+    console.log(['slug', 'bucket', 'readings', 'google_impressions', 'google_position', 'bing_citations', 'reasons'].join('\t'));
     for (const { p, r, b } of rows) {
       const imp = (ctx && ctx.impressions.get(p.finalSlug || p.slug)) || {};
+      const cit = (ctx && ctx.citations.get(slugPathOf(p))) || {};
       console.log([
         slugPathOf(p), b, p.stats.days,
         imp.google_impressions || 0, imp.google_position || 0,
+        cit.bing_citations || 0,
         r.join('|') || 'none',
       ].join('\t'));
     }
@@ -6484,8 +6560,8 @@ async function run() {
   const decisions = {
     generated: buildDate,
     rule: 'requiredByBuild(p) || (healthy(p) && gatesPass(p))',
-    switches: { GATES_ENABLED, HEALTHY_REQUIRES_FRESH, KEEP_MIN_READINGS, IMPRESSION_FLOOR },
-    rule_order: 'requiredByBuild wins outright. Otherwise: healthy AND not hard excluded AND ((readings >= KEEP_MIN_READINGS AND a fact gate) OR impressions >= IMPRESSION_FLOOR). Hard exclusions are below_min_readings, long_term_unavailable, duplicate_variant, gsc_crawled_not_indexed and family_duplicate; sparse_history is informational and does not block the demand term.',
+    switches: { GATES_ENABLED, HEALTHY_REQUIRES_FRESH, KEEP_MIN_READINGS, IMPRESSION_FLOOR, CITATION_FLOOR },
+    rule_order: 'requiredByBuild wins outright. Otherwise: healthy AND not hard excluded AND ((readings >= KEEP_MIN_READINGS AND a fact gate) OR google impressions >= IMPRESSION_FLOOR OR bing AI citations >= CITATION_FLOOR). Both demand terms are admit-only. Hard exclusions are below_min_readings, long_term_unavailable, duplicate_variant, gsc_crawled_not_indexed and family_duplicate; sparse_history is informational and does not block either demand term. The family rule carves out members above EITHER demand floor, so a heavily cited or heavily shown family member is never marked family_duplicate.',
     note: 'Reason codes are recorded for every page whether or not they bind under the current switches, so this file reads the same shape before and after the gates go live. Written by scripts/generate-product-pages.js; do not hand-edit. NO FIELD HERE CHANGES WITHOUT A DECISION CHANGING: per-page reading counts and stale-day counts were deliberately dropped because they move every single day and would have rewritten all 235 records nightly, burying the handful of lines that mean something. Readings still decide the outcome through the long_history and sparse_history codes, and staleness through long_term_unavailable, which move only when a threshold is actually crossed. So a diff on this file is a diff worth reading: a verdict flipped, a reason appeared or went, a family winner moved, or the impressions input was replaced.',
     counts: {
       indexable: generable.filter((q) => q.stats.indexable).length,
@@ -6499,6 +6575,7 @@ async function run() {
         google_impressions: (indexCtx.impressions.get(q.finalSlug) || {}).google_impressions || 0,
         google_position: (indexCtx.impressions.get(q.finalSlug) || {}).google_position || 0,
         bing_impressions: (indexCtx.impressions.get(q.finalSlug) || {}).bing_impressions || 0,
+        bing_citations: (indexCtx.citations.get(q.category + '/' + q.finalSlug) || {}).bing_citations || 0,
         reasons: q.indexReasons || [],
       }])
       .sort((x, y) => (x[0] < y[0] ? -1 : 1))),

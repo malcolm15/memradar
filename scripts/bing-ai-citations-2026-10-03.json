@@ -1,0 +1,205 @@
+{
+ "meta": {
+  "source": "Bing Webmaster Tools, AI Performance, Page Stats report",
+  "exported": "2026-10-03",
+  "window": "2026-07-03 to 2026-10-03",
+  "window_note": "Bing's default 3-month range, as reported by Malcolm. UNLIKE scripts/gsc-impressions-2026-q3.json THIS WINDOW STRADDLES THE 2026-08-23 DEMOTION: roughly 51 of its 92 days fall before it and 41 after. The export is a per-page total with no daily breakdown, so the split cannot be measured from this file. Read a figure here as citations over the whole quarter, not as pre-demotion demand.",
+  "metric": "citations, i.e. times the page was cited as a grounding source in a Bing AI answer. This is NOT bing_impressions: classic Bing search showed PDPs 154 times in a comparable window while AI answers cited them 336 times.",
+  "totals": {
+   "all_pages": 4939,
+   "pdp_pages": 336,
+   "non_pdp_pages": 4603,
+   "pdp_rows": 62
+  },
+  "keys": "<category>/<slug>, matching slugPathOf() in scripts/generate-product-pages.js. A slug absent from the export is read as 0 (LEFT JOIN) and is never dropped.",
+  "gate": "gateCitations() in scripts/generate-product-pages.js, admit-only, floor CITATION_FLOOR. It can rescue a page that passes no fact gate and can never evict one that does."
+ },
+ "pages": {
+  "ram/32gb-ddr4-3200mhz-desktop-ram-memory-kit": {
+   "bing_citations": 1
+  },
+  "ram/a-tech-16gb-ddr4-3200-mhz-sodimm-pc4-25600": {
+   "bing_citations": 1
+  },
+  "ram/corsair-vengeance-rgb-ddr5-32gb-6000mhz": {
+   "bing_citations": 2
+  },
+  "ram/corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz-3": {
+   "bing_citations": 3
+  },
+  "ram/corsair-vengeance-rgb-rs-ddr5-32gb-6000mhz": {
+   "bing_citations": 1
+  },
+  "ram/corsair-vengeance-rgb-rs-ddr5-ram-16gb-6000mhz": {
+   "bing_citations": 1
+  },
+  "ram/corsair-vengeance-rgb-rs-ddr5-ram-32gb-5600mhz": {
+   "bing_citations": 1
+  },
+  "ram/corsair-vengeance-rgb-rs-ddr5-ram-64gb-6000mhz": {
+   "bing_citations": 4
+  },
+  "ram/crucial-16gb-ddr5-ram-5600mhz": {
+   "bing_citations": 8
+  },
+  "ram/crucial-32gb-ddr4-ram-kit-3200mhz": {
+   "bing_citations": 4
+  },
+  "ram/crucial-32gb-ddr5-ram-kit-4800mhz": {
+   "bing_citations": 2
+  },
+  "ram/crucial-32gb-ddr5-ram-kit-5600mhz": {
+   "bing_citations": 17
+  },
+  "ram/crucial-64gb-ddr5-ram-5600mhz": {
+   "bing_citations": 1
+  },
+  "ram/crucial-pro-64gb-ddr5-ram-kit-5600mhz": {
+   "bing_citations": 7
+  },
+  "ram/g-skill-flare-x5-series-ddr5-ram-32gb-6000mhz": {
+   "bing_citations": 3
+  },
+  "ram/g-skill-ripjaws-s5-series-ddr5-ram-64gb-6000mhz": {
+   "bing_citations": 11
+  },
+  "ram/g-skill-trident-z-rgb-series-ddr4-ram-32gb-3600mhz": {
+   "bing_citations": 1
+  },
+  "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-32gb-6000mhz-3": {
+   "bing_citations": 4
+  },
+  "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-64gb-6000mhz": {
+   "bing_citations": 7
+  },
+  "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-64gb-6000mhz-3": {
+   "bing_citations": 5
+  },
+  "ram/g-skill-trident-z5-rgb-32gb-2-x-16gb": {
+   "bing_citations": 1
+  },
+  "ram/g-skill-trident-z5-royal-neo-series-ddr5-64gb-6000mhz": {
+   "bing_citations": 1
+  },
+  "ram/kingston-fury-beast-32gb-5600mhz": {
+   "bing_citations": 1
+  },
+  "ram/lexar-oc-ddr5-ram-1x8gb-6000mhz-cl38": {
+   "bing_citations": 2
+  },
+  "ram/patriot-viper-venom-ddr5-ram-16gb-6000mhz": {
+   "bing_citations": 4
+  },
+  "ram/teamgroup-elite-sodimm-ddr5-32gb-5600mhz": {
+   "bing_citations": 4
+  },
+  "ram/teamgroup-t-force-vulcan-ddr5-32gb-6000mhz": {
+   "bing_citations": 1
+  },
+  "ssd/1tb-sata-ssd-2-5-ssd-sata-iii-6": {
+   "bing_citations": 2
+  },
+  "ssd/1tb-sn850p-nvme-m-2-ssd-officially": {
+   "bing_citations": 4
+  },
+  "ssd/acer-predator-gm7-1tb-ssd-m-2-2280-pcie": {
+   "bing_citations": 1
+  },
+  "ssd/acer-predator-gm7-2tb-ssd-m-2-2280-pcie": {
+   "bing_citations": 6
+  },
+  "ssd/crucial-p310-4tb-ssd": {
+   "bing_citations": 1
+  },
+  "ssd/crucial-p310-500gb-ssd": {
+   "bing_citations": 2
+  },
+  "ssd/crucial-t500-pcie-gen4-nvme-1tb-ssd": {
+   "bing_citations": 5
+  },
+  "ssd/lexar-4tb-nm790-ssd-pcie-gen4-nvme-m-2": {
+   "bing_citations": 6
+  },
+  "ssd/samsung-870-evo-1tb-2-5in-sata-iii": {
+   "bing_citations": 13
+  },
+  "ssd/samsung-870-evo-1tb-sata-2-5-internal": {
+   "bing_citations": 3
+  },
+  "ssd/samsung-870-evo-2tb-sata-2-5-internal-ssd": {
+   "bing_citations": 6
+  },
+  "ssd/samsung-870-evo-4tb-2-5-inch-sata-iii": {
+   "bing_citations": 2
+  },
+  "ssd/samsung-960-evo-series-250gb-pcie-nvme": {
+   "bing_citations": 3
+  },
+  "ssd/samsung-980-pro-ssd-with-heatsink-2tb-pcie": {
+   "bing_citations": 2
+  },
+  "ssd/samsung-990-evo-plus-ssd-2tb": {
+   "bing_citations": 21
+  },
+  "ssd/samsung-990-pro-2tb": {
+   "bing_citations": 5
+  },
+  "ssd/samsung-990-pro-2tb-pcie-gen-4-0-x4": {
+   "bing_citations": 1
+  },
+  "ssd/samsung-990-pro-4tb-pcie-gen-4-0-x4": {
+   "bing_citations": 7
+  },
+  "ssd/samsung-990-pro-nvme-m-2-ssd-2tb": {
+   "bing_citations": 6
+  },
+  "ssd/samsung-990-pro-ssd-2tb-nvme-m-2-pcie": {
+   "bing_citations": 44
+  },
+  "ssd/samsung-990-pro-w-heatsink-ssd-2tb": {
+   "bing_citations": 3
+  },
+  "ssd/samsung-mz-v9p4t0b-am-990-pro-pcie-4-0-4tb-2": {
+   "bing_citations": 17
+  },
+  "ssd/samsung-ssd-860-evo-2tb-2-5-inch-sata": {
+   "bing_citations": 6
+  },
+  "ssd/samsung-ssd-870-evo-sata-iii-2-5-2tb": {
+   "bing_citations": 7
+  },
+  "ssd/samsung-ssd-9100-pro-1tb": {
+   "bing_citations": 2
+  },
+  "ssd/samsung-ssd-9100-pro-2tb": {
+   "bing_citations": 13
+  },
+  "ssd/samsung-ssd-990-pro-1tb": {
+   "bing_citations": 21
+  },
+  "ssd/six-nvme-m-2-ssd-pcie-4-0-1tb-m-2-2280": {
+   "bing_citations": 3
+  },
+  "ssd/teamgroup-t-force-vulcan-z-2tb-slc-cache-2": {
+   "bing_citations": 2
+  },
+  "ssd/western-digital-2tb-wd-green-sn350-nvme": {
+   "bing_citations": 8
+  },
+  "ssd/western-digital-wd-black-sn7100-2tb-nvme": {
+   "bing_citations": 3
+  },
+  "ssd/western-digital-wd-black-sn770m-1tb": {
+   "bing_citations": 1
+  },
+  "ssd/western-digital-wd-black-sn850x-2tb-nvme": {
+   "bing_citations": 1
+  },
+  "ssd/western-digital-wd-black-sn850x-4tb-nvme": {
+   "bing_citations": 9
+  },
+  "ssd/western-digital-wd-blue-4tb-sn5100-nvme": {
+   "bing_citations": 2
+  }
+ }
+}
