@@ -5168,6 +5168,7 @@ function listingCard(p, segMedianPerGb) {
     `data-sku="${esc(p.sku)}"`,
     `data-href="${esc(url)}"`,
     `data-name="${esc(p.name)}"`,
+    `data-short-name="${esc(p._titleName)}"`,
     `data-brand="${esc(p.brand || '')}"`,
     `data-price="${s.current == null ? '' : s.current}"`,
     `data-change30="${s.change30 == null ? '' : s.change30}"`,

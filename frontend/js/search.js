@@ -23,6 +23,15 @@ window.memradarSearch = (function () {
   var indexWaiters = [];
   var lastGaQuery = null;
 
+  // WHAT A ROW SHOWS vs WHAT IT MATCHES ON are deliberately different fields.
+  // Display is the PDP's own h1 (`short_name`), so the dropdown, the page and the
+  // alert email all name a product the same way. Matching stays on the raw Amazon
+  // title via `search`, so descriptive words the merchant used ("Laptop Memory",
+  // "Heatsink", "Renewed") still find the product even though no heading says them.
+  function displayName(p) {
+    return p.short_name || p.name;
+  }
+
   function normalize(s) {
     return String(s || '').toLowerCase().replace(/[^a-z0-9\s]/g, '');
   }
@@ -189,7 +198,7 @@ window.memradarSearch = (function () {
         return '<a href="/' + p.category + '/' + escHtml(p.slug) + '/" class="search-row" role="option" id="' + id + '-opt' + i + '" aria-selected="' + (i === state.highlighted) + '" data-i="' + i + '">' +
           '<span class="search-row-thumb">' + thumb + '</span>' +
           '<span class="search-row-main">' +
-            '<span class="search-row-name">' + highlightName(p.name, q) + '</span>' +
+            '<span class="search-row-name">' + highlightName(displayName(p), q) + '</span>' +
             '<span class="search-row-meta">' + escHtml([p.brand, p.category === 'ram' ? 'RAM' : 'SSD'].filter(Boolean).join(' · ')) + '</span>' +
           '</span>' +
           '<span class="search-row-price">' + fmtPrice(p.current_price) + '</span>' +
@@ -340,5 +349,5 @@ window.memradarSearch = (function () {
   // Ranked matches for a query (index must be loaded first via loadIndex).
   function search(query) { return findMatches(query); }
 
-  return { attach: attach, textMatches: textMatches, normalize: normalize, loadIndex: loadIndex, search: search };
+  return { attach: attach, textMatches: textMatches, normalize: normalize, loadIndex: loadIndex, search: search, displayName: displayName };
 })();

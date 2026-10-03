@@ -32,6 +32,12 @@
 
   var currentStep = 1;
   var selectedProduct = null; // { sku, name, category, current_price }
+  // The PDP's own h1. Index entries carry `short_name`; the openForProduct path is
+  // handed an already-resolved `name` by its caller. Never the raw Amazon title:
+  // an alert confirmed under one name and emailed under another reads as a mix-up.
+  function displayName(p) {
+    return (p && (p.short_name || p.name)) || '';
+  }
   var lastResults = [];
   // Single scrollable list, ranked by the site-wide search module (no second
   // ranking implementation, no pagination state to go stale). Beyond the cap
@@ -191,10 +197,10 @@
       : totalMatches + (totalMatches === 1 ? ' match' : ' matches');
     container.innerHTML = lastResults.map(function (p) {
       var catLabel = p.category === 'ram' ? 'RAM' : 'SSD';
-      return '<button class="modal-result-card" data-sku="' + esc(p.sku) + '" aria-label="Select ' + esc(p.name) + '">' +
+      return '<button class="modal-result-card" data-sku="' + esc(p.sku) + '" aria-label="Select ' + esc(displayName(p)) + '">' +
         '<div class="modal-result-info">' +
           '<span class="modal-badge modal-badge--' + esc(p.category) + '">' + catLabel + '</span>' +
-          '<span class="modal-result-name">' + esc(p.name) + '</span>' +
+          '<span class="modal-result-name">' + esc(displayName(p)) + '</span>' +
           '<span class="modal-result-price">' + money(p.current_price) + '</span>' +
         '</div>' +
         '<svg class="modal-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">' +
@@ -209,7 +215,7 @@
         var catLabel = selectedProduct.category === 'ram' ? 'RAM' : 'SSD';
         document.getElementById('modalSelectedProduct').innerHTML =
           '<span class="modal-badge modal-badge--' + esc(selectedProduct.category) + '">' + catLabel + '</span>' +
-          '<span class="modal-selected-name">' + esc(selectedProduct.name) + '</span>';
+          '<span class="modal-selected-name">' + esc(displayName(selectedProduct)) + '</span>';
         // Suggested target: 10% below current, rounded DOWN to the nearest x.99,
         // floored at $1. Integer-cent math, because 0.9 * 139.99 is
         // 125.99100000000001 in floating point. THE IDENTICAL EXPRESSION LIVES IN
@@ -289,7 +295,7 @@
     var catLabel = product.category === 'ram' ? 'RAM' : 'SSD';
     document.getElementById('modalSelectedProduct').innerHTML =
       '<span class="modal-badge modal-badge--' + esc(product.category) + '">' + catLabel + '</span>' +
-      '<span class="modal-selected-name">' + esc(product.name) + '</span>';
+      '<span class="modal-selected-name">' + esc(displayName(product)) + '</span>';
     // Same rule as the result-card path above and as `alertPrefill` in
     // scripts/generate-product-pages.js. Keep all three identical.
     document.getElementById('modalPriceInput').value = product.current_price
@@ -360,7 +366,7 @@
       }
       if (r.ok && r.data && r.data.success) {
         document.getElementById('modalSuccessText').innerHTML =
-          'Check your email at <strong>' + esc(email) + '</strong> to confirm your alert for <strong>' + esc(selectedProduct.name) + '</strong>.';
+          'Check your email at <strong>' + esc(email) + '</strong> to confirm your alert for <strong>' + esc(displayName(selectedProduct)) + '</strong>.';
         goToStep(4);
         return;
       }

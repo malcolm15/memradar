@@ -11,6 +11,7 @@
   var sb = window.memradarSupabase;
   var SLOTS = 4;
   var chosenBySku = {}; // sku -> product, for the Track Price buttons
+  var indexMap = null;  // sku -> { short, atl }, from search-index.json
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -48,11 +49,18 @@
     grid.innerHTML = new Array(SLOTS + 1).join(one);
   }
 
+  // The PDP's own h1, from search-index.json. NEVER p.name, which is the raw
+  // Amazon title the Supabase feed carries.
+  function displayName(p) {
+    var e = indexMap && indexMap.get(p.sku);
+    return (e && e.short) || p.name;
+  }
+
   function cardHtml(p) {
     var pdp = '/' + p.category + '/' + p.slug + '/';
     var brand = p.brand ? '<span class="listing-card-brand">' + esc(p.brand) + '</span>' : '';
     var img = p.image_url
-      ? '<img src="' + esc(p.image_url) + '" alt="' + esc(p.name) + '" loading="lazy" class="listing-card-img-el">'
+      ? '<img src="' + esc(p.image_url) + '" alt="' + esc(displayName(p)) + '" loading="lazy" class="listing-card-img-el">'
       : '';
     // Only real 30-day drops show the green indicator; ATL-fallback cards don't
     // (their change30 may be null or non-negative - never show a wrong badge).
@@ -64,7 +72,7 @@
       '<div class="listing-card-img">' + img + '</div>' +
       '<div class="listing-card-body">' +
         brand +
-        '<h3 class="listing-card-name"><a href="' + esc(pdp) + '" class="listing-card-name-link">' + esc(p.name) + '</a></h3>' +
+        '<h3 class="listing-card-name"><a href="' + esc(pdp) + '" class="listing-card-name-link">' + esc(displayName(p)) + '</a></h3>' +
         '<div class="listing-card-pricing"><span class="listing-card-price">' + money(p.price) + '</span>' + change + '</div>' +
         '<span class="listing-card-retailer">Amazon</span>' +
       '</div>' +
@@ -96,15 +104,18 @@
         e.stopPropagation();
         var p = chosenBySku[btn.dataset.sku];
         if (p && window.memradarAlertModal) {
-          window.memradarAlertModal.openForProduct({ sku: p.sku, name: p.name, category: p.category, current_price: p.price });
+          window.memradarAlertModal.openForProduct({ sku: p.sku, name: displayName(p), category: p.category, current_price: p.price });
         }
       });
     });
   }
 
-  // Fetch all_time_low map from the generated search index (only when the
-  // fallback is actually needed - the common case has >=4 real drops).
-  function fetchAtlMap() {
+  // ONE fetch, two consumers: the display name for every card and the all-time
+  // low the fallback slots rank on. It used to fetch only in the fallback branch
+  // and only for the low, so the cards had no source for the PDP's own name and
+  // rendered the raw Amazon title. Resolves to an empty map on failure, which
+  // falls the names back to the feed rather than dropping the section.
+  function fetchIndexMap() {
     var ver = (function () {
       var s = document.querySelector('script[src*="home-drops.js"]');
       var m = s && /v=(\d+)/.exec(s.src);
@@ -112,8 +123,16 @@
     })();
     return fetch('/search-index.json' + ver).then(function (r) { return r.json(); }).then(function (data) {
       var m = new Map();
-      data.forEach(function (e) { if (e.all_time_low != null) m.set(e.sku, Number(e.all_time_low)); });
+      data.forEach(function (e) {
+        m.set(e.sku, {
+          short: e.short_name || '',
+          atl: e.all_time_low == null ? null : Number(e.all_time_low)
+        });
+      });
       return m;
+    }).catch(function (err) {
+      console.log('Homepage drops: search index failed to load (' + err.message + '); names fall back to the product feed.');
+      return new Map();
     });
   }
 
@@ -121,7 +140,11 @@
     if (!sb || !window.memradarProductData) { degrade('data layer not initialized'); return; }
     skeleton();
     try {
-      var products = await window.memradarProductData.load(sb);
+      // In parallel: the prices decide WHICH products show, the index decides
+      // what they are CALLED, and neither waits on the other.
+      var loaded = await Promise.all([window.memradarProductData.load(sb), fetchIndexMap()]);
+      var products = loaded[0];
+      indexMap = loaded[1];
       var priced = products.filter(function (p) { return p.price != null; });
 
       var drops = priced.filter(function (p) { return p.change30 != null && p.change30 < 0; })
@@ -132,13 +155,16 @@
 
       if (chosen.length < SLOTS) {
         // Fallback: closest to all-time low among the non-drop products.
-        var atl = await fetchAtlMap();
+        var atlOf = function (sku) {
+          var e = indexMap.get(sku);
+          return e && e.atl != null ? e.atl : null;
+        };
         var chosenSkus = {};
         chosen.forEach(function (p) { chosenSkus[p.sku] = true; });
         var candidates = priced.filter(function (p) {
-          return !chosenSkus[p.sku] && atl.has(p.sku) && atl.get(p.sku) > 0;
+          return !chosenSkus[p.sku] && atlOf(p.sku) > 0;
         }).map(function (p) {
-          return { p: p, ratio: p.price / atl.get(p.sku) }; // 1.0 == at the all-time low
+          return { p: p, ratio: p.price / atlOf(p.sku) }; // 1.0 == at the all-time low
         }).sort(function (a, b) { return a.ratio - b.ratio; });
 
         for (var i = 0; i < candidates.length && chosen.length < SLOTS; i++) {

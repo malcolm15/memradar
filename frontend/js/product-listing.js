@@ -48,6 +48,7 @@
       out.push({
         sku: sku,
         name: card.getAttribute('data-name') || '',
+        shortName: card.getAttribute('data-short-name') || '',
         brand: card.getAttribute('data-brand') || null,
         price: price === '' || price == null ? null : Number(price),
         change30: chg === '' || chg == null ? null : Number(chg),
@@ -57,6 +58,7 @@
         _baked: true
       });
       bakedMeta[sku] = {
+        short: card.getAttribute('data-short-name') || '',
         perGb: card.getAttribute('data-pergb') || '',
         buy: card.getAttribute('data-buy') || '',
         oos: card.getAttribute('data-oos') === '1'
@@ -196,7 +198,7 @@
       case 'price-lh': a.sort(function (x, y) { return (x.price == null ? Infinity : x.price) - (y.price == null ? Infinity : y.price); }); break;
       case 'price-hl': a.sort(function (x, y) { return (y.price == null ? -Infinity : y.price) - (x.price == null ? -Infinity : x.price); }); break;
       case 'drop': a.sort(function (x, y) { return dropRank(x) - dropRank(y); }); break; // biggest drop first, no-baseline last
-      default: a.sort(function (x, y) { return x.name.localeCompare(y.name); }); // name-az
+      default: a.sort(function (x, y) { return displayName(x).localeCompare(displayName(y)); }); // name-az, on the displayed name so it matches the baked order
     }
     return a;
   }
@@ -224,18 +226,27 @@
     if (m.buy) bits += '<span class="listing-card-buy listing-card-buy--' + m.buy + '">' + BUY_LABEL[m.buy] + '</span>';
     return bits ? '<div class="listing-card-meta">' + bits + '</div>' : '';
   }
+  // THE DISPLAY NAME IS THE PDP's h1, NEVER products.name. The feed carries only
+  // the raw Amazon title, so a re-render used to overwrite every baked short name
+  // with a 150-character merchant title. bakedMeta survives re-renders, which is
+  // why the lookup goes through it rather than through the product object.
+  function displayName(p) {
+    var m = bakedMeta[p.sku];
+    return (m && m.short) || p.shortName || p.name;
+  }
+
   function cardHtml(p) {
     var brand = p.brand ? '<span class="listing-card-brand">' + esc(p.brand) + '</span>' : '';
     var img = p.image_url
-      ? '<img src="' + esc(p.image_url) + '" alt="' + esc(p.name) + '" loading="lazy" class="listing-card-img-el">'
+      ? '<img src="' + esc(p.image_url) + '" alt="' + esc(displayName(p)) + '" loading="lazy" class="listing-card-img-el">'
       : '';
     // Card click navigates to the PDP (when a slug exists); the Amazon button
     // stays a direct affiliate link via stopPropagation.
     var pdpHref = p.slug ? '/' + category + '/' + p.slug + '/' : '';
     var name = pdpHref
-      ? '<a href="' + esc(pdpHref) + '" class="listing-card-name-link">' + esc(p.name) + '</a>'
-      : esc(p.name);
-    return '<div class="listing-card' + (pdpHref ? ' listing-card--linked' : '') + '" data-sku="' + esc(p.sku) + '"' + (pdpHref ? ' data-href="' + esc(pdpHref) + '"' : '') + '>' +
+      ? '<a href="' + esc(pdpHref) + '" class="listing-card-name-link">' + esc(displayName(p)) + '</a>'
+      : esc(displayName(p));
+    return '<div class="listing-card' + (pdpHref ? ' listing-card--linked' : '') + '" data-sku="' + esc(p.sku) + '" data-name="' + esc(p.name) + '" data-short-name="' + esc(displayName(p)) + '"' + (pdpHref ? ' data-href="' + esc(pdpHref) + '"' : '') + '>' +
       '<div class="listing-card-img">' + img + '</div>' +
       '<div class="listing-card-body">' +
         brand +
