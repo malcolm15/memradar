@@ -26,14 +26,36 @@ CREATE TABLE price_history (
   fetched_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Alert subscriptions: user enters email + target price for a product
+-- Alert subscriptions: user enters email + target price for a product.
+--
+-- CAUGHT UP WITH THE LIVE TABLE ON 2026-10-03, and the gap was in both
+-- directions. This block recorded SIX columns while the live table carries TEN:
+-- the four double-opt-in columns (confirmed, confirm_token, unsubscribe_token,
+-- confirmed_at) were added through the dashboard and never written down here.
+-- The index section further down claimed idx_alerts_triggered and
+-- idx_alerts_product_id, NEITHER OF WHICH EXISTS in the database, while
+-- idx_alerts_active, which does exist, was absent from this file. So the only
+-- written record of the schema was wrong about the table AND wrong about its
+-- indexes, in opposite directions.
+--
+-- VERIFIED against `select indexname, indexdef from pg_indexes where tablename
+-- = 'alerts'` run in the Supabase SQL editor, because PostgREST does not expose
+-- the catalog to this project's credentials (pg_indexes returns PGRST205 and no
+-- exec_sql helper exists). Column names and types come from a live row.
+-- NOT NULL and DEFAULT clauses below are RECONSTRUCTED from the code that
+-- writes the table rather than read from the catalog, so treat those two
+-- qualifiers as the one unverified part of this block.
 CREATE TABLE alerts (
-  id            BIGSERIAL PRIMARY KEY,
-  product_id    BIGINT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-  email         TEXT NOT NULL,
-  target_price  NUMERIC(10, 2) NOT NULL,
-  triggered     BOOLEAN NOT NULL DEFAULT FALSE,
-  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  id                 BIGSERIAL PRIMARY KEY,
+  product_id         BIGINT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  email              TEXT NOT NULL,
+  target_price       NUMERIC(10, 2) NOT NULL,
+  triggered          BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  confirmed          BOOLEAN NOT NULL DEFAULT FALSE,
+  confirm_token      TEXT UNIQUE,   -- nulled on use: a confirm link is single-use
+  unsubscribe_token  TEXT UNIQUE,
+  confirmed_at       TIMESTAMPTZ
 );
 
 -- Row Level Security: alerts contain user emails, lock them down
@@ -283,9 +305,27 @@ WHERE o.retailer = 'newegg'
 CREATE INDEX IF NOT EXISTS idx_price_history_product_id ON price_history(product_id);
 CREATE INDEX IF NOT EXISTS idx_price_history_fetched_at ON price_history(fetched_at DESC);
 
--- alerts: alert trigger logic queries by triggered status and product_id
-CREATE INDEX IF NOT EXISTS idx_alerts_triggered ON alerts(triggered) WHERE triggered = false;
-CREATE INDEX IF NOT EXISTS idx_alerts_product_id ON alerts(product_id);
+-- alerts. Recorded 2026-10-03 from the live catalog; see the table comment for
+-- why this section used to be wrong. The two indexes previously listed here
+-- (idx_alerts_triggered, idx_alerts_product_id) do NOT exist in the database
+-- and were deleted from this file rather than created in it: idx_alerts_active
+-- below already covers the only hot query, alertCheck's
+-- `confirmed = true AND triggered = false` scan.
+CREATE INDEX IF NOT EXISTS idx_alerts_confirm_token ON alerts(confirm_token);
+CREATE INDEX IF NOT EXISTS idx_alerts_unsubscribe_token ON alerts(unsubscribe_token);
+CREATE INDEX IF NOT EXISTS idx_alerts_active ON alerts(confirmed, triggered)
+  WHERE confirmed = true AND triggered = false;
+
+-- SEVERAL THRESHOLDS PER PRODUCT PER ADDRESS (2026-10-03). The old
+-- alerts_email_product_unique on (email, product_id) permitted exactly one
+-- alert per person per product, and api/alerts.js upserts with
+-- ignoreDuplicates, so a second signup on the same product was DISCARDED in
+-- silence: no confirmation email, no update to the target, and a neutral 200
+-- that reads identically to success. Uniqueness now includes target_price, so a
+-- ladder of thresholds is allowed while an exact duplicate is still ignored
+-- silently, which is the behaviour the neutral response promises.
+CREATE UNIQUE INDEX IF NOT EXISTS alerts_email_product_target_unique
+  ON alerts(email, product_id, target_price);
 
 -- products: category filter used on RAM and SSD listing pages
 CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);

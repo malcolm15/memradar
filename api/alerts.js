@@ -155,7 +155,7 @@ module.exports = async (req, res) => {
         confirmed: false,
         confirm_token: confirmToken,
         unsubscribe_token: unsubscribeToken,
-      }], { onConflict: 'email,product_id', ignoreDuplicates: true })
+      }], { onConflict: 'email,product_id,target_price', ignoreDuplicates: true })
       .select('id');
     if (insErr) { logError('insert', insErr.message); neutral(res, 'internal_error', email); return; }
     const newlyInserted = Array.isArray(inserted) && inserted.length > 0;
