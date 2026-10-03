@@ -936,12 +936,34 @@ function buildIndexContext(pool, buildDate) {
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push(p);
   }
+  // THE SORTED GROUP IS RETAINED, AND perGbEnds IS DERIVED FROM IT rather than
+  // computed in a second pass. The ends were all this loop used to keep, so a
+  // page could be told it sat at an end but never where, or out of how many.
+  // perGbRank carries rank and group size so a row can say "3rd of 14", and
+  // the ends fall out of rank 1 and rank n. Same population and same sort as
+  // before, so every gate that reads perGbEnds is untouched by construction.
   const perGbEnds = new Set();
   const perGbRunnersUp = new Set();
-  for (const g of groups.values()) {
-    if (g.length < 3) continue;
+  const perGbRank = new Map();
+  for (const [key, g] of groups.entries()) {
     const sorted = [...g].sort((a, b) =>
       a.stats.current / totalCapacityGB(a.name) - b.stats.current / totalCapacityGB(b.name));
+    const pergb = (x) => x.stats.current / totalCapacityGB(x.name);
+    sorted.forEach((x, i) => perGbRank.set(x.sku, {
+      rank: i + 1,
+      size: sorted.length,
+      key,
+      perGb: pergb(x),
+      // Gap to the neighbour on the inside, for the group-end note. Null unless
+      // this product IS an end, since the note only ever renders on an end.
+      gapPct: i === 0 && sorted.length > 1 ? ((pergb(sorted[1]) - pergb(sorted[0])) / pergb(sorted[0])) * 100
+        : i === sorted.length - 1 && sorted.length > 1 ? ((pergb(sorted[i]) - pergb(sorted[i - 1])) / pergb(sorted[i - 1])) * 100
+          : null,
+    }));
+    // UNDER 3 IS STILL SKIPPED FOR THE GATE: in a pair both members are an
+    // "end", which makes the fact meaningless. Ranks are kept regardless,
+    // because "1 of 2" is honest even where "cheapest in its group" is not.
+    if (g.length < 3) continue;
     perGbEnds.add(sorted[0].sku);
     perGbEnds.add(sorted[sorted.length - 1].sku);
     if (sorted.length >= 5) {
@@ -966,6 +988,54 @@ function buildIndexContext(pool, buildDate) {
     shareCount.set(k, (shareCount.get(k) || 0) + 1);
   }
   const latMedian = ns.size ? median([...ns.values()]) : null;
+
+  // DISPLAY STATISTICS, COMPUTED OVER HEALTHY PRODUCTS, AND DELIBERATELY NOT
+  // SHARED WITH THE GATES ABOVE. The gate inputs (`ns`, `shareCount`,
+  // `latMedian`, the $/GB groups) are computed over the whole generable pool,
+  // exactly as before, because this commit's purpose is to change nothing that
+  // is already live. The new figures below are for rows a reader sees, where
+  // "of the kits we track" should mean the kits a reader can actually find,
+  // which is healthy() by the same reasoning that governs every product
+  // surface.
+  //
+  // MEASURED 2026-10-03, THE TWO POPULATIONS AGREE ON THE ONE FIGURE BOTH
+  // WOULD PRODUCE: the DDR5 latency median is 12.0 ns over the pool (n=74) and
+  // 12.0 ns over healthy (n=72). The two excluded members are a relisting at
+  // 10.0 ns and an 11-reading page at 12.7 ns, which straddle the median. That
+  // is luck, not a guarantee, so the gate keeps its own population rather than
+  // inheriting one that could move under it.
+  const healthyHere = (p) => healthy(p, { buildDate });
+  const latMedianByGen = new Map();
+  const nsByGen = new Map();
+  for (const p of pool) {
+    if (p.category !== 'ram' || !healthyHere(p)) continue;
+    const gen = ramType(p.name);
+    const v = latencyNs(p);
+    if (!gen || v == null) continue;
+    if (!nsByGen.has(gen)) nsByGen.set(gen, []);
+    nsByGen.get(gen).push(v);
+  }
+  for (const [gen, vals] of nsByGen.entries()) latMedianByGen.set(gen, median(vals));
+
+  // Speed percentile WITHIN GENERATION: the share of same-generation kits this
+  // kit is faster than. Strictly less-than, so the slowest kit reads 0% rather
+  // than a flattering number, and ties do not inflate each other.
+  const speedPct = new Map();
+  const speedsByGen = new Map();
+  for (const p of pool) {
+    if (p.category !== 'ram' || !healthyHere(p)) continue;
+    const gen = ramType(p.name);
+    const sp = parseSpeed(p.name);
+    if (!gen || !sp) continue;
+    if (!speedsByGen.has(gen)) speedsByGen.set(gen, []);
+    speedsByGen.get(gen).push({ sku: p.sku, sp });
+  }
+  for (const [gen, rows] of speedsByGen.entries()) {
+    for (const r of rows) {
+      const slower = rows.reduce((n, o) => n + (o.sp < r.sp ? 1 : 0), 0);
+      speedPct.set(r.sku, { pct: (slower / rows.length) * 100, gen, n: rows.length });
+    }
+  }
 
   // BING AI CITATION DEMAND. Same shape as the impressions loader below and
   // for the same reasons: a missing file disables the gate, a present-but-inert
@@ -1047,7 +1117,7 @@ function buildIndexContext(pool, buildDate) {
   }
 
   const fam = buildIndexFamilies(pool, impressions, citations);
-  return { buildDate, perGbEnds, perGbRunnersUp, ns, shareCount, latMedian, impressions, citations, familyDuplicates: fam.duplicates, families: fam.families };
+  return { buildDate, perGbEnds, perGbRunnersUp, perGbRank, ns, shareCount, latMedian, latMedianByGen, speedPct, impressions, citations, familyDuplicates: fam.duplicates, families: fam.families };
 }
 
 // VARIANT FAMILIES: slugs that differ only by a trailing -N. Three tiers, and
@@ -1856,6 +1926,7 @@ function glossaryFor(ctx) {
     cap: totalCapacityGB(ctx.p.name),
     speed: parseSpeed(ctx.p.name),
     cl: latency(ctx.p.name),
+    ns: latencyNs(ctx.p),   // CL and speed are both here; the derived figure was not
     kit: parseKitConfig(ctx.p.name),
     ff: formFactor(ctx.p.name),
     hasValueMetric: !!(totalCapacityGB(ctx.p.name) && ctx.segMedianPerGb != null),
