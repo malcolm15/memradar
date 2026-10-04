@@ -2642,7 +2642,8 @@
    "bing_citations": 0,
    "reasons": [
     "gsc_crawled_not_indexed",
-    "long_history"
+    "long_history",
+    "percentile_extreme"
    ]
   },
   "ssd/silicon-power-2tb-ssd-3d-nand-a55-slc": {

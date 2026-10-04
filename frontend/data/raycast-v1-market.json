@@ -1,7 +1,7 @@
 {
  "version": 1,
  "generated": "2026-10-04",
- "computed_at": "2026-10-04T10:22:23.6+00:00",
+ "computed_at": "2026-10-04T22:34:51.483+00:00",
  "update_frequency": "daily",
  "notice": "Regenerated once a day. memradar.com refreshes prices six times a day, so these figures can be up to 24 hours behind the site. This is not a live feed.",
  "method": "Every figure is a median, never a mean: a single expensive kit would drag an average. pct_change compares the same products with themselves across that window, so product_count is the size of that matched set and the periods are not directly comparable with each other. median_price_usd is the median current price across every tracked product in the segment; median_usd_per_gb is the same median over those whose capacity we can parse. Neither is a per-period figure.",
@@ -22,11 +22,11 @@
      "product_count": 69
     },
     "6m": {
-     "pct_change": 30.4,
+     "pct_change": 31.6,
      "product_count": 74
     },
     "1y": {
-     "pct_change": 328.6,
+     "pct_change": 319.6,
      "product_count": 63
     }
    },
@@ -38,8 +38,8 @@
    "label": "DDR4 memory",
    "periods": {
     "1m": {
-     "pct_change": 5.8,
-     "product_count": 34
+     "pct_change": 0,
+     "product_count": 33
     },
     "3m": {
      "pct_change": 8.1,
@@ -62,15 +62,15 @@
    "label": "NVMe SSDs",
    "periods": {
     "1m": {
-     "pct_change": 5.9,
+     "pct_change": 6.2,
      "product_count": 78
     },
     "3m": {
-     "pct_change": 10.9,
+     "pct_change": 9.9,
      "product_count": 68
     },
     "6m": {
-     "pct_change": 3.6,
+     "pct_change": 0.4,
      "product_count": 67
     },
     "1y": {
@@ -86,19 +86,19 @@
    "label": "SATA SSDs",
    "periods": {
     "1m": {
-     "pct_change": 1.5,
-     "product_count": 32
+     "pct_change": 2.1,
+     "product_count": 31
     },
     "3m": {
-     "pct_change": 2.3,
-     "product_count": 24
+     "pct_change": 3.8,
+     "product_count": 23
     },
     "6m": {
      "pct_change": 5.8,
      "product_count": 27
     },
     "1y": {
-     "pct_change": 134.7,
+     "pct_change": 127.9,
      "product_count": 27
     }
    },
