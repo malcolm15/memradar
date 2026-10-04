@@ -171,74 +171,68 @@
     el.textContent = sentences.join(' ');
   }
 
-  // Price-fetch schedule, UTC hours. Deliberate duplicate of the generator's
-  // FETCH_HOURS_UTC (this file runs in the browser and cannot require it);
-  // .github/workflows/price-fetch.yml's cron is the source of truth. Change
-  // all three together.
-  var FETCH_HOURS_UTC = [0, 4, 8, 12, 16, 20];
-  // GitHub's scheduled runs are best-effort: observed delays of 16-60 minutes
-  // over the first full day at this cadence. priceValidUntil promises the
-  // price holds until the next fetch, so it must not expire before a delayed
-  // run lands - pad past the worst observed delay.
-  var FETCH_DELAY_PAD_MIN = 90;
-  // Next price-fetch boundary plus the pad - same computation as the
-  // generator's nextFetchIso(), so the JSON-LD validity window is always the
-  // next scheduled fetch regardless of when the page was baked. Past the last
-  // slot, roll to tomorrow's first via hour + 24 (Date.UTC normalizes, and
-  // minutes > 59 roll into the hour the same way).
-  function nextFetchIso() {
-    var d = new Date();
-    var h = d.getUTCHours();
-    var hour = FETCH_HOURS_UTC[0] + 24;
-    for (var i = 0; i < FETCH_HOURS_UTC.length; i++) {
-      if (h < FETCH_HOURS_UTC[i]) { hour = FETCH_HOURS_UTC[i]; break; }
-    }
-    return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), hour, FETCH_DELAY_PAD_MIN, 0)).toISOString();
-  }
+  // THE FETCH-CLOCK DUPLICATE IS GONE WITH THE FIELDS IT EXISTED FOR. It
+  // mirrored the generator's FETCH_HOURS_UTC and FETCH_DELAY_PAD_MIN solely to
+  // roll priceValidUntil forward, and a PDP no longer publishes a validity
+  // window. CLAUDE.md's three-place rule drops to one place.
 
-  // Keep the Product JSON-LD coherent with the hydrated prices. Rendering
-  // crawlers see the same numbers the visible page shows. Two shapes:
-  // - single Offer (Amazon-only pages): update price + validity window.
-  // - AggregateOffer (two-retailer pages): update the named seller's nested
-  //   offer, then re-derive lowPrice/highPrice from the nested prices so the
-  //   aggregate NEVER advertises a bound no nested offer actually carries -
-  //   whichever order the Amazon and Newegg refreshes land in.
-  function updateJsonLd(seller, price, fetchedAt, inStock) {
+  // SYNC THE AGGREGATE FROM THE VISIBLE ROWS, ONCE, AFTER EVERY RETAILER HAS
+  // BEEN APPLIED. The old function ran once per retailer and re-derived the
+  // bounds from the nested offers array; the aggregator shape has no nested
+  // array, so an incremental caller has nothing to aggregate from.
+  //
+  // IT READS THE DOM RATHER THAN IN-MEMORY STATE, and that is forced rather
+  // than chosen. The hydrated state is split across two independent promises
+  // with no join: recomputeRetailerOffers reads retailer_offers while the main
+  // query reads the price_history observation log, and BOTH write Amazon's
+  // visible price (priceEls holds the same pdpBuyPrice and pdpStripAmazonPrice
+  // that applyRetailerState writes). They can disagree, they resolve in
+  // arbitrary order, and either can fail alone. The DOM is where they are
+  // actually reconciled, so it is the only source that cannot disagree with
+  // what the reader sees.
+  //
+  // Identity fields are never touched: this writes or deletes `offers`, nothing
+  // else. scripts/render-audit.js checks the result against the same rows.
+  function syncJsonLdOffers() {
     var el = document.querySelector('script[type="application/ld+json"]');
     if (!el) return;
     try {
       var data = JSON.parse(el.textContent);
       var graph = data['@graph'] || [];
-      for (var i = 0; i < graph.length; i++) {
-        if (graph[i]['@type'] !== 'Product' || !graph[i].offers) continue;
-        var offers = graph[i].offers;
-        if (offers['@type'] === 'AggregateOffer') {
-          var list = offers.offers || [];
-          var prices = [];
-          for (var j = 0; j < list.length; j++) {
-            if (list[j].seller && list[j].seller.name === seller) {
-              list[j].price = price;
-              // validFrom = when this price was actually fetched;
-              // priceValidUntil = the next scheduled fetch (generator clock).
-              if (fetchedAt) list[j].validFrom = new Date(fetchedAt).toISOString();
-              list[j].priceValidUntil = nextFetchIso();
-              if (inStock === true) list[j].availability = 'https://schema.org/InStock';
-              if (inStock === false) list[j].availability = 'https://schema.org/OutOfStock';
-            }
-            if (typeof list[j].price === 'number') prices.push(list[j].price);
-          }
-          if (prices.length) {
-            offers.lowPrice = Math.min.apply(null, prices);
-            offers.highPrice = Math.max.apply(null, prices);
-          }
-        } else if (seller === 'Amazon') {
-          offers.price = price;
-          if (fetchedAt) offers.validFrom = new Date(fetchedAt).toISOString();
-          offers.priceValidUntil = nextFetchIso();
-        }
+      var prices = [];
+      var rows = document.querySelectorAll('.pdp-retailers-table tbody tr');
+      for (var i = 0; i < rows.length; i++) {
+        // The CLASS, not the badge text: wording is copy and could be reworded,
+        // while pdp-stock--in is the state the generator and this file both set.
+        if (!rows[i].querySelector('.pdp-stock--in')) continue;
+        var cell = rows[i].querySelector('.pdp-retailer-price');
+        var v = cell ? Number(String(cell.textContent).replace(/[^0-9.]/g, '')) : NaN;
+        if (isFinite(v) && v > 0) prices.push(v);
+      }
+      for (var g = 0; g < graph.length; g++) {
+        if (graph[g]['@type'] !== 'Product') continue;
+        if (!prices.length) { delete graph[g].offers; continue; }
+        graph[g].offers = {
+          '@type': 'AggregateOffer',
+          lowPrice: Math.min.apply(null, prices),
+          highPrice: Math.max.apply(null, prices),
+          offerCount: prices.length,
+          priceCurrency: 'USD'
+        };
       }
       el.textContent = JSON.stringify(data).replace(/<\//g, '<\\/');
     } catch (e) { /* leave the baked JSON-LD on any parse issue */ }
+  }
+
+  // EXACTLY ONCE, AND ONLY AFTER BOTH HYDRATION PATHS HAVE SETTLED. Both are
+  // fire-and-forget and either can fail, so the barrier counts settlements
+  // rather than successes: a failed path still releases it, and the sync then
+  // runs against whatever the DOM holds, which on a failure is the baked state.
+  var pendingHydration = 2;
+  function hydrationSettled() {
+    if (pendingHydration <= 0) return;
+    pendingHydration -= 1;
+    if (pendingHydration === 0) syncJsonLdOffers();
   }
 
   // Capacity-family chips: refresh sibling prices (one .in() query) and move the
@@ -397,9 +391,6 @@
         res.data.forEach(function (o) {
           var p = Number(o.price);
           applyRetailerState(o.retailer, p, o.in_stock);
-          if (!isNaN(p)) {
-            updateJsonLd(o.retailer === 'amazon' ? 'Amazon' : 'Newegg', p, o.fetched_at, o.in_stock);
-          }
           if (o.retailer === 'amazon') {
             var wasOos = amazonOos;
             amazonOos = o.in_stock === false;
@@ -415,7 +406,8 @@
           }
         });
       })
-      .catch(function (e) { console.log('[pdp-hydrate] retailer offers failed, keeping baked values:', e && e.message); });
+      .catch(function (e) { console.log('[pdp-hydrate] retailer offers failed, keeping baked values:', e && e.message); })
+      .then(hydrationSettled, hydrationSettled);
   }
 
   function relativeTime(iso) {
@@ -461,11 +453,11 @@
         recomputeAnalysis(price, hydrateCfg);
         recomputeCapacityFamily(hydrateCfg, price);
         recomputePeers(hydrateCfg, price);
-        updateJsonLd('Amazon', price, row.fetched_at, null);
       }
       updatedEl.textContent = 'Updated ' + relativeTime(row.fetched_at);
     })
     .catch(function (err) {
       console.log('[pdp-hydrate] fetch failed, keeping baked values:', err.message);
-    });
+    })
+    .then(hydrationSettled, hydrationSettled);
 })();

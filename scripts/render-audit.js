@@ -140,6 +140,10 @@ function blameFor(kindOfPage, reason, where) {
   if (/count line|Showing \d/i.test(where)) return BLAME.listing_count();
   if (kindOfPage === 'homepage') return BLAME.home_drops();
   if (kindOfPage === 'listing') return BLAME.listing_cards();
+  if (/json-ld offers/.test(where)) {
+    return [locate('js/pdp-hydrate.js', /function syncJsonLdOffers\(\)/),
+      'scripts/generate-product-pages.js (buildJsonLdOffers)'];
+  }
   if (kindOfPage === 'pdp') return BLAME.pdp_hydrate();
   if (kindOfPage === 'generated' && /price-index/.test(where)) return BLAME.price_index();
   if (kindOfPage === 'guide') return BLAME.guide_live();
@@ -228,6 +232,20 @@ const EXTRACT = function () {
     alts.push({ src: (el.getAttribute('src') || '').split('/').pop(), alt: el.getAttribute('alt') });
   });
 
+  // The visible retailer state, read the same way pdp-hydrate writes it: the
+  // pdp-stock--in CLASS rather than the badge wording, which is copy.
+  const retailerRows = [];
+  main.querySelectorAll('.pdp-retailers-table tbody tr').forEach((tr) => {
+    const nameEl = tr.querySelector('.pdp-retailer-name');
+    const priceEl = tr.querySelector('.pdp-retailer-price');
+    if (!nameEl || !priceEl) return;
+    retailerRows.push({
+      retailer: nm(nameEl.textContent),
+      price: Number(String(priceEl.textContent).replace(/[^0-9.]/g, '')),
+      inStock: !!tr.querySelector('.pdp-stock--in'),
+    });
+  });
+
   const jsonld = [];
   document.querySelectorAll('script[type="application/ld+json"]').forEach((el) => {
     try { jsonld.push(JSON.parse(el.textContent)); } catch (e) { jsonld.push({ __parse_error: String(e.message) }); }
@@ -257,7 +275,7 @@ const EXTRACT = function () {
     canonical: (document.querySelector('link[rel="canonical"]') || {}).href || null,
     robots: metaOf('meta[name="robots"]'),
     ogTitle: metaOf('meta[property="og:title"]'),
-    blocks, hiddenBlocks, controls, cards, headings, links, alts, jsonld, counts,
+    blocks, hiddenBlocks, controls, cards, headings, links, alts, jsonld, counts, retailerRows,
     mainHtmlLen: main.innerHTML.length,
     audit: window.__audit ? {
       firstMutationMs: window.__audit.firstMutationMs,
@@ -458,6 +476,50 @@ function checkCards(page, side, cards, index) {
   return out;
 }
 
+// JSON-LD vs THE VISIBLE PAGE. Absolute, not a served-vs-rendered diff, and the
+// distinction is the whole point: a diff can only say "these two differ", while
+// the failure to catch is hydration that STOPS updating the aggregate, which
+// produces no diff at all and would read as clean. Run on both sides, so the
+// served side also proves the generator's own output agrees with its own page.
+//
+// On the served side this is genuinely independent: the generator writes the
+// JSON-LD from the database and this reads the rendered DOM. On the rendered
+// side it shares pdp-hydrate's DOM-reading assumption, so there it proves
+// hydration ran and agrees rather than proving the reading itself is right.
+function checkJsonLdAgainstVisible(side, data) {
+  const out = [];
+  const first = data.jsonld[0];
+  const prod = first && (first['@graph'] || []).find((n) => n['@type'] === 'Product');
+  if (!prod) return out;
+  if (!data.retailerRows.length) return out; // not a PDP, or no retailer table
+  const buyable = data.retailerRows.filter((r) => r.inStock && isFinite(r.price) && r.price > 0);
+  const o = prod.offers;
+  const say = (reason, want, got) =>
+    out.push({ cls: 'DEFECT', where: `${side} json-ld offers`, reason, served: want, rendered: got });
+
+  if (!buyable.length) {
+    if (o) say('nothing is in stock on the page but the Product still publishes an offers block',
+      '(offers omitted)', JSON.stringify(o).slice(0, 160));
+    return out;
+  }
+  if (!o) { say('offers absent although the page shows an in-stock retailer', 'AggregateOffer', '(absent)'); return out; }
+  if (o['@type'] !== 'AggregateOffer') say('offers is not an AggregateOffer', 'AggregateOffer', o['@type']);
+
+  const lo = Math.min(...buyable.map((r) => r.price));
+  const hi = Math.max(...buyable.map((r) => r.price));
+  if (Number(o.lowPrice) !== lo) say('lowPrice disagrees with the lowest IN-STOCK visible price', lo, o.lowPrice);
+  if (Number(o.highPrice) !== hi) say('highPrice disagrees with the highest IN-STOCK visible price', hi, o.highPrice);
+  if (Number(o.offerCount) !== buyable.length) say('offerCount disagrees with the in-stock retailer count', buyable.length, o.offerCount);
+  if (o.priceCurrency !== 'USD') say('priceCurrency is not USD', 'USD', o.priceCurrency);
+
+  // Merchant-only fields, by name. Their absence IS the change, so it is
+  // asserted rather than assumed, including a nested offers array.
+  const BANNED = ['offers', 'seller', 'url', 'availability', 'itemCondition', 'validFrom', 'priceValidUntil', 'price'];
+  const present = BANNED.filter((k) => k in o);
+  if (present.length) say(`offers carries merchant-only field(s): ${present.join(', ')}`, '(none)', present.join(', '));
+  return out;
+}
+
 function diffPage(page, served, rendered, net, index) {
   const d = [];
   const push = (cls, reason, where, servedVal, renderedVal, extra) =>
@@ -597,6 +659,10 @@ function diffPage(page, served, rendered, net, index) {
         `json-ld[${i}]`, A[i].slice(0, 200), B[i].slice(0, 200));
     }
   }
+
+  // ---- JSON-LD against the visible retailer state, both sides
+  checkJsonLdAgainstVisible('served', served).forEach((x) => d.push(x));
+  checkJsonLdAgainstVisible('rendered', rendered).forEach((x) => d.push(x));
 
   // ---- blame
   d.forEach((x) => { if (x.cls === 'DEFECT') x.blame = blameFor(page.kind, x.reason, x.where); });
@@ -855,6 +921,13 @@ async function loadPage(browser, url, { js }) {
     { name: 'card-count parity', test: (d) => d.where === 'card count' },
     { name: 'per-card name fidelity', test: (d) => /^(served|rendered) card /.test(d.where) },
     { name: 'head-field immutability', test: (d) => /^(<title>|meta description|rel=canonical|meta robots|og:title)$/.test(d.where) },
+    // Absolute, so it cannot false-positive on live copy or a price move: it
+    // compares the page against itself. lowPrice|highPrice deliberately STAY in
+    // EXPECTED_JSONLD_KEYS, because that regex only classifies a
+    // served-vs-rendered difference and such a difference is legitimate when a
+    // price moved between the two loads; removing them would turn every genuine
+    // move into a defect. This check is what removes the hiding risk.
+    { name: 'json-ld agrees with the visible retailer state', test: (d) => / json-ld offers$/.test(d.where) },
   ];
   if (flag('strict')) {
     const gateOnly = flag('gate');
