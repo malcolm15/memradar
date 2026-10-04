@@ -3,7 +3,7 @@ function validateAlert({ email, targetPrice, productId, honeypot }) {
 
   // Honeypot check
   if (honeypot && honeypot.trim() !== '') {
-    return { valid: false, silent: true }; // Silent rejection — don't tell bots why
+    return { valid: false, silent: true }; // Silent rejection, don't tell bots why
   }
 
   // Email validation

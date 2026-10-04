@@ -139,7 +139,7 @@ async function runPriceFetch(opts = {}) {
 
   const byAsin = new Map(products.map((p) => [p.sku, p]));
 
-  // history=0: we only need the stats block for current prices — same token
+  // history=0: we only need the stats block for current prices, same token
   // cost, much smaller payload.
   const keepaProducts = await keepa.fetchProducts(
     products.map((p) => p.sku),
@@ -204,7 +204,7 @@ async function runPriceFetch(opts = {}) {
     logError('Amazon retailer_offers upsert FAILED (non-fatal, price inserts unaffected)', err);
   }
 
-  // Market Pulse stats — best effort: price inserts are the critical path, a
+  // Market Pulse stats, best effort: price inserts are the critical path, a
   // stats failure must log loudly but never fail the cron response.
   let marketStats = null;
   let marketStatsComputedAt = null;
@@ -335,7 +335,7 @@ async function runPriceFetch(opts = {}) {
     }
   }
 
-  // Alert check — best effort: isolated so an alert failure never fails the
+  // Alert check, best effort: isolated so an alert failure never fails the
   // cron (price inserts are the critical path).
   let alertStats = null;
   try {

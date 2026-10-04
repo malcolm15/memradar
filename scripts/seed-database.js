@@ -1,4 +1,4 @@
-// ONE-TIME SEED SCRIPT — safe to run multiple times due to upsert. Remove or archive after Best Buy API is live.
+// ONE-TIME SEED SCRIPT: safe to run multiple times due to upsert. Remove or archive after Best Buy API is live.
 
 require('dotenv').config();
 

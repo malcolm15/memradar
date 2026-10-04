@@ -1,4 +1,4 @@
-// Standalone alert-check runner — same logic as the daily cron's alert step
+// Standalone alert-check runner: same logic as the daily cron's alert step
 // (backend/lib/alertCheck.js), for manual testing without a Keepa fetch.
 //
 // Builds the current-price map from the newest price_history row of each

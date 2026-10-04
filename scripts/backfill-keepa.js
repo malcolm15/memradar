@@ -5,7 +5,7 @@
 // - Fetches Keepa history in batches of 100 ASINs (1 token each; the client
 //   waits for refill on our 20 tokens/min plan when the bucket runs low)
 // - Downsamples to at most one point per product per calendar day (UTC, last
-//   reading of the day) — charts are daily-granularity, storing every
+//   reading of the day), charts are daily-granularity, storing every
 //   fluctuation bloats the table for no display value
 // - Gap days (-1 in the series) carry the last known price with in_stock=false
 //   (price is NOT NULL in the schema); leading gaps with no prior price are skipped
@@ -13,7 +13,7 @@
 // - Idempotent: with --confirm, each product's existing price_history rows are
 //   deleted before its new rows are inserted (full replace semantics)
 //
-// SAFETY: dry-run by default — fetches from Keepa (consumes tokens) but writes
+// SAFETY: dry-run by default, fetches from Keepa (consumes tokens) but writes
 // NOTHING to Supabase. Pass --confirm to write.
 //
 // Usage:
@@ -51,7 +51,7 @@ function toDailyRows(productId, points) {
   let lastKnownPrice = null;
   for (const [day, p] of byDay) {
     if (p.price === null) {
-      if (lastKnownPrice === null) continue; // leading gap — nothing to carry
+      if (lastKnownPrice === null) continue; // leading gap, nothing to carry
       rows.push({ product_id: productId, price: lastKnownPrice, in_stock: false, fetched_at: `${day}T23:59:00.000Z` });
     } else {
       lastKnownPrice = p.price;

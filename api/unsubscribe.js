@@ -1,4 +1,4 @@
-// GET /api/unsubscribe?token=... — remove an alert entirely (data
+// GET /api/unsubscribe?token=...: remove an alert entirely (data
 // minimization: an unsubscribed alert has no reason to exist). Idempotent and
 // friendly: always lands on the unsubscribed page, so a re-clicked link never
 // shows an error. This link is in every email we send (CAN-SPAM + decency).
@@ -19,7 +19,7 @@ module.exports = async (req, res) => {
 
   const token = (req.query && req.query.token) || '';
   // Even on a malformed token we show the unsubscribed page (idempotent, no
-  // information leak) — there's simply nothing to delete.
+  // information leak), there's simply nothing to delete.
   if (!token || typeof token !== 'string' || !/^[a-f0-9]{64}$/.test(token)) { redirect(res, DONE_PAGE); return; }
 
   try {

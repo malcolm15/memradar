@@ -3,7 +3,7 @@
 // processing an alert submission. Returns false if the limit is exceeded.
 //
 // TODO: Replace with a Redis-based solution (e.g. Upstash) before scaling to
-// multiple Vercel serverless function instances — in-memory state is not shared
+// multiple Vercel serverless function instances: in-memory state is not shared
 // across instances and resets on cold starts.
 
 const requests = new Map();

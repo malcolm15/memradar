@@ -1,4 +1,4 @@
-// Static product-detail-page generator — the Cyrilica lesson applied: every
+// Static product-detail-page generator, the Cyrilica lesson applied: every
 // product URL is a real directory with a real index.html returning a 200 with
 // full content baked in. No JS routing.
 //
@@ -8,17 +8,17 @@
 // missing so template drift is caught, never silently mis-generated.
 //
 // Slug covenant: products.slug is persisted in Supabase. A stored slug ALWAYS
-// wins over a freshly computed one — URLs never change once a page exists.
+// wins over a freshly computed one, URLs never change once a page exists.
 // New slugs are computed for slug-less products only and written back on
 // --confirm.
 //
 // Idempotent: every generated page contains a marker comment; regeneration
 // deletes ONLY directories whose index.html carries the marker, then recreates
 // from scratch. /ram/index.html and product-template.html are files, not
-// marked dirs — untouchable by design.
+// marked dirs, untouchable by design.
 //
 // Usage:
-//   node scripts/generate-product-pages.js            # dry run — report only
+//   node scripts/generate-product-pages.js            # dry run, report only
 //   node scripts/generate-product-pages.js --confirm  # write pages + slugs + sitemap
 require('dotenv').config();
 const fs = require('fs');
@@ -59,7 +59,7 @@ const SITE = 'https://memradar.com';
 const PAGE = 1000;
 const DAY_MS = 86400000;
 
-// Buy-indicator / value-metric thresholds — SINGLE SOURCE. Used for the baked
+// Buy-indicator / value-metric thresholds, SINGLE SOURCE. Used for the baked
 // HTML here AND baked into each page's #pdpHydrateConfig so pdp-hydrate.js
 // recomputes against the live price with identical values (no magic-number
 // duplication in the browser).
@@ -248,7 +248,7 @@ function jsonldImage(u) {
 // than emitted as a fragment.
 // parseMpn moved to backend/lib/productParsers.js (shared with match-newegg.js).
 
-// Label for the "average" the buy-indicator compares against — shared by the
+// Label for the "average" the buy-indicator compares against, shared by the
 // baked HTML and the hydrate config so both read identically.
 function avgLabelFor(s) {
   return s.limited ? `average since tracking began (${longDate(s.firstDay)})` : '90-day average';
@@ -1440,10 +1440,10 @@ function segmentLabel(seg) {
 
 // ---------------------------------------------------- Price Analysis prose
 // Two-part paragraph: a BAKED historical narrative (tracking span, ATL/ATH
-// facts, 30-day move — stable, crawlable SEO) plus a CURRENT-price assessment
+// facts, 30-day move: stable, crawlable SEO) plus a CURRENT-price assessment
 // (position vs low/high, $/GB, verdict) that is baked as the initial state and
 // hydrated live by pdp-hydrate.js recomputeAnalysis(). All figures are numbers/
-// dates/enums — no user-controlled text — and the hydrated copy uses textContent,
+// dates/enums, no user-controlled text, and the hydrated copy uses textContent,
 // so nothing needs HTML escaping. No em dashes in any emitted sentence.
 
 // ---------------------------------------------------------- Price Analysis
@@ -6208,7 +6208,7 @@ async function run() {
   // ---------------- confirm: write everything ----------------
   const buildDateLong = longDate(new Date().toISOString());
 
-  // 1) Delete previously generated dirs (marker check — never touch anything else)
+  // 1) Delete previously generated dirs (marker check, never touch anything else)
   //
   // SHRINK GUARD, added after a real incident. On 2026-08-26 the daily regen
   // loaded price history for only 84 of 235 products, so `generable` collapsed,
@@ -6886,7 +6886,7 @@ async function run() {
   }
   log(`Sitemap regenerated: ${staticCount} static + ${productEntries.length} indexable product URLs (${nonIndexable.length} noindex + ${relistings.length} relisting excluded) (lastmod manifest: ${Object.keys(manifest).length} entries)`);
 
-  // 5) Search index — one lean entry per product for the site-wide typeahead
+  // 5) Search index, one lean entry per product for the site-wide typeahead
   // (frontend/js/search.js). Regenerated every run so it never drifts.
   const searchIndex = healthyProducts.map((p) => ({
     sku: p.sku,

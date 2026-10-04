@@ -1,4 +1,4 @@
-// Keepa API client — Amazon price history data source (launch data provider).
+// Keepa API client: Amazon price history data source (launch data provider).
 //
 // Format rules this client absorbs so callers never see them (verified against
 // Keepa's official api_backend Java library):
@@ -18,7 +18,7 @@ const DOMAIN_US = 1;
 const KEEPA_START_MINUTE = 21564000;
 const MAX_BATCH = 100;
 const FETCH_TIMEOUT_MS = 30_000;
-const DEFAULT_REFILL_RATE = 20; // tokens/min — our plan
+const DEFAULT_REFILL_RATE = 20; // tokens/min, our plan
 
 const CSV = { AMAZON: 0, NEW: 1, BUY_BOX_SHIPPING: 18 };
 
@@ -203,7 +203,7 @@ function statToDollars(entry) {
 }
 
 // Current price from the stats object: AMAZON, then NEW, then BUY_BOX_SHIPPING
-// (last resort — includes shipping). Null if nothing is in stock.
+// (last resort, includes shipping). Null if nothing is in stock.
 function currentPrice(product) {
   const current = product.stats && product.stats.current;
   if (!Array.isArray(current)) return null;

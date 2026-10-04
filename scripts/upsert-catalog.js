@@ -1,6 +1,6 @@
 // Upserts the reviewed product catalog (scripts/output/catalog-preview.json)
 // into the Supabase `products` table. Conflict on `sku` (same upsert pattern as
-// api/fetch-prices.js). Does NOT touch `price_history` — the prices in the
+// api/fetch-prices.js). Does NOT touch `price_history`, the prices in the
 // preview are point-in-time search snapshots, not history; history comes from
 // Keepa in a later step.
 //
@@ -27,7 +27,7 @@ function logError(msg, err) {
   console.error(`[${new Date().toISOString()}] ERROR ${msg}:`, err.message);
 }
 
-// Map a preview product to a `products` row — DB columns only. Drops the
+// Map a preview product to a `products` row: DB columns only. Drops the
 // reviewer-only `_price_seen` field; leaves `model` and timestamps to defaults.
 function toRow(p) {
   return {

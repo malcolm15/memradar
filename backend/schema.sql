@@ -66,7 +66,7 @@ ALTER TABLE alerts ENABLE ROW LEVEL SECURITY;
 
 -- For now (no auth yet): only the backend service role can read/write alerts
 -- This policy gets updated when we add user accounts
--- WITH CHECK is explicit here — do not rely on PostgreSQL's implicit fallback
+-- WITH CHECK is explicit here, do not rely on PostgreSQL's implicit fallback
 CREATE POLICY "Service role only" ON alerts
   FOR ALL
   USING (auth.role() = 'service_role')
@@ -301,7 +301,7 @@ WHERE o.retailer = 'newegg'
 -- -----------------------------------------------
 -- INDEXES
 -- Run these in Supabase SQL Editor after data starts flowing.
--- These are not created automatically — must be applied manually.
+-- These are not created automatically: they must be applied manually.
 -- -----------------------------------------------
 
 -- price_history: most queries will filter by product_id and order by fetched_at

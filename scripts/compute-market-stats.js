@@ -1,4 +1,4 @@
-// Standalone Market Pulse stats runner — same logic as the daily cron step
+// Standalone Market Pulse stats runner: same logic as the daily cron step
 // (shared via backend/lib/marketStats.js). Use to populate market_stats without
 // waiting for the next cron, or to recompute manually.
 //

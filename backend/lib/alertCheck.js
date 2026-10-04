@@ -103,7 +103,7 @@ async function checkAlerts(supabase, priceByProductId, log, logError) {
     });
 
     // Send-then-delete: if the send fails, the row is untouched and the next
-    // run retries — better a duplicate risk than a silently dropped alert.
+    // run retries, better a duplicate risk than a silently dropped alert.
     // Only a CONFIRMED send (Resend returned ok) deletes the row.
     const sendRes = await sendEmail({ to: a.email, subject: tmpl.subject, html: tmpl.html, text: tmpl.text });
     if (!sendRes.ok) { stats.failed++; logError(`alert send (alert ${a.id})`, { message: sendRes.error }); continue; }

@@ -1,4 +1,4 @@
-// PUBLISHED-CLAIM FLOORS — the registry of prose magnitude claims currently
+// PUBLISHED-CLAIM FLOORS: the registry of prose magnitude claims currently
 // live on the site, each bound to the figure it rests on and the floor that
 // figure must hold for the sentence to stay true.
 //
@@ -39,7 +39,7 @@ const pctOf = (ratio) => (ratio - 1) * 100;
 // floors the weakest 1y segment down to the nearest ten and bakes that number
 // into the sentence. Its floor therefore moves with the regen, so hardcoding a
 // value here would go stale the first time the weakest segment crossed a tens
-// boundary. Read it back off the page instead — the baked HTML is the claim.
+// boundary. Read it back off the page instead, the baked HTML is the claim.
 const PAGE = (...parts) => path.join(__dirname, '..', '..', 'frontend', ...parts);
 
 // THE GENERATED-PIN TRANSCRIPT, written by the generator on every --confirm run

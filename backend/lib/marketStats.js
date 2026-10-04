@@ -1,4 +1,4 @@
-// Market Pulse stats computation — shared by the daily cron
+// Market Pulse stats computation: shared by the daily cron
 // (api/fetch-prices.js) and the standalone runner (scripts/compute-market-stats.js).
 //
 // Segments products by name, then compares the current cron batch's prices
@@ -8,7 +8,7 @@
 //
 // FAIRNESS RULE, applied INDEPENDENTLY PER PERIOD: a period's pct_change is
 // computed over the subset of products that had a baseline row in THAT
-// period's window AND have a current price — both medians use that same
+// period's window AND have a current price, both medians use that same
 // subset, so new products entering the catalog can't skew the comparison.
 // product_count = that period's subset size, which is why counts legitimately
 // differ between periods (a 1y window can only include products we were
@@ -24,7 +24,7 @@ const PERIODS = [
   { key: '1y', target: 365, min: 350, max: 380 },
 ];
 const DAY_MS = 24 * 60 * 60 * 1000;
-const PAGE = 1000; // PostgREST caps responses at 1000 rows — paginate
+const PAGE = 1000; // PostgREST caps responses at 1000 rows, paginate
 
 const SEGMENTS = ['ddr5', 'ddr4', 'nvme_ssd', 'sata_ssd'];
 
@@ -316,7 +316,7 @@ function median(xs) {
   return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
 }
 
-// batchTimestamp: the fetched_at of the current cron run's rows — passed
+// batchTimestamp: the fetched_at of the current cron run's rows, passed
 // explicitly rather than ORDER BY fetched_at DESC, because backfill day-bucket
 // rows are stamped T23:59 and can sort ahead of same-day cron rows.
 async function computeMarketStats(supabase, batchTimestamp, log = () => {}) {

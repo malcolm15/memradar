@@ -1,9 +1,9 @@
-// POST /api/alerts — create a (pending) price alert.
+// POST /api/alerts: create a (pending) price alert.
 //
 // PII endpoint (email addresses). Fails closed at every step and returns ONE
 // neutral response for every outcome except validation errors, so a prober
 // can't distinguish inserted / deduped / honeypotted / rate-limited / capped /
-// breakered. All DB access uses the Supabase client's parameterized methods —
+// breakered. All DB access uses the Supabase client's parameterized methods,
 // no SQL is ever built from user input (see the parameterization audit).
 require('dotenv').config();
 const crypto = require('crypto');
@@ -28,7 +28,7 @@ function log(outcome, email) {
 function logError(msg, detail) {
   console.error(`[${new Date().toISOString()}] alerts: ERROR ${msg}: ${detail}`);
 }
-// Logs are a leak surface — never log the full address.
+// Logs are a leak surface: never log the full address.
 function maskEmail(e) {
   if (!e || typeof e !== 'string' || e.indexOf('@') < 0) return '(none)';
   const parts = e.split('@');
@@ -69,7 +69,7 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') { res.status(204).end(); return; }
   // 1. Method
   if (req.method !== 'POST') { res.status(405).json({ error: 'Method not allowed' }); return; }
-  // 2. Size guard — before parsing
+  // 2. Size guard, before parsing
   const contentLength = parseInt(req.headers['content-length'] || '0', 10);
   if (contentLength > MAX_BODY_BYTES) { res.status(413).json({ error: 'Request too large' }); return; }
 
@@ -83,10 +83,10 @@ module.exports = async (req, res) => {
   }
 
   try {
-    // 3. Honeypot FIRST — before any expensive work.
+    // 3. Honeypot FIRST, before any expensive work.
     if (body.website) { neutral(res, 'honeypot_tripped', body.email); return; }
 
-    // 4. Turnstile — failure looks like success to bots.
+    // 4. Turnstile: failure looks like success to bots.
     const turnstileOk = await verifyTurnstile(body.turnstileToken);
     if (!turnstileOk) { neutral(res, 'turnstile_failed', body.email); return; }
 
@@ -94,7 +94,7 @@ module.exports = async (req, res) => {
     const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'unknown';
     if (!rateLimit(ip)) { neutral(res, 'rate_limited', body.email); return; }
 
-    // 6. Validate + sanitize. The ONE branch allowed a real error response —
+    // 6. Validate + sanitize. The ONE branch allowed a real error response,
     // validation errors reveal nothing about the database.
     const v = validateAlert({ email: body.email, targetPrice: body.targetPrice, productId: body.productId });
     if (!v.valid) { res.status(400).json({ success: false, errors: v.errors }); return; }
@@ -132,7 +132,7 @@ module.exports = async (req, res) => {
     if (e8b) { logError('active count', e8b.message); neutral(res, 'internal_error', email); return; }
     if ((activeCount || 0) >= ACTIVE_CAP) { neutral(res, 'email_active_cap', email); return; }
 
-    // 8c. Circuit breaker — total confirmation sends across all users / 24h.
+    // 8c. Circuit breaker: total confirmation sends across all users / 24h.
     const { count: sendCount, error: e8c } = await supabase
       .from('email_send_log')
       .select('id', { count: 'exact', head: true })
@@ -142,7 +142,7 @@ module.exports = async (req, res) => {
     const breakerTripped = (sendCount || 0) >= BREAKER_CAP;
     if (breakerTripped) logError('breaker_tripped', `confirmation sends in 24h = ${sendCount} (>= ${BREAKER_CAP})`);
 
-    // 9. Insert. Upsert on (email, product_id) — on conflict, do nothing. Both
+    // 9. Insert. Upsert on (email, product_id): on conflict, do nothing. Both
     // tokens are cryptographically random (never Math.random).
     const confirmToken = crypto.randomBytes(32).toString('hex');
     const unsubscribeToken = crypto.randomBytes(32).toString('hex');
@@ -160,7 +160,7 @@ module.exports = async (req, res) => {
     if (insErr) { logError('insert', insErr.message); neutral(res, 'internal_error', email); return; }
     const newlyInserted = Array.isArray(inserted) && inserted.length > 0;
 
-    // 10. Confirmation email — only for a genuinely new row, and only when the
+    // 10. Confirmation email, only for a genuinely new row, and only when the
     // breaker is closed (breaker: row inserted, email deferred).
     if (newlyInserted && !breakerTripped) {
       const tmpl = confirmationEmail({
@@ -190,7 +190,7 @@ module.exports = async (req, res) => {
     neutral(res, newlyInserted ? 'created_breaker_deferred' : 'deduped', email);
   } catch (err) {
     logError('unhandled', err.message);
-    // Still neutral — never leak an internal failure as a distinct outcome.
+    // Still neutral: never leak an internal failure as a distinct outcome.
     res.status(200).json(NEUTRAL);
   }
 };

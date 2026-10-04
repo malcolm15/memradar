@@ -1,4 +1,4 @@
-// Product-catalog harvester — Step 1 of the data-pipeline pivot (see CLAUDE.md
+// Product-catalog harvester: Step 1 of the data-pipeline pivot (see CLAUDE.md
 // "Data Source Evaluation Findings"). Runs a batch of Amazon keyword searches
 // via PriceAPI, dedupes by ASIN, derives a product catalog, applies sanity
 // filters, and writes a REVIEW PREVIEW to scripts/output/catalog-preview.json.
@@ -23,7 +23,7 @@ const MIN_PRICE = 15;
 
 const OUTPUT_PATH = path.join(__dirname, 'output', 'catalog-preview.json');
 
-// Ordered so RAM queries run first — first occurrence of an ASIN wins its
+// Ordered so RAM queries run first, first occurrence of an ASIN wins its
 // category (per spec: prefer the group it appeared in first).
 const QUERIES = [
   { term: 'DDR5 32GB RAM kit', category: 'ram' },
@@ -174,7 +174,7 @@ const BRAND_RULES = [
   [/\bt7\b/i, 'Samsung'],
   [/^\s*mz-/i, 'Samsung'],
   // Crucial (model families). \bct\d catches CT#### model codes anywhere in the
-  // title (e.g. CT2K48G56C46S5) — recovers Crucial kits whose name drops "Crucial".
+  // title (e.g. CT2K48G56C46S5), recovers Crucial kits whose name drops "Crucial".
   [/\bt500\b/i, 'Crucial'],
   [/\bt705\b/i, 'Crucial'],
   [/\bp310\b/i, 'Crucial'],
@@ -266,7 +266,7 @@ async function run() {
   log(`All jobs done: ${jobsOk} ok, ${jobsFailed.length} failed. Credits total: free=${totalFree}, paid=${totalPaid}`);
   if (jobsFailed.length) log(`Failed queries: ${jobsFailed.join(' | ')}`);
 
-  // Dedupe by ASIN — first occurrence wins (and sets category).
+  // Dedupe by ASIN, first occurrence wins (and sets category).
   const byAsin = new Map();
   let rawCount = 0;
   for (const { raw, category } of collected) {

@@ -1,4 +1,4 @@
-// GET /api/confirm?token=... — confirm a pending alert (double opt-in).
+// GET /api/confirm?token=...: confirm a pending alert (double opt-in).
 // Single-use: on success the confirm_token is nulled, so a re-clicked link
 // lands on the invalid page (acceptable; tokens are 32 bytes, single-use).
 require('dotenv').config();
@@ -14,7 +14,7 @@ function redirect(res, url) { res.writeHead(302, { Location: url }); res.end(); 
 module.exports = async (req, res) => {
   if (req.method !== 'GET') { res.status(405).json({ error: 'Method not allowed' }); return; }
 
-  // Generous rate limit — token brute force is infeasible at 32 bytes, but
+  // Generous rate limit, token brute force is infeasible at 32 bytes, but
   // there's no reason to permit scanning.
   const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'unknown';
   if (!rateLimit(ip, 30, 60 * 60 * 1000)) { res.status(429).json({ error: 'Too many requests' }); return; }

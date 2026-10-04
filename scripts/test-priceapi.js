@@ -7,11 +7,11 @@
 // Usage: node scripts/test-priceapi.js [source]
 //   source defaults to "walmart". Also verified working: "amazon".
 //   Note: google_shopping does NOT support keyword (term) search on our trial
-//   account — it only allows product/offers topics keyed by id/gtin.
+//   account, it only allows product/offers topics keyed by id/gtin.
 require('dotenv').config();
 
 // Current PriceAPI base. If requests 404/401 unexpectedly, the legacy host
-// `https://priceapi.metoda.com/v2` also appears in their docs — swap here.
+// `https://priceapi.metoda.com/v2` also appears in their docs, swap here.
 const BASE = 'https://api.priceapi.com/v2';
 
 const API_KEY = process.env.PRICE_API_KEY;
