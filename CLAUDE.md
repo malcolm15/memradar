@@ -1522,6 +1522,10 @@ requiredByBuild(p) || ( healthy(p) && !hardExcluded(p)
 
 **DECISION PENDING WITH MALCOLM:** whether an EU-visitor consent obligation applies given two persistent GA cookies drop before any interaction, and therefore whether consent mode or a CMP is needed. Not a code question and not decided here.
 
+### Open items: small engineering
+
+- **`compute-market-stats.js` needs a `--dry-run` flag that prints the table without upserting (opened 2026-10-04).** The script reads like a reporting command, prints a formatted table, and **upserts 24 `market_stats` rows by default with no confirmation step**. Every other gated script in this repo is dry-run by default and needs `--confirm`; this one is the sole inversion, and it cost an unintended off-cadence recompute on 2026-10-04 when it was run only to check that a console column still aligned. **Until the flag exists the script is never run outside the scheduled workflow.** Treat invoking it as a database write, because it is one.
+
 ### Open items: index gates and JSON-LD followups
 
 **STATS-FRESHNESS POSITIVE TEST: CLOSED 2026-10-04, no change needed.** Both paths of `scripts/stats-freshness-issue.js` were exercised through its existing `STATS_SOURCE_JSON` affordance, which substitutes a fabricated `STATS_SOURCE` line, with the script's dry-run default so nothing was created. A fabricated `computed_date` of 2026-10-02 against a build date of 2026-10-04 printed `WOULD CREATE / TITLE: [stats] no compute on 2026-10-04` and reported the gap as 59.9 hours; today's date printed `the build read figures computed today. Nothing to do.` The affordance already existed, so the item is closed rather than built.
