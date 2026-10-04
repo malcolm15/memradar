@@ -69,7 +69,7 @@ function toDailyRows(productId, points) {
 }
 
 function printSample(product, rows) {
-  console.log(`\n-- Sample: ${product.sku} — ${product.name.slice(0, 70)} --`);
+  console.log(`\n-- Sample: ${product.sku}, ${product.name.slice(0, 70)} --`);
   const show = (r) => `   ${r.fetched_at.slice(0, 10)}  $${String(r.price).padStart(8)}  in_stock=${r.in_stock}  regular=$${r.regular_price}`;
   const head = rows.slice(0, 5);
   const tail = rows.length > 10 ? rows.slice(-5) : rows.slice(head.length);
@@ -91,7 +91,7 @@ async function flushInsert(buffer) {
 
 async function run() {
   const startTime = Date.now();
-  log(`Keepa backfill started${CONFIRM ? '' : ' (DRY RUN — no DB writes; pass --confirm to write)'}`);
+  log(`Keepa backfill started${CONFIRM ? '' : ' (DRY RUN: no DB writes; pass --confirm to write)'}`);
 
   const { data: products, error } = await supabase
     .from('products')
@@ -160,7 +160,7 @@ async function run() {
   console.log(`Failures:           ${failures.length}`);
   failures.forEach((f) => console.log(`   - ${f.sku}: ${f.error}`));
   console.log(`Duration:           ${Math.round(duration_ms / 1000)}s`);
-  if (!CONFIRM) console.log('\nDry run complete — nothing was written. Re-run with --confirm to load.');
+  if (!CONFIRM) console.log('\nDry run complete, nothing was written. Re-run with --confirm to load.');
 }
 
 run().catch((err) => {

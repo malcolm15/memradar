@@ -37,7 +37,7 @@ async function latestCronBatch() {
   if (error) throw error;
   const cronTs = data.map((r) => r.fetched_at).filter((ts) => !isDayBucket(ts));
   if (cronTs.length === 0) {
-    throw new Error('no cron batch found in the last 36h — has the price fetch run?');
+    throw new Error('no cron batch found in the last 36h. Has the price fetch run?');
   }
   return cronTs[0]; // newest first
 }
@@ -60,7 +60,7 @@ async function run() {
     if (lastPeriod && s.period !== lastPeriod) console.log('-------+------------+-------------+--------------+---------+---------');
     lastPeriod = s.period;
     console.log(
-      `${String(s.period).padEnd(6)} | ${s.segment.padEnd(10)} | $${String(s.current_avg_price ?? '—').padStart(9)} | $${String(s.baseline_avg_price ?? '—').padStart(10)} | ${String(s.pct_change === null ? '—' : (s.pct_change >= 0 ? '+' : '') + s.pct_change + '%').padStart(7)} | ${s.product_count}`
+      `${String(s.period).padEnd(6)} | ${s.segment.padEnd(10)} | $${String(s.current_avg_price ?? 'n/a').padStart(9)} | $${String(s.baseline_avg_price ?? 'n/a').padStart(10)} | ${String(s.pct_change === null ? 'n/a' : (s.pct_change >= 0 ? '+' : '') + s.pct_change + '%').padStart(7)} | ${s.product_count}`
     );
   }
   console.log(`\n${stats.length} rows upserted into market_stats (conflict on segment,period).`);

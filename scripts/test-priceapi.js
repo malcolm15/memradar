@@ -59,7 +59,7 @@ async function createJob() {
 
   const text = await res.text();
   if (!res.ok) {
-    throw new Error(`create job failed: ${res.status} ${res.statusText} — ${text.slice(0, 500)}`);
+    throw new Error(`create job failed: ${res.status} ${res.statusText}: ${text.slice(0, 500)}`);
   }
 
   let job;
@@ -79,7 +79,7 @@ async function pollJob(jobId) {
     const res = await fetch(`${BASE}/jobs/${jobId}?token=${encodeURIComponent(API_KEY)}`);
     const text = await res.text();
     if (!res.ok) {
-      throw new Error(`poll failed: ${res.status} ${res.statusText} — ${text.slice(0, 300)}`);
+      throw new Error(`poll failed: ${res.status} ${res.statusText}: ${text.slice(0, 300)}`);
     }
 
     let job;
@@ -106,7 +106,7 @@ async function downloadResults(jobId) {
   const res = await fetch(`${BASE}/jobs/${jobId}/download?token=${encodeURIComponent(API_KEY)}`);
   const text = await res.text();
   if (!res.ok) {
-    throw new Error(`download failed: ${res.status} ${res.statusText} — ${text.slice(0, 300)}`);
+    throw new Error(`download failed: ${res.status} ${res.statusText}: ${text.slice(0, 300)}`);
   }
   try {
     return JSON.parse(text);
@@ -179,7 +179,7 @@ async function run() {
   log(`PriceAPI evaluation job started (source=${SOURCE})`);
 
   if (!API_KEY || API_KEY === 'placeholder_value') {
-    throw new Error('PRICE_API_KEY is missing or still "placeholder_value" — set the real key in .env first');
+    throw new Error('PRICE_API_KEY is missing or still "placeholder_value". Set the real key in .env first');
   }
 
   log(`Creating ${SOURCE} search_results job (term="${SEARCH_TERM}", country=us, max_pages=1)...`);

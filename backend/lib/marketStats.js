@@ -332,7 +332,7 @@ async function computeMarketStats(supabase, batchTimestamp, log = () => {}) {
     else if (excluded[p.category] !== undefined) excluded[p.category]++;
   }
   if (excluded.ram || excluded.ssd) {
-    log(`Market stats: excluded from segments — ram=${excluded.ram}, ssd=${excluded.ssd}`);
+    log(`Market stats: excluded from segments: ram=${excluded.ram}, ssd=${excluded.ssd}`);
   }
 
   // Current prices: exactly the rows of this cron batch.

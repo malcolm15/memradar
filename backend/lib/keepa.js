@@ -90,7 +90,7 @@ async function fetchBatch(asins, { history = 1, stats = 90 } = {}, log = () => {
       const type = data.error.type || data.error.message || JSON.stringify(data.error);
       if (/token/i.test(type) && attempt < 3) {
         const waitMs = (tokenState.refillIn || 60000) + Math.ceil(asins.length / tokenState.refillRate) * 60000;
-        log(`Keepa token shortage (${type}) — waiting ${Math.ceil(waitMs / 1000)}s then retrying (attempt ${attempt}/3)`);
+        log(`Keepa token shortage (${type}), waiting ${Math.ceil(waitMs / 1000)}s then retrying (attempt ${attempt}/3)`);
         await sleep(waitMs);
         continue;
       }

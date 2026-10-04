@@ -59,9 +59,9 @@ function printTally(label, rows) {
 }
 
 async function run() {
-  log(`Catalog upsert started${CONFIRM ? '' : ' (DRY RUN — no DB writes; pass --confirm to write)'}`);
+  log(`Catalog upsert started${CONFIRM ? '' : ' (DRY RUN: no DB writes; pass --confirm to write)'}`);
 
-  if (!fs.existsSync(PREVIEW_PATH)) throw new Error(`preview not found: ${PREVIEW_PATH} — run build-catalog.js first`);
+  if (!fs.existsSync(PREVIEW_PATH)) throw new Error(`preview not found: ${PREVIEW_PATH}, run build-catalog.js first`);
   const payload = JSON.parse(fs.readFileSync(PREVIEW_PATH, 'utf8'));
   const products = Array.isArray(payload.products) ? payload.products : [];
   if (products.length === 0) throw new Error('no products in preview');
@@ -71,7 +71,7 @@ async function run() {
   // Guard: required NOT NULL columns must be present.
   const bad = rows.filter((r) => !r.sku || !r.name || !r.category || !r.product_url);
   if (bad.length) {
-    throw new Error(`${bad.length} rows missing required fields (sku/name/category/product_url) — aborting`);
+    throw new Error(`${bad.length} rows missing required fields (sku/name/category/product_url), aborting`);
   }
 
   // Guard: duplicate SKUs within the file would make the upsert nondeterministic.
@@ -88,7 +88,7 @@ async function run() {
 
   if (!CONFIRM) {
     console.log('');
-    log('DRY RUN complete — nothing was written. Re-run with --confirm to upsert into Supabase.');
+    log('DRY RUN complete, nothing was written. Re-run with --confirm to upsert into Supabase.');
     return;
   }
 

@@ -5418,7 +5418,7 @@ function buildPage(template, ctx) {
   const chartTagIdx = template.indexOf('<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js');
   const bodyEndIdx = template.indexOf('</body>');
   if (!headMatch || mainOpen < 0 || mainClose < 0 || chartTagIdx < 0 || bodyEndIdx < 0) {
-    throw new Error('template anchors missing (head/main/Chart.js/body) — template drift, aborting');
+    throw new Error('template anchors missing (head/main/Chart.js/body): template drift, aborting');
   }
 
   const head = buildHead(headMatch[0], ctx);
@@ -5843,7 +5843,7 @@ ${productXml.join('\n')}
 // --------------------------------------------------------------------- main
 async function run() {
   const startTime = Date.now();
-  log(`PDP generation started${CONFIRM ? '' : ' (DRY RUN — no writes; pass --confirm to generate)'}`);
+  log(`PDP generation started${CONFIRM ? '' : ' (DRY RUN: no writes; pass --confirm to generate)'}`);
   const expectedProducts = await preflight();
 
   const template = fs.readFileSync(TEMPLATE_PATH, 'utf8');
@@ -6201,7 +6201,7 @@ async function run() {
     } else {
       console.log('\nOrphan sweep: no orphans (every generated page dir matches a catalog slug)');
     }
-    console.log('Dry run complete — nothing written. Re-run with --confirm to generate.');
+    console.log('Dry run complete, nothing written. Re-run with --confirm to generate.');
     return;
   }
 

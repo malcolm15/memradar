@@ -22,7 +22,7 @@ async function generate() {
       .resize(size, size)
       .png()
       .toFile(path.join(OUT, name));
-    console.log(`✓ ${name} — ${info.width}×${info.height}px`);
+    console.log(`✓ ${name}: ${info.width}×${info.height}px`);
   }
 
   // ICO: embed 16×16 and 32×32
@@ -32,7 +32,7 @@ async function generate() {
   ]);
   const ico = await toIco([buf16, buf32]);
   fs.writeFileSync(path.join(OUT, 'favicon.ico'), ico);
-  console.log(`✓ favicon.ico — 16×16 + 32×32 embedded`);
+  console.log(`✓ favicon.ico: 16×16 + 32×32 embedded`);
 }
 
 generate().catch(err => { console.error(err); process.exit(1); });

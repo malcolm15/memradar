@@ -80,7 +80,7 @@ async function createJob(term) {
     body,
   });
   const text = await res.text();
-  if (!res.ok) throw new Error(`create job failed: ${res.status} ${res.statusText} — ${text.slice(0, 300)}`);
+  if (!res.ok) throw new Error(`create job failed: ${res.status} ${res.statusText}: ${text.slice(0, 300)}`);
   const job = JSON.parse(text);
   const jobId = pick(job, ['job_id', 'id']);
   if (!jobId) throw new Error(`no job_id in create response: ${JSON.stringify(job).slice(0, 300)}`);
@@ -91,7 +91,7 @@ async function pollJob(jobId) {
   for (let attempt = 1; attempt <= MAX_POLL_ATTEMPTS; attempt++) {
     const res = await fetch(`${BASE}/jobs/${jobId}?token=${encodeURIComponent(API_KEY)}`);
     const text = await res.text();
-    if (!res.ok) throw new Error(`poll failed: ${res.status} ${res.statusText} — ${text.slice(0, 200)}`);
+    if (!res.ok) throw new Error(`poll failed: ${res.status} ${res.statusText}: ${text.slice(0, 200)}`);
     const job = JSON.parse(text);
     const status = pick(job, ['status', 'state']) || 'unknown';
     if (status === 'finished') return job;
@@ -106,7 +106,7 @@ async function pollJob(jobId) {
 async function downloadResults(jobId) {
   const res = await fetch(`${BASE}/jobs/${jobId}/download?token=${encodeURIComponent(API_KEY)}`);
   const text = await res.text();
-  if (!res.ok) throw new Error(`download failed: ${res.status} ${res.statusText} — ${text.slice(0, 200)}`);
+  if (!res.ok) throw new Error(`download failed: ${res.status} ${res.statusText}: ${text.slice(0, 200)}`);
   return JSON.parse(text);
 }
 
@@ -135,7 +135,7 @@ function extractProducts(download) {
 
 // Run one search job end-to-end. Returns { products, credits } or throws.
 async function runQueryJob(query) {
-  log(`Job: "${query.term}" (${query.category}) — creating...`);
+  log(`Job: "${query.term}" (${query.category}), creating...`);
   const jobId = await createJob(query.term);
   const finishedJob = await pollJob(jobId);
   const download = await downloadResults(jobId);
@@ -239,7 +239,7 @@ async function run() {
   log(`Catalog build started: ${QUERIES.length} Amazon search jobs (${SOURCE}/search_results, country=${COUNTRY})`);
 
   if (!API_KEY || API_KEY === 'placeholder_value') {
-    throw new Error('PRICE_API_KEY is missing or still "placeholder_value" — set the real key in .env first');
+    throw new Error('PRICE_API_KEY is missing or still "placeholder_value". Set the real key in .env first');
   }
 
   const collected = []; // { raw, category } in job order
@@ -352,7 +352,7 @@ function printSummary(payload) {
   console.log('\n-- Count per brand --');
   Object.entries(byBrand).sort((a, b) => b[1] - a[1]).forEach(([k, v]) => console.log(`  ${String(k).padEnd(16)} ${v}`));
 
-  console.log('\n-- Full product list (name — price) --');
+  console.log('\n-- Full product list (name, price) --');
   ['ram', 'ssd'].forEach((cat) => {
     const rows = products.filter((p) => p.category === cat);
     if (!rows.length) return;
