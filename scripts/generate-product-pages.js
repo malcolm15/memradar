@@ -227,30 +227,11 @@ function longMonth(ym) {
 function longDate(iso) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 }
-// Price-fetch schedule, UTC hours. SOURCE OF TRUTH is
-// .github/workflows/price-fetch.yml's cron; these must match it, and
-// frontend/js/pdp-hydrate.js carries a deliberate duplicate (browser file,
-// cannot require this module - same convention as the
-// productParsers/product-listing duplication). Change all three together.
-// 06/18 -> 08/20 on 2026-08-17 (deployment-collision avoidance), then
-// -> every 4 hours on 2026-08-22 when the fetch moved to GitHub Actions.
-const FETCH_HOURS_UTC = [0, 4, 8, 12, 16, 20];
-// GitHub's scheduled runs are best-effort and queue behind load. Observed over
-// the first full day at this cadence: delays of 16, 16, 22, 27, 28, 31 and 60
-// minutes (the on-the-hour 00:00 slot is the most contended). priceValidUntil
-// is a PROMISE that the price holds until the next fetch, so it must not
-// expire before a delayed run can land - pad past the worst observed delay.
-const FETCH_DELAY_PAD_MIN = 90;
-// Next price-fetch boundary plus the delay pad. Past the last slot, roll to
-// tomorrow's first via hour + 24 (Date.UTC normalizes day/month/year
-// overflow, and minutes > 59 roll into the hour the same way).
-function nextFetchIso(from) {
-  const h = from.getUTCHours();
-  const next = FETCH_HOURS_UTC.find((x) => h < x);
-  const hour = next === undefined ? FETCH_HOURS_UTC[0] + 24 : next;
-  return new Date(Date.UTC(from.getUTCFullYear(), from.getUTCMonth(), from.getUTCDate(), hour, FETCH_DELAY_PAD_MIN, 0)).toISOString();
-}
-
+// THE FETCH CLOCK IS RETIRED (2026-10-04). FETCH_HOURS_UTC,
+// FETCH_DELAY_PAD_MIN and nextFetchIso existed only to compute the PDP
+// JSON-LD's priceValidUntil window, and the aggregate shape publishes no
+// validity window, so all three had zero callers. The schedule now lives in
+// exactly one place, the cron in .github/workflows/price-fetch.yml.
 // JSON-LD image: Google recommends >=1200px for product snippets. Amazon media
 // URLs encode the size in a ._AC_..._ token; request a 1200px variant when the
 // token is present, otherwise fall back to the stored image_url untouched.
@@ -5464,16 +5445,20 @@ ${buildMain(ctx)}
 // ------------------------------------------------------- honest lastmod
 // A page's <lastmod> only advances when its MEANINGFUL content changes.
 // We hash each rendered page with the volatile bits stripped: the ?v= asset
-// stamp, the baked "Last updated" build date, and offers.priceValidUntil,
-// all of which change every build without any real content change. The
-// hash->lastmod map persists in scripts/lastmod-manifest.json (committed),
-// so a regeneration that changes nothing real preserves the prior date.
+// stamp and the baked "Last updated" build date, both of which change every
+// build without any real content change. The hash->lastmod map persists in
+// scripts/lastmod-manifest.json (committed), so a regeneration that changes
+// nothing real preserves the prior date.
+//
+// THE priceValidUntil AND validFrom NORMALISERS WERE REMOVED (2026-10-04) with
+// the fields themselves. Removal is hash-NEUTRAL once no page carries either
+// string, which is why it is safe here and cannot cause a second 235-page
+// churn. A normaliser for a field that no longer exists is a false statement
+// about what the page contains.
 function contentHash(html) {
   const normalized = html
     .replace(/\?v=\d+/g, '?v=')
-    .replace(/Last updated: [^<]*/g, 'Last updated: ')
-    .replace(/"priceValidUntil": "[^"]*"/g, '"priceValidUntil": ""')
-    .replace(/"validFrom": "[^"]*"/g, '"validFrom": ""');
+    .replace(/Last updated: [^<]*/g, 'Last updated: ');
   return crypto.createHash('sha256').update(normalized).digest('hex');
 }
 function loadLastmodManifest() {
