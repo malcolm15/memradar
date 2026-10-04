@@ -2262,6 +2262,10 @@ function buildHead(templateHead, ctx) {
     ? head.replace(/<meta name="robots" content="noindex">/, '<meta name="robots" content="noindex,follow">')
     : head.replace(/<meta name="robots" content="noindex">\s*/, '');
 
+  // Spread rather than assign-then-delete so the key ORDER is unchanged on the
+  // 225 pages that keep an offers block: a reordered object would lay a
+  // cosmetic diff over the real one.
+  const offersBlock = buildJsonLdOffers(ctx);
   const product = {
     '@type': 'Product',
     // Concise collision-unique name (same builder as the <title> tag), not the
@@ -2270,7 +2274,7 @@ function buildHead(templateHead, ctx) {
     name: ctx.p._titleName,
     sku: ctx.p.sku,
     description: desc,
-    offers: buildJsonLdOffers(ctx),
+    ...(offersBlock ? { offers: offersBlock } : {}),
   };
   const mpn = parseMpn(ctx.p.name);
   if (mpn) product.mpn = mpn;
@@ -2304,53 +2308,36 @@ function buildHead(templateHead, ctx) {
 // Order: cheapest in-stock offer first (in-stock beats OOS, then price asc,
 // Amazon wins ties for stability). Newegg links wrap the CLEAN stored URL in
 // the Rakuten deep link at render time (never stored wrapped).
-// Product JSON-LD offers block. Single-retailer pages keep the exact Offer
-// shape shipped before Newegg existed (byte-identical output). Two-retailer
-// pages get an AggregateOffer whose lowPrice/highPrice are DERIVED from the
-// nested offers - never set independently - so the aggregate can't disagree
-// with its own offers. pdp-hydrate.js maintains the same invariant when it
-// refreshes either retailer's price client-side.
+// AGGREGATOR SEMANTICS, NOT MERCHANT SEMANTICS. We are not the seller: we
+// compare prices and link out. So a PDP publishes price BOUNDS and a COUNT and
+// nothing only a seller could promise. Deliberately absent, each absence being
+// the point rather than an oversight: no nested Offer, no seller, no url, no
+// availability, no itemCondition, no validFrom, no priceValidUntil.
+//
+// ONLY IN-STOCK OFFERS CONTRIBUTE, and unknown availability is not in stock,
+// the same rule the visible stock badge follows by making no claim. This is a
+// correctness fix as much as a semantic one; see CLAUDE.md for the measurement.
+//
+// ALWAYS AggregateOffer, offerCount 1 included. The page is a comparison page
+// whether or not two retailers happen to have stock today.
+//
+// RETURNS NULL WHEN NOTHING IS IN STOCK, and the caller then omits `offers`
+// entirely while keeping every identity field. The page knowingly loses
+// product-snippet eligibility until stock returns: there is no price anyone can
+// pay, so there is no price to publish.
 function buildJsonLdOffers(ctx) {
-  // Price validity window on the 4-hourly fetch clock: valid from this
-  // generation, until the next scheduled fetch. pdp-hydrate.js rolls both
-  // forward client-side so a page rendered later never advertises a stale
-  // window.
-  const validFrom = new Date().toISOString();
-  const priceValidUntil = nextFetchIso(new Date());
-  const amazon = {
-    '@type': 'Offer',
-    price: ctx.stats.current,
-    priceCurrency: 'USD',
-    url: ctx.url,
-    availability: ctx.inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-    itemCondition: 'https://schema.org/NewCondition',
-    validFrom,
-    priceValidUntil,
-  };
+  const prices = [];
+  if (ctx.inStock && ctx.stats.current != null) prices.push(Number(ctx.stats.current));
   const o = ctx.neweggOffer;
-  if (!o || o.price == null) return amazon;
-  amazon.seller = { '@type': 'Organization', name: 'Amazon' };
-  const newegg = {
-    '@type': 'Offer',
-    price: Number(o.price),
-    priceCurrency: 'USD',
-    url: ctx.url,
-    itemCondition: 'https://schema.org/NewCondition',
-    validFrom,
-    priceValidUntil,
-    seller: { '@type': 'Organization', name: 'Newegg' },
-  };
-  // in_stock is nullable; unknown makes no availability claim (same rule as
-  // the visible stock badge).
-  if (o.in_stock != null) newegg.availability = o.in_stock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock';
-  const prices = [amazon.price, newegg.price];
+  // Strict === true, so a null in_stock is excluded rather than assumed.
+  if (o && o.price != null && o.in_stock === true) prices.push(Number(o.price));
+  if (!prices.length) return null;
   return {
     '@type': 'AggregateOffer',
-    offerCount: 2,
     lowPrice: Math.min(...prices),
     highPrice: Math.max(...prices),
+    offerCount: prices.length,
     priceCurrency: 'USD',
-    offers: [amazon, newegg],
   };
 }
 
