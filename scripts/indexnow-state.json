@@ -1,6 +1,6 @@
 {
  "https://memradar.com/ram/corsair-vengeance-ddr5-ram-32gb-6000mhz/": {
-  "price": 580,
+  "price": 567.99,
   "atl": 92.99,
   "ath": 771.52,
   "buy": "elevated",
@@ -11,7 +11,7 @@
   "atl": 359.99,
   "ath": 499.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/crucial-32gb-ddr5-ram-kit-5600mhz/": {
   "price": 589.99,
@@ -25,7 +25,7 @@
   "atl": 364.99,
   "ath": 686.66,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/teamgroup-t-force-vulcan-ddr5-32gb-6000mhz/": {
   "price": 489.99,
@@ -53,7 +53,7 @@
   "atl": 68.89,
   "ath": 529,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz/": {
   "price": 597.39,
@@ -63,14 +63,14 @@
   "indexable": true
  },
  "https://memradar.com/ram/g-skill-flare-x5-series-ddr5-ram-32gb-6000mhz/": {
-  "price": 498.88,
+  "price": 479.99,
   "atl": 50,
   "ath": 498.88,
   "buy": "elevated",
   "indexable": true
  },
  "https://memradar.com/ram/corsair-vengeance-ddr5-32gb-6000mhz/": {
-  "price": 639.95,
+  "price": 519.95,
   "atl": 317.22,
   "ath": 639.95,
   "buy": "elevated",
@@ -102,21 +102,21 @@
   "atl": 99.99,
   "ath": 509.99,
   "buy": null,
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz-3/": {
   "price": 549.99,
   "atl": 103.99,
   "ath": 725,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/corsair-vengeance-rgb-rs-ddr5-ram-64gb-6000mhz/": {
   "price": 1039.99,
   "atl": 757.85,
   "ath": 1039.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/g-skill-flare-x5-series-ddr5-ram-64gb-6000mhz/": {
   "price": 1169.99,
@@ -133,7 +133,7 @@
   "indexable": true
  },
  "https://memradar.com/ram/crucial-pro-64gb-ddr5-ram-kit-5600mhz/": {
-  "price": 1051.81,
+  "price": 1075.79,
   "atl": 123.99,
   "ath": 1087.99,
   "buy": "elevated",
@@ -144,7 +144,7 @@
   "atl": 165.73,
   "ath": 1349.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/crucial-128gb-kit-5600mhz/": {
   "price": 2340,
@@ -165,14 +165,14 @@
   "atl": 149.99,
   "ath": 1055.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/g-skill-trident-z5-royal-neo-series-ddr5-64gb-6000mhz/": {
   "price": 1599.99,
   "atl": 239.99,
   "ath": 1599.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/crucial-64gb-ddr5-ram-kit-4800mhz/": {
   "price": 1048,
@@ -193,7 +193,7 @@
   "atl": 189.95,
   "ath": 1199.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/crucial-64gb-ddr5-ram-5600mhz/": {
   "price": 1099.99,
@@ -207,84 +207,84 @@
   "atl": 140.99,
   "ath": 1184.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/g-skill-trident-z5-rgb-series-ddr5-ram-64gb-6000mhz/": {
   "price": 1069.99,
   "atl": 149.99,
   "ath": 1069.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/corsair-vengeance-rgb-rs-ddr5-ram-16gb-6000mhz/": {
   "price": 285.99,
   "atl": 234.99,
   "ath": 285.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/corsair-vengeance-ddr5-ram-16gb-5200mhz/": {
   "price": 294.99,
   "atl": 62.99,
   "ath": 339,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/corsair-vengeance-ddr5-ram-16gb-6000mhz/": {
   "price": 299.99,
   "atl": 231.99,
   "ath": 308.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/patriot-memory-viper-venom-ddr5-ram-16gb-6000mhz/": {
   "price": 244.99,
   "atl": 40.99,
   "ath": 245.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/patriot-viper-elite-5-ddr5-ram-16gb-6000mhz/": {
   "price": 237.99,
   "atl": 38.99,
   "ath": 348.9,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/patriot-viper-venom-ddr5-ram-16gb-6000mhz/": {
   "price": 246.99,
   "atl": 202.99,
   "ath": 246.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/corsair-vengeance-rgb-rs-ddr5-16gb-6000mhz/": {
   "price": 329.99,
   "atl": 252.59,
   "ath": 329.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/corsair-vengeance-rgb-ddr5-ram-16gb-5200mhz/": {
   "price": 301.99,
   "atl": 65.99,
   "ath": 301.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/corsair-vengeance-rgb-rs-ddr5-ram-16gb-5200mhz/": {
   "price": 278.99,
   "atl": 229.99,
   "ath": 680.7,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/a-tech-16gb-ddr5-4800mhz-pc5-38400-cl40/": {
   "price": 239.72,
   "atl": 43.49,
   "ath": 239.72,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/crucial-16gb-ddr5-ram-5600mhz/": {
   "price": 289.99,
@@ -298,14 +298,14 @@
   "atl": 37.04,
   "ath": 273.65,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/crucial-16gb-ddr5-ram-4800mhz/": {
   "price": 259,
   "atl": 33.11,
   "ath": 429.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/corsair-vengeance-ddr5-ram-32gb-6000mhz-2/": {
   "price": 559.99,
@@ -319,14 +319,14 @@
   "atl": 119.99,
   "ath": 169.99,
   "buy": "good",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/corsair-vengeance-rgb-rs-ddr5-32gb-6000mhz/": {
   "price": 482.99,
   "atl": 452.07,
   "ath": 499.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/teamgroup-t-force-delta-rgb-ddr5-ram-32gb-6000mhz-2/": {
   "price": 599.99,
@@ -336,10 +336,10 @@
   "indexable": true
  },
  "https://memradar.com/ram/corsair-vengeance-lpx-ddr4-ram-32gb-3200mhz/": {
-  "price": 249.99,
+  "price": 242.12,
   "atl": 47.49,
   "ath": 277.27,
-  "buy": "elevated",
+  "buy": "typical",
   "indexable": true
  },
  "https://memradar.com/ram/g-skill-ripjawsv-series-ddr4-ram-32gb-3200mhz/": {
@@ -361,7 +361,7 @@
   "atl": 152.99,
   "ath": 229.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/timetec-32gb-kit-2666mhz/": {
   "price": 189.99,
@@ -375,21 +375,21 @@
   "atl": 179.06,
   "ath": 229.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/puskill-ddr4-32gb-3200mhz/": {
   "price": 199.99,
   "atl": 161.99,
   "ath": 269.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/ddr4-ram-laptop-only-gigastone-32gb-kit-3200mhz/": {
   "price": 197.09,
   "atl": 44.09,
   "ath": 240.99,
   "buy": "good",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/g-skill-trident-z-rgb-series-ddr4-ram-32gb-3600mhz/": {
   "price": 259.99,
@@ -403,14 +403,14 @@
   "atl": 42.99,
   "ath": 320.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/32gb-ddr4-3200mhz-desktop-ram-memory-kit/": {
   "price": 199.99,
   "atl": 149.99,
   "ath": 209.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/g-skill-trident-z-rgb-series-ddr4-ram-32gb-3200mhz/": {
   "price": 249.99,
@@ -424,42 +424,42 @@
   "atl": 44.99,
   "ath": 267.68,
   "buy": "typical",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/a-tech-ddr4-ram-32gb-kit-2666mhz/": {
   "price": 196.99,
   "atl": 49.98,
   "ath": 231.98,
   "buy": "typical",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/a-tech-32gb-3200mhz/": {
   "price": 230.53,
   "atl": 49.98,
   "ath": 258.38,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/timetec-32gb-kit-3200mhz/": {
   "price": 189.99,
   "atl": 37.99,
   "ath": 232.99,
   "buy": "typical",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/a-tech-16gb-3200mhz/": {
   "price": 134.06,
   "atl": 36.24,
   "ath": 163.46,
   "buy": "typical",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/a-tech-16gb-ddr4-3200-mhz-sodimm-pc4-25600/": {
   "price": 115.26,
   "atl": 24.99,
   "ath": 129.19,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/g-skill-ripjawsv-series-ddr4-ram-16gb-3200mhz/": {
   "price": 134.99,
@@ -487,21 +487,21 @@
   "atl": 32.99,
   "ath": 119.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/a-tech-ddr4-ram-16gb-2666mhz-pc4-21300/": {
   "price": 101.54,
   "atl": 24.99,
   "ath": 115.99,
   "buy": "typical",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/silicon-power-ddr4-16gb-kit-3200mhz/": {
   "price": 109.97,
   "atl": 20.97,
   "ath": 112.97,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/crucial-16gb-ddr4-ram-3200mhz/": {
   "price": 118,
@@ -522,14 +522,14 @@
   "atl": 38.88,
   "ath": 159.88,
   "buy": "typical",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/a-tech-16gb-2666mhz/": {
   "price": 113.86,
   "atl": 38.24,
   "ath": 129.98,
   "buy": "typical",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/ddr4-ram-16gb-3200mhz/": {
   "price": 109.99,
@@ -539,7 +539,7 @@
   "indexable": true
  },
  "https://memradar.com/ram/g-skill-ripjawsv-series-ddr4-ram-16gb-3200mhz-2/": {
-  "price": 129.99,
+  "price": 128.98,
   "atl": 27.99,
   "ath": 237.42,
   "buy": "elevated",
@@ -550,7 +550,7 @@
   "atl": 156.98,
   "ath": 157.86,
   "buy": "typical",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/teamgroup-t-force-vulcan-z-ddr4-16gb-kit-3200mhz/": {
   "price": 129.99,
@@ -564,21 +564,21 @@
   "atl": 42.99,
   "ath": 174.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/a-tech-16gb-ddr4-2400-mhz-udimm-pc4-19200/": {
   "price": 100.84,
   "atl": 30.24,
   "ath": 115.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/silicon-power-value-gaming-ddr4-ram-16gb-3200mhz/": {
-  "price": 132.97,
+  "price": 129.97,
   "atl": 72.99,
   "ath": 150.97,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz-4/": {
   "price": 639.99,
@@ -592,14 +592,14 @@
   "atl": 107.99,
   "ath": 909.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/corsair-vengeance-ddr5-ram-32gb-6400mhz/": {
   "price": 549.99,
   "atl": 83.99,
   "ath": 725.69,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-32gb-6000mhz/": {
   "price": 639.99,
@@ -613,47 +613,47 @@
   "atl": 87,
   "ath": 559.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-32gb-6000mhz-2/": {
   "price": 539.99,
   "atl": 79.99,
   "ath": 539.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/g-skill-trident-z5-rgb-series-ddr5-ram-32gb-6000mhz-2/": {
   "price": 514.99,
   "atl": 87.99,
   "ath": 550.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/g-skill-trident-z5-royal-neo-series-ddr5-32gb-6000mhz/": {
   "price": 759.99,
   "atl": 138.99,
   "ath": 799.99,
   "buy": "good",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/g-skill-trident-z5-rgb-series-ddr5-ram-32gb-6400mhz/": {
   "price": 589.99,
   "atl": 109.99,
   "ath": 629.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/g-skill-trident-z5-rgb-series-ddr5-ram-16gb-6000mhz/": {
   "price": 276.99,
   "atl": 209.99,
   "ath": 276.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/g-skill-trident-z5-rgb-32gb-2-x-16gb/": {
-  "price": 545.93,
+  "price": 661.58,
   "atl": 99.99,
-  "ath": 579.99,
+  "ath": 661.58,
   "buy": "elevated",
   "indexable": true
  },
@@ -662,7 +662,7 @@
   "atl": 199,
   "ath": 1299.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-64gb-6000mhz-3/": {
   "price": 1579.99,
@@ -676,21 +676,21 @@
   "atl": 77.63,
   "ath": 619.99,
   "buy": "typical",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-32gb-6000mhz-4/": {
   "price": 599.99,
   "atl": 105.99,
   "ath": 599.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/pro-ddr5-ram-32gb-kit-6400mhz/": {
-  "price": 574.95,
+  "price": 569,
   "atl": 174.99,
   "ath": 574.95,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/crucial-96gb-ddr5-5600mhz-laptop-memory/": {
   "price": 1599,
@@ -704,28 +704,28 @@
   "atl": 46.53,
   "ath": 249.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/kingston-fury-beast-rgb-32gb-6000mhz/": {
-  "price": 599.03,
+  "price": 680.49,
   "atl": 109.99,
   "ath": 691.99,
-  "buy": "good",
-  "indexable": true
+  "buy": "elevated",
+  "indexable": false
  },
  "https://memradar.com/ram/kingston-fury-beast-rgb-16gb-6000mt-s/": {
   "price": 459.99,
   "atl": 59.99,
   "ath": 673.25,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/kingston-fury-beast-32gb-6000mhz/": {
   "price": 589.99,
   "atl": 105.99,
   "ath": 773.22,
   "buy": "good",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/kingston-fury-beast-32gb-6000mt-s-ddr5/": {
   "price": 707.79,
@@ -739,21 +739,21 @@
   "atl": 239.99,
   "ath": 1411.49,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/kingston-fury-impact-32gb-5600mhz/": {
   "price": 598.98,
   "atl": 84.99,
   "ath": 669.49,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/kingston-fury-beast-16gb-6000mt-s-ddr5/": {
-  "price": 359.99,
+  "price": 343.76,
   "atl": 64.32,
   "ath": 463.22,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/kingston-fury-beast-16gb-5200mhz/": {
   "price": 363.99,
@@ -767,7 +767,7 @@
   "atl": 85.99,
   "ath": 999,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/kingston-fury-beast-white-rgb-32gb-5600mhz/": {
   "price": 689.07,
@@ -784,7 +784,7 @@
   "indexable": true
  },
  "https://memradar.com/ram/kingston-fury-impact-64gb-5600mhz/": {
-  "price": 1364.99,
+  "price": 1357.04,
   "atl": 159.99,
   "ath": 1364.99,
   "buy": "elevated",
@@ -802,14 +802,14 @@
   "atl": 41.22,
   "ath": 409.95,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/kingston-fury-impact-16gb-6400mt-s-cl38/": {
   "price": 349.99,
   "atl": 69.99,
   "ath": 367.49,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/kingston-fury-renegade-white-rgb-32gb-6400mhz/": {
   "price": 711.69,
@@ -830,56 +830,56 @@
   "atl": 197.88,
   "ath": 257.95,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/six-x4000-1tb-m-2-ssd-pcie-gen3x4-nvme/": {
   "price": 149.99,
   "atl": 119.99,
   "ath": 152.99,
   "buy": "typical",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/fanxiang-1tb-nvme-ssd-pcie-gen-4-gaming/": {
   "price": 169.99,
   "atl": 56.94,
   "ath": 179.99,
   "buy": "typical",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/crucial-p310-1tb-ssd/": {
   "price": 180.31,
   "atl": 59.99,
   "ath": 187.89,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/kingston-nv3-1tb-m-2-2280-nvme-ssd/": {
   "price": 156.99,
   "atl": 52.99,
   "ath": 183.29,
   "buy": "good",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/western-digital-wd-black-sn7100-1tb-nvme/": {
   "price": 199,
   "atl": 69.97,
   "ath": 239.57,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/acer-predator-gm7-1tb-ssd-m-2-2280-pcie/": {
   "price": 179.99,
   "atl": 69.99,
   "ath": 199.99,
   "buy": "good",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/bestoss-1tb-nvme-m-2-ssd-pcie-3-0-2280/": {
   "price": 140.98,
   "atl": 140.98,
   "ath": 220.98,
   "buy": "good",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/samsung-ssd-990-pro-1tb/": {
   "price": 239.99,
@@ -900,63 +900,63 @@
   "atl": 34.99,
   "ath": 153.99,
   "buy": "typical",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/kingspec-ssd-1tb/": {
   "price": 142.97,
   "atl": 43.98,
   "ath": 153.97,
   "buy": "typical",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/fanxiang-s501q-ssd-1tb-pcle-3-0x4/": {
   "price": 149.99,
   "atl": 45.49,
   "ath": 152.82,
   "buy": "typical",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/patriot-memory-p400-lite-m-2-pcie-gen-4-1tb/": {
   "price": 149.99,
   "atl": 37.99,
   "ath": 243,
   "buy": "typical",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/fanxiang-1tb-nvme-ssd-pcie-gen4-m-2/": {
   "price": 167.99,
   "atl": 55.99,
   "ath": 167.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/six-nvme-m-2-ssd-pcie-4-0-1tb-m-2-2280/": {
   "price": 174.99,
   "atl": 69.99,
   "ath": 176.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/samsung-ssd-9100-pro-1tb/": {
   "price": 249.99,
   "atl": 126,
   "ath": 331.72,
   "buy": "typical",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/bestoss-1tb-m-2-ssd-nvme-pcie4-0-2280/": {
   "price": 167.99,
   "atl": 57.99,
   "ath": 167.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/western-digital-wd-blue-sn5100-1tb-nvme/": {
   "price": 166.99,
   "atl": 67.99,
   "ath": 239.99,
   "buy": "good",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/intel-660p-series-m-2-2280-1tb-pcie-nvme/": {
   "price": 195,
@@ -977,28 +977,28 @@
   "atl": 44.99,
   "ath": 249.99,
   "buy": "typical",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/bestoss-m-2-2280-nvme-ssd-2tb-pcie-4-0/": {
   "price": 309.99,
   "atl": 116.49,
   "ath": 325.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/fikwot-fn955-2tb-nvme-ssd-m-2-2280-pcie/": {
   "price": 299.99,
   "atl": 99.99,
   "ath": 299.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/western-digital-wd-black-sn7100-2tb-nvme/": {
   "price": 314.99,
   "atl": 119.99,
   "ath": 499.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/samsung-990-pro-ssd-2tb-nvme-m-2-pcie/": {
   "price": 389.99,
@@ -1012,21 +1012,21 @@
   "atl": 64.97,
   "ath": 279.97,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/crucial-p310-2tb-ssd/": {
-  "price": 260.36,
+  "price": 260.62,
   "atl": 93.99,
   "ath": 299.99,
   "buy": "good",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/bestoss-2tb-nvme-m-2-ssd-pcie-3-0-m-2/": {
   "price": 279.99,
   "atl": 106.99,
   "ath": 279.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/samsung-ssd-9100-pro-2tb/": {
   "price": 399.99,
@@ -1047,7 +1047,7 @@
   "atl": 116.99,
   "ath": 288,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/samsung-990-evo-plus-ssd-2tb/": {
   "price": 369.99,
@@ -1061,7 +1061,7 @@
   "atl": 165.99,
   "ath": 334.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/acer-predator-gm7-2tb-ssd-m-2-2280-pcie/": {
   "price": 345.99,
@@ -1078,32 +1078,32 @@
   "indexable": false
  },
  "https://memradar.com/ssd/silicon-power-2tb-ud90-nvme-4-0-gen4-pcie/": {
-  "price": 284.14,
+  "price": 279.97,
   "atl": 71.97,
   "ath": 294.97,
   "buy": "typical",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/western-digital-wd-black-sn850x-2tb-nvme/": {
   "price": 369,
   "atl": 89.99,
   "ath": 504.65,
   "buy": "typical",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/bestoss-2tb-m-2-ssd-nvme-pcie4-0-2280/": {
   "price": 297.99,
   "atl": 116.99,
   "ath": 297.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/predator-m-2-ssd-2tb-gm7000-with-dram/": {
-  "price": 369.99,
+  "price": 329.99,
   "atl": 93.5,
   "ath": 379.99,
-  "buy": "elevated",
-  "indexable": true
+  "buy": "good",
+  "indexable": false
  },
  "https://memradar.com/ssd/samsung-990-pro-nvme-m-2-ssd-2tb/": {
   "price": 1299.99,
@@ -1117,14 +1117,14 @@
   "atl": 119.99,
   "ath": 499.99,
   "buy": "good",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/fanxiang-2tb-nvme-ssd-pcie-gen4-m-2-ssd/": {
   "price": 297.99,
   "atl": 93.47,
   "ath": 297.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/samsung-990-evo-plus-ssd-4tb/": {
   "price": 1049.99,
@@ -1145,24 +1145,24 @@
   "atl": 249.99,
   "ath": 1099.99,
   "buy": "good",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/western-digital-wd-black-sn8100-4tb-nvme/": {
   "price": 699.99,
   "atl": 379.99,
   "ath": 1299.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/acer-predator-gm7-4tb-ssd-m-2-2280-pcie/": {
   "price": 702.99,
   "atl": 224.99,
   "ath": 732.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/lexar-4tb-nm790-ssd-pcie-gen4-nvme-m-2/": {
-  "price": 699.99,
+  "price": 569.99,
   "atl": 172.58,
   "ath": 872.41,
   "buy": "elevated",
@@ -1180,17 +1180,17 @@
   "atl": 207.99,
   "ath": 648.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/western-digital-wd-black-sn7100-4tb-nvme/": {
   "price": 579.99,
   "atl": 209.99,
   "ath": 748.7,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/western-digital-wd-black-sn850x-4tb-nvme-2/": {
-  "price": 649.99,
+  "price": 699.99,
   "atl": 229.95,
   "ath": 843,
   "buy": "elevated",
@@ -1201,62 +1201,62 @@
   "atl": 244.99,
   "ath": 919.99,
   "buy": "typical",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/fikwot-fn960-4tb-m-2-nvme-ssd-pcie-gen4/": {
   "price": 519.99,
   "atl": 429.99,
   "ath": 529.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/samsung-ssd-9100-pro-4tb/": {
   "price": 1309,
   "atl": 364.99,
   "ath": 1359.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/crucial-p310-4tb-ssd/": {
   "price": 574,
   "atl": 229.99,
   "ath": 699,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/silicon-power-4tb-ud90-nvme-4-0-gen4-pcie/": {
   "price": 527.97,
   "atl": 157.97,
   "ath": 549.97,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/samsung-990-pro-w-heatsink-ssd-2tb/": {
   "price": 669.99,
   "atl": 136.56,
   "ath": 669.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/samsung-990-pro-1tb-pcie-gen-4-0-x4/": {
   "price": 239.24,
   "atl": 85.45,
   "ath": 359.5,
   "buy": "typical",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/samsung-mz-v9p4t0b-am-990-pro-pcie-4-0-4tb/": {
   "price": 1789.9,
   "atl": 575.98,
   "ath": 2199.98,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/samsung-ssd-870-evo-sata-iii-2-5-2tb/": {
-  "price": 461.87,
+  "price": 481.44,
   "atl": 89.99,
   "ath": 749.99,
-  "buy": "typical",
+  "buy": "elevated",
   "indexable": true
  },
  "https://memradar.com/ssd/samsung-990-pro-2tb-pcie-gen-4-0-x4/": {
@@ -1264,7 +1264,7 @@
   "atl": 143.13,
   "ath": 529.75,
   "buy": "typical",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/samsung-990-pro-2tb/": {
   "price": 429.98,
@@ -1285,7 +1285,7 @@
   "atl": 129.9,
   "ath": 495,
   "buy": "good",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/samsung-990-pro-4tb-pcie-gen-4-0-x4/": {
   "price": 895.5,
@@ -1299,42 +1299,42 @@
   "atl": 59.68,
   "ath": 279.99,
   "buy": "good",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/1tb-sn850p-nvme-m-2-ssd-officially/": {
   "price": 237,
   "atl": 99.99,
   "ath": 354.99,
   "buy": "good",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/western-digital-wd-black-sn850x-nvme-ssd-1tb/": {
   "price": 249,
   "atl": 59.99,
   "ath": 386,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/western-digital-wd-black-sn850x-2tb-nvme-2/": {
   "price": 419.85,
   "atl": 112.84,
   "ath": 429,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/western-digital-wd-black-sn8100-2tb-nvme/": {
-  "price": 399.99,
+  "price": 485.26,
   "atl": 179.99,
   "ath": 669.99,
-  "buy": "typical",
-  "indexable": true
+  "buy": "elevated",
+  "indexable": false
  },
  "https://memradar.com/ssd/western-digital-wd-black-sn850x-4tb-nvme-3/": {
   "price": 779.99,
   "atl": 249.99,
   "ath": 1119.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/western-digital-wd-black-sn770m-1tb/": {
   "price": 449.99,
@@ -1344,7 +1344,7 @@
   "indexable": true
  },
  "https://memradar.com/ssd/crucial-t500-pcie-gen4-nvme-1tb-ssd/": {
-  "price": 274.9,
+  "price": 274.85,
   "atl": 56.99,
   "ath": 277.5,
   "buy": "typical",
@@ -1362,129 +1362,129 @@
   "atl": 269,
   "ath": 912.5,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/crucial-t500-4tb-pcie-gen4-nvme-gaming-ps5/": {
   "price": 799,
   "atl": 291.99,
   "ath": 895,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/crucial-t500-pcie-gen4-nvme-500gb-ssd/": {
   "price": 400,
   "atl": 52.99,
   "ath": 400,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/500gb-optimus-5100-nvme-ssd-pcie-4-0/": {
   "price": 109.99,
   "atl": 99.99,
   "ath": 220.69,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/samsung-870-evo-sata-ssd-500gb-2-5/": {
   "price": 249.99,
   "atl": 29.99,
   "ath": 299.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/sandisk-ssd-plus-500gb-internal-solid/": {
   "price": 109,
   "atl": 39.99,
   "ath": 119.99,
   "buy": "good",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/ultra-3d-nand-500gb-internal-ssd-sata/": {
   "price": 164.58,
   "atl": 32.99,
   "ath": 200.92,
   "buy": "typical",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/crucial-p310-500gb-ssd/": {
-  "price": 113.61,
+  "price": 113.63,
   "atl": 38.99,
   "ath": 133.95,
   "buy": "good",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/crucial-t705-pcie-gen5-nvme-1tb-ssd/": {
   "price": 247,
   "atl": 119.99,
   "ath": 319.5,
   "buy": "good",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/1tb-sata-ssd-2-5-ssd-sata-iii-6/": {
   "price": 129.99,
   "atl": 44.79,
   "ath": 142.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/crucial-p510-pcie-gen5-nvme-1tb-ssd/": {
-  "price": 185.17,
+  "price": 185.27,
   "atl": 79.99,
   "ath": 239,
   "buy": "good",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/fikwot-fs810-2tb-ssd/": {
   "price": 229.99,
   "atl": 62.99,
   "ath": 229.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/fikwot-fx815-1tb-ssd/": {
   "price": 129.99,
   "atl": 45.99,
   "ath": 139.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/silicon-power-2tb-ssd-3d-nand-a55-slc/": {
   "price": 234.97,
   "atl": 169.99,
   "ath": 239.97,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/western-digital-2tb-wd-blue-sa510-sata/": {
   "price": 329.99,
   "atl": 84.61,
   "ath": 479.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/fanxiang-2tb-sata-ssd-2-5-ssd-sata-iii/": {
   "price": 229.99,
   "atl": 84.79,
   "ath": 229.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/kingspec-2tb-2-5-inch-sata-iii-internal/": {
   "price": 209.97,
   "atl": 197.97,
   "ath": 219.97,
   "buy": "typical",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/fanxiang-ssd-2tb-internal-solid-state/": {
   "price": 229.99,
   "atl": 58.49,
   "ath": 229.99,
   "buy": "typical",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/teamgroup-t-force-vulcan-z-2tb-slc-cache/": {
-  "price": 236.89,
+  "price": 237,
   "atl": 64.59,
   "ath": 257.99,
   "buy": "elevated",
@@ -1495,42 +1495,42 @@
   "atl": 120.62,
   "ath": 263.39,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/teamgroup-t-force-vulcan-z-2tb-slc-cache-2/": {
   "price": 224.99,
   "atl": 60.99,
   "ath": 245.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/centon-2tb-ssd-internal-solid-state-drive/": {
   "price": 217.99,
   "atl": 74.99,
   "ath": 253.99,
   "buy": "good",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/bestoss-2tb-sata-ssd-2-5-inch-internal/": {
   "price": 229.99,
   "atl": 109.99,
   "ath": 229.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/kingspec-oneboom-2tb-internal-ssd-2-5/": {
   "price": 185.97,
   "atl": 97.99,
   "ath": 219.97,
   "buy": "typical",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/teamgroup-qx-2tb-3d-nand-qlc-2-5-inch/": {
   "price": 219.89,
   "atl": 60.99,
   "ath": 229.99,
   "buy": "typical",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/samsung-ssd-860-evo-2tb-2-5-inch-sata/": {
   "price": 464.45,
@@ -1540,11 +1540,11 @@
   "indexable": true
  },
  "https://memradar.com/ssd/samsung-ssd-870-evo-sata-iii-2-5-1tb/": {
-  "price": 349.99,
+  "price": 337.91,
   "atl": 49.11,
   "ath": 498.84,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/samsung-870-qvo-sata-iii-ssd-2tb-2-5/": {
   "price": 487.95,
@@ -1561,10 +1561,10 @@
   "indexable": true
  },
  "https://memradar.com/ssd/pny-cs900-2tb-3d-nand-2-5-sata-iii/": {
-  "price": 229.99,
+  "price": 234.99,
   "atl": 60.99,
   "ath": 479.99,
-  "buy": "good",
+  "buy": "typical",
   "indexable": true
  },
  "https://memradar.com/ssd/fikwot-fn203-m-2-sata-ssd-slc-cache-1tb/": {
@@ -1572,7 +1572,7 @@
   "atl": 34.99,
   "ath": 199.99,
   "buy": "typical",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/samsung-870-evo-4tb-2-5-inch-sata-iii/": {
   "price": 1399.99,
@@ -1582,11 +1582,11 @@
   "indexable": true
  },
  "https://memradar.com/ssd/samsung-870-evo-sata-ssd-250gb-2-5/": {
-  "price": 173.58,
+  "price": 164.99,
   "atl": 28.49,
   "ath": 219.99,
-  "buy": "elevated",
-  "indexable": true
+  "buy": "typical",
+  "indexable": false
  },
  "https://memradar.com/ssd/samsung-870-qvo-sata-iii-ssd-8tb-2-5/": {
   "price": 1459.99,
@@ -1600,7 +1600,7 @@
   "atl": 2479.99,
   "ath": 4139.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/samsung-ssd-870-evo-500gb/": {
   "price": 309,
@@ -1621,7 +1621,7 @@
   "atl": 59,
   "ath": 439,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/samsung-870-evo-2tb-sata-2-5-internal-ssd/": {
   "price": 450,
@@ -1635,23 +1635,23 @@
   "atl": 34.45,
   "ath": 243.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/samsung-960-evo-series-250gb-pcie-nvme/": {
-  "price": 235.47,
+  "price": 237.63,
   "atl": 47.99,
   "ath": 249.11,
   "buy": "elevated",
   "indexable": true
  },
  "https://memradar.com/": {
-  "hash": "12fcf3618ec6b42579f26ab27672536f3c359deee390120296d76c0e043e898d"
+  "hash": "29b9c088de69bff7c1fb1d167b17ef63d26286cb5f9ff8559575cd5da9da24fd"
  },
  "https://memradar.com/ram/": {
-  "hash": "7a5be231c784679c0f5543e203e405692f130a403944540be751dc6927d0511f"
+  "hash": "296b65199afbc41288650df8fa6913dffcf0bfa3281f6c2e6a0b8672e236f684"
  },
  "https://memradar.com/ssd/": {
-  "hash": "d5e3fb2381f8d158cf6f31128fa57c6748b0d6b5e2c9f264d793c5d483cd70ce"
+  "hash": "ffdbe82e4a5c75627e2f3417417c6a3fc4d7a1e9d8cb6da3ffa8cd6823996d7f"
  },
  "https://memradar.com/about.html": {
   "hash": "3d528e181fc83843cfe62cbab744ec18871daa37c9c745c0d8e8c93c73346d42"
@@ -1669,16 +1669,16 @@
   "hash": "486a7d81c55ea559f9c4692b8e1607b858c6528921cd5badbd4437d3636e7449"
  },
  "https://memradar.com/guides/": {
-  "hash": "8ae374f02c40017c8bab51a75e30dbb982fdc0c05e8571efcc1cf0501eb88c0a"
+  "hash": "b2b3e5d095ec80eca34ace60c1e67f97b0db654b0b18f3b8556200c243c147e6"
  },
  "https://memradar.com/guides/should-i-buy-ram-now/": {
-  "hash": "27d2fd974deeaa796f2ac8f06ece2f66d23e35d5b76f1dd7b44979ad5a81ea36"
+  "hash": "a268a662faab201ef03632befcbce8b2f2cf5ceaa600028994c6158185c367e9"
  },
  "https://memradar.com/guides/should-i-buy-an-ssd-now/": {
-  "hash": "8e0d028c7cca7d9edaca85a44368a15892cc7c3b0b5eb5d79a9e4f4d6559a2c5"
+  "hash": "50efb0982e54dfdc44939441e9097e17b580d7deeda4ff8dd92ce1e68f501f78"
  },
  "https://memradar.com/price-index/": {
-  "hash": "1149c5e297cc138b1ea733bc5ea40e63c8540531e38d73eff6e511755cd2e180"
+  "hash": "db41ec129ca7e5115f1278ad6b19715c2af08dbdac0a38ba92682e136d72357a"
  },
  "https://memradar.com/faq/": {
   "hash": "1ea808f8f81afbe265541c3d6198a4dfa54f33a249bbf891fbae6baeb5ecff81"
@@ -1687,7 +1687,7 @@
   "hash": "c028668192548c75c3047fb3f04d37ea0c0ca9f9e5e0d4915ba78f20aba472fc"
  },
  "https://memradar.com/blog/why-ram-prices-are-so-high/": {
-  "hash": "52d34a54c99f386f244b09e0da5653baa360a4b2e7c627e84e6ee8e87f2f3dfa"
+  "hash": "15821f98812b1aabb56bf4458032c210522c60ec2bbc6baf535ba81e3c10d699"
  },
  "https://memradar.com/blog/is-prime-day-a-good-time-to-buy-ram/": {
   "hash": "77c5b92a3b32d82e3e111878043d5f89b9764cf27b112c346703d7cf1307774b"
@@ -1699,13 +1699,13 @@
   "hash": "e13a007bdccbfac383ef6fc53390dfe6b9c626b2072ea67e6e7188ef6de7cb4d"
  },
  "https://memradar.com/methodology/": {
-  "hash": "8d8b91d00eb5de9d7d60f8d97d8a4d266fc4f3912b10195ba346835aa68427c0"
+  "hash": "0aa968d14c619a6638eac83311905388be72c63a4f5390f1335fb432b3fccbbc"
  },
  "https://memradar.com/build-cost/": {
   "hash": "62b5df9360cf391b5e36b47938696598db82b04276a350b982f7f3f8b4f9a87f"
  },
  "https://memradar.com/data/": {
-  "hash": "1989e383a1e013ee15de06bc6f6ecddb6a4f18a89372d4ee9bdbab53787f65a7"
+  "hash": "18c961aa0bcb86f336ad88985d2f959804a1cddc84e8c271a2f3613949bcba8c"
  },
  "https://memradar.com/raycast/": {
   "hash": "be09c54595f20615f8a461cfd2f4eb7b9fca2b2ecd1868e37e740ebdf557f743"

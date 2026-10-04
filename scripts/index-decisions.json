@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-03",
+ "generated": "2026-10-04",
  "rule": "requiredByBuild(p) || (healthy(p) && gatesPass(p))",
  "switches": {
   "GATES_ENABLED": true,
@@ -11,8 +11,8 @@
  "rule_order": "requiredByBuild wins outright. Otherwise: healthy AND not hard excluded AND ((readings >= KEEP_MIN_READINGS AND a fact gate) OR google impressions >= IMPRESSION_FLOOR OR bing AI citations >= CITATION_FLOOR). Both demand terms are admit-only. Hard exclusions are below_min_readings, long_term_unavailable, duplicate_variant, gsc_crawled_not_indexed and family_duplicate; sparse_history is informational and does not block either demand term. The family rule carves out members above EITHER demand floor, so a heavily cited or heavily shown family member is never marked family_duplicate.",
  "note": "Reason codes are recorded for every page whether or not they bind under the current switches, so this file reads the same shape before and after the gates go live. Written by scripts/generate-product-pages.js; do not hand-edit. NO FIELD HERE CHANGES WITHOUT A DECISION CHANGING: per-page reading counts and stale-day counts were deliberately dropped because they move every single day and would have rewritten all 235 records nightly, burying the handful of lines that mean something. Readings still decide the outcome through the long_history and sparse_history codes, and staleness through long_term_unavailable, which move only when a threshold is actually crossed. So a diff on this file is a diff worth reading: a verdict flipped, a reason appeared or went, a family winner moved, or the impressions input was replaced.",
  "counts": {
-  "indexable": 81,
-  "noindex": 154
+  "indexable": 80,
+  "noindex": 155
  },
  "pages": {
   "ram/16gb-1x16gb-ddr4-2666mhz-pc4-21300-2rx8": {
@@ -231,8 +231,7 @@
    "bing_citations": 0,
    "reasons": [
     "required_by_build",
-    "sparse_history",
-    "percentile_extreme"
+    "sparse_history"
    ]
   },
   "ram/corsair-vengeance-ddr5-ram-32gb-6000mhz-2": {
@@ -778,7 +777,6 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
-    "percentile_extreme",
     "pre2021_history",
     "pergb_group_end"
    ]
@@ -915,14 +913,15 @@
   },
   "ram/g-skill-trident-z5-rgb-32gb-2-x-16gb": {
    "sku": "B0BQWXTDWN",
-   "indexable": false,
+   "indexable": true,
    "first_tracked": "2023-07-03",
    "google_impressions": 4,
    "google_position": 12.75,
    "bing_impressions": 0,
    "bing_citations": 1,
    "reasons": [
-    "long_history"
+    "long_history",
+    "percentile_extreme"
    ]
   },
   "ram/g-skill-trident-z5-rgb-series-ddr5-ram-16gb-6000mhz": {
@@ -1138,8 +1137,7 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history",
-    "percentile_extreme"
+    "sparse_history"
    ]
   },
   "ram/kingston-fury-beast-rgb-64gb-6400mhz": {
@@ -1390,8 +1388,7 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
-    "gsc_crawled_not_indexed",
-    "percentile_extreme"
+    "gsc_crawled_not_indexed"
    ]
   },
   "ram/silicon-power-ddr5-64gb-6000mhz": {
@@ -1891,15 +1888,14 @@
   },
   "ssd/crucial-t500-pcie-gen4-nvme-500gb-ssd": {
    "sku": "B0CK2R8YLY",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2023-10-31",
    "google_impressions": 26,
    "google_position": 17.19,
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "long_history",
-    "percentile_extreme"
+    "long_history"
    ]
   },
   "ssd/crucial-t705-pcie-gen5-nvme-1tb-ssd": {
@@ -2236,15 +2232,14 @@
   },
   "ssd/samsung-870-evo-sata-ssd-250gb-2-5": {
    "sku": "B08QBN5J9B",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2021-01-19",
    "google_impressions": 24,
    "google_position": 21.12,
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "long_history",
-    "percentile_extreme"
+    "long_history"
    ]
   },
   "ssd/samsung-870-evo-sata-ssd-500gb-2-5": {
@@ -2646,7 +2641,8 @@
    "bing_citations": 0,
    "reasons": [
     "gsc_crawled_not_indexed",
-    "long_history"
+    "long_history",
+    "percentile_extreme"
    ]
   },
   "ssd/silicon-power-2tb-ssd-3d-nand-a55-slc": {
@@ -2659,8 +2655,7 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
-    "gsc_crawled_not_indexed",
-    "percentile_extreme"
+    "gsc_crawled_not_indexed"
    ]
   },
   "ssd/silicon-power-2tb-ud90-nvme-4-0-gen4-pcie": {
@@ -2684,7 +2679,8 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "percentile_extreme"
    ]
   },
   "ssd/six-nvme-m-2-ssd-pcie-4-0-1tb-m-2-2280": {
