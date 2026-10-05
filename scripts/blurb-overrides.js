@@ -23,13 +23,35 @@
 // by the generator from the GUIDES registry, so a retitled guide follows
 // automatically and no blurb ever contains markup.
 //
-// These are product-line level by design; SKU-specific numbers (capacity,
-// speed, CL, colour) live on the generated spec line.
+// Two kinds of blurb live here. Product-line blurbs describe the kit or drive.
+// Price-record blurbs annotate what MemRadar has recorded for one listing.
+// SKU-specific numbers (capacity, speed, CL, colour) still live on the
+// generated spec line.
 //
 // Rendered as "About this kit" / "About this drive" only on pages with an
 // entry. Pages without one render nothing, no placeholder. Static prose:
-// nothing here hydrates, and no blurb carries a price or a price figure,
-// because the page already has both and prose quoting them would go stale.
+// nothing here hydrates.
+//
+// What a blurb may say about price (rule set 2026-10-04):
+//   ALLOWED: a recorded price on a named date; a change between two named
+//   dates with both prices; a median for a completed calendar year, or for
+//   the tracked portion of a year when stated as such; a verdict from
+//   ath-classification.json about a named date, in the file's own terms.
+//   NOT ALLOWED: current prices, ranks, cheapest or most expensive,
+//   all-time high or low as a standing status, counts or shares over the
+//   whole history, family position, catalogue comparisons, retailer stock
+//   state, and anything from an incomplete year stated as a year figure.
+//   Do not upgrade an observation into a stronger claim. "No in-stock
+//   observation between X and Y" is allowed; "there was no stock" is not.
+//   "Amazon had no offer on DATE" only where the classification file says
+//   so. Do not infer causes, demand, shortages or product quality from
+//   price movements. Product facts come from the raw title, attributed to
+//   the listing.
+//   Title-derived product facts are a separate maintenance category. They
+//   reflect the raw title as stored when the blurb was written and can go
+//   stale if the listing title changes. Price-record claims written in the
+//   allowed dated or closed-interval forms above do not stale as new data
+//   arrives.
 module.exports = {
   // Corsair Vengeance RGB DDR5 32GB 6000
   // /ram/corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz-4/
@@ -102,7 +124,7 @@ module.exports = {
   B0CN92HXZL: 'The laptop upgrade most people actually need: 32GB across two SODIMMs at 5600, the capacity that turns a 16GB machine from adequate into comfortable. JEDEC speed, no profiles, works in any DDR5 laptop or mini PC with two free slots. The single check that matters is whether your machine\'s memory is soldered; if it is, no kit on this site will help. If it is socketed, this is the plain, reliable option.',
   // Crucial 64GB DDR5 4800 kit
   // /ram/crucial-64gb-ddr5-ram-kit-4800mhz/
-  B09HW6ZJV5: '4800 is DDR5\'s base speed, and this kit is the cheapest route to 64GB of it. It is for capacity-first machines where memory speed barely registers: home servers, virtualization boxes, a workstation that runs out of memory before it runs out of bandwidth. Runs at spec with nothing to enable. For a gaming or Ryzen build, the same money on a faster 32GB kit is usually the better spend; for a machine that just needs room, this is the right shape.',
+  B09HW6ZJV5: '4800 is DDR5\'s base speed, and this kit pairs it with 64GB of capacity. It is for capacity-first machines where memory speed barely registers: home servers, virtualization boxes, a workstation that runs out of memory before it runs out of bandwidth. Runs at spec with nothing to enable. For a gaming or Ryzen build, the same money on a faster 32GB kit is usually the better spend; for a machine that just needs room, this is the right shape.',
   // G.Skill Flare X5 32GB 6000
   // /ram/g-skill-flare-x5-series-ddr5-ram-32gb-6000mhz/
   B0BFGB2D2Z: 'If there is one canonical AM5 memory kit, it is a 32GB Flare X5 at 6000: EXPO out of the box, low enough to clear any cooler, no lighting, and the speed and capacity most Ryzen 7000 and 9000 builders settle on. It is what gets recommended when someone asks "just tell me what to buy." The CL bin on the spec line is the only thing that varies between listings; the lower one is nicer, the higher one is usually the value.',
