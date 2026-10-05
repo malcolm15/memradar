@@ -249,8 +249,31 @@ jobs:
           echo "result=$line" >> "$GITHUB_OUTPUT"
           exit 0
 
+      # Reads the generator's OWN LLMS_SOURCE line, not a fresh check, for the
+      # same reason the stats-freshness step reads STATS_SOURCE: it reports what
+      # the run actually did. continue-on-error and a script that exits 0 on
+      # every path, because a reporting step must never redden a regen whose
+      # prices were fine. It writes `result` on EVERY path, so the llms object
+      # always reaches the SUMMARY below: a field present only on the
+      # interesting paths is one you cannot trust when it is absent, which is
+      # the whole lesson of the 2026-10-04 freeze.
+      - name: Check llms.txt rebuilt
+        id: llmscheck
+        if: always()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REGEN_LOG: ${{ runner.temp }}/regen.log
+        run: |
+          gh label list --repo "$GITHUB_REPOSITORY" --json name --jq '.[].name' | grep -qx llms-freshness || \
+            gh label create llms-freshness --color C5DEF5 \
+              --description "llms.txt failed to rebuild on consecutive regens" \
+              --repo "$GITHUB_REPOSITORY"
+          node scripts/llms-skip-issue.js --confirm
+
       - name: Summary
         env:
           INDEXNOW: ${{ steps.indexnow.outputs.result }}
+          LLMS: ${{ steps.llmscheck.outputs.result }}
         run: |
-          echo "SUMMARY {\"job\":\"regenerate-pages\",\"committed\":${{ steps.commit.outputs.committed }},\"pages_changed\":${{ steps.commit.outputs.pages_changed }},\"indexnow\":${INDEXNOW:-null}}"
+          echo "SUMMARY {\"job\":\"regenerate-pages\",\"committed\":${{ steps.commit.outputs.committed }},\"pages_changed\":${{ steps.commit.outputs.pages_changed }},\"indexnow\":${INDEXNOW:-null},\"llms\":${LLMS:-null}}"

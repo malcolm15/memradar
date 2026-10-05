@@ -701,6 +701,7 @@ function findOrphans(generable) {
 }
 const ORPHAN_ALARM = 10;
 const GENERATOR_STREAK_KEY = 'generator_failure_streaks';
+const LLMS_SKIP_KEY = 'llms_skip_streak';
 
 async function preflight() {
   const problems = [];
@@ -6833,9 +6834,11 @@ async function run() {
   // file this run just produced. Skippable like every other content build: a
   // failure here must not take a day's prices with it, and yesterday's llms.txt
   // is still an accurate description of the site.
+  let llmsSkipReason = null;
   if (!IS_SAMPLE) {
     if (!dataFindings || !csvBounds) {
-      log('⚠ /llms.txt NOT regenerated: it needs the /data/ findings and the monthly CSV bounds, and one of them did not build this run');
+      llmsSkipReason = 'it needs the /data/ findings and the monthly CSV bounds, and one of them did not build this run';
+      log(`\u26a0 /llms.txt NOT regenerated: ${llmsSkipReason}`);
     } else {
       try {
         const l = buildLlmsTxt({
@@ -6848,9 +6851,39 @@ async function run() {
         fs.writeFileSync(LLMS_OUTPUT_PATH, l.text);
         log(`llms.txt written: ${l.findings} findings, ${l.examples.length} product examples (${l.examples.map((e) => e.sku).join(', ')}), CSV from ${csvBounds.first}`);
       } catch (e) {
-        log(`⚠ /llms.txt NOT regenerated: ${e.message}`);
+        llmsSkipReason = e.message;
+        log(`\u26a0 /llms.txt NOT regenerated: ${e.message}`);
       }
     }
+
+    // MACHINE-READABLE, because the warning above lived only in a log that
+    // expires with the 90-day Actions retention and nothing else recorded it.
+    // Two consecutive regens skipped llms.txt on 2026-10-04 and 10-05 and every
+    // rung of the observability ladder stayed green: this function catches its
+    // own error and exits 0, so the job's `set -euo pipefail` never sees it, the
+    // GENERATION SUMMARY has no llms field, the job SUMMARY had none, no issue
+    // script read it, and the supervisor has no reference to it.
+    //
+    // THE STREAK IS PERSISTED, not derived from the log, because the question is
+    // "has this failed twice RUNNING" and a single run cannot answer it. Same
+    // store as generator_failure_streaks, cleared by any successful write so a
+    // streak cannot outlive the fault.
+    let llmsStreak = null;
+    try {
+      const prior = Number((await getState(LLMS_SKIP_KEY, 0)) || 0);
+      llmsStreak = llmsSkipReason ? prior + 1 : 0;
+      if (llmsStreak !== prior) await setState(LLMS_SKIP_KEY, llmsStreak);
+    } catch (e) {
+      // Tracking is diagnostics and must never fail an otherwise-good build,
+      // the rule the failure-streak tracker already follows. A null streak is
+      // reported as unknown rather than guessed at.
+      log(`\u26a0 llms.txt skip tracking failed: ${e.message}`);
+    }
+    console.log(`LLMS_SOURCE ${JSON.stringify({
+      written: !llmsSkipReason,
+      reason: llmsSkipReason || null,
+      consecutive_skips: llmsStreak,
+    })}`);
   }
 
   // IndexNow material list. Written AFTER the sitemap, because the sitemap is
