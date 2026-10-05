@@ -5009,12 +5009,37 @@ const LLMS_OUTPUT_PATH = path.join(FRONTEND, 'llms.txt');
 // tell crawlers not to index.
 const LLMS_EXAMPLE_SKUS = ['B0CJ8ZHMVF', 'B01LYFKX41'];
 
-// Lifted from the BUILT page, never recomputed. The whole point of an example
-// is that a reader can check it against the page, and a second computation is
-// exactly how the two drift apart: the Corsair's current price moved by a cent
-// between two readings on 2026-09-22 while this was being written.
-function exampleFromBuiltPage(product) {
-  const file = path.join(FRONTEND, product.category, product.slug, 'index.html');
+// EVERY VALUE COMES FROM THE BUILD OBJECT. The page is read exactly ONCE, for
+// the robots-meta presence test, and nothing else is taken out of HTML.
+//
+// This replaced a scrape on 2026-10-05, after it froze llms.txt for two
+// consecutive regens. Its price read was a regex for a JSON-LD price key over
+// the whole document. That key existed only until the aggregate shape removed
+// it on 2026-10-04; afterwards the regex found NOTHING on a single-retailer
+// page, which threw, and on a two-retailer page it found the FIRST PEER'S PRICE
+// inside #pdpHydrateConfig. A regex over a whole page cannot say which field it
+// matched. The three label scrapes for First tracked, All-time low and All-time
+// high had the same defect waiting on any milestone rewording.
+//
+// READING p.stats IS NOT THE "SECOND COMPUTATION" THE OLD COMMENT WARNED ABOUT.
+// buildPage formats these same fields from this same object in this same run,
+// through these same money() and longDate() helpers, so the file and the page
+// agree by construction rather than by a regex agreeing with a template.
+function exampleFromProduct(product) {
+  const slug = product.finalSlug || product.slug;
+  const s = product.stats;
+  if (!s || s.current == null) throw new Error(`llms.txt example ${product.sku}: no current price on the build object`);
+  if (!s.atl || !s.ath) throw new Error(`llms.txt example ${product.sku}: no all-time low or high on the build object`);
+  if (!s.firstDay) throw new Error(`llms.txt example ${product.sku}: no firstDay on the build object`);
+  if (!product._titleName) throw new Error(`llms.txt example ${product.sku}: no _titleName on the build object`);
+
+  // THE ONE READ OF THE BUILT PAGE, and deliberately a presence test rather than
+  // a field read: it proves the published artifact carries the robots tag the
+  // rule decided on, which an in-memory flag cannot. Keep it narrow. The path
+  // uses finalSlug, the field buildPage writes to; the old code used
+  // product.slug for both the path and the url, which is wrong for any product
+  // whose slug was computed this run rather than stored.
+  const file = path.join(FRONTEND, product.category, slug, 'index.html');
   let html;
   try {
     html = fs.readFileSync(file, 'utf8');
@@ -5024,24 +5049,16 @@ function exampleFromBuiltPage(product) {
   if (/<meta name="robots" content="[^"]*noindex/.test(html)) {
     throw new Error(`llms.txt example ${product.sku} is noindex; requiredByBuild() is meant to make that impossible, so either the pin is not registered there or the rule changed under it`);
   }
-  const flat = html.replace(/<script[\s\S]*?<\/script>/g, '').replace(/\s+/g, ' ').replace(/<[^>]+>/g, '|');
-  const pick = (label) => {
-    const m = new RegExp(label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\|+([^|]+)').exec(flat);
-    return m ? m[1].trim() : null;
+
+  return {
+    h1: product._titleName,
+    firstTracked: longDate(s.firstDay),
+    atl: `${money(s.atl.price)} on ${longDate(s.atl.day)}`,
+    ath: `${money(s.ath.price)} on ${longDate(s.ath.day)}`,
+    price: s.current,
+    url: `${SITE}/${product.category}/${slug}/`,
+    sku: product.sku,
   };
-  const h1m = /<h1[^>]*>([\s\S]*?)<\/h1>/.exec(html);
-  const h1 = h1m ? h1m[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim() : null;
-  const priceM = /"price":\s*"?([\d.]+)/.exec(html);
-  const fields = {
-    h1,
-    firstTracked: pick('First tracked'),
-    atl: pick('All-time low'),
-    ath: pick('All-time high'),
-    price: priceM ? priceM[1] : null,
-  };
-  const missing = Object.keys(fields).filter((k) => !fields[k]);
-  if (missing.length) throw new Error(`llms.txt example ${product.sku}: could not read ${missing.join(', ')} from its built page`);
-  return { ...fields, url: `${SITE}/${product.category}/${product.slug}/`, sku: product.sku };
 }
 
 function buildLlmsTxt(ctx) {
@@ -5052,14 +5069,14 @@ function buildLlmsTxt(ctx) {
   const examples = LLMS_EXAMPLE_SKUS.map((sku) => {
     const p = bySku.get(sku);
     if (!p) throw new Error(`llms.txt example ${sku} is not in the catalog; pick another or remove it`);
-    const ex = exampleFromBuiltPage(p);
+    const ex = exampleFromProduct(p);
     if (!inSitemap.has(ex.url)) throw new Error(`llms.txt example ${sku} (${ex.url}) is not in the sitemap; it must not be quoted as an example`);
     return ex;
   });
 
   const exampleText = examples.map((e) => [
     `- ${e.h1} (${e.sku}), ${e.url}`,
-    `  First tracked ${e.firstTracked}. All-time low ${e.atl}. All-time high ${e.ath}. Current price ${money(Number(e.price))}.`,
+    `  First tracked ${e.firstTracked}. All-time low ${e.atl}. All-time high ${e.ath}. Current price ${money(e.price)}.`,
   ].join('\n')).join('\n\n');
 
   // The findings, as sentences, with their dates. Same items, same order and
