@@ -1,28 +1,44 @@
 {
   "schema_version": 1,
   "generated": "2026-10-05",
-  "scope": "The 30 tracked products whose all-time high exceeds 1.5x the stored list price on the ATH day. Selected from the database; verdicts from one Keepa call. PLUS two added 2026-10-05 for blurb provenance, OUTSIDE the 1.5x rule: B0BHJDY57J and B0DHLCRF91, the two highest-demand kept pages that had no blurb and no verdict on file. Their ratio reads 1.0 because the stored list price on an ATH day is the 90-day maximum, which on the day a high is set equals the high itself, so the ratio carries no information for them and is not why they were classified.",
-  "note": "Verdicts are NEVER re-derived. A later run appends new ASINs or updates an existing one in place, keyed by ASIN. Nothing in the generator or any display path reads this file yet; per-class display rules are an October checkpoint decision. Not hand-edited.",
+  "note": "The file holds MULTIPLE EXPLICITLY LABELLED SELECTIONS. Membership alone means nothing: an ASIN being present says only that somebody classified it, not that it met any threshold. Any reader must filter on the per-entry `selection` field, and any count must come from the matching block in `selections` rather than from the whole file. Verdicts are NEVER re-derived. A later run appends new ASINs or updates an existing one in place, keyed by ASIN, and must give every new entry a selection. Nothing in the generator or any display path reads this file yet; per-class display rules are an October checkpoint decision. Not hand-edited.",
   "classes": {
     "a": "genuine Amazon first-party high. The AMAZON series (csv[0]) carries the ATH.",
     "b": "marketplace-only spike. Amazon had no offer (or a different price) and the NEW series (csv[1]) carries the ATH.",
     "c": "data artifact or unexplained. No requested series sits within 2% of the stored ATH."
   },
   "rule": "For each product, find the stored ATH value in the requested series ON the ATH UTC day. AMAZON (csv[0]) carrying it within 2% gives (a); AMAZON absent or holding no offer while NEW (csv[1]) carries it gives (b); otherwise (c). NOTE: the first pass read only the value in effect at the END of the day and mis-sorted two rows into (c); the full intraday series is authoritative, because a day can close on a -1 or on a different price than the one our fetch recorded.",
+  "selections": {
+    "ratio_ge_1_5": {
+      "description": "The 30 tracked products whose all-time high exceeds 1.5x the stored list price on the ATH day. Selected from the database; verdicts from one Keepa call.",
+      "counts": {
+        "a": 2,
+        "b": 28,
+        "c": 0,
+        "total": 30
+      },
+      "tokens_spent": 32
+    },
+    "blurb_provenance": {
+      "description": "ATH classified for a named product so a blurb can state what the recorded high was. NOT a sample of any band and not evidence about one: these entries were picked because a page needed provenance, nothing else. Their ratio reads 1.0 by construction, because the list price stored for an ATH day is the 90-day maximum, which on the day a high is set equals the high itself.",
+      "counts": {
+        "a": 2,
+        "b": 0,
+        "c": 0,
+        "total": 2
+      },
+      "tokens_spent": 2
+    }
+  },
+  "tokens_spent_total": 34,
   "caveats": [
     "csv[18] BUY_BOX_SHIPPING is null on every row because backend/lib/keepa.js does not request it: fetchBatch sends only key, domain, asin, stats and history, and Keepa returns buy box history only when asked. A null here means NOT REQUESTED, never \"no buy box offer\".",
     "amazon_no_offer true means csv[0] existed and its value in effect was -1, which is a real \"Amazon had no offer\" reading rather than a missing series.",
     "Pre-2019 ATH days (four rows) sit in backfilled history, where CLAUDE.md warns the list price is frozen and the marketplace heuristic does not apply. Their class here rests on the Keepa series, not on the ratio.",
     "Keepa records a price only when it CHANGES, so the value in effect at end of day is usually a level that had held for some time rather than a same-day observation.",
     "RESOLVED 2026-09-30: the two rows first reported (c) are both (b). The end-of-day-only reading was the fault, not the data. Raw Keepa responses are now saved to the scratchpad BEFORE parsing, so re-reading a response costs no tokens.",
-    "Two entries added 2026-10-05 (B0BHJDY57J, B0DHLCRF91) sit outside the 1.5x selection rule and were classified on request for blurb provenance. Both are class (a): Amazon's own series carried the high. Their list_price equals their ath_price for the structural reason given in scope, so do not read their ratio as evidence of anything."
+    "The two `blurb_provenance` entries (B0BHJDY57J, B0DHLCRF91) are both class (a): Amazon's own series carried the high. They are NEVER part of the ratio_ge_1_5 denominator, and their ratio is not evidence of anything, for the reason given in that selection's description."
   ],
-  "tokens_spent": 34,
-  "counts": {
-    "a": 4,
-    "b": 28,
-    "c": 0
-  },
   "products": {
     "B0B9C4DKKG": {
       "name": "Samsung 990 PRO NVMe M.2 SSD, 2 TB, PCIe 4.0, 7,450 MB/s Read, 6,900 MB/s Write, Internal SSD, for Gaming and Video Editing, MZ-V9P2T0BW",
@@ -37,7 +53,8 @@
       "csv_amazon": null,
       "csv_new": 1299.99,
       "csv_buybox": null,
-      "amazon_no_offer": true
+      "amazon_no_offer": true,
+      "selection": "ratio_ge_1_5"
     },
     "B0BJ7X9P1W": {
       "name": "Trident Z5 RGB Series DDR5 RAM (Intel XMP 3.0) 64GB (2x32GB) 6400MT/s CL32-39-39-102 1.40V Desktop Computer Memory U-DIMM - Matte Black (F5-6400J3239G32GX2-TZ5RK)",
@@ -52,7 +69,8 @@
       "csv_amazon": null,
       "csv_new": 1299.99,
       "csv_buybox": null,
-      "amazon_no_offer": true
+      "amazon_no_offer": true,
+      "selection": "ratio_ge_1_5"
     },
     "B0BJP3MRW1": {
       "name": "G.SKILL Trident Z5 Neo Series DDR5 RAM (AMD EXPO) 64GB (2x32GB) 6000MT/s CL30-40-40-96 1.40V Desktop Computer Memory U-DIMM - Matte Black (F5-6000J3040G32GX2-TZ5N)",
@@ -67,7 +85,8 @@
       "csv_amazon": null,
       "csv_new": 1199.99,
       "csv_buybox": null,
-      "amazon_no_offer": true
+      "amazon_no_offer": true,
+      "selection": "ratio_ge_1_5"
     },
     "B0BJNTLJ5X": {
       "name": "G.SKILL Trident Z5 Neo RGB Series DDR5 RAM (AMD EXPO) 64GB (2x32GB) 6000MT/s CL30-40-40-96 1.40V Desktop Computer Memory U-DIMM - Matte Black (F5-6000J3040G32GX2-TZ5NR)",
@@ -82,7 +101,8 @@
       "csv_amazon": null,
       "csv_new": 1149.99,
       "csv_buybox": null,
-      "amazon_no_offer": true
+      "amazon_no_offer": true,
+      "selection": "ratio_ge_1_5"
     },
     "B0BNTRRLYP": {
       "name": "TEAMGROUP T-Force Vulcan DDR5 32GB (2x16GB) 6000MHz (PC5-48000) CL38 Desktop Memory Module Ram (Black) for Chipset 600 700 Series XMP 3.0 Ready - FLBD532G6000HC38ADC01",
@@ -97,7 +117,8 @@
       "csv_amazon": null,
       "csv_new": 489.99,
       "csv_buybox": null,
-      "amazon_no_offer": true
+      "amazon_no_offer": true,
+      "selection": "ratio_ge_1_5"
     },
     "B0BF8MP83M": {
       "name": "Trident Z5 Neo RGB Series DDR5 RAM (AMD EXPO) 32GB (2x16GB) 6000MT/s CL32-38-38-96 1.35V Desktop Computer Memory U-DIMM - Matte Black (F5-6000J3238F16GX2-TZ5NR)",
@@ -112,7 +133,8 @@
       "csv_amazon": null,
       "csv_new": 599.99,
       "csv_buybox": null,
-      "amazon_no_offer": true
+      "amazon_no_offer": true,
+      "selection": "ratio_ge_1_5"
     },
     "B0BNXXFSBR": {
       "name": "RAM 16GB DDR5 5200MHz (or 4800MHz) Laptop Memory CT16G52C42S5, Black",
@@ -127,7 +149,8 @@
       "csv_amazon": null,
       "csv_new": 249.99,
       "csv_buybox": null,
-      "amazon_no_offer": true
+      "amazon_no_offer": true,
+      "selection": "ratio_ge_1_5"
     },
     "B0CK2R8YLY": {
       "name": "T500 PCIe Gen4 NVMe 500GB SSD, Up to 7,200MB/s, TLC NAND, Laptop & Desktop (PC) Compatible, for Creatives and Gamers, Solid State Drive, Includes 1-Mo Adobe Creative Cloud – CT500T500SSD8",
@@ -142,7 +165,8 @@
       "csv_amazon": null,
       "csv_new": 400,
       "csv_buybox": null,
-      "amazon_no_offer": true
+      "amazon_no_offer": true,
+      "selection": "ratio_ge_1_5"
     },
     "B0GQCJ2D3D": {
       "name": "CORSAIR Vengeance RGB RS DDR5 RAM 16GB (2x8GB) Up to 5200MHz CL40-40-40-77 1.25V AMD EXPO Intel XMP Computer Desktop Memory – Gray (CMG16GX5M2B5200Z40)",
@@ -157,7 +181,8 @@
       "csv_amazon": null,
       "csv_new": 680.7,
       "csv_buybox": null,
-      "amazon_no_offer": true
+      "amazon_no_offer": true,
+      "selection": "ratio_ge_1_5"
     },
     "B0BF6ZQ8MY": {
       "name": "Trident Z5 Neo RGB Series DDR5 RAM (AMD EXPO & Intel XMP 3.0) 32GB (2x16GB) 6000MT/s CL36-36-36-96 1.35V Desktop Computer Memory U-DIMM - Matte Black (F5-6000J3636F16GX2-TZ5NR)",
@@ -172,7 +197,8 @@
       "csv_amazon": null,
       "csv_new": 519.99,
       "csv_buybox": null,
-      "amazon_no_offer": true
+      "amazon_no_offer": true,
+      "selection": "ratio_ge_1_5"
     },
     "B08PC43D78": {
       "name": "SSD 870 EVO, 500 GB, Form Factor 2.5”, Intelligent Turbo Write, Magician 6 Software, Black",
@@ -187,7 +213,8 @@
       "csv_amazon": null,
       "csv_new": 310.52,
       "csv_buybox": null,
-      "amazon_no_offer": true
+      "amazon_no_offer": true,
+      "selection": "ratio_ge_1_5"
     },
     "B0DCGFCHXF": {
       "name": "FURY Beast RGB 16GB 6000MT/s DDR5 CL36 Desktop Memory | AMD EXPO | Single Module | KF560C36BBE2A-16",
@@ -203,7 +230,8 @@
       "csv_new": 673.25,
       "csv_buybox": null,
       "amazon_no_offer": true,
-      "keepa_resolved_at": "2026-09-30T21:52:00Z"
+      "keepa_resolved_at": "2026-09-30T21:52:00Z",
+      "selection": "ratio_ge_1_5"
     },
     "B0CYM3TYCR": {
       "name": "FURY Beast RGB 8GB 6000MT/s DDR5 CL30 Desktop Memory | AMD EXPO | Single Module | KF560C30BBEA-8",
@@ -218,7 +246,8 @@
       "csv_amazon": null,
       "csv_new": 409.95,
       "csv_buybox": null,
-      "amazon_no_offer": true
+      "amazon_no_offer": true,
+      "selection": "ratio_ge_1_5"
     },
     "B0D9WTKV1B": {
       "name": "WD_Black SN850X 4TB NVMe SSD with Heatsink - M.2 2280, Up to 7,300 MB/s Read speeds, Up to 6,300 MB/s Write speeds, Gaming Expansion, High Performance Internal Solid State Drive - WDS400T2XHE",
@@ -233,7 +262,8 @@
       "csv_amazon": 1249.99,
       "csv_new": 699.9,
       "csv_buybox": null,
-      "amazon_no_offer": false
+      "amazon_no_offer": false,
+      "selection": "ratio_ge_1_5"
     },
     "B0786QNSBD": {
       "name": "Samsung SSD 860 EVO 2TB 2.5 Inch SATA III Internal SSD (MZ-76E2T0B/AM)",
@@ -248,7 +278,8 @@
       "csv_amazon": null,
       "csv_new": 896.95,
       "csv_buybox": null,
-      "amazon_no_offer": true
+      "amazon_no_offer": true,
+      "selection": "ratio_ge_1_5"
     },
     "B09KCLP63B": {
       "name": "FURY Beast 32GB (2x16GB) 5200MT/s DDR5 CL40 Desktop Memory | Intel XMP 3.0 | Kit of 2 | KF552C40BBK2-32",
@@ -263,7 +294,8 @@
       "csv_amazon": null,
       "csv_new": 999,
       "csv_buybox": null,
-      "amazon_no_offer": true
+      "amazon_no_offer": true,
+      "selection": "ratio_ge_1_5"
     },
     "B09HW6ZJV5": {
       "name": "Crucial 64GB DDR5 RAM Kit (2x32GB), 4800MHz CL40 Desktop Memory, UDIMM 288-Pin, Compatible with 13th Gen Intel Core and AMD Ryzen 7000 - CT2K32G48C40U5",
@@ -278,7 +310,8 @@
       "csv_amazon": null,
       "csv_new": 1048,
       "csv_buybox": null,
-      "amazon_no_offer": true
+      "amazon_no_offer": true,
+      "selection": "ratio_ge_1_5"
     },
     "B0C79H54TQ": {
       "name": "Crucial Pro 64GB DDR5 RAM Kit (2x32GB), 5600MHz (or 5200MHz or 4800MHz) Desktop Memory UDIMM 288-pin, Compatible with 13th Gen Intel Core and AMD Ryzen 7000 - CP2K32G56C46U5",
@@ -293,7 +326,8 @@
       "csv_amazon": null,
       "csv_new": 1087.99,
       "csv_buybox": null,
-      "amazon_no_offer": true
+      "amazon_no_offer": true,
+      "selection": "ratio_ge_1_5"
     },
     "B09HW9886B": {
       "name": "Crucial 32GB DDR5 RAM Kit (2x16GB), 4800MHz (PC5-38400) CL40 Desktop Memory, UDIMM 288-Pin, Compatible with 13th Gen Intel Core and AMD Ryzen 7000 - CT2K16G48C40U5",
@@ -308,7 +342,8 @@
       "csv_amazon": null,
       "csv_new": 529,
       "csv_buybox": null,
-      "amazon_no_offer": true
+      "amazon_no_offer": true,
+      "selection": "ratio_ge_1_5"
     },
     "B07GCL6BR4": {
       "name": "Intel 660p Series M.2 2280 1TB PCIe NVMe 3.0 x4 3D2, QLC Internal Solid State Drive (SSD) SSDPEKNW010T8X1",
@@ -323,7 +358,8 @@
       "csv_amazon": null,
       "csv_new": 268.47,
       "csv_buybox": null,
-      "amazon_no_offer": true
+      "amazon_no_offer": true,
+      "selection": "ratio_ge_1_5"
     },
     "B0171GQR0C": {
       "name": "G.SKILL RipjawsV Series DDR4 RAM (XMP) 32GB (2x16GB) 3200MT/s CL16-18-18-38 1.35V Intel AMD Desktop Computer Memory U-DIMM - Black (F4-3200C16D-32GVK)",
@@ -338,7 +374,8 @@
       "csv_amazon": null,
       "csv_new": 439.78,
       "csv_buybox": null,
-      "amazon_no_offer": true
+      "amazon_no_offer": true,
+      "selection": "ratio_ge_1_5"
     },
     "B0171GQXME": {
       "name": "G.SKILL RipjawsV Series DDR4 RAM (XMP) 16GB (1x16GB) 3200MT/s CL16-18-18-38 1.35V Intel AMD Desktop Computer Memory U-DIMM - Black (F4-3200C16S-16GVK)",
@@ -353,7 +390,8 @@
       "csv_amazon": null,
       "csv_new": 237.42,
       "csv_buybox": null,
-      "amazon_no_offer": true
+      "amazon_no_offer": true,
+      "selection": "ratio_ge_1_5"
     },
     "B08GB8S6R3": {
       "name": "PNY CS900 2TB 3D NAND 2.5\" SATA III Internal Solid State Drive (SSD) - (SSD7CS900-2TB-RB)",
@@ -368,7 +406,8 @@
       "csv_amazon": null,
       "csv_new": 479.99,
       "csv_buybox": null,
-      "amazon_no_offer": true
+      "amazon_no_offer": true,
+      "selection": "ratio_ge_1_5"
     },
     "B09DVRBNWV": {
       "name": "Western Digital 2TB WD Green SN350 NVMe Internal SSD Solid State Drive - Gen3 PCIe, QLC, M.2 2280, Up to 3,200 MB/s - WDS200T3G0C",
@@ -383,7 +422,8 @@
       "csv_amazon": null,
       "csv_new": 441.42,
       "csv_buybox": null,
-      "amazon_no_offer": true
+      "amazon_no_offer": true,
+      "selection": "ratio_ge_1_5"
     },
     "B0C14TF467": {
       "name": "Western Digital 2TB WD Blue SA510 SATA Internal Solid State Drive SSD - SATA III 6 Gb/s, 2.5\"/7mm, Up to 560 MB/s - WDS200T3B0A",
@@ -398,7 +438,8 @@
       "csv_amazon": 479.99,
       "csv_new": 259,
       "csv_buybox": null,
-      "amazon_no_offer": false
+      "amazon_no_offer": false,
+      "selection": "ratio_ge_1_5"
     },
     "B09HW2JNHX": {
       "name": "Crucial 16GB DDR5 RAM, 4800MHz CL40 Desktop Memory, UDIMM 288-Pin, Compatible with 12th Gen Intel Core and AMD Ryzen 7000 - CT16G48C40U5",
@@ -414,7 +455,8 @@
       "csv_new": 429.99,
       "csv_buybox": null,
       "amazon_no_offer": true,
-      "keepa_resolved_at": "2026-09-30T21:52:00Z"
+      "keepa_resolved_at": "2026-09-30T21:52:00Z",
+      "selection": "ratio_ge_1_5"
     },
     "B0BHJFNW9X": {
       "name": "990 PRO w/ Heatsink SSD 1TB PCIe 4.0 M.2 Internal Solid State Hard Drive, Fastest Speed for Gaming, Heat Control, Direct Storage and Memory Expansion, Compatible w/ Playstation5, MZ-V9P2T0GW",
@@ -429,7 +471,8 @@
       "csv_amazon": null,
       "csv_new": 495,
       "csv_buybox": null,
-      "amazon_no_offer": true
+      "amazon_no_offer": true,
+      "selection": "ratio_ge_1_5"
     },
     "B0C4Y3DCL4": {
       "name": "Vengeance RGB DDR5 RAM 32GB (2x16GB) Up to 6400MHz CL36-48-48-104 1.35V Intel XMP 3.0 Desktop Computer Memory - White (CMH32GX5M2B6400C36W)",
@@ -444,7 +487,8 @@
       "csv_amazon": null,
       "csv_new": 909.99,
       "csv_buybox": null,
-      "amazon_no_offer": true
+      "amazon_no_offer": true,
+      "selection": "ratio_ge_1_5"
     },
     "B0BTDP6P7Y": {
       "name": "Patriot Memory P400 Lite M.2 PCIe Gen 4 x4 1TB SSD, Solid State Drive - P400LP1KGM28H",
@@ -459,7 +503,8 @@
       "csv_amazon": null,
       "csv_new": 243,
       "csv_buybox": null,
-      "amazon_no_offer": true
+      "amazon_no_offer": true,
+      "selection": "ratio_ge_1_5"
     },
     "B0DSQMKYLN": {
       "name": "Crucial 128GB Kit (2X64GB) DDR5 RAM 5600MHz (or 5200MHz or 4800MHz) Laptop Memory Kit, SODIMM 262-Pin, Compatible with Latest Intel Core Ultra and AMD Ryzen 8000 & Above – CT2K64G56C46S5",
@@ -474,7 +519,8 @@
       "csv_amazon": null,
       "csv_new": 2399,
       "csv_buybox": null,
-      "amazon_no_offer": true
+      "amazon_no_offer": true,
+      "selection": "ratio_ge_1_5"
     },
     "B0BHJDY57J": {
       "name": "990 PRO w/ Heatsink SSD 2TB, PCIe Gen4 M.2 2280 Internal Solid State Hard Drive, Seq. Read Speeds Up To 7,450MB/s for High End Computing, Workstations, Compatible w/ PlayStation 5, MZ-V9P2T0CW",
@@ -489,7 +535,9 @@
       "csv_amazon": 669.99,
       "csv_new": 498.95,
       "csv_buybox": null,
-      "amazon_no_offer": false
+      "amazon_no_offer": false,
+      "selection": "blurb_provenance",
+      "added_at": "2026-10-05"
     },
     "B0DHLCRF91": {
       "name": "Samsung 990 EVO Plus SSD 2TB, PCIe Gen 4x4, Gen 5x2 M.2 2280, Speeds Up-to 7,250 MB/s, Upgrade Storage for PC/Laptops, HMB Technology and Intelligent Turbowrite 2.0, (MZ-V9S2T0B/AM)",
@@ -504,7 +552,9 @@
       "csv_amazon": 579.99,
       "csv_new": 345.0,
       "csv_buybox": null,
-      "amazon_no_offer": false
+      "amazon_no_offer": false,
+      "selection": "blurb_provenance",
+      "added_at": "2026-10-05"
     }
   }
 }
