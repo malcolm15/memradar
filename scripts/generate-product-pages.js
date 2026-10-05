@@ -4918,7 +4918,16 @@ function buildFindings(ctx) {
   }
 
   const lis = items.map((it) =>
-    `        <li${it.floorPct == null ? '' : ` data-claim="${it.id}" data-floor-pct="${it.floorPct}"`}>${esc(it.text)} <span class="data-finding-date">Computed ${it.when}.</span></li>`
+    // EVERY FINDING CARRIES data-claim; ONLY A FLOORED ONE CARRIES
+    // data-floor-pct. The id was previously emitted only alongside a floor,
+    // which left the two count findings with nothing for a checker to key on,
+    // and "not floor-checkable" was quietly taken to mean "unchecked": when
+    // llms.txt froze on 2026-10-04 their counts drifted 206 to 205 and 154 to
+    // 153 with nothing firing. Whether the two published locations AGREE is a
+    // different question from whether a figure clears a floor, and an id is
+    // what makes the first question askable. bakedFindingFloor still REQUIRES
+    // data-floor-pct, so the floored path is untouched by this.
+    `        <li data-claim="${it.id}"${it.floorPct == null ? '' : ` data-floor-pct="${it.floorPct}"`}>${esc(it.text)} <span class="data-finding-date">Computed ${it.when}.</span></li>`
   ).join('\n');
   return { html: `      <ul class="pi-notables data-findings">\n${lis}\n      </ul>`, items, on };
 }
