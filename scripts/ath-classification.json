@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "generated": "2026-09-30",
-  "scope": "The 30 tracked products whose all-time high exceeds 1.5x the stored list price on the ATH day. Selected from the database; verdicts from one Keepa call.",
+  "generated": "2026-10-05",
+  "scope": "The 30 tracked products whose all-time high exceeds 1.5x the stored list price on the ATH day. Selected from the database; verdicts from one Keepa call. PLUS two added 2026-10-05 for blurb provenance, OUTSIDE the 1.5x rule: B0BHJDY57J and B0DHLCRF91, the two highest-demand kept pages that had no blurb and no verdict on file. Their ratio reads 1.0 because the stored list price on an ATH day is the 90-day maximum, which on the day a high is set equals the high itself, so the ratio carries no information for them and is not why they were classified.",
   "note": "Verdicts are NEVER re-derived. A later run appends new ASINs or updates an existing one in place, keyed by ASIN. Nothing in the generator or any display path reads this file yet; per-class display rules are an October checkpoint decision. Not hand-edited.",
   "classes": {
     "a": "genuine Amazon first-party high. The AMAZON series (csv[0]) carries the ATH.",
@@ -14,11 +14,12 @@
     "amazon_no_offer true means csv[0] existed and its value in effect was -1, which is a real \"Amazon had no offer\" reading rather than a missing series.",
     "Pre-2019 ATH days (four rows) sit in backfilled history, where CLAUDE.md warns the list price is frozen and the marketplace heuristic does not apply. Their class here rests on the Keepa series, not on the ratio.",
     "Keepa records a price only when it CHANGES, so the value in effect at end of day is usually a level that had held for some time rather than a same-day observation.",
-    "RESOLVED 2026-09-30: the two rows first reported (c) are both (b). The end-of-day-only reading was the fault, not the data. Raw Keepa responses are now saved to the scratchpad BEFORE parsing, so re-reading a response costs no tokens."
+    "RESOLVED 2026-09-30: the two rows first reported (c) are both (b). The end-of-day-only reading was the fault, not the data. Raw Keepa responses are now saved to the scratchpad BEFORE parsing, so re-reading a response costs no tokens.",
+    "Two entries added 2026-10-05 (B0BHJDY57J, B0DHLCRF91) sit outside the 1.5x selection rule and were classified on request for blurb provenance. Both are class (a): Amazon's own series carried the high. Their list_price equals their ath_price for the structural reason given in scope, so do not read their ratio as evidence of anything."
   ],
-  "tokens_spent": 32,
+  "tokens_spent": 34,
   "counts": {
-    "a": 2,
+    "a": 4,
     "b": 28,
     "c": 0
   },
@@ -474,6 +475,36 @@
       "csv_new": 2399,
       "csv_buybox": null,
       "amazon_no_offer": true
+    },
+    "B0BHJDY57J": {
+      "name": "990 PRO w/ Heatsink SSD 2TB, PCIe Gen4 M.2 2280 Internal Solid State Hard Drive, Seq. Read Speeds Up To 7,450MB/s for High End Computing, Workstations, Compatible w/ PlayStation 5, MZ-V9P2T0CW",
+      "category": "ssd",
+      "ath_price": 669.99,
+      "ath_date": "2026-04-16",
+      "list_price": 669.99,
+      "ratio": 1.0,
+      "class": "a",
+      "reason": "AMAZON series carries the ATH: csv[0] moved to $669.99 at 2026-04-16T07:52Z, matching the stored ATH exactly. It then went to no offer at 11:52Z and back to $669.99 at 18:16Z the same day, so Amazon held an offer at the moment the high was carried. NEW sat at $498.95 throughout.",
+      "keepa_checked_at": "2026-10-05T16:48:00Z",
+      "csv_amazon": 669.99,
+      "csv_new": 498.95,
+      "csv_buybox": null,
+      "amazon_no_offer": false
+    },
+    "B0DHLCRF91": {
+      "name": "Samsung 990 EVO Plus SSD 2TB, PCIe Gen 4x4, Gen 5x2 M.2 2280, Speeds Up-to 7,250 MB/s, Upgrade Storage for PC/Laptops, HMB Technology and Intelligent Turbowrite 2.0, (MZ-V9S2T0B/AM)",
+      "category": "ssd",
+      "ath_price": 579.99,
+      "ath_date": "2026-05-04",
+      "list_price": 579.99,
+      "ratio": 1.0,
+      "class": "a",
+      "reason": "AMAZON series carries the ATH: csv[0] moved to $579.99 at 2026-05-04T12:40Z, matching the stored ATH exactly, with no no-offer reading that day. NEW sat at $345.00 when the high was carried and moved to $412.00 at 19:44Z, below it either way.",
+      "keepa_checked_at": "2026-10-05T16:48:00Z",
+      "csv_amazon": 579.99,
+      "csv_new": 345.0,
+      "csv_buybox": null,
+      "amazon_no_offer": false
     }
   }
 }
