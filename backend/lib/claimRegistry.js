@@ -160,10 +160,20 @@ const bakedFindingFloor = (claimId) => () => {
 
   // The sentence itself, from the same <li>, for the cross-location check.
   let dataSentence = null;
+  let dataWhen = null;
   try {
     const html = fs.readFileSync(PAGE('data', 'index.html'), 'utf8');
     const m = new RegExp(`data-claim="${claimId}"[^>]*>([\\s\\S]*?)<span`).exec(html);
     if (m) dataSentence = unescapeHtml(m[1].replace(/<[^>]+>/g, '')).replace(/\s+/g, ' ').trim();
+    // THE COMPUTED DATE, which the sentence regex above deliberately stops short
+    // of: it terminates at `<span`, and the date lives inside
+    // <span class="data-finding-date">. Both files are written from one findings
+    // array in one run, so they can only disagree if one of them did not get
+    // written. That is exactly what happened on 2026-10-04, when llms.txt failed
+    // to build for two consecutive regens and this check passed both times,
+    // because the wording had not moved and the date was outside what it saw.
+    const d = new RegExp(`data-claim="${claimId}"[^>]*>[\\s\\S]*?<span class="data-finding-date">Computed ([^<.]+)\\.`).exec(html);
+    if (d) dataWhen = d[1].trim();
   } catch { /* handled below */ }
 
   let llms;
@@ -179,6 +189,26 @@ const bakedFindingFloor = (claimId) => () => {
     const e = new Error(`the "${claimId}" finding is on /data/ but not in /llms.txt with the same wording; the two published locations disagree`);
     e.code = 'CLAIM_LOCATION_MISMATCH';
     throw e;
+  }
+  // WHOLE-LINE MATCH, NOT A SUBSTRING, AND THE DIFFERENCE IS A REAL FALSE-PASS
+  // PATH. llms.txt renders each finding as its own line, `- <sentence> Computed
+  // <date>.`. A substring test for "<sentence> Computed <date>." would be
+  // satisfied by ANOTHER finding's line whenever one sentence is a SUFFIX of
+  // another, since "A Computed D." sits inside "B Computed D." when B ends with
+  // A. A stale or missing line for A would then pass on B's line. No pair is a
+  // suffix of another today, checked, but the registry rule is about what can
+  // go wrong rather than what happens to be true. Anchoring on the "- " prefix
+  // and the full sentence makes the line identify exactly one finding.
+  // Note a PREFIX relationship is already fail-safe the other way: the check for
+  // a prefix A never matches B's longer line, so it reports rather than hides.
+  if (dataWhen != null) {
+    const wanted = `- ${dataSentence} Computed ${dataWhen}.`;
+    const hasLine = llms.split('\n').some((line) => line.trim() === wanted);
+    if (!hasLine) {
+      const e = new Error(`the "${claimId}" finding is in both locations with the same wording, but /data/ dates it "Computed ${dataWhen}." and /llms.txt carries no matching line; one of the two files did not rebuild`);
+      e.code = 'CLAIM_LOCATION_MISMATCH';
+      throw e;
+    }
   }
   // The post restates only two of the three findings, so its absence for a given
   // claim is normal and silent; a DISAGREEMENT is not.
