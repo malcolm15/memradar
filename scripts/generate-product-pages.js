@@ -5089,7 +5089,6 @@ function buildLlmsTxt(ctx) {
     .replace(/<!--PRODUCT_COUNT-->/g, String(generable.length))
     .replace(/<!--EARLIEST_YEAR-->/g, earliestYear)
     .replace(/<!--CSV_FIRST_MONTH-->/g, csvFirstMonth)
-    .replace(/<!--MIN_DAYS_INDEXABLE-->/g, String(MIN_DAYS_INDEXABLE))
     .replace('<!--FINDINGS-->', findingText)
     .replace('<!--EXAMPLES-->', exampleText);
   if (/<!--[A-Z_]+-->/.test(out)) throw new Error(`llms.txt: unreplaced anchor ${(/<!--[A-Z_]+-->/.exec(out) || [])[0]}`);

@@ -37,7 +37,7 @@ These two show what a product page holds. Both are quoted verbatim from the page
 
 - Price figures change daily. A page's own "last updated" line states when its figures were computed.
 - Figures over longer windows rest on smaller, older product sets, so quote long-window percentages as magnitudes rather than to a decimal.
-- Product pages with under <!--MIN_DAYS_INDEXABLE--> days of tracked history carry noindex and are excluded from the sitemap; they hold too little history to be worth citing.
+- Only a subset of product pages is in the sitemap. Pages are chosen on the depth of their price history, how much on the page is specific to that product, and other page-level signals; the rest carry noindex. Every product page stays reachable from the category pages, and the price data on it is the same either way.
 - Newegg links are affiliate links; Amazon links are not. Price history is Amazon data licensed from Keepa. Newegg data comes from Rakuten Advertising.
 
 ## Data for developers
