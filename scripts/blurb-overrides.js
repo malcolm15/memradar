@@ -134,4 +134,39 @@ module.exports = {
   // Acer Predator Vesta II RGB 32GB 6000
   // /ram/acer-predator-vesta-ii-rgb-ddr5-ram-32gb-6000mhz/
   B0CRNNVYM2: 'Acer\'s memory is made by BIWIN, and the Vesta II is its RGB DDR5 line: a lit heatspreader, 6000 MT/s, and pricing that is often aggressive because the brand is still earning trust in this category. Reviews have been kind to the underlying modules. The lighting works with the major motherboard RGB tools rather than a dedicated app. Worth a look when the big names are priced above their history and this one is not.',
+
+  // ---- PRICE-RECORD BLURBS, batch 1, added 2026-10-04. Every figure is a
+  // recorded price on a named date, a change between two named dates, a median
+  // for a completed or explicitly partial year, or a verdict quoted from
+  // ath-classification.json. See the rule set at the top of this file.
+  // Samsung 990 PRO 2TB
+  // /ssd/samsung-990-pro-2tb/
+  B0BXX1JJH8: 'Samsung\'s listing for this drive states a 1,200 TBW endurance rating and a five-year warranty, details a price chart does not show. Our price record starts in July 2023. The median recorded price was about $191 over the tracked portion of 2023, $211 in 2024 and $179 in 2025. Of those three periods, 2025 had the lowest median.',
+  // Samsung 870 EVO 1TB 2.5in SATA
+  // /ssd/samsung-870-evo-1tb-2-5in-sata-iii/
+  B08W5TLTL2: 'This listing is the 2.5-inch SATA version of Samsung\'s 870 EVO, tracked here since the end of December 2024. The median recorded price in 2025 was about $109, and from July 8 to October 16 that year the price made no real move. December was different: the recorded price rose from $149 on December 12 to $225 on December 15, then fell to $169 the next day.',
+  // Crucial Pro 64GB DDR5 5600
+  // /ram/crucial-pro-64gb-ddr5-ram-kit-5600mhz/
+  B0C79H54TQ: 'Two 32GB modules, 64GB in total. The median recorded price was about $186 for the part of 2023 we tracked, $160 in 2024 and $190 in 2025. The $1,087.99 recorded on September 23, 2026 deserves a note. Our classification for that day shows Amazon had no offer, and a marketplace seller\'s price was the one recorded.',
+  // Corsair Vengeance DDR5 32GB 6000 CL36
+  // /ram/corsair-vengeance-ddr5-ram-32gb-6000mhz/
+  B0CJ8ZHMVF: 'The title lists both AMD EXPO and Intel XMP 3.0 profiles for this 2x16GB kit. Its price record is easiest to read as two dated points. On November 23, 2024 we recorded $92.99. On October 1, 2026 we recorded $771.52, up from $567.99 the day before, and by October 3 it was $580. In between, the median recorded price went from about $115 in 2024 to about $205 in 2025.',
+  // Corsair Vengeance LPX DDR4 32GB 3200
+  // /ram/corsair-vengeance-lpx-ddr4-ram-32gb-3200mhz/
+  B07RW6Z692: 'MemRadar has tracked this kit since June 2019. Over the months we tracked that year its median recorded price was about $180, and we recorded $277.27 on December 4, 2019. By 2024 the median was about $60, and on May 5, 2025 we recorded $47.49. On October 4, 2026 the recorded price was above $240, still below the $277.27 observation from December 2019.',
+  // Lexar NM790 4TB Gen4
+  // /ssd/lexar-4tb-nm790-ssd-pcie-gen4-nvme-m-2/
+  B0C91RNCDV: 'Lexar lists this 4TB Gen4 drive as PS5 compatible, with read speeds up to 7,400 MB/s. Its yearly median price rose each year from 2023 to 2025: about $198 in the second half of 2023, $263 in 2024 and $288 in 2025. A sharper move came just after that. Between January 5 and January 7, 2026 the recorded price went from $399.99 to $615.13.',
+  // Samsung 990 EVO Plus 4TB
+  // /ssd/samsung-990-evo-plus-ssd-4tb/
+  B0DHLBDSP7: 'For 2025, the record of this 4TB drive shows a median price of $255, with $199.99 recorded on October 7. May 2026 looks very different in the series: $1,049.99 on May 17, $649.87 on May 18 and 19, then $1,049.99 again on May 20.',
+  // Samsung 990 PRO 4TB
+  // /ssd/samsung-990-pro-4tb-pcie-gen-4-0-x4/
+  B0CHRSJ4LR: 'This listing\'s record begins on December 15, 2025 at $453.51. By February 24, 2026 the recorded price was $729.99. Between April 21 and July 21, 2026 the series contains no in-stock observation; the recorded prices on either side of that gap were $965.00 and $899.88. Only four of its observations fall in 2025.',
+  // Samsung 990 PRO 2TB (MZ-V9P2T0BW)
+  // /ssd/samsung-990-pro-nvme-m-2-ssd-2tb/
+  B0B9C4DKKG: 'The September 2026 spike on this chart needs context. Between September 14 and September 22 the recorded price went from $374.95 to $1,299.99. Our classification for September 22 shows Amazon itself had no offer, and the recorded price came from a marketplace seller. The figure is a third-party asking price during a gap in Amazon\'s own offer, not a price Amazon charged. For 2023, 2024 and 2025 the median recorded prices were about $198, $190 and $178.',
+  // Corsair Vengeance RGB DDR5 32GB 6000 CL36, white
+  // /ram/corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz/
+  B0CDY46PFK: 'The white RGB version of Corsair\'s 6000MHz CL36 kit, listed with an Intel XMP 3.0 profile and no mention of AMD EXPO. The median recorded price stayed within ten dollars across late 2023, 2024 and 2025: about $105, $115 and $111. That 2025 figure hides how the year ended. Between November 13 and December 4, 2025 the recorded price went from $226.99 to $499.99.',
 };
