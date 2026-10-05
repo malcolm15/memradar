@@ -152,6 +152,54 @@ const unescapeHtml = (t) => t
   .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
   .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&#x27;/g, "'");
 
+// THE CROSS-LOCATION CHECK WITHOUT A FLOOR. The two count findings are
+// monitorable:false because no market_stats figure can falsify them: they are
+// recomputed from each product's own history on every regen. That is a statement
+// about FLOORS, and it was quietly taken to mean "unchecked", so when llms.txt
+// froze on 2026-10-04 their counts drifted 206 to 205 and 154 to 153 across one
+// day with nothing firing. Whether the two published locations AGREE is a
+// different question from whether a figure clears a floor, and this one they can
+// answer. Same whole-line sentence-and-date match as bakedFindingFloor, and
+// deliberately NOT reading data-floor-pct, which these <li>s do not carry.
+function findingLocationsAgree(claimId) {
+  let html;
+  try {
+    html = fs.readFileSync(PAGE('data', 'index.html'), 'utf8');
+  } catch (err) {
+    const e = new Error(`cannot read /data/ to cross-check the "${claimId}" finding (${err.code || err.message})`);
+    e.code = 'CLAIM_LOCATION_MISMATCH';
+    throw e;
+  }
+  const m = new RegExp(`data-claim="${claimId}"[^>]*>([\\s\\S]*?)<span`).exec(html);
+  if (!m) {
+    const e = new Error(`the "${claimId}" finding is not on /data/`);
+    e.code = 'CLAIM_TEXT_ABSENT';
+    throw e;
+  }
+  const sentence = unescapeHtml(m[1].replace(/<[^>]+>/g, '')).replace(/\s+/g, ' ').trim();
+  const d = new RegExp(`data-claim="${claimId}"[^>]*>[\\s\\S]*?<span class="data-finding-date">Computed ([^<.]+)\\.`).exec(html);
+  const when = d ? d[1].trim() : null;
+  let llms;
+  try {
+    llms = fs.readFileSync(LLMS_PATH, 'utf8');
+  } catch (err) {
+    const e = new Error(`cannot read /llms.txt to cross-check the "${claimId}" finding (${err.code || err.message})`);
+    e.code = 'CLAIM_LOCATION_MISMATCH';
+    throw e;
+  }
+  if (!llms.includes(sentence)) {
+    const e = new Error(`the "${claimId}" finding is on /data/ but not in /llms.txt with the same wording; the two published locations disagree`);
+    e.code = 'CLAIM_LOCATION_MISMATCH';
+    throw e;
+  }
+  if (when != null && !llms.split('\n').some((l) => l.trim() === `- ${sentence} Computed ${when}.`)) {
+    const e = new Error(`the "${claimId}" finding is in both locations with the same wording, but /data/ dates it "Computed ${when}." and /llms.txt carries no matching line; one of the two files did not rebuild`);
+    e.code = 'CLAIM_LOCATION_MISMATCH';
+    throw e;
+  }
+  return { sentence, when };
+}
+
 const bakedFindingFloor = (claimId) => () => {
   const onData = bakedFloor(
     PAGE('data', 'index.html'),
@@ -498,6 +546,10 @@ const CLAIM_REGISTRY = [
     where: 'Current findings',
     sentence: 'N of the M products MemRadar tracks sell for at least one and a half times their lowest recorded price, and K for more than three times it.',
     monitorable: false,
+    // NOT floor-checkable, but the two published locations must still agree.
+    // Checked by findingLocationsAgree() rather than resolveFloor, so it reports
+    // a location mismatch without pretending a floor exists.
+    crossCheckOnly: ['data-atl-15x', 'data-atl-3x'],
     reason: 'counts, not segment figures. Both are recomputed from each product\'s own recorded history during every regen (atlMultipleDistribution), so unlike a hand-written magnitude they cannot go stale between builds, and no market_stats row can falsify them. Same standing as the explainer\'s ATL-multiple counts. They are dated with the BUILD date on the page rather than the market_stats computed_at, because that is when they were actually calculated. RESTATED 2026-09-24 on /blog/will-ram-prices-go-back-down/ as "It is 88% today", which is a DATED PIN rather than a live figure: that post carries a hand-set reviewed date and its figures are fixed to it, so the number there will not track the regen and is not expected to. If the share moves materially the post is re-reviewed by hand, never silently updated.',
   },
 
@@ -816,7 +868,22 @@ function checkClaimFloors(stats) {
   const ok = [];
 
   for (const entry of CLAIM_REGISTRY) {
-    if (entry.monitorable === false) continue;
+    if (entry.monitorable === false) {
+      // A CROSS-LOCATION CHECK RUNS EVEN HERE. It is the one thing an
+      // unmonitorable finding CAN be wrong about in a detectable way, and
+      // skipping it is how two published counts drifted unnoticed for a day.
+      for (const id of entry.crossCheckOnly || []) {
+        try {
+          findingLocationsAgree(id);
+        } catch (err) {
+          const base = { ...summarise(entry), id, floor_pct: null, floor_source: 'both published locations', figures: [] };
+          if (err.code === 'CLAIM_LOCATION_MISMATCH') breached.push({ ...base, breached_on: [err.message] });
+          else if (err.code === 'CLAIM_TEXT_ABSENT') withdrawn.push({ ...base, reason: err.message, means: 'the generator did not emit this count finding, which means atlMultipleDistribution did not compute. That is a build fault, not a market move.' });
+          else unresolved.push({ ...base, reason: err.message });
+        }
+      }
+      continue;
+    }
 
     let floorPct, floorSource;
     try {
