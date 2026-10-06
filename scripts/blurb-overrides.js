@@ -120,15 +120,6 @@ module.exports = {
   // Crucial 16GB DDR5 5600, desktop
   // /ram/crucial-16gb-ddr5-ram-5600mhz/
   B0BLTH3KWV: 'A single 16GB desktop module at JEDEC speed. The usual reason to buy one stick rather than a kit is to pair it with one you already have, and Crucial\'s standard line is the safest bet for that, since it runs at the platform default with no profile to reconcile. As a lone module it runs single-channel. As an upgrade to a prebuilt that shipped with one stick, it is exactly the right part.',
-  // WD_Black SN770 2TB  [rewritten 2026-09-02 after verification]
-  // /ssd/western-digital-wd-black-2tb-sn770-nvme/
-  B0GV1RCHX2: {
-    text: 'This is the renewed listing for the SN770, WD\'s DRAM-less Gen4 gaming drive, and the drive itself is excellent: close to the SN850X in the things games do, single-sided, laptop-friendly. Renewed changes the math. Flash wears with writes, a refurbished drive\'s remaining endurance is unknown unless the seller shows SMART data, and the warranty is the seller\'s short guarantee rather than WD\'s five years. Our own storage guide advises against used flash. Compare this against a new SN770 before deciding the discount covers the uncertainty.',
-    // The blurb cites the SSD guide in prose; the link makes that citation
-    // followable. Verified 2026-09-02: the guide's "Should I buy a used SSD?"
-    // section does advise against used flash.
-    guide: 'ssd',
-  },
   // TEAMGROUP Elite SODIMM 32GB 5600
   // /ram/teamgroup-elite-sodimm-ddr5-32gb-5600mhz/
   B0CN92HXZL: 'The laptop upgrade most people actually need: 32GB across two SODIMMs at 5600, the capacity that turns a 16GB machine from adequate into comfortable. JEDEC speed, no profiles, works in any DDR5 laptop or mini PC with two free slots. The single check that matters is whether your machine\'s memory is soldered; if it is, no kit on this site will help. If it is socketed, this is the plain, reliable option.',
@@ -138,12 +129,6 @@ module.exports = {
   // G.Skill Flare X5 32GB 6000
   // /ram/g-skill-flare-x5-series-ddr5-ram-32gb-6000mhz/
   B0BFGB2D2Z: 'This Flare X5 kit is listed as 2x16GB at 6000MT/s CL36 and 1.35V, with both AMD EXPO and Intel XMP 3.0 named in the title. Its median recorded price stayed within eight dollars across three completed years: about $95 in 2023, $95 in 2024 and $88 in 2025. In its first months on record we recorded $159.99 on November 25, 2022, $292.00 on November 26 and $159.99 again on November 27.',
-  // Silicon Power DDR5 64GB 6000
-  // /ram/silicon-power-ddr5-64gb-6000mhz/
-  B0GN5MSZXJ: 'Silicon Power is a Taiwanese value brand, and this is 64GB at 6000 for less than the enthusiast names charge. What you give up is mostly reputation: the modules use the same few memory die suppliers as everyone else, but the binning, support, and community track record are thinner. For a capacity-heavy build on a budget it is a reasonable gamble. Confirm the profile type on the listing matches your platform before assuming it will hit 6000.',
-  // Acer Predator Vesta II RGB 32GB 6000
-  // /ram/acer-predator-vesta-ii-rgb-ddr5-ram-32gb-6000mhz/
-  B0CRNNVYM2: 'Acer\'s memory is made by BIWIN, and the Vesta II is its RGB DDR5 line: a lit heatspreader, 6000 MT/s, and pricing that is often aggressive because the brand is still earning trust in this category. Reviews have been kind to the underlying modules. The lighting works with the major motherboard RGB tools rather than a dedicated app. Worth a look when the big names are priced above their history and this one is not.',
 
   // ---- PRICE-RECORD BLURBS, batch 1, added 2026-10-04. Every figure is a
   // recorded price on a named date, a change between two named dates, a median
