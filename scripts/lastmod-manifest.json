@@ -68,7 +68,7 @@
   "lastmod": "2026-10-06"
  },
  "https://memradar.com/ram/g-skill-flare-x5-series-ddr5-ram-64gb-6000mhz/": {
-  "hash": "93345436bc7fac60207679bf25fb577ee97e58e260b820668f1bb77f4188b1be",
+  "hash": "d04744770c03a09f996bd617a38042c0139ec02ae437ca26af3db643cc36c832",
   "lastmod": "2026-10-06"
  },
  "https://memradar.com/ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-64gb-6000mhz/": {
@@ -112,7 +112,7 @@
   "lastmod": "2026-10-06"
  },
  "https://memradar.com/ram/crucial-64gb-ddr5-ram-5600mhz/": {
-  "hash": "b80e3910df9f412f42f46084477b4c7fd99f735e804e49182ac60369718e2e10",
+  "hash": "f8563172af1e61f6d2c8b3162d2f9177d08568309b18e6600201727e88771092",
   "lastmod": "2026-10-06"
  },
  "https://memradar.com/ram/teamgroup-elite-sodimm-ddr5-64gb-5600mhz/": {
@@ -188,7 +188,7 @@
   "lastmod": "2026-10-06"
  },
  "https://memradar.com/ram/teamgroup-t-force-delta-rgb-ddr5-ram-32gb-6000mhz-2/": {
-  "hash": "c1612ca15ee796ca8d6f06d8e71070878abf5d9f3880ee6bd017bae8ca8cb78a",
+  "hash": "9941955c5237ed0755f6866e4aa143e855e0b54aa24083657ec73a4faed66d95",
   "lastmod": "2026-10-06"
  },
  "https://memradar.com/ram/corsair-vengeance-lpx-ddr4-ram-32gb-3200mhz/": {
@@ -200,7 +200,7 @@
   "lastmod": "2026-10-06"
  },
  "https://memradar.com/ram/crucial-32gb-ddr4-ram-kit-3200mhz/": {
-  "hash": "e94ade669bf5ae42d56c2e2f6603f938b42b368286cfd9274be0883c78bfa019",
+  "hash": "9d5527efd5865f34dc2d66f6d0bc6a0bd81c75e9090db455554aa2ee7a15688d",
   "lastmod": "2026-10-06"
  },
  "https://memradar.com/ram/puskill-ddr4-laptop-ram-32gb-kit-3200mhz/": {
@@ -272,7 +272,7 @@
   "lastmod": "2026-10-06"
  },
  "https://memradar.com/ram/teamgroup-t-force-vulcan-z-ddr4-dram-16gb-3200mhz/": {
-  "hash": "ff230512f9cf82d09355ef1b4f737d4bf8d574b1a32443829d283cb459371fe2",
+  "hash": "052cd01e2d7993e2e5245924bf0d191d76c888a59b05175503b883b4ea06549e",
   "lastmod": "2026-10-06"
  },
  "https://memradar.com/ram/a-tech-16gb-ddr4-2666-mhz-udimm-pc4-21300/": {
@@ -288,7 +288,7 @@
   "lastmod": "2026-10-06"
  },
  "https://memradar.com/ram/crucial-16gb-ddr4-ram-3200mhz/": {
-  "hash": "424739bf6969fda33f0d1597ac8143476bd2df7a32fabfd314165a4d62f452d8",
+  "hash": "16a8914ce0477d4800134a59ba0d876af604b6f632905f01514db0c815011dde",
   "lastmod": "2026-10-06"
  },
  "https://memradar.com/ram/patriot-viper-steel-ddr4-ram-16gb-3200mhz/": {
@@ -332,7 +332,7 @@
   "lastmod": "2026-10-06"
  },
  "https://memradar.com/ram/corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz-4/": {
-  "hash": "438e0424dae5d87d72163cda18d6b8e4e61601ed41a98f0d476bc345d2a5f4b2",
+  "hash": "1863e17513f60cb9543f7ad8b64e1e841151dcd55ee3168958a35216f4256773",
   "lastmod": "2026-10-06"
  },
  "https://memradar.com/ram/corsair-vengeance-rgb-ddr5-ram-32gb-6400mhz/": {
@@ -504,7 +504,7 @@
   "lastmod": "2026-10-06"
  },
  "https://memradar.com/ssd/samsung-ssd-990-pro-1tb/": {
-  "hash": "79ec582c73cbfe0cb683c29737b4a5e8262a9f571a6517e6e7ddad3b82f34390",
+  "hash": "997969e6a8623a52b7339a3ada8973c71fc9d6c8f131aa55554a70b4381bfb69",
   "lastmod": "2026-10-06"
  },
  "https://memradar.com/ssd/silicon-power-1tb-nvme-m-2-pcie-gen3x4/": {
@@ -588,7 +588,7 @@
   "lastmod": "2026-10-06"
  },
  "https://memradar.com/ssd/samsung-ssd-9100-pro-2tb/": {
-  "hash": "e63dee2764fa28d91181a29e604d49dbb870fdcf495e4d0badd9f184c3654b5d",
+  "hash": "070e89851ae54f47da79fd8ef8035d9889882830b32a62950a66ffde30c6d17a",
   "lastmod": "2026-10-06"
  },
  "https://memradar.com/ssd/western-digital-2tb-wd-green-sn350-nvme/": {
@@ -716,7 +716,7 @@
   "lastmod": "2026-10-06"
  },
  "https://memradar.com/ssd/samsung-ssd-870-evo-sata-iii-2-5-2tb/": {
-  "hash": "77b70afa1cff59358b2862d917d031147deec0388c32561888e519f0f29a78dc",
+  "hash": "437fc00488564640fccc30a264b2eb929889d3585988c211de28b39b1b685123",
   "lastmod": "2026-10-06"
  },
  "https://memradar.com/ssd/samsung-990-pro-2tb-pcie-gen-4-0-x4/": {
@@ -768,7 +768,7 @@
   "lastmod": "2026-10-06"
  },
  "https://memradar.com/ssd/crucial-t500-pcie-gen4-nvme-1tb-ssd/": {
-  "hash": "e40eaafba0dea612ea5dcd88e2983ac4691446ec5825ea4e1d35988d2431dde8",
+  "hash": "e5b9b16b2df5633e00b5c4a81e01082eab469aa593f7d8e0d2f29a2ae56ecf4b",
   "lastmod": "2026-10-06"
  },
  "https://memradar.com/ssd/crucial-t500-2tb-pcie-gen4-nvme-gaming-ps5/": {
@@ -888,7 +888,7 @@
   "lastmod": "2026-10-06"
  },
  "https://memradar.com/ssd/samsung-ssd-860-pro-2tb-2-5-inch-sata/": {
-  "hash": "a1e7eab228e55b2f9b01adc7c8eede8f78e9ecfe14505391e1ccbe7f3a2d6572",
+  "hash": "918f83123d93f0a295853efe8ecb67660d02f88051ca2bf41b8aa4a041a241b2",
   "lastmod": "2026-10-06"
  },
  "https://memradar.com/ssd/pny-cs900-2tb-3d-nand-2-5-sata-iii/": {
@@ -908,7 +908,7 @@
   "lastmod": "2026-10-06"
  },
  "https://memradar.com/ssd/samsung-870-qvo-sata-iii-ssd-8tb-2-5/": {
-  "hash": "c61a2b453365196812499ac24ed5f7248f122eb022c1b4b0204cb0a333468e33",
+  "hash": "c6fee2904f0af8b470f6519e0cf767be6c12faf4ba6bdb6cb9eaad4bf21d0da5",
   "lastmod": "2026-10-06"
  },
  "https://memradar.com/ssd/samsung-ssd-870-evo-sata-iii-2-5-8tb/": {

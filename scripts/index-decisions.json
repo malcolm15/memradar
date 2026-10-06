@@ -487,7 +487,8 @@
    "bing_citations": 0,
    "reasons": [
     "long_history",
-    "pre2021_history"
+    "pre2021_history",
+    "blurb_annotated"
    ]
   },
   "ram/crucial-16gb-ddr5-ram-4800mhz": {
@@ -539,7 +540,8 @@
    "bing_citations": 4,
    "reasons": [
     "long_history",
-    "pre2021_history"
+    "pre2021_history",
+    "blurb_annotated"
    ]
   },
   "ram/crucial-32gb-ddr4-ram-kit-3200mhz-2": {
@@ -1529,7 +1531,8 @@
    "bing_citations": 0,
    "reasons": [
     "long_history",
-    "pre2021_history"
+    "pre2021_history",
+    "blurb_annotated"
    ]
   },
   "ram/timetec-32gb-kit-2666mhz": {
@@ -1878,7 +1881,8 @@
    "reasons": [
     "long_history",
     "pergb_group_end",
-    "bing_citations"
+    "bing_citations",
+    "blurb_annotated"
    ]
   },
   "ssd/crucial-t500-pcie-gen4-nvme-4tb-ssd": {
@@ -2286,7 +2290,8 @@
    "bing_citations": 0,
    "reasons": [
     "long_history",
-    "pre2021_history"
+    "pre2021_history",
+    "blurb_annotated"
    ]
   },
   "ssd/samsung-960-evo-series-250gb-pcie-nvme": {
@@ -2503,7 +2508,8 @@
    "reasons": [
     "long_history",
     "pre2021_history",
-    "pergb_group_end"
+    "pergb_group_end",
+    "blurb_annotated"
    ]
   },
   "ssd/samsung-ssd-870-evo-500gb": {
@@ -2542,7 +2548,8 @@
    "bing_citations": 7,
    "reasons": [
     "long_history",
-    "bing_citations"
+    "bing_citations",
+    "blurb_annotated"
    ]
   },
   "ssd/samsung-ssd-870-evo-sata-iii-2-5-8tb": {
@@ -2604,7 +2611,8 @@
    "bing_citations": 21,
    "reasons": [
     "long_history",
-    "bing_citations"
+    "bing_citations",
+    "blurb_annotated"
    ]
   },
   "ssd/samsung-ssd-990-pro-4tb": {
