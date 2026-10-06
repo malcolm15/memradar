@@ -270,7 +270,8 @@
    "bing_citations": 0,
    "reasons": [
     "long_history",
-    "pre2021_history"
+    "pre2021_history",
+    "blurb_annotated"
    ]
   },
   "ram/corsair-vengeance-lpx-ddr4-ram-32gb-3200mhz": {
@@ -746,7 +747,8 @@
    "reasons": [
     "required_by_build",
     "long_history",
-    "pre2021_history"
+    "pre2021_history",
+    "blurb_annotated"
    ]
   },
   "ram/g-skill-ripjawsv-series-ddr4-ram-16gb-3200mhz-2": {
@@ -803,7 +805,8 @@
    "bing_citations": 0,
    "reasons": [
     "long_history",
-    "pre2021_history"
+    "pre2021_history",
+    "blurb_annotated"
    ]
   },
   "ram/g-skill-trident-z-rgb-series-ddr4-ram-32gb-3600mhz": {
@@ -817,7 +820,8 @@
    "reasons": [
     "long_history",
     "pre2021_history",
-    "pergb_group_end"
+    "pergb_group_end",
+    "blurb_annotated"
    ]
   },
   "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-32gb-6000mhz": {
@@ -1221,7 +1225,8 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "long_history"
+    "long_history",
+    "percentile_extreme"
    ]
   },
   "ram/kingston-fury-renegade-white-rgb-16gb-6400mhz": {
@@ -1321,7 +1326,8 @@
    "bing_citations": 0,
    "reasons": [
     "long_history",
-    "pre2021_history"
+    "pre2021_history",
+    "blurb_annotated"
    ]
   },
   "ram/patriot-viper-venom-ddr5-ram-16gb-6000mhz": {
@@ -1396,7 +1402,8 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
-    "gsc_crawled_not_indexed"
+    "gsc_crawled_not_indexed",
+    "percentile_extreme"
    ]
   },
   "ram/silicon-power-ddr5-64gb-6000mhz": {
@@ -1518,7 +1525,8 @@
    "bing_citations": 0,
    "reasons": [
     "long_history",
-    "pre2021_history"
+    "pre2021_history",
+    "blurb_annotated"
    ]
   },
   "ram/teamgroup-t-force-vulcan-z-ddr4-dram-16gb-3200mhz": {
@@ -1546,7 +1554,8 @@
    "reasons": [
     "long_history",
     "pre2021_history",
-    "pergb_group_end"
+    "pergb_group_end",
+    "blurb_annotated"
    ]
   },
   "ram/timetec-32gb-kit-3200mhz": {
@@ -1634,7 +1643,8 @@
    "bing_citations": 0,
    "reasons": [
     "gsc_crawled_not_indexed",
-    "long_history"
+    "long_history",
+    "percentile_extreme"
    ]
   },
   "ssd/bestoss-1tb-m-2-ssd-nvme-pcie4-0-2280": {
@@ -2277,7 +2287,8 @@
    "bing_citations": 0,
    "reasons": [
     "long_history",
-    "pre2021_history"
+    "pre2021_history",
+    "blurb_annotated"
    ]
   },
   "ssd/samsung-870-qvo-sata-iii-ssd-8tb-2-5": {
@@ -2306,7 +2317,8 @@
     "required_by_build",
     "long_history",
     "percentile_extreme",
-    "pre2021_history"
+    "pre2021_history",
+    "blurb_annotated"
    ]
   },
   "ssd/samsung-980-pro-ssd-with-heatsink-2tb-pcie": {
@@ -2344,7 +2356,6 @@
    "bing_citations": 0,
    "reasons": [
     "long_history",
-    "pergb_group_end",
     "blurb_annotated"
    ]
   },
@@ -2598,7 +2609,8 @@
    "bing_impressions": 1,
    "bing_citations": 0,
    "reasons": [
-    "long_history"
+    "long_history",
+    "pergb_group_end"
    ]
   },
   "ssd/samsung-ssd-990-pro-1tb": {
@@ -2650,7 +2662,8 @@
    "bing_citations": 0,
    "reasons": [
     "long_history",
-    "pre2021_history"
+    "pre2021_history",
+    "blurb_annotated"
    ]
   },
   "ssd/silicon-power-2tb-nvme-m-2-pcie-gen3x4": {
@@ -2676,7 +2689,8 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
-    "gsc_crawled_not_indexed"
+    "gsc_crawled_not_indexed",
+    "percentile_extreme"
    ]
   },
   "ssd/silicon-power-2tb-ud90-nvme-4-0-gen4-pcie": {
