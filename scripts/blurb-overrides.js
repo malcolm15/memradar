@@ -47,6 +47,9 @@
 //   so. Do not infer causes, demand, shortages or product quality from
 //   price movements. Product facts come from the raw title, attributed to
 //   the listing.
+//   THE RULE SET APPLIES TO EVERY BLURB, PRODUCT-LINE ONES INCLUDED: no
+//   ranks, no recommendations, no value judgements, whatever the blurb is
+//   about.
 //   Title-derived product facts are a separate maintenance category. They
 //   reflect the raw title as stored when the blurb was written and can go
 //   stale if the listing title changes. Price-record claims written in the
@@ -124,10 +127,10 @@ module.exports = {
   B0CN92HXZL: 'The laptop upgrade most people actually need: 32GB across two SODIMMs at 5600, the capacity that turns a 16GB machine from adequate into comfortable. JEDEC speed, no profiles, works in any DDR5 laptop or mini PC with two free slots. The single check that matters is whether your machine\'s memory is soldered; if it is, no kit on this site will help. If it is socketed, this is the plain, reliable option.',
   // Crucial 64GB DDR5 4800 kit
   // /ram/crucial-64gb-ddr5-ram-kit-4800mhz/
-  B09HW6ZJV5: '4800 is DDR5\'s base speed, and this kit pairs it with 64GB of capacity. It is for capacity-first machines where memory speed barely registers: home servers, virtualization boxes, a workstation that runs out of memory before it runs out of bandwidth. Runs at spec with nothing to enable. For a gaming or Ryzen build, the same money on a faster 32GB kit is usually the better spend; for a machine that just needs room, this is the right shape.',
+  B09HW6ZJV5: 'Crucial lists this kit as two 32GB desktop modules at 4800MHz CL40. For the four completed years from 2022 through 2025 its median recorded prices were about $352, $158, $171 and $189. In late January 2026 we recorded $749.00 on January 26, $292.28 on January 29 and $749.00 again on January 30.',
   // G.Skill Flare X5 32GB 6000
   // /ram/g-skill-flare-x5-series-ddr5-ram-32gb-6000mhz/
-  B0BFGB2D2Z: 'If there is one canonical AM5 memory kit, it is a 32GB Flare X5 at 6000: EXPO out of the box, low enough to clear any cooler, no lighting, and the speed and capacity most Ryzen 7000 and 9000 builders settle on. It is what gets recommended when someone asks "just tell me what to buy." The CL bin on the spec line is the only thing that varies between listings; the lower one is nicer, the higher one is usually the value.',
+  B0BFGB2D2Z: 'This Flare X5 kit is listed as 2x16GB at 6000MT/s CL36 and 1.35V, with both AMD EXPO and Intel XMP 3.0 named in the title. Its median recorded price stayed within eight dollars across three completed years: about $95 in 2023, $95 in 2024 and $88 in 2025. In its first months on record we recorded $159.99 on November 25, 2022, $292.00 on November 26 and $159.99 again on November 27.',
   // Silicon Power DDR5 64GB 6000
   // /ram/silicon-power-ddr5-64gb-6000mhz/
   B0GN5MSZXJ: 'Silicon Power is a Taiwanese value brand, and this is 64GB at 6000 for less than the enthusiast names charge. What you give up is mostly reputation: the modules use the same few memory die suppliers as everyone else, but the binning, support, and community track record are thinner. For a capacity-heavy build on a budget it is a reasonable gamble. Confirm the profile type on the listing matches your platform before assuming it will hit 6000.',
