@@ -241,6 +241,19 @@ function money(v) {
 function perGb(v) {
   return '$' + (v >= 1 ? v.toFixed(2) : v.toFixed(3)) + '/GB';
 }
+// THE ONE PLACE A PRICE PER GB IS COMPUTED, added 2026-10-06. perGb() above only
+// FORMATS, and the division used to sit inline at eleven sites, each free to pick
+// its own denominator. One site being wrong is not detectable from the others,
+// which is how a 2-pack came to publish $0.437/GB against a true $0.218/GB. Every
+// site that divides a price by a capacity now calls this, so the denominator is
+// chosen once: offerCapacityGB, the total capacity purchased in the listing. The
+// product-class value stays totalCapacityGB and is used for identity, labels,
+// spec group keys and capacity chips only. See productParsers.js for the full
+// definition of the two capacities.
+function offerPerGb(x) {
+  if (!x || !x.stats) return null;
+  return pricePerGb(x.stats.current, x.name);
+}
 function monthYear(iso) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
 }
@@ -291,7 +304,7 @@ const median = (xs) => {
 // family-clustering scripts require the same module). The browser-side
 // duplicate in frontend/js/product-listing.js must stay in sync by hand.
 const {
-  totalCapacityGB, capacityLabel, parseSpeed, ramType, ssdType, formFactor, latency, parseMpn, shortName, parseKitConfig,
+  totalCapacityGB, offerCapacityGB, pricePerGb, capacityLabel, parseSpeed, ramType, ssdType, formFactor, latency, parseMpn, shortName, parseKitConfig,
 } = require('../backend/lib/productParsers');
 const GLOSSARY = require('./glossary.js');
 const BLURBS = require('./blurb-overrides.js');
@@ -955,8 +968,8 @@ function buildIndexContext(pool, buildDate) {
   const perGbRank = new Map();
   for (const [key, g] of groups.entries()) {
     const sorted = [...g].sort((a, b) =>
-      a.stats.current / totalCapacityGB(a.name) - b.stats.current / totalCapacityGB(b.name));
-    const pergb = (x) => x.stats.current / totalCapacityGB(x.name);
+      offerPerGb(a) - offerPerGb(b));
+    const pergb = (x) => offerPerGb(x);
     sorted.forEach((x, i) => perGbRank.set(x.sku, {
       rank: i + 1,
       size: sorted.length,
@@ -1539,7 +1552,10 @@ function analysisSentences(current, s, ctx) {
   // VALUE_LOW_RATIO / VALUE_HIGH_RATIO are 0.93 / 1.07, i.e. exactly the
   // +/-NOTABLE_PER_GB_PCT band. They stay the single source because the value
   // metric and pdp-hydrate.js already key off them.
-  const cap = totalCapacityGB(ctx.p.name);
+  // DIVIDES EXPLICITLY RATHER THAN THROUGH offerPerGb BECAUSE THE NUMERATOR IS
+  // `current`, the recomputed live price this block mirrors in pdp-hydrate.js,
+  // not p.stats.current. The denominator is still chosen once, here.
+  const cap = offerCapacityGB(ctx.p.name);        // [T] denominator of the $/GB sentence
   if (cap && ctx.segMedianPerGb != null) {
     const rel = (current / cap) / ctx.segMedianPerGb;
     if (rel <= VALUE_LOW_RATIO || rel >= VALUE_HIGH_RATIO) {
@@ -1912,11 +1928,11 @@ function buildPeers(ctx) {
   const peers = ctx.peers || [];
   if (peers.length < PEER_MIN) return '';
   const cap = totalCapacityGB(ctx.p.name);
-  const mine = cap ? ctx.stats.current / cap : null;
+  const mine = offerPerGb({ name: ctx.p.name, stats: ctx.stats });
   const noun = ctx.p.category === 'ram' ? 'kits' : 'drives';
   const rows = peers.map((q) => {
     const qcap = totalCapacityGB(q.name);
-    const qpg = qcap ? q.stats.current / qcap : null;
+    const qpg = offerPerGb(q);
     const delta = (mine != null && qpg != null) ? ((qpg - mine) / mine) * 100 : null;
     const dTxt = delta == null ? 'n/a' : Math.abs(Math.round(delta)) < 1 ? 'same' : `${delta > 0 ? '+' : ''}${Math.round(delta)}%`;
     const dCls = delta == null ? '' : Math.abs(Math.round(delta)) < 1 ? '' : delta > 0 ? ' pdp-peer-up' : ' pdp-peer-down';
@@ -2092,7 +2108,9 @@ function familyChips(p, familyMap) {
       category: rep.category,
       sku: rep.sku,
       price,
-      perGb: price != null ? price / cap : null,
+      // [T] the chip's own $/GB. The chip AXIS (cap, label) stays the product-class
+      // capacity; only this comparison figure takes the offer denominator.
+      perGb: offerPerGb(rep),
     };
   });
   // best $/GB across the chips (lowest current price-per-GB)
@@ -2150,12 +2168,12 @@ function specRows(ctx) {
     if (value) rows.push({ label, value, anchor, note });
   };
   const notes = st ? specNotes(ctx) : { cas: null, perGb: null, compound: null };
-  const capGb = totalCapacityGB(p.name);
-  const cap = capacityLabel(capGb);
+  const capGb = offerCapacityGB(p.name);        // [T] denominator of the $/GB row
+  const cap = capacityLabel(totalCapacityGB(p.name));        // [U] the class label
   const rk = ctx.perGbRank || null;
   const perGbValue = () => {
     if (!st || capGb == null || st.current == null) return null;
-    const pergb = `$${(st.current / capGb).toFixed(2)}`;
+    const pergb = `$${offerPerGb({ name: p.name, stats: st }).toFixed(2)}`;
     if (!rk || rk.size < 2) return pergb;
     const [, gb, a, b] = String(rk.key).split('|');
     const group = [capacityLabel(Number(gb)), a, b].filter(Boolean).join(' ');
@@ -2228,8 +2246,8 @@ function specSummary(p) {
 
 function relatedCard(rp) {
   const url = `/${rp.category}/${rp.slug}/`;
-  const cap = totalCapacityGB(rp.name);
-  const gbLine = cap && rp.stats ? `<span class="pdp-related-per-gb">${perGb(rp.stats.current / cap)}</span>` : '';
+  const cap = offerCapacityGB(rp.name);        // [T] the card prints $/GB
+  const gbLine = cap && rp.stats ? `<span class="pdp-related-per-gb">${perGb(offerPerGb(rp))}</span>` : '';
   const brand = rp.brand ? `<span class="listing-card-brand">${esc(rp.brand)}</span>` : '';
   const img = rp.image_url ? `<img src="${esc(rp.image_url)}" alt="${esc(rp._titleName)}" loading="lazy" class="listing-card-img-el" onerror="this.style.display='none'">` : '';
   let change = '';
@@ -2485,7 +2503,7 @@ function buildMain(ctx) {
   // Value metric (price per GB vs segment median $/GB)
   let valueMetric = '';
   if (cap && ctx.segMedianPerGb != null) {
-    const mine = s.current / cap;
+    const mine = offerPerGb({ name: p.name, stats: s });
     const rel = mine / ctx.segMedianPerGb;
     const wording = rel < VALUE_LOW_RATIO ? 'below the segment median, good value' : rel > VALUE_HIGH_RATIO ? 'above the segment median' : 'near the segment median';
     valueMetric = `<div class="pdp-value-metric" id="pdpValueMetric">
@@ -2817,7 +2835,7 @@ function buildScripts(ctx) {
   const hydrateCfg = {
     avg90: ctx.stats.avg90,
     avgLabel: avgLabelFor(ctx.stats),
-    capGb: totalCapacityGB(ctx.p.name),
+    capGb: offerCapacityGB(ctx.p.name),        // [T] pdp-hydrate divides the live price by this
     segMedian: ctx.segMedianPerGb,
     segLabel: segmentLabel(ctx.segment),
     goodMaxRatio: BUY_GOOD_MAX_RATIO,
@@ -2854,7 +2872,7 @@ function buildScripts(ctx) {
   // peer table with ONE query. Only added when the table actually rendered, so
   // a peer-less page's config stays byte-identical and its lastmod holds.
   if (ctx.peers && ctx.peers.length >= PEER_MIN) {
-    hydrateCfg.peers = ctx.peers.map((q) => ({ sku: q.sku, cap: totalCapacityGB(q.name), price: q.stats.current }));
+    hydrateCfg.peers = ctx.peers.map((q) => ({ sku: q.sku, cap: offerCapacityGB(q.name), price: q.stats.current }));
   }
   if (ctx.familyChips && ctx.familyChips.length >= 2) {
     hydrateCfg.famChips = ctx.familyChips.map((c) => ({
@@ -4259,7 +4277,9 @@ function buildMonthlyCsv(products, buildDate) {
   const cells = new Map(); // segment|month -> [{price, perGb}]
   for (const p of products) {
     if (!CSV_SEGMENTS.includes(p.segment) || !p.series || !p.series.length) continue;
-    const cap = totalCapacityGB(p.name);
+    // EXPLICIT DENOMINATOR, NOT offerPerGb: the numerator is that month's median
+    // of this product's daily prices, not p.stats.current.
+    const cap = offerCapacityGB(p.name);        // [T] the CSV $/GB column is the offer
     const byMonth = new Map();
     for (const pt of p.series) {
       const m = pt.day.slice(0, 7);
@@ -5179,8 +5199,8 @@ const BEST_VALUE_MIN = 8;
 function listingCard(p, segMedianPerGb) {
   const url = `/${p.category}/${p.finalSlug}/`;
   const s = p.stats;
-  const cap = totalCapacityGB(p.name);
-  const mine = cap ? s.current / cap : null;
+  const cap = offerCapacityGB(p.name);        // [T] the card prints $/GB
+  const mine = offerPerGb(p);
   const amazonUrl = p.product_url;
   const brand = p.brand ? `<span class="listing-card-brand">${esc(p.brand)}</span>` : '';
   const img = p.image_url
@@ -5292,10 +5312,10 @@ function bestValueTable(category, products, neweggBySku, segPerGb) {
     if (p.inStock === false) continue;
     const ng = neweggBySku.get(p.sku);
     if (ng && ng.in_stock === false) continue;
-    const cap = totalCapacityGB(p.name);
+    const cap = offerCapacityGB(p.name);        // [T] ranks on $/GB
     const med = segPerGb[p.segment];
     if (!cap || med == null || !(med > 0)) continue;
-    const mine = p.stats.current / cap;
+    const mine = offerPerGb(p);
     rows.push({ p, mine, med, rel: (mine - med) / med * 100 });
   }
   rows.sort((a, b) => a.rel - b.rel);
@@ -5998,8 +6018,8 @@ async function run() {
   const segPerGb = {};
   for (const seg of ['ddr5', 'ddr4', 'nvme_ssd', 'sata_ssd']) {
     const vals = products
-      .filter((p) => p.segment === seg && p.stats && totalCapacityGB(p.name))
-      .map((p) => p.stats.current / totalCapacityGB(p.name));
+      .filter((p) => p.segment === seg && p.stats && offerCapacityGB(p.name))
+      .map((p) => offerPerGb(p));
     segPerGb[seg] = vals.length ? median(vals) : null;
   }
 

@@ -58,6 +58,8 @@ module.exports = {
   // --- Samsung 990 PRO 4TB: a 2-pack and a single-drive warranty bundle. Price
   // confirms it: $1789.90 vs $889.99, exactly 2x. "2 Pack" is unparseable by the
   // pack matcher because the sibling's "Protection Pack" has no leading digit.
+  // The render audit asserts the word "Pack" is present here: this listing sells
+  // two drives and is ranked against single ones, so the label is load-bearing.
   B0CXZ153DP: 'Samsung 990 PRO NVMe 4TB 2-Pack',
   B0CY2SZ62P: 'Samsung 990 PRO NVMe 4TB + Warranty',
 

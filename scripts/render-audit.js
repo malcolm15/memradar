@@ -37,6 +37,7 @@
 //   node scripts/render-audit.js --quiet-ms=1500 --verbose
 //   node scripts/render-audit.js --strict --gate --pages=/,/ram/,/ssd/,<pdp>
 const puppeteer = require('puppeteer');
+const { unitCount, offerCapacityGB, totalCapacityGB } = require('../backend/lib/productParsers');
 const fs = require('fs');
 const path = require('path');
 
@@ -246,6 +247,25 @@ const EXTRACT = function () {
     });
   });
 
+  // A MULTI-UNIT LISTING'S STATED PRICE PER GB, read from the page's own text so
+  // the check is absolute rather than a served-vs-rendered diff: a page that
+  // hydrates perfectly into one unit's capacity produces no diff at all.
+  const perGbNum = (sel) => {
+    const el = main.querySelector(sel);
+    if (!el) return null;
+    const m = /\$([0-9]+\.?[0-9]*)\s*\/\s*GB/.exec(String(el.textContent));
+    return m ? Number(m[1]) : null;
+  };
+  const cfgElPg = document.getElementById('pdpHydrateConfig');
+  let hydrateCfgPg = null;
+  try { hydrateCfgPg = cfgElPg ? JSON.parse(cfgElPg.textContent) : null; } catch (e) { hydrateCfgPg = null; }
+  const priceElPg = main.querySelector('#pdpCurrentPrice');
+  const pdpPerGb = {
+    price: priceElPg ? Number(String(priceElPg.textContent).replace(/[^0-9.]/g, '')) : null,
+    valueMetric: perGbNum('#pdpValueMetric .pdp-value-per-gb'),
+    capGb: hydrateCfgPg ? hydrateCfgPg.capGb : null,
+  };
+
   const jsonld = [];
   document.querySelectorAll('script[type="application/ld+json"]').forEach((el) => {
     try { jsonld.push(JSON.parse(el.textContent)); } catch (e) { jsonld.push({ __parse_error: String(e.message) }); }
@@ -275,7 +295,7 @@ const EXTRACT = function () {
     canonical: (document.querySelector('link[rel="canonical"]') || {}).href || null,
     robots: metaOf('meta[name="robots"]'),
     ogTitle: metaOf('meta[property="og:title"]'),
-    blocks, hiddenBlocks, controls, cards, headings, links, alts, jsonld, counts, retailerRows,
+    blocks, hiddenBlocks, controls, cards, headings, links, alts, jsonld, counts, retailerRows, pdpPerGb,
     mainHtmlLen: main.innerHTML.length,
     audit: window.__audit ? {
       firstMutationMs: window.__audit.firstMutationMs,
@@ -476,6 +496,56 @@ function checkCards(page, side, cards, index) {
   return out;
 }
 
+// A5 LAYER 2. For any product whose listing sells more than one unit, the page's
+// stated price per GB must divide by the capacity the buyer receives, not by one
+// unit's. ABSOLUTE, not a served-vs-rendered diff: the failure to catch is a site
+// using one unit's capacity on BOTH sides, which produces no diff. The sku
+// comes from the page's own JSON-LD and the raw title from search-index.json, the
+// generator's own record, so this re-parses nothing the page could have got wrong.
+function checkOfferPerGb(side, data, index) {
+  const out = [];
+  const pg = data.pdpPerGb;
+  if (!pg || pg.price == null || !isFinite(pg.price)) return out;
+  const first = data.jsonld[0];
+  const prod = first && (first['@graph'] || []).find((n) => n['@type'] === 'Product');
+  const sku = prod && prod.sku;
+  const row = sku && index && index.bySku ? index.bySku.get(sku) : null;
+  if (!row || !row.name) return out;
+  const units = unitCount(row.name);
+  if (units <= 1) return out;                      // single-unit pages are unaffected
+  const offerCap = offerCapacityGB(row.name);
+  const classCap = totalCapacityGB(row.name);   // one drive here: unitCount > 1 only on SSDs
+  const say = (reason, want, got) =>
+    out.push({ cls: 'DEFECT', where: `${side} offer price per GB`, reason, served: want, rendered: got });
+  if (pg.capGb != null && pg.capGb !== offerCap) {
+    say(`hydrate capGb is ${pg.capGb}, one unit's capacity, so the browser recomputes $/GB against ${classCap}GB on a listing that sells ${units} units`,
+      String(offerCap), String(pg.capGb));
+  }
+  // THE MULTI-UNIT LABEL. A listing that sells several units is ranked and
+  // compared against single drives on every product surface, so the reader has to
+  // be able to see that it is a pack. The label comes from the SKU-keyed entry in
+  // scripts/title-overrides.js, which nothing else guards: remove that entry and
+  // the name silently loses the word. This asserts the rendered h1 carries it and
+  // deliberately does NOT derive the name from unitCount.
+  const h1 = (data.headings || []).find((h) => h.level === 'h1');
+  if (h1 && !/pack/i.test(h1.text)) {
+    say(`h1 does not say "Pack" on a listing that sells ${units} units, so the multi-unit label is missing and the page reads as a single drive beside the ones it is ranked against`,
+      'an h1 containing "Pack"', h1.text);
+  }
+  if (pg.valueMetric != null) {
+    const want = pg.price / offerCap;
+    const wrong = pg.price / classCap;
+    const near = (a, b) => Math.abs(a - b) <= 0.0015;
+    if (!near(pg.valueMetric, want)) {
+      say(near(pg.valueMetric, wrong)
+        ? `stated $/GB divides by ONE unit (${classCap}GB) on a listing that sells ${units} units`
+        : "stated $/GB matches neither the offer capacity nor one unit's capacity",
+      want.toFixed(4), pg.valueMetric.toFixed(4));
+    }
+  }
+  return out;
+}
+
 // JSON-LD vs THE VISIBLE PAGE. Absolute, not a served-vs-rendered diff, and the
 // distinction is the whole point: a diff can only say "these two differ", while
 // the failure to catch is hydration that STOPS updating the aggregate, which
@@ -663,6 +733,8 @@ function diffPage(page, served, rendered, net, index) {
   // ---- JSON-LD against the visible retailer state, both sides
   checkJsonLdAgainstVisible('served', served).forEach((x) => d.push(x));
   checkJsonLdAgainstVisible('rendered', rendered).forEach((x) => d.push(x));
+  checkOfferPerGb('served', served, index).forEach((x) => d.push(x));
+  checkOfferPerGb('rendered', rendered, index).forEach((x) => d.push(x));
 
   // ---- blame
   d.forEach((x) => { if (x.cls === 'DEFECT') x.blame = blameFor(page.kind, x.reason, x.where); });
@@ -928,6 +1000,9 @@ async function loadPage(browser, url, { js }) {
     // price moved between the two loads; removing them would turn every genuine
     // move into a defect. This check is what removes the hiding risk.
     { name: 'json-ld agrees with the visible retailer state', test: (d) => / json-ld offers$/.test(d.where) },
+    // Cannot false-positive on live copy or a price move: it compares the page's
+    // own displayed price against the page's own stated figure.
+    { name: 'multi-unit price per GB uses the offer capacity', test: (d) => / offer price per GB$/.test(d.where) },
   ];
   if (flag('strict')) {
     const gateOnly = flag('gate');
