@@ -129,6 +129,32 @@ const CITATION_FLOOR = 5;
 // reproduces the legacy `readings >= MIN_DAYS_INDEXABLE` result exactly, which
 // is asserted on every run (see assertIndexParity).
 const GATES_ENABLED = true;
+
+// THE TWO PRICE-DRIVEN GATES STOP DECIDING INDEXABILITY, 2026-10-05. Flip this
+// back to true and the rule is exactly what it was; that is the whole reason it
+// is one named constant rather than two deletions.
+//
+// WHY. percentile_extreme asks where today's price sits in this product's own
+// recorded history and pergb_group_end asks whether it is an end of its $/GB
+// spec group, so BOTH move with prices by construction. Measured over the 60
+// days to 2026-10-05: 221 indexable state changes, of which percentile_extreme
+// caused 181 and pergb_group_end 32, with 29 products changing state three or
+// more times and the indexable count ranging 67 to 86. With both out, the same
+// window produces 4 state changes, every one of them a page crossing a readings
+// threshold upward, and 0 products flipping more than once.
+//
+// THEY REMAIN PAGE FACTS. The Specifications $/GB rank row, the notable-only
+// notes, the percentile figures in index-decisions.json and the near-miss
+// classification in --index-plan all keep reading them unchanged. What stops is
+// their vote on the robots tag and the sitemap.
+const PRICE_GATES_DECIDE_INDEX = false;
+
+// A HAND-WRITTEN BLURB IS A DURABLE ADMIT REASON, with the readings floor. The
+// blurb is the one signal on a PDP that a person deliberately added and that no
+// price movement can withdraw, which is precisely what the two retired gates
+// were not. Behind KEEP_MIN_READINGS for the same reason the fact gates are:
+// a page with 90 readings has too little history for the annotation to rest on.
+const BLURB_ADMITS_INDEX = true;
 // The freshness term of healthy() is implemented and one constant from live.
 // It is OFF because two currently-indexed pages are stale (measured 2026-09-30:
 // B0CRNNVYM2 at 61 days, B0H83JSCJJ at 37), so enabling it would drop two
@@ -1247,8 +1273,21 @@ function gateCitations(p, ctx) {
 // KEEP_MIN_READINGS qualifies, because a percentile claim off 90 readings is
 // arithmetic rather than a distribution.
 function factGate(p, ctx) {
-  return gatePercentile(p) || gatePre2021History(p) || gatePerGbGroupEnd(p, ctx)
-    || gateLatencyDistinct(p, ctx);
+  // The two price-driven gates are still CALLED for their reason codes in
+  // indexReasons() and for the near-miss logic in indexPlan(); what
+  // PRICE_GATES_DECIDE_INDEX removes is their vote here.
+  const priced = PRICE_GATES_DECIDE_INDEX && (gatePercentile(p) || gatePerGbGroupEnd(p, ctx));
+  return priced || gatePre2021History(p) || gateLatencyDistinct(p, ctx);
+}
+
+// Membership in scripts/blurb-overrides.js for this SKU, which is the predicate
+// the gate executes. NOT the presence of a pdp-blurb section in built HTML:
+// buildBlurb renders from this same map, so the map is the source and the
+// section is its output, and keying on the output would make the rule depend on
+// a page the rule helps build.
+function gateBlurb(p) {
+  if (!BLURB_ADMITS_INDEX) return false;
+  return Object.prototype.hasOwnProperty.call(BLURBS, p.sku) && p.stats.days >= KEEP_MIN_READINGS;
 }
 
 // HARD EXCLUSIONS outrank every gate including demand. Note what is NOT here:
@@ -1274,7 +1313,7 @@ function hardExcluded(p, ctx) {
 function gatesPass(p, ctx, enabled = GATES_ENABLED) {
   if (!enabled) return true;
   if (hardExcluded(p, ctx)) return false;
-  return (p.stats.days >= KEEP_MIN_READINGS && factGate(p, ctx)) || gateImpressions(p, ctx) || gateCitations(p, ctx);
+  return (p.stats.days >= KEEP_MIN_READINGS && factGate(p, ctx)) || gateBlurb(p) || gateImpressions(p, ctx) || gateCitations(p, ctx);
 }
 
 function keepIndexable(p, ctx, enabled = GATES_ENABLED) {
@@ -1300,6 +1339,10 @@ function indexReasons(p, ctx) {
   if (gateLatencyDistinct(p, ctx)) out.push('latency_distinct');
   if (gateImpressions(p, ctx)) out.push('historical_demand');
   if (gateCitations(p, ctx)) out.push('bing_citations');
+  // EMITTED EVEN WHEN RETIRED, so --index-plan and index-decisions.json stay
+  // readable and a page can still be inspected for why it looks the way it
+  // does. A reason code is a record, not a vote.
+  if (gateBlurb(p)) out.push('blurb_annotated');
   return out;
 }
 
