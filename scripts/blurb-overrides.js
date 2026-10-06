@@ -242,4 +242,45 @@ module.exports = {
   // Crucial 32GB DDR4 3200 SODIMM (laptop)
   // /ram/crucial-32gb-ddr4-ram-kit-3200mhz/
   B08C4X9VR5: 'Laptop memory: two 16GB SODIMM 260-pin modules at 3200MHz CL22. For the five completed years from 2021 through 2025 the median recorded prices were about $162, $122, $73, $66 and $113. In April 2026 we recorded $256.98 on the 20th, $120.88 on the 21st and $249.99 on the 22nd.',
+  // FINAL BATCH, 2026-10-06. Thirteen indexed pages that had no entry.
+  // Every entry is a price-record blurb written to the 2026-10-04 rule set.
+  // Corsair Vengeance LPX DDR4 16GB 3200
+  // /ram/corsair-vengeance-lpx-ddr4-ram-16gb-3200mhz/
+  B07RS1G6XW: 'A 16GB DDR4 desktop kit of two 8GB modules, listed at up to 3200MHz with CL16 timings at 1.35V, in black. The median price we recorded was $82 across 2020, $96 across 2021, $60 across 2022, $44 across 2023, $40 across 2024 and $80 across 2025. In January 2026 we recorded $61.19 on January 3, $144.95 on January 4, $61.19 on January 5 and $139.00 on January 6.',
+  // Patriot Viper Steel DDR4 16GB 3200
+  // /ram/patriot-viper-steel-ddr4-ram-16gb-3200mhz/
+  B07N3Z1RP8: 'A single 16GB DDR4 desktop module (1x16GB) at 3200MHz and CL16, 1.35V, in UDIMM form, listed as compatible with XMP. The median of the prices we recorded was $67 for 2020, $93 for 2021 and $55 for 2022. For 2023 our observations run from February 7 to December 12, with a median of $32. The medians for 2024 and 2025 were $32 and $41. In October 2025 we recorded $59.99 on October 16 and $77.99 on October 21.',
+  // Timetec 32GB DDR4 2666
+  // /ram/timetec-32gb-kit-2666mhz/
+  B07CQ8FJXB: 'A 32GB DDR4 desktop kit of two 16GB modules at 2666MHz and CL19, 1.2V: 288-pin, non-ECC, unbuffered UDIMMs. In the completed years 2019, 2021 and 2024 the median price we recorded was $132, $129 and $44. For 2025 our observations run from March 24 to December 30, with a median of $41; within that span we recorded $157.58 on December 23 and $182.18 on December 29.',
+  // Silicon Power 1TB NVMe Gen3x4
+  // /ssd/silicon-power-1tb-nvme-m-2-pcie-gen3x4/
+  B07ZGJVTZK: 'A 1TB NVMe SSD in the M.2 2280 size, on PCIe Gen3x4. The median price we recorded for each completed year was $115 in 2020, $97 in 2021, $77 in 2022, $43 in 2023, $60 in 2024 and $58 in 2025. We recorded $97.99 on January 11, 2021, $180.00 on January 15 and $102.99 on January 20.',
+  // G.Skill RipjawsV DDR4 16GB 3200
+  // /ram/g-skill-ripjawsv-series-ddr4-ram-16gb-3200mhz/
+  B015FXXBW0: 'Two 8GB DDR4 U-DIMMs for desktops, 16GB in all, at 3200MT/s with CL16 timings and 1.35V, in black, listed with XMP. The median price we recorded was $88 across 2016, $140 across 2017, $184 across 2018 and $85 across 2019. Across 2024 it was $34 and across 2025, $44. We recorded $149.00 on February 12, 2026, then $73.22 on February 20 and $145.00 on February 21.',
+  // TEAMGROUP Vulcan Z DDR4 16GB 3200
+  // /ram/teamgroup-t-force-vulcan-z-ddr4-16gb-kit-3200mhz/
+  B07T637L7T: 'The title lists this gray kit as two 8GB DDR4 desktop modules, 16GB in total, at 3200MHz and CL16. The median price we recorded was $71 across 2020, $66 across 2021, $54 across 2022, $36 across 2023 and $33 across 2024. In 2020 we recorded $129.71 on June 2 and $70.50 on June 3, and $59.99 on December 1 and $113.51 on December 2.',
+  // G.Skill Trident Z5 Neo RGB DDR5 64GB 6000
+  // /ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-64gb-6000mhz-3/
+  B0CJXBCQ7P: 'A 64GB DDR5 desktop kit of two 32GB U-DIMMs from the Trident Z5 Neo RGB series, at 6000MT/s with CL30 timings and 1.40V, in matte white, listed with AMD EXPO. We recorded $189.99 on October 11, 2024. For 2025 our observations run from April 9 to December 23, with a median of $430. In 2026 we recorded $1,000.00 on July 30 and $1,399.99 on July 31, then $1,599.99 on August 17 and $1,379.97 on August 18.',
+  // Samsung 960 EVO 250GB PCIe NVMe
+  // /ssd/samsung-960-evo-series-250gb-pcie-nvme/
+  B01LYFKX41: 'A 250GB internal SSD from the 960 EVO series: PCIe NVMe, in the M.2 form. The median price we recorded was $115 across 2018, $141 across 2019, $114 across 2022, $89 across 2023 and $87 across 2025. In April 2022 we recorded $113.38 on April 3, $206.69 on April 5 and on April 8, and $112.92 on April 12.',
+  // Samsung 990 PRO 4TB + protection pack
+  // /ssd/samsung-mz-v9p4t0b-am-990-pro-pcie-4-0-4tb-2/
+  B0CY2SZ62P: 'A 4TB 990 PRO NVMe M.2 SSD on PCIe 4.0, sold as a bundle with a 2 YR CPS Enhanced Protection Pack. The prices we record are for the bundle. We recorded $319.99 on March 27, 2024. In 2026 we recorded $609.00 on February 4 and $809.99 on February 10, and later $889.99 on August 3, $1,099.99 on August 4 and $889.99 on August 11.',
+  // G.Skill Trident Z RGB DDR4 32GB 3200
+  // /ram/g-skill-trident-z-rgb-series-ddr4-ram-32gb-3200mhz/
+  B07DMNZY56: 'From the Trident Z RGB series: two 16GB DDR4 U-DIMMs for desktops, 32GB in all, at 3200MT/s with CL16 timings and 1.35V, listed with XMP. The median price we recorded was $195 across 2019, $147 across 2020 and $78 across 2023. In June 2019 we recorded $208.90 on June 11, $376.99 on June 12 and $189.98 on June 13. In December 2025 we recorded $77.99 on December 14 and $219.99 on December 15.',
+  // Samsung 870 QVO SATA III 2TB
+  // /ssd/samsung-870-qvo-sata-iii-ssd-2tb-2-5/
+  B089C6LZ42: 'A 2TB 870 QVO: a SATA III internal SSD in the 2.5-inch size. The median price we recorded for each completed year was $183 in 2021, $189 in 2022, $130 in 2023, $167 in 2024 and $211 in 2025. In March 2026 we recorded $399.99 on March 20, $199.99 on March 21 and $379.99 on March 22.',
+  // G.Skill Ripjaws S5 DDR5 64GB 6000
+  // /ram/g-skill-ripjaws-s5-series-ddr5-ram-64gb-6000mhz/
+  B0C6HWKGWV: 'Two 32GB DDR5 U-DIMMs for desktops, 64GB in all, at 6000MT/s with CL36 timings and 1.35V, in matte black, listed with both Intel XMP 3.0 and AMD EXPO. Across 2025 the median price we recorded was $453. Within that year we recorded $139.99 on February 25, and $599.99 on December 2 and $959.99 on December 3.',
+  // G.Skill Trident Z RGB DDR4 32GB 3600
+  // /ram/g-skill-trident-z-rgb-series-ddr4-ram-32gb-3600mhz/
+  B08176KLZT: 'This Trident Z RGB series kit is listed as 32GB of desktop DDR4 in two 16GB U-DIMMs, at 3600MT/s with CL18 timings and 1.35V, with XMP. Across 2020 the median price we recorded was $168; across 2022, $146; across 2023, $80. In December 2020 we recorded $164.99 on December 20, $271.99 on December 21, $164.99 on December 22 and $271.99 on December 23.',
 };
