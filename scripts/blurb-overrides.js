@@ -55,13 +55,20 @@
 //   stale if the listing title changes. Price-record claims written in the
 //   allowed dated or closed-interval forms above do not stale as new data
 //   arrives.
+//   Rounding: a yearly median quoted as "about $N" is the stored median
+//   rounded to the nearest dollar, half up (757.50 reads as $758). One
+//   convention for every blurb; do not choose per entry.
+//   No minimum reading count is set for a completed-year median. A year
+//   qualifies when its observations span January through December; if a
+//   minimum is ever wanted, it is a methodology decision applied to every
+//   blurb at once.
 module.exports = {
   // Corsair Vengeance RGB DDR5 32GB 6000
   // /ram/corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz-4/
-  B0DPJ9DJ3D: 'Corsair\'s mainstream RGB DDR5 kit, and the one most builders end up cross-shopping against G.Skill\'s Trident Z5. 6000 MT/s suits both AM5 and current Intel, and 32GB in two sticks is the standard gaming configuration. The heatspreader runs tall, so check clearance under a large air cooler. Lighting is managed through iCUE; skip the software and the sticks default to a rainbow cycle. A safe choice in the good sense. The gap to the non-RGB Vengeance is the cost of the light bar.',
+  B0DPJ9DJ3D: 'This is the white Vengeance RGB kit: 2x16GB, listed at up to 6000MHz CL30 and 1.4V, with AMD EXPO and Intel XMP 3.0 both named in the title. Its median recorded price across 2025 was $159. In November of that year the recorded price moved on five recorded days in a row: $246.99 on the 16th, $317.99 on the 17th, $422.33 on the 18th, $326.99 on the 19th and $448.99 on the 20th.',
   // G.Skill Flare X5 64GB 6000
   // /ram/g-skill-flare-x5-series-ddr5-ram-64gb-6000mhz/
-  B0CGQ3KS8X: 'Flare X5 is G.Skill\'s AMD-first line: EXPO-certified, low-profile, no lighting, built to run at the speeds Ryzen 7000 and 9000 handle best. The 64GB kit at 6000 is for people who edit video, run virtual machines, or never close a tab, and the short heatspreader clears almost any air cooler. Nothing about it is flashy, which is the point. The profile is EXPO first, so Intel builders should confirm an XMP profile is present before expecting rated speed.',
+  B0CGQ3KS8X: 'G.Skill lists this Flare X5 kit as 2x32GB at 6000MT/s CL30 and 1.40V, in matte black, with AMD EXPO named in the title. No calendar year before 2026 is fully covered in our record, so the figures here are dated prices. We recorded $354.99 on October 17, 2025, $248.00 on October 20 and $354.99 again on October 21. On January 6, 2026 we recorded $712.99, and $869.99 the next day.',
   // T-Force Delta RGB 32GB 6000, black  [rewritten 2026-09-02 after verification]
   // /ram/teamgroup-t-force-delta-rgb-ddr5-ram-32gb-6000mhz/
   B0B3HGJ4V7: 'The white Delta RGB: TEAMGROUP\'s full-width light bar in a white heatspreader, one of the cheaper ways to keep a white build consistent. White memory is one of the few parts where the colour is aesthetic but the price is not, which is why the black version has its own page here; the two drift apart more than you\'d expect. XMP and EXPO on the 6000 kit, and the heatspreader is tall enough that cooler clearance is worth measuring. Otherwise it is the Delta you\'d expect.',
@@ -73,7 +80,7 @@ module.exports = {
   B0GGJ2GN9K: 'Corsair\'s lower-priced RGB tier: the same module family with a simpler light bar, for builders who want the look without paying for a top speed bin. 5600 MT/s is the entry end of DDR5, fine for an Intel build or an everyday machine and a step below where Ryzen owners usually land. 32GB across two sticks is the sensible configuration. Buy it for the lighting and the price, not the speed.',
   // T-Force Delta RGB 32GB 6000, white  [rewritten 2026-09-02 after verification]
   // /ram/teamgroup-t-force-delta-rgb-ddr5-ram-32gb-6000mhz-2/
-  B0B3HHB3Z9: 'The Delta RGB in black is the kit with the full-width light bar, and it usually lands under the Corsair and G.Skill equivalents at the same speed. This 6000 kit carries both XMP and EXPO, so it drops into either platform. The heatspreader is tall enough that cooler clearance is a real question, not a footnote. TEAMGROUP\'s warranty is lifetime and its reliability record is fine. The honest reason to pick this over the bigger names is price, which is what this page tracks.',
+  B0B3HHB3Z9: 'The black version of TEAMGROUP\'s Delta RGB kit, listed as 2x16GB at 6000MHz CL30 with both Intel XMP 3.0 and AMD EXPO named in the title. Across three completed years its median recorded price stayed within about five dollars: $105 in 2023, $105 in 2024 and $110 in 2025. The daily record also contains two sharp moves. We recorded $239.99 on November 1, 2022, $471.00 on November 2 and $239.99 again on November 3; and $100.66 on November 30, 2023, then $169.30 the next day.',
   // generic DDR4 16GB 3200
   // /ram/ddr4-ram-16gb-3200mhz/
   B0GYF4X5V8: 'An unbranded DDR4 kit at the most common DDR4 speed. What you trade for the low price is everything that isn\'t the chips: no recognisable warranty path, unknown binning, and no guarantee the modules match a previous kit. For an office machine or a spare DDR4 board that needs to work, that trade is often fine. For a gaming rig you plan to keep, a Crucial or Kingston kit at the same speed usually costs little more and answers the support question.',
@@ -94,7 +101,7 @@ module.exports = {
   B0BNTRRLYP: 'Vulcan is TEAMGROUP\'s heatspreader kit without the light bar: the Delta\'s speed in a lower, plainer module at a lower price. This listing is XMP 3.0 only, with no EXPO profile, which makes it a straightforward pick on Intel and a slightly less certain one on AM5, where the XMP profile usually loads but is not AMD-certified. The lower height suits big air coolers. Nothing to install and nothing to light up.',
   // Crucial 64GB DDR5 5600
   // /ram/crucial-64gb-ddr5-ram-5600mhz/
-  B0BLTG3RLR: '64GB at JEDEC speed for people whose workload is memory-hungry but whose patience for BIOS tuning is not: video editors, developers running containers, anyone hitting swap with 32GB. It runs at 5600 out of the box. No heatspreader, no profiles, no lighting. The trade is the top end: a profiled 6000 kit will edge it in memory-bound benchmarks, but for capacity-first buyers that is rarely the point.',
+  B0BLTG3RLR: 'Crucial lists this 64GB desktop kit at 5600MHz, or 5200MHz or 4800MHz, as UDIMM 288-pin memory. Its median recorded price was about $178 in 2024 and $184 in 2025. In the last weeks of 2025 we recorded $429.70 on November 15, $299.90 on November 16 and $429.50 on November 17, then $568.99 on December 9 and $719.99 on December 10.',
   // Corsair Vengeance DDR5 32GB 6000, alternate listing
   // /ram/corsair-vengeance-ddr5-32gb-6000mhz/
   B0G5Q1XTKM: 'Corsair offers the non-RGB Vengeance 32GB 6000 in both XMP-only and EXPO-certified versions, and which one this is matters more than the small price gap between them. On Intel either works. On AM5, the EXPO version is the one that reaches rated speed with a single BIOS setting; the XMP-only kit usually runs too, but with less certainty. Check the listing title for EXPO before assuming the cheaper one is interchangeable.',
