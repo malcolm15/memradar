@@ -25,6 +25,67 @@ function totalCapacityGB(name) {
   const all = capTokensGB(name);
   return all.length ? Math.max(...all) : null;
 }
+// TWO CAPACITIES, AND THE DIFFERENCE MATTERS ONLY FOR MULTI-UNIT LISTINGS.
+// Added 2026-10-06.
+//
+//   capacity_gb and totalCapacityGB() are the PRODUCT-CLASS capacity, used for
+//   identity and grouping: for SSDs this is the capacity of one drive; for RAM
+//   kits it is the kit's stated total capacity. offerCapacityGB() is the total
+//   storage or memory capacity purchased in the listing, and is the denominator
+//   for every price-per-GB calculation. The two differ only when a listing sells
+//   more than one unit of the same product.
+//
+// A listing can sell several of the same drive and Amazon states it as prose
+// ("4TB 2 Pack"), which no parser read, so on such a listing every price-per-GB
+// site divided the whole offer price by one drive's capacity. Measured on
+// B0CXZ153DP: $0.437/GB published against a true $0.218/GB, and the page read as
+// the dearest member of its 4TB NVMe M.2 group.
+//
+// A RAM KIT CAN NEVER BE MULTIPLIED TWICE, AND THAT INVARIANT IS ASSERTED HERE
+// RATHER THAN ASSUMED. RAM titles state the kit TOTAL before the parenthesis
+// ("32GB (2x16GB)"), and totalCapacityGB already reads that total, so multiplying
+// again by a pack count would double a figure that is already complete. Returning
+// 1 whenever parseKitConfig matches makes that explicit at the one place a future
+// reader would look. No catalogue title today has both a kit config and a pack
+// word (measured: 0 of 235), so this costs nothing and guards the next one.
+//
+// KNOWN GAP, STATED RATHER THAN HIDDEN: a title that states only "2x2TB" with no
+// total before a parenthesis would give totalCapacityGB 2048 and unitCount 1, so
+// the offer capacity would be half. No such title exists in the catalogue today
+// (0 SSD titles match parseKitConfig at all). If one appears, the fix belongs in
+// totalCapacityGB, not here.
+//
+// "Protection Pack", "Value Pack" and similar are service or marketing nouns
+// rather than multiplicity, so they are excluded explicitly.
+function unitCount(name) {
+  const n = String(name || '');
+  if (parseKitConfig(n)) return 1;
+  if (/\b(protection|cps|value|expansion|software|starter)\s+pack\b/i.test(n)) return 1;
+  const m = /\b(\d{1,2})\s*[-\s]?pack\b/i.exec(n) || /\bpack of\s*(\d{1,2})\b/i.exec(n);
+  const c = m ? Number(m[1]) : 1;
+  return c >= 1 && c <= 12 ? c : 1;
+}
+
+// TOTAL CAPACITY PURCHASED IN THE LISTING. This is the denominator for price per
+// GB and nothing else. The product class stays totalCapacityGB(): a 2-pack of 4TB
+// drives is still a 4TB drive for the spec summary, the peer spec group, the
+// per-GB group key and the capacity chips, and calling it 8TB would be a worse
+// error than the one being fixed. For RAM the two are always equal, by the
+// invariant above.
+function offerCapacityGB(name) {
+  const per = totalCapacityGB(name);
+  return per == null ? null : per * unitCount(name);
+}
+
+// THE PRICE-PER-GB ARITHMETIC, in one place so a test has one thing to assert.
+// The generator's offerPerGb() and anything else that needs a price per GB call
+// this; nothing divides a price by a capacity on its own.
+function pricePerGb(price, name) {
+  if (price == null) return null;
+  const c = offerCapacityGB(name);
+  return c ? price / c : null;
+}
+
 function capacityLabel(gb) {
   if (gb == null) return null;
   return gb >= 1024 && gb % 1024 === 0 ? (gb / 1024) + 'TB' : gb + 'GB';
@@ -129,6 +190,9 @@ module.exports = {
   shortName,
   capTokensGB,
   totalCapacityGB,
+  unitCount,
+  offerCapacityGB,
+  pricePerGb,
   capacityLabel,
   parseSpeed,
   parseKitConfig,
@@ -139,3 +203,41 @@ module.exports = {
   formFactor,
   latency,
 };
+
+// Self-test: node backend/lib/productParsers.js
+if (require.main === module) {
+  const assert = require('assert');
+  const T = [
+    // [title, expected unitCount, expected offerCapacityGB]
+    ['MZ-V9P4T0B/AM 990 PRO PCIe 4.0 NVMe M.2 SSD 4TB 2 Pack', 2, 8192],
+    ['Samsung 990 PRO 4TB NVMe M.2 2-Pack', 2, 8192],
+    ['Samsung 990 PRO 4TB NVMe M.2, Pack of 2', 2, 8192],
+    ['MZ-V9P4T0B/AM 990 PRO PCIe 4.0 NVMe M.2 SSD 4TB Bundle with 2 YR CPS Enhanced Protection Pack', 1, 4096],
+    ['WD_Black SN850X 4TB NVMe SSD with Heatsink - M.2 2280, Up to 7,300 MB/s Read speeds', 1, 4096],
+    ['CORSAIR Vengeance DDR5 RAM 32GB (2x16GB) Up to 6000MHz CL30-36-36-76 1.4V', 1, 32],
+    ['FURY Beast 16GB 6000MT/s DDR5 CL30 Desktop Memory | AMD EXPO | Single Module | KF560C30BBE-16', 1, 16],
+    ['Samsung 990 PRO 2TB, 3-bit TLC V-NAND, M.2 (2280), NVMe 2.0, 1200TBW, 5 Years Warranty', 1, 2048],
+    ['Some Enclosure Adapter With No Capacity At All', 1, null],
+  ];
+  for (const [name, units, offer] of T) {
+    assert.strictEqual(unitCount(name), units, `unitCount: ${name}`);
+    assert.strictEqual(offerCapacityGB(name), offer, `offerCapacityGB: ${name}`);
+  }
+  // A RAM kit can never be multiplied twice, whatever else the title says.
+  assert.strictEqual(unitCount('Corsair 32GB (2x16GB) DDR5 ... 2 Pack'), 1);
+  assert.strictEqual(offerCapacityGB('Corsair 32GB (2x16GB) DDR5 ... 2 Pack'), 32);
+  // THE REGRESSION PROPERTY: for any multi-unit title the offer capacity is
+  // exactly the product-class capacity times the unit count. A price-per-GB site
+  // that reached for the product-class value would break this.
+  for (const [name] of T) {
+    const u = unitCount(name);
+    if (u > 1) assert.strictEqual(offerCapacityGB(name), totalCapacityGB(name) * u, `property: ${name}`);
+    else assert.strictEqual(offerCapacityGB(name), totalCapacityGB(name), `property (single): ${name}`);
+  }
+  // pricePerGb is the only arithmetic, and it divides by the OFFER capacity.
+  assert.strictEqual(pricePerGb(1789.90, 'MZ-V9P4T0B/AM 990 PRO ... SSD 4TB 2 Pack'), 1789.90 / 8192);
+  assert.strictEqual(pricePerGb(1789.90, 'Samsung SSD 990 PRO 4TB, PCIe 4.0 M.2 2280'), 1789.90 / 4096);
+  assert.strictEqual(pricePerGb(null, 'anything 4TB'), null);
+  assert.strictEqual(pricePerGb(100, 'no capacity here'), null);
+  console.log('productParsers.js self-test: all assertions passed');
+}
