@@ -94,6 +94,23 @@ jobs:
           cache: npm
       - run: npm ci --omit=dev
 
+      # PRE-GENERATION GATE. Pure self-tests for code the generator's require
+      # graph actually reaches, run before anything is written. A failure here
+      # stops the job: Regenerate never starts, nothing is committed, no deploy
+      # is dispatched, and the previously published pages stay live.
+      #
+      # SCOPE IS DELIBERATELY NARROW, and the test for inclusion is three-part:
+      # the generator imports it, it needs no network, database or secret, and
+      # IT FAILS THE PROCESS on a bad assertion. keepa.js is pure and fast and
+      # uses real assert, but the generator does not import it, so it stays out.
+      # A self-test built on console.assert prints "Assertion failed" and then
+      # exits 0; adding one here would buy a green step and no safety.
+      - name: Self-tests for code the generator depends on
+        run: |
+          set -euo pipefail
+          node backend/lib/productParsers.js
+          node backend/lib/rakutenLink.js
+
       - name: Regenerate
         id: regen
         env:
