@@ -169,4 +169,40 @@ module.exports = {
   // Corsair Vengeance RGB DDR5 32GB 6000 CL36, white
   // /ram/corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz/
   B0CDY46PFK: 'The white RGB version of Corsair\'s 6000MHz CL36 kit, listed with an Intel XMP 3.0 profile and no mention of AMD EXPO. The median recorded price stayed within ten dollars across late 2023, 2024 and 2025: about $105, $115 and $111. That 2025 figure hides how the year ended. Between November 13 and December 4, 2025 the recorded price went from $226.99 to $499.99.',
+
+  // ---- PRICE-RECORD BLURBS, batch 2, added 2026-10-05. Same rule set as
+  // batch 1: every figure is a recorded price on a named date, a change between
+  // two named dates, a median for a completed year, or a verdict quoted from
+  // ath-classification.json. Nine cite a classification; two of those are
+  // class (a), where Amazon's own series carried the high.
+  // G.SKILL RipjawsV DDR4 16GB 3200, 1x16GB
+  // /ram/g-skill-ripjawsv-series-ddr4-ram-16gb-3200mhz-2/
+  B0171GQXME: 'This listing is a single 16GB module (1x16GB). Its yearly median price in our record peaked at about $183 in 2018, then fell in every year but one through 2025: $94, $71, $85, $65, $43, $35 and $33. The $237.42 recorded on December 12, 2017 sits between $180.00 on December 4 and $219.99 on December 13. Our classification for December 12 shows Amazon had no offer that day, and a marketplace seller\'s price was the one recorded.',
+  // G.SKILL RipjawsV DDR4 32GB 3200
+  // /ram/g-skill-ripjawsv-series-ddr4-ram-32gb-3200mhz/
+  B0171GQR0C: 'For the ten completed calendar years from 2016 through 2025, the median recorded prices were about $188, $265, $344, $170, $119, $140, $116, $65, $54 and $69. On January 8, 2018 we recorded $439.78. We also recorded $429.78 on January 3 and $437.08 on January 12. For January 8 itself, our classification shows Amazon had no offer and a marketplace seller\'s price was recorded.',
+  // Intel 660p 1TB NVMe
+  // /ssd/intel-660p-series-m-2-2280-1tb-pcie-nvme/
+  B07GCL6BR4: 'Intel\'s listing describes this as a QLC drive on PCIe NVMe 3.0 x4. From 2019 through 2025 its yearly median price stayed between about $84 and $126: $114, $126, $116, $84, $101, $104 and $115. Its first weeks on record looked different. We recorded $199.00 on October 20, 2018, $268.47 on October 25 and $199.00 again on October 27. Our classification for October 25 shows Amazon had no offer that day.',
+  // PNY CS900 2TB SATA
+  // /ssd/pny-cs900-2tb-3d-nand-2-5-sata-iii/
+  B08GB8S6R3: 'The recorded price of this drive was $189.99 on January 10, 2021 and $479.99 on January 19. It was $478.98 on January 26 and $218.49 the next day. Our classification for January 19 shows Amazon had no offer, and the price recorded was a marketplace seller\'s. The yearly medians for the same drive: about $207 in 2021, $157 in 2022, $97 in 2023, $122 in 2024 and $100 in 2025.',
+  // Samsung 860 EVO 2TB SATA
+  // /ssd/samsung-ssd-860-evo-2tb-2-5-inch-sata/
+  B0786QNSBD: 'In March 2018 the recorded price of this drive climbed over four days, from $699.99 on March 23 to $896.95 on March 26, and was $604.87 the day after. Our classification for March 26 shows Amazon had no offer. In August 2021 it went from $801.85 to $399.99 between the 11th and the 13th, and was back at $801.85 by the 20th. Away from those weeks, the yearly medians were about $300, $290 and $299 from 2019 through 2021, and about $240, $241 and $236 from 2023 through 2025.',
+  // Samsung 870 EVO 500GB SATA
+  // /ssd/samsung-ssd-870-evo-500gb/
+  B08PC43D78: 'For four years the yearly median price of this 500GB drive moved between about $63 and $127: $71 in 2022, $63 in 2023, $127 in 2024 and $69 in 2025. In September 2026 we recorded $306.00 on September 22, $310.52 on September 25 and $309.00 on September 28. Our classification for September 25 shows Amazon had no offer that day, and the recorded price was a marketplace seller\'s.',
+  // WD Green SN350 2TB NVMe
+  // /ssd/western-digital-2tb-wd-green-sn350-nvme/
+  B09DVRBNWV: 'The title lists this as a QLC drive on Gen3 PCIe, rated up to 3,200 MB/s. Its yearly median price was about $170 in 2022, $90 in 2023 and $115 in both 2024 and 2025. In January and February 2026 the recorded price went from $231.00 on January 23 to $437.49 on January 24, was $441.42 on February 3, and $266.33 on February 4. For February 3 our classification shows Amazon had no offer and a marketplace seller\'s price was recorded.',
+  // WD_Black SN850X 4TB NVMe, heatsink
+  // /ssd/western-digital-wd-black-sn850x-4tb-nvme/
+  B0D9WTKV1B: 'The $1,249.99 recorded on March 23, 2026 was Amazon\'s own price. Our classification marks it as a genuine Amazon first-party high. Two days earlier we had recorded $838.81, and two days later $699.99. For comparison, the median recorded price across 2025 was about $320.',
+  // Samsung 990 PRO 2TB, heatsink
+  // /ssd/samsung-990-pro-w-heatsink-ssd-2tb/
+  B0BHJDY57J: 'Samsung\'s listing gives this heatsink version as PlayStation 5 compatible. Its median recorded price was about $189 in 2024 and $180 in 2025. On April 16, 2026 the recorded price reached $669.99, up from $506.78 the day before, and our classification shows that was Amazon\'s own price: Amazon\'s series moved to $669.99 during the day, showed no offer for part of the day, and returned at $669.99. A $250 step then appears twice that summer: $669.99 to $419.99 on July 28, and $419.99 back to $669.99 on August 3.',
+  // Samsung 990 EVO Plus 2TB
+  // /ssd/samsung-990-evo-plus-ssd-2tb/
+  B0DHLCRF91: 'The title lists two interface modes for this drive, PCIe Gen 4x4 and Gen 5x2. Across 2025 its median recorded price was about $140. The $579.99 recorded on May 4, 2026 was Amazon\'s own price according to our classification. Later that year we recorded $369.99 on August 30, $579.99 on August 31 and $369.99 on September 1.',
 };
