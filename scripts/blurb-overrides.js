@@ -108,12 +108,12 @@ module.exports = {
   // Samsung 990 PRO 2TB
   // /ssd/samsung-990-pro-ssd-2tb-nvme-m-2-pcie/
   B0BHJJ9Y77: 'The 990 PRO has been the reference Gen4 NVMe drive since it launched: TLC flash, a DRAM cache, a controller that holds its speed under sustained load, and a five-year warranty. It is the drive reviewers compare other drives against. A heatsink version exists for the PS5, and Samsung\'s Gen5 successor exists for people who need it, but for gaming and general use this is as fast as storage needs to be. If it is priced sanely, it is the drive to buy.',
-  // TEAMGROUP Elite SODIMM 64GB 5600
+  // TEAMGROUP Elite SODIMM 64GB 5600  [rewritten 2026-10-06 to the price rule set]
   // /ram/teamgroup-elite-sodimm-ddr5-64gb-5600mhz/
-  B0CN9376FP: 'Laptop memory, and a lot of it: two 32GB SODIMMs at JEDEC 5600, no profiles, no heatspreader. This is for a workstation laptop or a mini PC that ships with two slots and a stingy factory configuration. Check two things before buying: that the machine\'s memory is socketed rather than soldered, and that it supports 32GB modules. Many mini PCs do; many thin laptops do not.',
-  // Corsair Vengeance DDR5 16GB 6000  [rewritten 2026-09-02 after verification]
+  B0CN9376FP: 'TEAMGROUP lists this Elite kit as 64GB of DDR5 laptop memory in two 32GB SODIMMs: 5600MHz, CL46, 1.1V, 262-pin, non-ECC and unbuffered. Across 2025 the median price we recorded was $176. For 2024 our observations run from February 19 to December 17, with a median of $172. In 2026 we recorded $800.99 on August 19 and $939.99 on August 20, then $1,049.99 on September 1, $1,184.99 on September 2 and $1,049.99 on September 3.',
+  // Corsair Vengeance DDR5 16GB 6000  [rewritten 2026-10-06 to the price rule set]
   // /ram/corsair-vengeance-ddr5-ram-16gb-6000mhz/
-  B0GJFTS22V: '16GB is the floor for a gaming PC in 2026, and this is the entry ticket at a proper speed: 2x8GB at 6000 with both EXPO and XMP, so it runs at rated speed on either platform. The catch is growth. Both slots on a two-slot board are filled, so moving to 32GB later means replacing the kit rather than adding to it. The honest advice is that 32GB is the sensible target now; this is the budget-constrained version of a fine kit.',
+  B0GJFTS22V: 'A gray 16GB DDR5 desktop kit of two 8GB modules, listed at up to 6000MHz with CL36 timings at 1.35V, with AMD EXPO and Intel XMP 3.0. Our record of this listing begins on April 14, 2026. We recorded an in-stock price on every day of August and September 2026; the median was $250 across August and $290 across September. Within September we recorded $259.99 on the 7th and $289.99 on the 8th.',
   // Acer Predator GM7 2TB
   // /ssd/acer-predator-gm7-2tb-ssd-m-2-2280-pcie/
   B0CB8JJR7F: 'A DRAM-less Gen4 drive that reviewers were surprised by: fast enough in everyday use to embarrass drives that cost more, using host memory instead of an onboard cache. That design keeps the price down and is fine for a game library or a boot drive. It is not the drive for constant large file writes, where DRAM-equipped competitors hold up better. Acer\'s storage line is made by BIWIN; the brand on the sticker is not the manufacturer.',
