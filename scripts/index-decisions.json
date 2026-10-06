@@ -194,7 +194,6 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
-    "pergb_group_end",
     "historical_demand"
    ]
   },
@@ -232,8 +231,7 @@
    "bing_citations": 0,
    "reasons": [
     "required_by_build",
-    "sparse_history",
-    "percentile_extreme"
+    "sparse_history"
    ]
   },
   "ram/corsair-vengeance-ddr5-ram-32gb-6000mhz-2": {
@@ -246,6 +244,7 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
+    "percentile_extreme",
     "historical_demand"
    ]
   },
@@ -297,7 +296,6 @@
    "bing_citations": 2,
    "reasons": [
     "sparse_history",
-    "percentile_extreme",
     "historical_demand"
    ]
   },
@@ -709,6 +707,7 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
+    "percentile_extreme",
     "historical_demand"
    ]
   },
@@ -913,14 +912,15 @@
   },
   "ram/g-skill-trident-z5-rgb-32gb-2-x-16gb": {
    "sku": "B0BQWXTDWN",
-   "indexable": false,
+   "indexable": true,
    "first_tracked": "2023-07-03",
    "google_impressions": 4,
    "google_position": 12.75,
    "bing_impressions": 0,
    "bing_citations": 1,
    "reasons": [
-    "long_history"
+    "long_history",
+    "percentile_extreme"
    ]
   },
   "ram/g-skill-trident-z5-rgb-series-ddr5-ram-16gb-6000mhz": {
@@ -982,8 +982,7 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history",
-    "percentile_extreme"
+    "sparse_history"
    ]
   },
   "ram/g-skill-trident-z5-rgb-series-ddr5-ram-64gb-6400mhz": {
@@ -1202,15 +1201,14 @@
   },
   "ram/kingston-fury-impact-64gb-5600mhz": {
    "sku": "B0BRTJT5P2",
-   "indexable": true,
+   "indexable": false,
    "first_tracked": "2023-01-10",
    "google_impressions": 11,
    "google_position": 14,
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "long_history",
-    "percentile_extreme"
+    "long_history"
    ]
   },
   "ram/kingston-fury-renegade-white-rgb-16gb-6400mhz": {
@@ -1284,8 +1282,7 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history",
-    "percentile_extreme"
+    "sparse_history"
    ]
   },
   "ram/patriot-viper-elite-5-ddr5-ram-16gb-6000mhz": {
@@ -1438,6 +1435,7 @@
    "reasons": [
     "sparse_history",
     "percentile_extreme",
+    "pergb_group_end",
     "latency_distinct",
     "historical_demand"
    ]
@@ -1465,7 +1463,6 @@
    "bing_citations": 0,
    "reasons": [
     "long_history",
-    "percentile_extreme",
     "historical_demand"
    ]
   },
@@ -1479,7 +1476,6 @@
    "bing_citations": 0,
    "reasons": [
     "long_history",
-    "percentile_extreme",
     "historical_demand"
    ]
   },
@@ -2377,6 +2373,7 @@
    "bing_citations": 7,
    "reasons": [
     "sparse_history",
+    "percentile_extreme",
     "bing_citations"
    ]
   },
@@ -2496,7 +2493,6 @@
    "bing_citations": 0,
    "reasons": [
     "long_history",
-    "percentile_extreme",
     "pergb_group_end"
    ]
   },
