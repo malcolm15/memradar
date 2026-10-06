@@ -41,14 +41,19 @@ module.exports = { neweggDeepLink, NEWEGG_MID };
 
 // Self-test: node backend/lib/rakutenLink.js
 if (require.main === module) {
+  // node assert, NOT console.assert. This self-test is a step in the
+  // pre-generation gate in .github/workflows/newegg-refresh.yml, and
+  // console.assert prints "Assertion failed" and then exits 0, so a gate built
+  // on it would be green for a broken link builder.
+  const assert = require('assert');
   const link = neweggDeepLink('https://www.newegg.com/p/N82E16820331558?cm_sp=x', 'EXAMPLE11ID');
   console.log(link);
   const u = new URL(link);
-  console.assert(u.hostname === 'click.linksynergy.com', 'host');
-  console.assert(u.searchParams.get('mid') === NEWEGG_MID, 'mid');
-  console.assert(u.searchParams.get('murl') === 'https://www.newegg.com/p/N82E16820331558?cm_sp=x', 'murl roundtrip');
+  assert.strictEqual(u.hostname, 'click.linksynergy.com', 'host');
+  assert.strictEqual(u.searchParams.get('mid'), NEWEGG_MID, 'mid');
+  assert.strictEqual(u.searchParams.get('murl'), 'https://www.newegg.com/p/N82E16820331558?cm_sp=x', 'murl roundtrip');
   let threw = false;
   try { neweggDeepLink('https://x.com', ''); } catch (e) { threw = true; }
-  console.assert(threw, 'missing-id must throw');
+  assert.ok(threw, 'missing-id must throw');
   console.log('rakutenLink self-test OK');
 }
