@@ -215,4 +215,31 @@ module.exports = {
   // Samsung 990 EVO Plus 2TB
   // /ssd/samsung-990-evo-plus-ssd-2tb/
   B0DHLCRF91: 'The title lists two interface modes for this drive, PCIe Gen 4x4 and Gen 5x2. Across 2025 its median recorded price was about $140. The $579.99 recorded on May 4, 2026 was Amazon\'s own price according to our classification. Later that year we recorded $369.99 on August 30, $579.99 on August 31 and $369.99 on September 1.',
+  // Crucial 16GB DDR4 3200 SODIMM (laptop)
+  // /ram/crucial-16gb-ddr4-ram-3200mhz/
+  B08C511GQH: 'This listing is 16GB of SODIMM 260-pin laptop memory at 3200MHz CL22. Its median recorded price fell from about $86 in 2021 to $70 in 2022 and $36 in 2023, was $37 in 2024, and $60 in 2025. In December 2025 we recorded $105.99 on the 19th, $59.99 on the 20th and $99.99 on the 21st.',
+  // Samsung 990 PRO 1TB NVMe
+  // /ssd/samsung-ssd-990-pro-1tb/
+  B0BHJF2VRN: 'Samsung\'s title for this 1TB drive gives PCIe 4.0, M.2 2280 and speeds up to 7,450 MB/s. Its median recorded price was about $118 in 2024 and $117 in 2025. In July 2023 we recorded $59.99 on July 11, $89.95 on July 12, $59.99 on July 13, $89.93 on July 14, $88.80 on July 15 and $59.99 on July 16.',
+  // Samsung 870 QVO 8TB SATA
+  // /ssd/samsung-870-qvo-sata-iii-ssd-8tb-2-5/
+  B089C3TZL9: 'On May 4, 2026 we recorded $1,770.63 for this 8TB SATA drive, and $2,399.99 the next day. Earlier that year we recorded $999.99 on January 22, $755.99 on January 23 and $982.99 on January 24. For the five completed years from 2021 through 2025 its median recorded prices were about $800, $720, $400, $612 and $672.',
+  // Samsung 9100 PRO 2TB NVMe
+  // /ssd/samsung-ssd-9100-pro-2tb/
+  B0DX2DPJZ5: 'Samsung\'s title lists this 2TB drive as PCIe 5.0 x4, M.2 2280, with sequential read speeds up to 14,700MB/s. We have tracked it since March 2025, and the median recorded price over the tracked part of that year was about $220. In January 2026 we recorded $237.52 on the 12th, $378.95 on the 13th, $283.24 on the 14th and $340.49 on the 15th.',
+  // Samsung 860 PRO 2TB SATA
+  // /ssd/samsung-ssd-860-pro-2tb-2-5-inch-sata/
+  B07879KC15: 'Samsung\'s 860 PRO in the 2TB, 2.5-inch SATA III version. Its yearly median price did not move in one direction: about $380 in 2021, $580 in 2022, $758 in 2023, $500 in 2024 and $425 in 2025. In February 2022 we recorded $379.99 on the 8th, $850.00 on the 9th and $439.99 on the 10th.',
+  // Samsung 870 EVO 2TB SATA
+  // /ssd/samsung-ssd-870-evo-sata-iii-2-5-2tb/
+  B08QB93S6R: 'The title for this 2TB SATA III drive gives read speeds up to 560MB/s. Its median recorded prices for the five completed years from 2021 through 2025 were about $300, $190, $127, $172 and $170. In December 2025 we recorded $224.99 on the 18th, $349.99 on the 19th and $189.99 on the 20th.',
+  // TEAMGROUP Vulcan Z DDR4 16GB 3200
+  // /ram/teamgroup-t-force-vulcan-z-ddr4-dram-16gb-3200mhz/
+  B08PJNVWNZ: 'In the week of January 10, 2022 we recorded $95.48 on the 10th, $57.99 on the 11th, $139.49 on the 12th, $99.98 on the 13th and $57.99 on the 14th for this kit. It is listed as two 8GB desktop modules at 3200MHz CL16, in gray. Its median recorded price was about $77 in 2021, $51 in 2022 and $36 in both 2023 and 2024.',
+  // Crucial T500 1TB NVMe
+  // /ssd/crucial-t500-pcie-gen4-nvme-1tb-ssd/
+  B0CK39YR9V: 'Crucial\'s title lists this 1TB drive as PCIe Gen4 NVMe with TLC NAND and speeds up to 7,300MB/s. Its median recorded price was about $90 in 2024 and $94 in 2025. In April 2026 we recorded two moves from $199.99 to $268.92: April 19 to April 20, and April 24 to April 25.',
+  // Crucial 32GB DDR4 3200 SODIMM (laptop)
+  // /ram/crucial-32gb-ddr4-ram-kit-3200mhz/
+  B08C4X9VR5: 'Laptop memory: two 16GB SODIMM 260-pin modules at 3200MHz CL22. For the five completed years from 2021 through 2025 the median recorded prices were about $162, $122, $73, $66 and $113. In April 2026 we recorded $256.98 on the 20th, $120.88 on the 21st and $249.99 on the 22nd.',
 };
