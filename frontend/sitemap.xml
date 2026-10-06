@@ -163,6 +163,12 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://memradar.com/ram/corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz/</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://memradar.com/ram/g-skill-flare-x5-series-ddr5-ram-32gb-6000mhz/</loc>
     <lastmod>2026-10-06</lastmod>
     <changefreq>daily</changefreq>
@@ -230,12 +236,6 @@
   </url>
   <url>
     <loc>https://memradar.com/ram/crucial-16gb-ddr5-ram-5600mhz/</loc>
-    <lastmod>2026-10-06</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://memradar.com/ram/crucial-16gb-ddr5-ram-5600mhz-2/</loc>
     <lastmod>2026-10-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -343,67 +343,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://memradar.com/ram/g-skill-trident-z5-rgb-32gb-2-x-16gb/</loc>
-    <lastmod>2026-10-06</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://memradar.com/ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-64gb-6000mhz-3/</loc>
-    <lastmod>2026-10-06</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://memradar.com/ram/crucial-96gb-ddr5-5600mhz-laptop-memory/</loc>
-    <lastmod>2026-10-06</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://memradar.com/ram/kingston-fury-beast-32gb-6000mt-s-ddr5/</loc>
-    <lastmod>2026-10-06</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://memradar.com/ram/kingston-fury-impact-32gb-5600mhz/</loc>
-    <lastmod>2026-10-06</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://memradar.com/ram/kingston-fury-beast-16gb-5200mhz/</loc>
-    <lastmod>2026-10-06</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://memradar.com/ram/kingston-fury-beast-white-rgb-32gb-5600mhz/</loc>
-    <lastmod>2026-10-06</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://memradar.com/ram/kingston-fury-renegade-white-rgb-16gb-6400mhz/</loc>
-    <lastmod>2026-10-06</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://memradar.com/ram/kingston-fury-beast-32gb-5600mhz/</loc>
-    <lastmod>2026-10-06</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://memradar.com/ram/kingston-fury-renegade-white-rgb-32gb-6400mhz/</loc>
-    <lastmod>2026-10-06</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://memradar.com/ram/kingston-fury-beast-64gb-5600mhz/</loc>
     <lastmod>2026-10-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -422,12 +362,6 @@
   </url>
   <url>
     <loc>https://memradar.com/ssd/intel-660p-series-m-2-2280-1tb-pcie-nvme/</loc>
-    <lastmod>2026-10-06</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://memradar.com/ssd/crucial-p310-1tb-232l-micron-qlc-nand-pcie/</loc>
     <lastmod>2026-10-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -469,7 +403,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://memradar.com/ssd/western-digital-4tb-wd-blue-sn5000-nvme/</loc>
+    <loc>https://memradar.com/ssd/samsung-990-evo-plus-ssd-4tb/</loc>
     <lastmod>2026-10-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -482,12 +416,6 @@
   </url>
   <url>
     <loc>https://memradar.com/ssd/western-digital-wd-black-sn850x-4tb-nvme/</loc>
-    <lastmod>2026-10-06</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://memradar.com/ssd/western-digital-wd-black-sn850x-4tb-nvme-2/</loc>
     <lastmod>2026-10-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -523,25 +451,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://memradar.com/ssd/western-digital-wd-black-sn770m-1tb/</loc>
-    <lastmod>2026-10-06</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://memradar.com/ssd/crucial-t500-pcie-gen4-nvme-1tb-ssd/</loc>
-    <lastmod>2026-10-06</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://memradar.com/ssd/crucial-t500-2tb-pcie-gen4-nvme-gaming-ps5/</loc>
-    <lastmod>2026-10-06</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://memradar.com/ssd/teamgroup-t-force-vulcan-z-2tb-slc-cache/</loc>
     <lastmod>2026-10-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>

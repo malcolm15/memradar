@@ -60,7 +60,7 @@
   "atl": 91.99,
   "ath": 597.39,
   "buy": "good",
-  "indexable": false
+  "indexable": true
  },
  "https://memradar.com/ram/g-skill-flare-x5-series-ddr5-ram-32gb-6000mhz/": {
   "price": 494.49,
@@ -298,7 +298,7 @@
   "atl": 37.04,
   "ath": 273.65,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/crucial-16gb-ddr5-ram-4800mhz/": {
   "price": 259.99,
@@ -655,7 +655,7 @@
   "atl": 99.99,
   "ath": 712.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/g-skill-trident-z5-rgb-series-ddr5-ram-64gb-6400mhz/": {
   "price": 1299.99,
@@ -697,7 +697,7 @@
   "atl": 171.57,
   "ath": 1711.88,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/crucial-ram-16gb-ddr5-5200mhz/": {
   "price": 249.99,
@@ -732,7 +732,7 @@
   "atl": 119.05,
   "ath": 707.79,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/kingston-fury-beast-rgb-64gb-6400mhz/": {
   "price": 1299.99,
@@ -746,7 +746,7 @@
   "atl": 84.99,
   "ath": 669.49,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/kingston-fury-beast-16gb-6000mt-s-ddr5/": {
   "price": 349.73,
@@ -760,7 +760,7 @@
   "atl": 49.99,
   "ath": 363.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/kingston-fury-beast-32gb-5200mhz/": {
   "price": 656.99,
@@ -774,14 +774,14 @@
   "atl": 87,
   "ath": 698.51,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/kingston-fury-renegade-white-rgb-16gb-6400mhz/": {
   "price": 382.21,
   "atl": 75.67,
   "ath": 464.5,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/kingston-fury-impact-64gb-5600mhz/": {
   "price": 1241.99,
@@ -795,7 +795,7 @@
   "atl": 87.99,
   "ath": 695.12,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/kingston-fury-beast-rgb-8gb-6000mt-s-ddr5/": {
   "price": 205.23,
@@ -816,14 +816,14 @@
   "atl": 134.99,
   "ath": 908.67,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/kingston-fury-beast-64gb-5600mhz/": {
   "price": 1517.99,
   "atl": 159.99,
   "ath": 1517.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ram/16gb-2x8gb-ddr5-4800mhz-pc5-38400-1rx8/": {
   "price": 257.95,
@@ -970,7 +970,7 @@
   "atl": 67.62,
   "ath": 189.95,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/gigastone-m-2-ssd-1tb-pcie-4-0-nvme-ssd/": {
   "price": 219.99,
@@ -1131,14 +1131,14 @@
   "atl": 199.99,
   "ath": 1049.99,
   "buy": "elevated",
-  "indexable": false
+  "indexable": true
  },
  "https://memradar.com/ssd/western-digital-4tb-wd-blue-sn5000-nvme/": {
   "price": 479.99,
   "atl": 199.99,
   "ath": 742,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/samsung-ssd-990-pro-4tb/": {
   "price": 959.74,
@@ -1194,7 +1194,7 @@
   "atl": 229.95,
   "ath": 843,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/western-digital-wd-blue-4tb-sn5100-nvme/": {
   "price": 479.99,
@@ -1341,7 +1341,7 @@
   "atl": 98.03,
   "ath": 449.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/crucial-t500-pcie-gen4-nvme-1tb-ssd/": {
   "price": 274.85,
@@ -1355,7 +1355,7 @@
   "atl": 121.49,
   "ath": 499.95,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/crucial-t500-pcie-gen4-nvme-4tb-ssd/": {
   "price": 799,
@@ -1488,7 +1488,7 @@
   "atl": 64.59,
   "ath": 257.99,
   "buy": "elevated",
-  "indexable": true
+  "indexable": false
  },
  "https://memradar.com/ssd/crucial-bx500-sata-ssd-2tb/": {
   "price": 254,
