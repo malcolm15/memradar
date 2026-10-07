@@ -54,6 +54,10 @@ const BASE = (arg('base', 'https://memradar.com')).replace(/\/$/, '');
 // How long the SERVED pass waits for the page's own stylesheet before giving up
 // and saying so. Bounded: the page always completes.
 const CSS_READY_MS = Number(arg('css-ready-ms', '8000'));
+// At most this many discovered multi-unit pages join a run. One is enough to
+// make the check non-vacuous; the cap keeps a catalogue that suddenly carried
+// dozens of multi-packs from quietly tripling the deploy step.
+const DISCOVER_MAX = Number(arg('discover-max', '3'));
 const QUIET_MS = Number(arg('quiet-ms', '1200'));
 const NAV_TIMEOUT = Number(arg('timeout', '60000'));
 const JSON_OUT = arg('json', '');
@@ -986,8 +990,38 @@ async function loadPage(browser, url, { js }) {
   let index = null;
   try {
     const rows = await (await fetch(`${BASE}/search-index.json`)).json();
-    index = { bySku: new Map(rows.map((e) => [e.sku, e])), count: rows.length };
+    index = { bySku: new Map(rows.map((e) => [e.sku, e])), count: rows.length, rows };
     log(`  reference: /search-index.json, ${index.count} entries`);
+    // DYNAMIC DISCOVERY OF MULTI-UNIT PRODUCT PAGES.
+    //
+    // The multi-unit per-GB check needs a listing whose unitCount is above 1.
+    // Exactly one catalogue product qualified on 2026-10-06, and hard-coding its
+    // URL in the deploy command made the check depend on one Amazon listing
+    // keeping its title and its slug. A retitle breaks BOTH, because the slug is
+    // title-derived, and the check would then silently inspect nothing.
+    //
+    // No extra network request: search-index.json has already been fetched for
+    // the card-name check. No database call, and no built page read back as
+    // data; this is the generator's own emitted index.
+    //
+    // DETERMINISTIC BY DESIGN: sorted by SKU ascending, then capped, so the set
+    // audited does not depend on the order the index happens to be written in.
+    if (flag('gate')) {
+      const multi = index.rows.filter((r) => r.name && unitCount(r.name) > 1)
+        .sort((a, b) => (a.sku < b.sku ? -1 : a.sku > b.sku ? 1 : 0));
+      const listed = new Set(PAGES.map((p) => p.url));
+      const add = [];
+      for (const r of multi.slice(0, DISCOVER_MAX)) {
+        const url = `/${r.category}/${r.slug}/`;
+        if (listed.has(url)) continue;
+        listed.add(url);
+        add.push({ url, kind: 'pdp', discovered: true, sku: r.sku });
+      }
+      log(`  multi-unit discovery: ${multi.length} product(s) with unitCount > 1 in the index, `
+        + `${Math.min(multi.length, DISCOVER_MAX)} within the cap of ${DISCOVER_MAX}, ${add.length} added to this run`);
+      add.forEach((p) => log(`    + ${p.url}  (${p.sku}: unitCount > 1, so it is the only kind of page the multi-unit per-GB check can inspect)`));
+      PAGES.push(...add);
+    }
   } catch (e) {
     log(`  *** /search-index.json unreadable (${e.message}); the card name check is DISABLED, which is not a pass`);
   }
