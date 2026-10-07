@@ -99,6 +99,28 @@ const PAGES = (() => {
 const THIRD_PARTY_HOST = /google-analytics\.com|googletagmanager\.com|challenges\.cloudflare\.com|cdn\.jsdelivr\.net|cdnjs\.cloudflare\.com|code\.jquery\.com|doubleclick/;
 const THIRD_PARTY_CONSOLE = /font-size:0;color:transparent|gtag|google-analytics|turnstile|challenges\.cloudflare/i;
 
+// DID THE PAGE LAND WHERE WE ASKED? A URL can 404 or redirect after a slug
+// change, and before 2026-10-07 the audit said nothing about it: a 404 was
+// audited as though it were the page, reported 0 defects and exited 0.
+//
+// ACCEPTABLE NORMALISATION, and nothing else counts as landing:
+//   1. the scheme and host become BASE's (so a canonical-host redirect is fine);
+//   2. a missing trailing slash is added;
+//   3. a trailing index.html is dropped;
+//   4. the query string and fragment are ignored.
+// Anything beyond that, including a redirect to a different path, is NOT landing.
+function landedOn(requested, finalUrl) {
+  const norm1 = (u) => {
+    let p;
+    try { p = new URL(u, BASE).pathname; } catch (e) { return null; }
+    if (p.endsWith('/index.html')) p = p.slice(0, -'index.html'.length);
+    if (!p.endsWith('/')) p += '/';
+    return p;
+  };
+  const a = norm1(requested), b = norm1(finalUrl);
+  return a != null && a === b;
+}
+
 const log = (s) => console.log(s);
 const norm = (s) => String(s == null ? '' : s).replace(/ /g, ' ').replace(/\s+/g, ' ').trim();
 
@@ -779,7 +801,9 @@ async function loadPage(browser, url, { js }) {
     }
   });
 
-  await page.goto(BASE + url, { waitUntil: js ? 'networkidle2' : 'domcontentloaded', timeout: NAV_TIMEOUT });
+  const nav = await page.goto(BASE + url, { waitUntil: js ? 'networkidle2' : 'domcontentloaded', timeout: NAV_TIMEOUT });
+  const navStatus = nav ? nav.status() : null;
+  const finalUrl = page.url();
 
   // THE SERVED SNAPSHOT MUST BE TAKEN WITH THE PAGE'S OWN STYLESHEET APPLIED.
   //
@@ -898,7 +922,7 @@ async function loadPage(browser, url, { js }) {
 
   const data = await page.evaluate(EXTRACT);
   await page.close();
-  return { data, net, hydrationMs, sawMutation, cssWarning, loadMs: Date.now() - t0 };
+  return { data, net, hydrationMs, sawMutation, cssWarning, navStatus, finalUrl, loadMs: Date.now() - t0 };
 }
 
 (async () => {
@@ -930,12 +954,37 @@ async function loadPage(browser, url, { js }) {
         const servedBytes = (await servedRaw.arrayBuffer()).byteLength;
         const off = await loadPage(browser, p.url, { js: false });
         const on = await loadPage(browser, p.url, { js: true });
+        // NAVIGATION STATUS, BEFORE ANY DIFF IS TRUSTED. Checked on BOTH passes,
+        // because a redirect or an error page can differ between them.
+        const navIssues = [];
+        for (const [label, r] of [['served', off], ['rendered', on]]) {
+          if (r.navStatus != null && r.navStatus >= 400) {
+            navIssues.push(`${label} pass: HTTP ${r.navStatus}`);
+          } else if (!landedOn(p.url, r.finalUrl)) {
+            navIssues.push(`${label} pass: landed on ${r.finalUrl}`);
+          }
+        }
+        const landed = navIssues.length === 0;
         const diffs = diffPage(p, off.data, on.data, on.net, index);
+        const allDiffs = diffs.concat(navIssues.map((why) => ({
+          // A HAND-LISTED page that does not land is a BLOCKING defect, because
+          // those URLs are stable surfaces and one of them vanishing is a broken
+          // site, not catalogue churn. A DISCOVERED page that does not land is a
+          // loud NON-BLOCKING line, because a product being delisted or
+          // re-slugged is ordinary catalogue evolution and must not redden a
+          // deploy.
+          cls: p.discovered ? 'NOISE' : 'DEFECT',
+          where: p.discovered ? 'navigation (discovered page)' : 'navigation',
+          reason: `page did not land on the requested URL (${why})`,
+          served: p.url, rendered: off.finalUrl,
+        })));
         const wipes = (on.data.audit && on.data.audit.wipes) || [];
         const firstData = on.net.dataResponses.length
           ? Math.min(...on.net.dataResponses.map((r) => r.atMs)) : null;
         row = {
           page: p.url, kind: p.kind, status: servedRaw.status, servedBytes,
+          discovered: !!p.discovered,
+          navStatus: off.navStatus, finalUrl: off.finalUrl, landed,
           jsBytes: on.net.jsBytes, scripts: on.net.scripts,
           hydrationMs: on.hydrationMs, loadMs: on.loadMs,
           mutationCount: (on.data.audit && on.data.audit.mutationCount) || 0,
@@ -956,8 +1005,8 @@ async function loadPage(browser, url, { js }) {
           cssWarning: off.cssWarning,
           dataResponses: on.net.dataResponses.length,
           counts: { served: off.data.counts, rendered: on.data.counts },
-          diffs,
-          tally: diffs.reduce((m, d) => { m[d.cls] = (m[d.cls] || 0) + 1; return m; }, { EXPECTED: 0, DEFECT: 0, NOISE: 0 }),
+          diffs: allDiffs,
+          tally: allDiffs.reduce((m, d) => { m[d.cls] = (m[d.cls] || 0) + 1; return m; }, { EXPECTED: 0, DEFECT: 0, NOISE: 0 }),
         };
         process.stdout.write(`${row.tally.DEFECT} defect / ${row.tally.EXPECTED} expected / ${row.tally.NOISE} noise\n`);
       } catch (e) {
@@ -975,13 +1024,15 @@ async function loadPage(browser, url, { js }) {
   const lpad = (s, n) => String(s).padStart(n);
   log('');
   log('================ PER PAGE ================');
-  log(`${pad('page', 48)}${lpad('EXP', 5)}${lpad('DEF', 5)}${lpad('NOI', 5)}${lpad('hydr ms', 9)}${lpad('JS KB', 8)}${lpad('cards s/r', 12)}${lpad('wipes', 7)}${lpad('errs', 6)}`);
+  log(`${pad('page  (+ = discovered)', 48)}${lpad('HTTP', 6)}${lpad('EXP', 5)}${lpad('DEF', 5)}${lpad('NOI', 5)}${lpad('hydr ms', 9)}${lpad('JS KB', 8)}${lpad('cards s/r', 12)}${lpad('wipes', 7)}${lpad('errs', 6)}`);
   for (const r of report) {
     if (r.error) { log(`${pad(r.page, 48)}  ERROR ${r.error}`); continue; }
     const cards = `${r.counts.served.product_cards}/${r.counts.rendered.product_cards}`;
-    log(`${pad(r.page, 48)}${lpad(r.tally.EXPECTED, 5)}${lpad(r.tally.DEFECT, 5)}${lpad(r.tally.NOISE, 5)}` +
+    log(`${pad((r.discovered ? '+' : '') + r.page, 48)}${lpad(r.navStatus == null ? '?' : r.navStatus, 6)}${lpad(r.tally.EXPECTED, 5)}${lpad(r.tally.DEFECT, 5)}${lpad(r.tally.NOISE, 5)}` +
       `${lpad(r.hydrationMs == null ? 'none' : r.hydrationMs, 9)}${lpad((r.jsBytes / 1024).toFixed(0), 8)}` +
-      `${lpad(cards, 12)}${lpad(r.wipes.length, 7)}${lpad(r.firstPartyIssues.length, 6)}`);
+      `${lpad(cards, 12)}${lpad(r.wipes.length, 7)}${lpad(r.firstPartyIssues.length, 6)}` +
+      (r.cssWarning ? '   *** SERVED SNAPSHOT WITHOUT ITS STYLESHEET' : '') +
+      (r.landed === false ? `   *** DID NOT LAND, final ${r.finalUrl}, no coverage counted` : ''));
   }
 
   const cssWarned = report.filter((r) => r.cssWarning);
@@ -1072,6 +1123,9 @@ async function loadPage(browser, url, { js }) {
   // live copy, so a new figure appearing in a sentence would fail a deploy for
   // no reason, and a gate that cries wolf gets switched off.
   const GATED = [
+    // A hand-listed page that does not land is blocking; a discovered one is
+    // classified NOISE at source and never reaches this list.
+    { name: 'page lands on the requested URL', test: (d) => d.where === 'navigation' },
     { name: 'card-count parity', test: (d) => d.where === 'card count' },
     { name: 'per-card name fidelity', test: (d) => /^(served|rendered) card /.test(d.where) },
     { name: 'head-field immutability', test: (d) => /^(<title>|meta description|rel=canonical|meta robots|og:title)$/.test(d.where) },
