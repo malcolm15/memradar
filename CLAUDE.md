@@ -341,7 +341,7 @@ The script can also run directly via `node api/fetch-prices.js` for manual testi
 
 Computed once daily, best-effort: a stats failure logs loudly but never fails the cron. Shared logic in `backend/lib/marketStats.js`.
 
-**THE SCHEDULED COMPUTE DOES NOT GO THROUGH `scripts/compute-market-stats.js`, AND NO WORKFLOW INVOKES THAT SCRIPT AT ALL (corrected 2026-10-06).** The real path is `.github/workflows/price-fetch.yml` (cron `0 */4 * * *`) to `scripts/run-price-fetch.js --confirm` to `backend/lib/priceFetch.js`, which calls `computeMarketStats` only on the **08:00 UTC slot**, gated by `shouldComputeStats()` (the first slot at or after 08:00 that finds no row computed today). `scripts/compute-market-stats.js` is a **hand-run tool with no automated caller**; it reaches the same `computeMarketStats` and so writes the same 24 rows. Read-only inspection: `node scripts/compute-market-stats.js --dry-run` (auto-finds the latest cron batch, skipping backfill `T23:59` day-bucket timestamps).
+**THE SCHEDULED COMPUTE DOES NOT GO THROUGH `scripts/compute-market-stats.js`, AND NO WORKFLOW INVOKES THAT SCRIPT AT ALL (corrected 2026-10-06).** The real path is `.github/workflows/price-fetch.yml` (cron `17 */4 * * *` since 2026-10-07, `0 */4 * * *` before that) to `scripts/run-price-fetch.js --confirm` to `backend/lib/priceFetch.js`, which calls `computeMarketStats` only on the **08:00 UTC slot**, gated by `shouldComputeStats()` (the first slot at or after 08:00 that finds no row computed today). `scripts/compute-market-stats.js` is a **hand-run tool with no automated caller**; it reaches the same `computeMarketStats` and so writes the same 24 rows. Read-only inspection: `node scripts/compute-market-stats.js --dry-run` (auto-finds the latest cron batch, skipping backfill `T23:59` day-bucket timestamps).
 
 **TWO SIBLING WRITES BELONG TO OTHER PATHS AND ARE NOT REACHABLE FROM THIS SCRIPT.** `claim_floor_runs` is inserted by `backend/lib/priceFetch.js:307`, on the price-fetch path. `bot_state` is upserted only by `backend/lib/botState.js:28`, used by the social-post scripts. The script's complete transitive write surface is three `upsert` calls into `market_stats` (`marketStats.js:519`, `:535`, `:554`), which are one logical write plus two degrade paths for a pending `ALTER`; there are no filesystem writes, no non-Supabase HTTP and no child processes anywhere in its call graph.
 
@@ -407,7 +407,9 @@ Computed once daily, best-effort: a stats failure logs loudly but never fails th
 
 **THE TRIPWIRE HARNESS EXPECTED 16, WAS STALE, AND THE FIX DOES NOT TRAVEL (2026-10-06).** `scripts/output/test-tripwire-flag.js` checked `res.stats.length === 16`, false since the build baskets added 8 rows. It never failed anything, because those lines print a boolean rather than asserting it, so it read `false` and nobody saw. **One compute returns 24 stats rows.** The harness now derives that from the definitions instead of hard-coding it, `(SEGMENTS.length + BASKETS.length) * PERIODS.length`, all three of which `marketStats.js` already exported, so no module exports were widened. **THE FILE IS UNTRACKED**: ignored by `.gitignore:11` (`scripts/output/`), hand-written 2026-08-26 beside the other one-off `verify-*.js` harnesses, with no tracked source anywhere and zero commits in its history. **The local fix exists in one workspace and will not reach a fresh clone.** This note is the durable record: anyone who finds that harness expecting 16 should expect 24, or re-derive it.
 
-**DRY-RUN PROOF, 2026-10-06 22:38 UTC.** One dry run in a clean window (nearest four-hour price-fetch slot 83 minutes away, outside 07:45-09:45 UTC). Whole-table snapshots in deterministic order with recursively sorted keys, before and after, all three identical:
+**DRY-RUN PROOF, 2026-10-06 22:38 UTC.** One dry run in a clean window (nearest four-hour price-fetch slot 83 minutes away, outside 07:45-09:45 UTC, measured against the `0 */4` slots in force that day).
+
+**THE PROOF WINDOW RESTATED FOR THE NEW SLOTS (2026-10-07).** The fetch now runs `17 */4` and the compute rides the first fetch at or after 08:00 UTC, so the window to avoid is **08:00 to 10:00 UTC** (the compute's arrival band, widened for delivery delay) and **within 30 minutes either side of 00:17, 04:17, 08:17, 12:17, 16:17 and 20:17**. A clean window is therefore roughly **13:00-15:45** or **17:00-19:45 UTC**. The rule is unchanged: pick a time no scheduled writer can collide with, and re-read `market_stats` `max(computed_at)` before and after as the collision guard. Whole-table snapshots in deterministic order with recursively sorted keys, before and after, all three identical:
 - `market_stats` 24 rows, `sha256=28f67276d1c8f16a36f8cb9808046f9aa17540817d614a51436968e1e99944cc`
 - `claim_floor_runs` 15 rows, `sha256=7d10d349853b4adb7adaf8c198679de75f2910a0bc34123c099fe20c97621783`
 - `bot_state` 2 rows, `sha256=fbe77e5b71be3a72786bd7f1c2ce1ab7afc26a99218966fc49e91c82f639cc55`
@@ -902,6 +904,57 @@ What was wrong the first time, and what the rewrites fixed:
 
 **KNOWN BLIND SPOT IN THE RENDER AUDIT, AND WHAT DOES COVER IT.** On `/price-index/` a failed stats fetch leaves the baked table in place, so served and rendered agree and the audit sees nothing. Measured by blocking the Supabase request: the page settles in the same ~7.2s, does not time out, and the DDR5 cell still reads its baked `+317.5%`. **`scripts/hydration-check.js` does cover this**: `/price-index/` is one of its four targets, and it corrupts each hydrated element and asserts restoration, which a failed fetch cannot do. It runs in the same deploy step, immediately before the render audit. The live smoke test also fetches the page but only asserts it serves.
 
+## Alert routing: which alarms can actually reach a person
+
+**THE DECIDING FACT, MEASURED 2026-10-07: THE SUPERVISOR OPENS ITS ISSUES UNDER MALCOLM'S OWN ACCOUNT.** Issue authorship, captured from the API: `#3`, `#6`, `#10`, `#11`, `#12`, `#13` are all authored by **`malcolm15`**, because the Worker authenticates with `SUPERVISOR_GITHUB_TOKEN`, a fine-grained PAT issued under his account. **GitHub does not notify a user about activity performed under their own account**, so watching the repo for Issues does **not** deliver supervisor alerts. The two claim-floor issues `#8` and `#9` are authored by **`app/github-actions`**, because `claim-floor-issues.js` runs inside the workflow with `${{ github.token }}`, and those **do** reach him through Watch.
+
+So the six supervisor alerts in the last 35 days, including the three correct staleness detections, reached **no channel he reads**. That is why the Resend path is worth generalising, and it is the only fix: no notification setting can route around a self-authored issue.
+
+| Alarm | Trigger | Channel | Failed run? | Watch? | Reaches him today |
+|---|---|---|---|---|---|
+| Workflow failure (any job) | non-zero exit | failed run | **yes** | n/a | **yes, email** |
+| Render audit `--strict --gate` | gated defect post-publication | failed run | **yes** | n/a | **yes, email** |
+| `claim-floor-issues.js` | a published sentence loses support | issue as `app/github-actions` | no, `exit(0)` | **yes** | **yes, via Watch** |
+| `llms-skip-issue.js` | llms.txt not rebuilt twice running | issue as `app/github-actions` | no, `exit(0)` | **yes** | **yes, via Watch** |
+| `stats-freshness-issue.js` | build used figures not computed today | issue as `app/github-actions` | no, `exit(0)` | **yes** | **yes, via Watch** |
+| Supervisor **staleness** | last success older than `max_age_hours` | issue as **`malcolm15`** | no | **no, self-authored** | **NO** |
+| Supervisor **config drift** | a scheduled job nobody watches | issue as **`malcolm15`** | no | **no** | **NO** |
+| Supervisor **tick failure** | the tick throws | issue as **`malcolm15`** | no | **no** | **NO** |
+| Supervisor tick failure **and** GitHub unreachable | both fail | **Resend email** to `hello@memradar.com` | no | n/a | **yes, email** |
+| Dead-man switch | no heartbeat ping for 45 min | healthchecks.io | no | n/a | **not established** |
+
+**The three exit-0 alarm scripts are correct as written and must stay that way.** `stats-freshness-issue.js` says it plainly: "a freshness notice must not redden a regen". The fix for routing belongs in the channel, never in making a regen fail.
+
+**NOT ESTABLISHED: whether healthchecks.io has a notification channel configured.** The README documents the ping URL, a 45-minute grace period and the DNS independence check, but a notification channel is account-side configuration and is not visible from this repo.
+
+## Schedules: off the top of the hour, and the routing rule that goes with it
+
+**EVERY CRON MOVED OFF MINUTE 0 ON 2026-10-07.** `price-fetch` `17 */4`, `newegg-refresh` `23 6` and `43 9`, `bluesky-posts` `37 17` and `37 18 * * 0`. The commented-out `x-posts` crons were left as they are with a warning not to enable them at minute 0.
+
+**WHY.** GitHub delays and drops scheduled runs under load, and load peaks at the top of every hour, which is where all five live crons sat. The repo already documented the symptom in two places: `backend/lib/priceFetch.js` records that "GitHub delivers scheduled runs late and sometimes drops a slot outright", and the supervisor exists because on 2026-08-27 "five scheduled slots across two workflows were never created by GitHub at all". What had never been tried was moving off the contended minute.
+
+**THIS IS GITHUB'S OWN GUIDANCE, NOT A MEASURED PREDICTION.** There is no within-repo counterfactual: no cron here has ever run at a non-zero minute, so no improvement could be forecast before shipping. The honest claim is that the change is free, reversible, and testable afterwards.
+
+**THE RULE THIS CHANGE IMPLIES, AND IT IS THE PART THAT CAN BITE: A CRON EXPRESSION THAT A WORKFLOW COMPARES AGAINST MUST BE CHANGED IN BOTH PLACES IN ONE COMMIT.** Three live comparisons key on the literal schedule string, and changing a cron without them would not fail anything, it would silently stop a job or quietly pick the wrong path:
+
+| File | Line | Comparison | Consequence of a mismatch |
+|---|---|---|---|
+| `newegg-refresh.yml` | 45 | `github.event.schedule == '23 6 * * *'` | `refresh-offers` never runs on schedule |
+| `newegg-refresh.yml` | 87 | `github.event.schedule == '43 9 * * *'` | `regenerate-pages` never runs, so the site stops regenerating |
+| `bluesky-posts.yml` | 58 | `= "37 18 * * 0"` picks weekly over daily | Sunday posts the daily drop instead of the weekly pulse |
+
+`x-posts.yml:76` carries the same pattern against a commented-out cron; its literal was deliberately left matching its commented crons, with a note that both must move together if it is ever enabled. `price-fetch.yml` has **no** schedule comparison: one cron, one job, no `if:`, so it decides what to run purely by being triggered. `newegg-refresh.yml:62` tests `date -u +%u = 7` for the Sunday full reconciliation, which is a day-of-week test on the run time and is unaffected by a minute change.
+
+**NOTHING ELSE KEYS ON THE MINUTE, VERIFIED.** `shouldComputeStats()` reads `getUTCHours()` of the run time at `priceFetch.js:78`, gates on `hour < 8` at `:81`, and its degraded fallback compares `hour === 8` at `:97`. An 08:17 run is hour 8 exactly as 08:00 was. `run-price-fetch.js:38` computes an hour and uses it only in the log line at `:66`.
+
+**MEASUREMENT CHECKPOINT, A DECISION TO BE READ BY A PERSON, NOT AN AUTOMATIC RULE.**
+- **Primary metric:** scheduled `price-fetch` runs created AND successful per complete UTC day.
+- **Secondary:** dropped-slot rate, and delay from the nominal slot time.
+- **Baseline, 13 complete UTC days 2026-09-24 to 2026-10-06:** mean **3.85** successful scheduled fetches a day of 6, min 2, max 5, **no day reached 6**; over the wider 14-day window **30 of 84 slots** produced no run.
+- **Window:** 21 complete days from the first full day after this shipped, so **2026-10-08 through 2026-10-28**, and **the read is due 2026-10-29**.
+- **How to read it:** a clear, material improvement is a success, with a mean around **4.8 or better** as the target and **not a pass mark**. Roughly unchanged is **inconclusive and the off-peak schedule stays**, because avoiding the top of the hour is GitHub's own guidance and there is no cost to keeping it. **Revert only if the new schedule is materially worse or causes an operational problem.**
+- **Assignment rule for counting drops:** each schedule-event run is assigned to the most recent slot at or before its `createdAt`; a slot with no run assigned counts as dropped. **Known weakness, and the count is an UPPER BOUND because of it:** GitHub does not record which cron slot a run belongs to, so when two consecutive slots are both very late, a run can be attributed to the later one and the earlier one counted dropped.
+
 ## Render Audit: coverage, navigation status and discovery
 
 **A CANDIDATE IS ONE COMPARISON OR VALIDATION THE CHECK ACTUALLY EVALUATED (2026-10-07).** Not a constant, and not the number of values that happen to be present on both sides. Each count is derived from the same list or collection the check itself walks, so it moves when the check moves.
@@ -1268,7 +1321,9 @@ Three things changed together, and the middle one is the load-bearing idea:
 
 **THE WORST GAP BETWEEN CONSECUTIVE REGEN SUCCESSES IS 26.88h** (2026-09-27 to 09-28), measured n=36, median 23.97h, p95 26.60h. The figure recorded here previously was 26.27h. Against 37.95h that leaves **11.07h of headroom**, so the threshold cannot fire on anything observed, while a genuinely missed regen still reaches its roughly 48h signature with about 10h to spare.
 
-**THE REGEN CRON STAYS AT `0 9 * * *`, DECIDED 2026-09-23 AGAINST MOVING IT.** Moving it to 11:00 was proposed and rejected on the data: `regenerate-pages` already arrives **12:46-15:48** (n=15, median 13:44, min delay 3.77h, p95 6.80h), so it already lands 3 to 7 hours after the 08:00 fetch. The ordering problem was never the regen's slot, it was the compute drifting past it. With the calendar rule the worst observed case is a **3h15m** margin (latest 08:00 arrival 09:31 against earliest regen 12:46). Moving to 11:00 would shift arrivals to 14:46-17:48, buy no margin, collide with the 16:00 fetch slot and delay the deploy by two hours.
+**THE REGEN CRON MOVED TO `43 9 * * *` ON 2026-10-07, MINUTE ONLY. The 09:00 HOUR STAYS, DECIDED 2026-09-23 AGAINST MOVING IT.** The 2026-10-07 change shifts the minute off the top of the hour for delivery reasons and does not revisit the hour; everything the 2026-09-23 decision says about the hour still holds, and a 43-minute shift only widens the margin after the compute.
+
+**THE ORIGINAL 2026-09-23 DECISION, UNCHANGED:** Moving it to 11:00 was proposed and rejected on the data: `regenerate-pages` already arrives **12:46-15:48** (n=15, median 13:44, min delay 3.77h, p95 6.80h), so it already lands 3 to 7 hours after the 08:00 fetch. The ordering problem was never the regen's slot, it was the compute drifting past it. With the calendar rule the worst observed case is a **3h15m** margin (latest 08:00 arrival 09:31 against earliest regen 12:46). Moving to 11:00 would shift arrivals to 14:46-17:48, buy no margin, collide with the 16:00 fetch slot and delay the deploy by two hours.
 
 **THE SUPERVISOR'S `regenerate-pages` p95 WENT 49.0 MINUTES, THEN 408.1, THEN 477.0, AND THE MIDDLE STEP WAS DESCRIBED WRONGLY HERE UNTIL 2026-10-02.** It read **49.0 minutes from a single observation**, and this file used to call that a placeholder nobody went back for. **It was not.** The job and its cron were added 2026-08-25, the config's rule required the p95 to come from slots strictly before the 2026-08-26 20:00 degradation, and that window contained exactly one occurrence: 2026-08-26T09:49:19Z, a 49.3 minute delay. The 49.0 was the only reading the stated rule allowed, and the supervisor's own REVISIT block said so at the time. **The actual defect was the 2026-09-23 fix: it measured post-degradation data without amending the rule that forbade doing so**, leaving the file asserting an arithmetic whose p95 contradicted the comment forty lines above it. Both are now consistent, and the rule reads "current operating regime" because no healthy period exists to return to. The 2026-09-23 reading itself was sound (n=15: p50 4.74h, p90 6.18h, p95 6.80h, max 6.81h) and no false alarm ever fired at any of the three values; the defect was the window, not the arithmetic.
 
@@ -1425,7 +1480,7 @@ A reference document for journalists and researchers checking whether a figure f
 | $/GB segment median "calculated fresh from all **in-stock** products" | `segPerGb` filters on segment and parseable capacity only, **not stock** | "from every tracked product in that segment whose capacity we can parse" |
 | "Median rather than mean, **throughout**" | the 90-day average is a **mean** (`in90.reduce(...)/in90.length`), two paragraphs above | scoped to "every figure computed across a segment", with the exception named |
 
-Everything else checked out: the six-times-daily cadence (`0 */4 * * *` = 00/04/08/12/16/20 UTC), the Newegg daily feed plus Sunday full reconciliation (`date -u +%u = 7`), the kit-total capacity rule, the per-window matched-subset rule, medians in `marketStats`, and that no price on the site is scraped.
+Everything else checked out: the six-times-daily cadence (`0 */4 * * *` = 00/04/08/12/16/20 UTC, now `17 */4` = 00:17/04:17/08:17/12:17/16:17/20:17 since 2026-10-07), the Newegg daily feed plus Sunday full reconciliation (`date -u +%u = 7`), the kit-total capacity rule, the per-window matched-subset rule, medians in `marketStats`, and that no price on the site is scraped.
 
 **The marketplace share is `monitorable: false` in the registry, and the reason is structural.** The price SOURCE (Keepa's AMAZON series versus the NEW marketplace series) is **not stored anywhere in our database**; only the resulting price is. Recomputing it costs one Keepa token per product and needs a live stats call, so it cannot ride a stats run the way every other floor does. **To recompute:** request Keepa stats for every tracked ASIN (`history=0, stats=90`, batches of 100, one token per product, so roughly 235 tokens a run), then classify where each product's DISPLAYED price comes from in the same order as `keepa.currentPrice()`: the AMAZON series first, then NEW (marketplace), then BUY_BOX_SHIPPING, ignoring values under $5. The share is products priced from NEW or BUY_BOX over priced products, and over all tracked products. Run it by hand when the claim needs re-checking; deliberately NOT committed as a script, because a committed script that spends Keepa credits whenever someone runs it is a worse trap than an absent one. Reworded to a magnitude precisely because it cannot be floored: "more than two thirds" holds on both denominators with 4pp and 7pp of headroom, where the draft's "roughly two thirds" was already wrong on the day it was written.
 
