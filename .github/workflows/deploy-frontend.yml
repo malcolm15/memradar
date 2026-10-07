@@ -118,11 +118,20 @@ jobs:
           #                              regenerated daily
           #   /data/                     the Dataset JSON-LD, the downloads and the
           #                              citation terms machines are pointed at
-          #   the 990 PRO 2 Pack         THE ONLY catalogue product with
-          #                              unitCount > 1. Without it the multi-unit
-          #                              per-GB check is gated and inspects nothing
-          #                              on every page in the list, which is a
-          #                              check reporting 0 for want of a target.
+          # THE MULTI-UNIT PAGE IS DISCOVERED, NOT LISTED HERE (2026-10-07). The
+          # multi-unit per-GB check can only inspect a listing whose unitCount is
+          # above 1, and exactly one catalogue product qualified when the check
+          # shipped. Hard-coding that product's URL here made a gated check depend
+          # on one Amazon listing keeping its title AND its slug, and the slug is
+          # title-derived, so a single retitle would have broken both and left the
+          # check silently inspecting nothing. Instead, whenever --gate is set the
+          # audit reads the search-index.json it already fetches, selects every
+          # entry whose name gives unitCount > 1, sorts by SKU ascending and audits
+          # at most the first three. Sorting makes the choice deterministic rather
+          # than dependent on the order the index happens to be written in. If the
+          # catalogue holds none, nothing is added and the run prints a VACUOUS
+          # CHECK warning for that check without failing, because a catalogue with
+          # no multi-pack is an ordinary state and not a defect.
           # Left out on purpose: /build-cost/, whose figures the claim registry
           # already cross-checks against /price-index/ and which is the slowest of
           # the figure pages; and /methodology/, hand-written prose carrying no
@@ -136,4 +145,4 @@ jobs:
           # and never a reason the day's prices went uncommitted. Stale beats
           # wrong applies to publishing, not to reporting.
           node scripts/render-audit.js --strict --gate \
-            --pages=/,/ram/,/ssd/,/ram/ddr4-ram-laptop-only-gigastone-32gb-kit-3200mhz/,/price-index/,/data/,/ssd/samsung-mz-v9p4t0b-am-990-pro-pcie-4-0-4tb/
+            --pages=/,/ram/,/ssd/,/ram/ddr4-ram-laptop-only-gigastone-32gb-kit-3200mhz/,/price-index/,/data/
