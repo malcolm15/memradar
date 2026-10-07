@@ -18,8 +18,13 @@ name: bluesky-posts
 
 on:
   schedule:
-    - cron: '0 17 * * *'    # daily drop
-    - cron: '0 18 * * 0'    # weekly pulse (Sunday)
+    # MINUTE 37, NOT 0 (moved 2026-10-07), for the reason in price-fetch.yml.
+    # THE WEEKLY STRING IS LOAD-BEARING: the "Resolve mode" step below compares
+    # github.event.schedule against it to pick weekly over daily, so both were
+    # changed in the same commit. A mismatch here would not fail the run, it
+    # would quietly post the daily drop on Sunday instead of the pulse.
+    - cron: '37 17 * * *'   # daily drop
+    - cron: '37 18 * * 0'   # weekly pulse (Sunday)
   workflow_dispatch:
     inputs:
       mode:
@@ -50,7 +55,7 @@ jobs:
         id: cfg
         run: |
           if [ "${{ github.event_name }}" = "schedule" ]; then
-            if [ "${{ github.event.schedule }}" = "0 18 * * 0" ]; then MODE=weekly; else MODE=daily; fi
+            if [ "${{ github.event.schedule }}" = "37 18 * * 0" ]; then MODE=weekly; else MODE=daily; fi
             DRY=false
           else
             MODE="${{ inputs.mode }}"

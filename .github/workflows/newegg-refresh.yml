@@ -19,8 +19,13 @@ name: newegg-refresh
 
 on:
   schedule:
-    - cron: '0 6 * * *'    # Newegg feed refresh
-    - cron: '0 9 * * *'    # daily page regeneration (after the 08:00 stats compute)
+    # MINUTES 23 AND 43, NOT 0 (moved 2026-10-07), for the reason in
+    # price-fetch.yml. THESE TWO STRINGS ARE LOAD-BEARING: the job gates below
+    # compare github.event.schedule against them literally, so changing a cron
+    # here without changing the matching `if:` silently disables that job. Both
+    # were changed in the same commit.
+    - cron: '23 6 * * *'   # Newegg feed refresh
+    - cron: '43 9 * * *'   # daily page regeneration (after the 08:00 stats compute)
   workflow_dispatch:
     inputs:
       mode:
@@ -37,7 +42,7 @@ jobs:
     # 06:00 cron, or a manual dispatch that did not ask for the regen job.
     # The Newegg feed regenerates once nightly, so pulling it again at 09:00
     # would re-read the same file.
-    if: (github.event_name == 'schedule' && github.event.schedule == '0 6 * * *') || (github.event_name == 'workflow_dispatch' && inputs.job != 'regen')
+    if: (github.event_name == 'schedule' && github.event.schedule == '23 6 * * *') || (github.event_name == 'workflow_dispatch' && inputs.job != 'regen')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -79,7 +84,7 @@ jobs:
     # hand without editing this file. NOT `needs: refresh-offers` - they run
     # on different schedules, and a needs-edge would skip the regen whenever
     # the refresh job is filtered out.
-    if: (github.event_name == 'schedule' && github.event.schedule == '0 9 * * *') || (github.event_name == 'workflow_dispatch' && inputs.job == 'regen')
+    if: (github.event_name == 'schedule' && github.event.schedule == '43 9 * * *') || (github.event_name == 'workflow_dispatch' && inputs.job == 'regen')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:

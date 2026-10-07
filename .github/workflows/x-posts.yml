@@ -32,6 +32,15 @@ name: x-posts (DORMANT)
 # code are already in place. Bluesky's schedule is in bluesky-posts.yml.
 on:
   # schedule:
+  # STILL DISABLED, and if these are ever enabled DO NOT enable them at minute 0:
+  # every other cron in this repo moved off the top of the hour on 2026-10-07
+  # because GitHub drops and delays runs scheduled there. Pick a minute no other
+  # workflow here uses.
+  #
+  # AND NOTE THE SCHEDULE COMPARISON BELOW. The "Resolve mode" step tells the
+  # weekly pulse from the daily drop by comparing github.event.schedule against a
+  # literal cron string. Whatever minute these crons are given, that literal must
+  # be changed to match in the SAME commit, or the Sunday run posts a daily drop.
   #   - cron: '0 17 * * *'    # daily drop
   #   - cron: '0 18 * * 0'    # weekly pulse (Sunday)
   workflow_dispatch:

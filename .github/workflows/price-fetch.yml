@@ -24,7 +24,21 @@ name: price-fetch
 
 on:
   schedule:
-    - cron: '0 */4 * * *'   # 00/04/08/12/16/20 UTC
+    # MINUTE 17, NOT 0 (moved 2026-10-07). GitHub delays and drops scheduled
+    # runs under load, and load peaks at the top of every hour, which is where
+    # every cron in this repo used to sit.
+    #
+    # THE BASELINE THIS IS MEASURED AGAINST, so the next reader can tell whether
+    # it helped: 13 complete UTC days, 2026-09-24 to 2026-10-06, a mean of 3.85
+    # successful scheduled fetches a day against the 6 scheduled, min 2, max 5,
+    # and NOT ONE day reaching 6. Over the wider 14-day window, 30 of 84 slots
+    # produced no run at all.
+    #
+    # This job has NO schedule comparison: one cron, one job, no `if:` on
+    # github.event.schedule, so the minute is free to move. Nothing downstream
+    # keys on it either, because shouldComputeStats() reads the run's UTC HOUR
+    # (backend/lib/priceFetch.js:78, :81, :97), never the minute.
+    - cron: '17 */4 * * *'   # 00:17/04:17/08:17/12:17/16:17/20:17 UTC
   workflow_dispatch:
     inputs:
       skip_market_stats:
