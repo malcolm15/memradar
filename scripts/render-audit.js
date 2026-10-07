@@ -109,6 +109,25 @@ const THIRD_PARTY_CONSOLE = /font-size:0;color:transparent|gtag|google-analytics
 //   3. a trailing index.html is dropped;
 //   4. the query string and fragment are ignored.
 // Anything beyond that, including a redirect to a different path, is NOT landing.
+// THE HEAD FIELDS, hoisted so the coverage count is DERIVED FROM THIS LIST and
+// moves when the list moves. Every pair is compared on every page, and norm()
+// maps a missing field to '', so a field absent on BOTH sides compares equal and
+// is still an evaluated comparison, while a field present on one side only is a
+// defect. That is why the honest candidate count here is the list length and not
+// the number of fields that happen to be present.
+const HEAD_FIELDS = [['title', '<title>'], ['metaDesc', 'meta description'],
+  ['canonical', 'rel=canonical'], ['robots', 'meta robots'], ['ogTitle', 'og:title']];
+
+// The gated check names, in one place, so the coverage block and the GATED list
+// cannot drift apart. diffPage keys its candidate counts on exactly these.
+const GATE_NAMES = [
+  'card-count parity',
+  'per-card name fidelity',
+  'head-field immutability',
+  'json-ld agrees with the visible retailer state',
+  'multi-unit price per GB uses the offer capacity',
+];
+
 function landedOn(requested, finalUrl) {
   const norm1 = (u) => {
     let p;
@@ -527,21 +546,25 @@ function checkCards(page, side, cards, index) {
 // using one unit's capacity on BOTH sides, which produces no diff. The sku
 // comes from the page's own JSON-LD and the raw title from search-index.json, the
 // generator's own record, so this re-parses nothing the page could have got wrong.
+// Returns { defects, candidates }, counted by the function itself for the same
+// reason as the JSON-LD check above.
 function checkOfferPerGb(side, data, index) {
   const out = [];
+  let candidates = 0;
   const pg = data.pdpPerGb;
-  if (!pg || pg.price == null || !isFinite(pg.price)) return out;
+  if (!pg || pg.price == null || !isFinite(pg.price)) return { defects: out, candidates };
   const first = data.jsonld[0];
   const prod = first && (first['@graph'] || []).find((n) => n['@type'] === 'Product');
   const sku = prod && prod.sku;
   const row = sku && index && index.bySku ? index.bySku.get(sku) : null;
-  if (!row || !row.name) return out;
+  if (!row || !row.name) return { defects: out, candidates };
   const units = unitCount(row.name);
-  if (units <= 1) return out;                      // single-unit pages are unaffected
+  if (units <= 1) return { defects: out, candidates };   // single-unit pages are unaffected
   const offerCap = offerCapacityGB(row.name);
   const classCap = totalCapacityGB(row.name);   // one drive here: unitCount > 1 only on SSDs
   const say = (reason, want, got) =>
     out.push({ cls: 'DEFECT', where: `${side} offer price per GB`, reason, served: want, rendered: got });
+  if (pg.capGb != null) candidates += 1;
   if (pg.capGb != null && pg.capGb !== offerCap) {
     say(`hydrate capGb is ${pg.capGb}, one unit's capacity, so the browser recomputes $/GB against ${classCap}GB on a listing that sells ${units} units`,
       String(offerCap), String(pg.capGb));
@@ -553,10 +576,12 @@ function checkOfferPerGb(side, data, index) {
   // the name silently loses the word. This asserts the rendered h1 carries it and
   // deliberately does NOT derive the name from unitCount.
   const h1 = (data.headings || []).find((h) => h.level === 'h1');
+  if (h1) candidates += 1;
   if (h1 && !/pack/i.test(h1.text)) {
     say(`h1 does not say "Pack" on a listing that sells ${units} units, so the multi-unit label is missing and the page reads as a single drive beside the ones it is ranked against`,
       'an h1 containing "Pack"', h1.text);
   }
+  if (pg.valueMetric != null) candidates += 1;
   if (pg.valueMetric != null) {
     const want = pg.price / offerCap;
     const wrong = pg.price / classCap;
@@ -568,7 +593,7 @@ function checkOfferPerGb(side, data, index) {
       want.toFixed(4), pg.valueMetric.toFixed(4));
     }
   }
-  return out;
+  return { defects: out, candidates };
 }
 
 // JSON-LD vs THE VISIBLE PAGE. Absolute, not a served-vs-rendered diff, and the
@@ -581,23 +606,29 @@ function checkOfferPerGb(side, data, index) {
 // JSON-LD from the database and this reads the rendered DOM. On the rendered
 // side it shares pdp-hydrate's DOM-reading assumption, so there it proves
 // hydration ran and agrees rather than proving the reading itself is right.
+// Returns { defects, candidates }. CANDIDATES ARE COUNTED BY THE FUNCTION ITSELF
+// rather than by a parallel copy of its guards, because a second copy of this
+// branching is a second thing to drift.
 function checkJsonLdAgainstVisible(side, data) {
   const out = [];
+  let candidates = 0;
   const first = data.jsonld[0];
   const prod = first && (first['@graph'] || []).find((n) => n['@type'] === 'Product');
-  if (!prod) return out;
-  if (!data.retailerRows.length) return out; // not a PDP, or no retailer table
+  if (!prod) return { defects: out, candidates };          // not a PDP
+  if (!data.retailerRows.length) return { defects: out, candidates }; // no retailer table
   const buyable = data.retailerRows.filter((r) => r.inStock && isFinite(r.price) && r.price > 0);
   const o = prod.offers;
   const say = (reason, want, got) =>
     out.push({ cls: 'DEFECT', where: `${side} json-ld offers`, reason, served: want, rendered: got });
 
   if (!buyable.length) {
+    candidates += 1;   // one validation: may an offers block exist at all
     if (o) say('nothing is in stock on the page but the Product still publishes an offers block',
       '(offers omitted)', JSON.stringify(o).slice(0, 160));
     return out;
   }
-  if (!o) { say('offers absent although the page shows an in-stock retailer', 'AggregateOffer', '(absent)'); return out; }
+  if (!o) { candidates += 1; say('offers absent although the page shows an in-stock retailer', 'AggregateOffer', '(absent)'); return { defects: out, candidates }; }
+  candidates += 6;   // @type, lowPrice, highPrice, offerCount, priceCurrency, merchant-only fields
   if (o['@type'] !== 'AggregateOffer') say('offers is not an AggregateOffer', 'AggregateOffer', o['@type']);
 
   const lo = Math.min(...buyable.map((r) => r.price));
@@ -612,7 +643,7 @@ function checkJsonLdAgainstVisible(side, data) {
   const BANNED = ['offers', 'seller', 'url', 'availability', 'itemCondition', 'validFrom', 'priceValidUntil', 'price'];
   const present = BANNED.filter((k) => k in o);
   if (present.length) say(`offers carries merchant-only field(s): ${present.join(', ')}`, '(none)', present.join(', '));
-  return out;
+  return { defects: out, candidates };
 }
 
 function diffPage(page, served, rendered, net, index) {
@@ -621,8 +652,7 @@ function diffPage(page, served, rendered, net, index) {
     d.push({ cls, reason, where, served: servedVal, rendered: renderedVal, ...(extra || {}) });
 
   // ---- head fields. None of these may move: no script on the site writes them.
-  for (const [k, where] of [['title', '<title>'], ['metaDesc', 'meta description'],
-    ['canonical', 'rel=canonical'], ['robots', 'meta robots'], ['ogTitle', 'og:title']]) {
+  for (const [k, where] of HEAD_FIELDS) {
     if (norm(served[k]) !== norm(rendered[k])) {
       push('DEFECT', `${where} rewritten by JS`, where, served[k], rendered[k]);
     }
@@ -756,14 +786,34 @@ function diffPage(page, served, rendered, net, index) {
   }
 
   // ---- JSON-LD against the visible retailer state, both sides
-  checkJsonLdAgainstVisible('served', served).forEach((x) => d.push(x));
-  checkJsonLdAgainstVisible('rendered', rendered).forEach((x) => d.push(x));
-  checkOfferPerGb('served', served, index).forEach((x) => d.push(x));
-  checkOfferPerGb('rendered', rendered, index).forEach((x) => d.push(x));
+  const jsonldServed = checkJsonLdAgainstVisible('served', served);
+  const jsonldRendered = checkJsonLdAgainstVisible('rendered', rendered);
+  const perGbServed = checkOfferPerGb('served', served, index);
+  const perGbRendered = checkOfferPerGb('rendered', rendered, index);
+  [jsonldServed, jsonldRendered, perGbServed, perGbRendered]
+    .forEach((r) => r.defects.forEach((x) => d.push(x)));
 
   // ---- blame
   d.forEach((x) => { if (x.cls === 'DEFECT') x.blame = blameFor(page.kind, x.reason, x.where); });
-  return d;
+
+  // WHAT EACH GATED CHECK ACTUALLY INSPECTED ON THIS PAGE.
+  // A candidate is one comparison or validation the check EVALUATED, derived
+  // from the same field list or collection the check itself walks. It is never a
+  // constant: if the head-field list grows, the third number grows with it.
+  const gateCandidates = {
+    // ONE comparison per page, `served.cards.length !== rendered.cards.length`,
+    // evaluated whenever the index is available. On a page with no cards that is
+    // a 0-against-0 comparison, which is why the per-card count beside it is the
+    // number that shows whether any card was really examined.
+    'card-count parity': index ? 1 : 0,
+    // One pass per card on EACH side: checkCards loops `for (const c of cards)`.
+    'per-card name fidelity': index ? served.cards.length + rendered.cards.length : 0,
+    // Every pair in HEAD_FIELDS is compared on every page, absent or not.
+    'head-field immutability': HEAD_FIELDS.length,
+    'json-ld agrees with the visible retailer state': jsonldServed.candidates + jsonldRendered.candidates,
+    'multi-unit price per GB uses the offer capacity': perGbServed.candidates + perGbRendered.candidates,
+  };
+  return { diffs: d, gateCandidates };
 }
 
 // ---------------------------------------------------------------------------
@@ -965,7 +1015,7 @@ async function loadPage(browser, url, { js }) {
           }
         }
         const landed = navIssues.length === 0;
-        const diffs = diffPage(p, off.data, on.data, on.net, index);
+        const { diffs, gateCandidates } = diffPage(p, off.data, on.data, on.net, index);
         const allDiffs = diffs.concat(navIssues.map((why) => ({
           // A HAND-LISTED page that does not land is a BLOCKING defect, because
           // those URLs are stable surfaces and one of them vanishing is a broken
@@ -985,6 +1035,10 @@ async function loadPage(browser, url, { js }) {
           page: p.url, kind: p.kind, status: servedRaw.status, servedBytes,
           discovered: !!p.discovered,
           navStatus: off.navStatus, finalUrl: off.finalUrl, landed,
+          // A PAGE THAT DID NOT LAND CONTRIBUTES NO COVERAGE. Whatever the audit
+          // compared, it was not the page we asked for, so counting its
+          // candidates would be counting a test of something else.
+          gateCandidates: landed ? gateCandidates : Object.fromEntries(Object.keys(gateCandidates).map((k) => [k, 0])),
           jsBytes: on.net.jsBytes, scripts: on.net.scripts,
           hydrationMs: on.hydrationMs, loadMs: on.loadMs,
           mutationCount: (on.data.audit && on.data.audit.mutationCount) || 0,
@@ -1033,6 +1087,37 @@ async function loadPage(browser, url, { js }) {
       `${lpad(cards, 12)}${lpad(r.wipes.length, 7)}${lpad(r.firstPartyIssues.length, 6)}` +
       (r.cssWarning ? '   *** SERVED SNAPSHOT WITHOUT ITS STYLESHEET' : '') +
       (r.landed === false ? `   *** DID NOT LAND, final ${r.finalUrl}, no coverage counted` : ''));
+  }
+
+  // ALWAYS PRINTED, not only when something is wrong. A coverage number that
+  // appears only on the interesting path is a number nobody can trust when it is
+  // absent, which is the lesson of the llms.txt incident.
+  //
+  // A gated check reporting 0 defects because it had 0 eligible targets is not a
+  // pass. From the day it shipped until 2026-10-06 the multi-unit check was
+  // exactly that on every page in both the default and the deploy list.
+  const gateTotals = GATE_NAMES.map((name) => ({
+    name,
+    total: report.reduce((n, r) => n + ((r.gateCandidates && r.gateCandidates[name]) || 0), 0),
+  }));
+  log('');
+  log('================ GATED CHECK COVERAGE ================');
+  log('  candidates = comparisons or validations the check EVALUATED across this page list.');
+  log('  A page that did not land contributes zero to every check.');
+  gateTotals.forEach((g) => log(`  ${lpad(g.total, 6)}  ${g.name}${g.total === 0 ? '   *** VACUOUS' : ''}`));
+  const vacuous = gateTotals.filter((g) => g.total === 0);
+  if (vacuous.length) {
+    log('');
+    log('*** VACUOUS CHECK WARNING ***');
+    vacuous.forEach((g) => log(`    "${g.name}" inspected NOTHING on any page in this list.`));
+    log('    It reported 0 defects for want of a target, not because the pages are clean.');
+    if (vacuous.some((g) => /multi-unit/.test(g.name))) {
+      log('    For the multi-unit check that means no product in search-index.json has');
+      log('    unitCount > 1 today, or the one that does did not land. That is an ordinary');
+      log('    catalogue state, not a defect.');
+    }
+    log('    THIS DOES NOT CHANGE THE EXIT CODE. A catalogue with no eligible product is');
+    log('    not a defect, and a run that goes red for a non-defect gets switched off.');
   }
 
   const cssWarned = report.filter((r) => r.cssWarning);
@@ -1152,9 +1237,19 @@ async function loadPage(browser, url, { js }) {
     if (blocking.length) {
       log(`*** --strict: exiting 1 on ${blocking.length} blocking defect(s)`);
       blocking.forEach((d) => log(`      ${d.page}  [${d.where}] ${d.reason}`));
+      if (vacuous.length) {
+        log('');
+        log(`    AND SEPARATELY, ${vacuous.length} gated check(s) inspected nothing on this run:`);
+        vacuous.forEach((g) => log(`      ${g.name}`));
+        log('    The warning does not soften the failure above. Both are true at once.');
+      }
       process.exit(1);
     }
     log('--strict: no blocking defects');
+    if (vacuous.length) {
+      log(`--strict: ${vacuous.length} gated check(s) inspected nothing; see VACUOUS CHECK WARNING above.`);
+      log('          Coverage is not a defect, so this does not change the exit code.');
+    }
   }
   process.exit(0);
 })();
