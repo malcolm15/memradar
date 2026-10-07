@@ -187,7 +187,7 @@
       <p>No prices on this site are scraped. Both sources are licensed or contractual, which is a deliberate choice: a price you cannot explain the provenance of is a price you should not publish.</p>
 
       <h2>How often prices update</h2>
-      <p>Amazon prices are fetched every four hours, six times a day. Each fetch writes one observation per product that has a price, and every product page shows how long ago its price was recorded.</p>
+      <p>Amazon prices are scheduled for collection every four hours, up to six times a day. The service that runs these jobs sometimes delays or skips a scheduled run. Between September 24 and October 6, 2026, we recorded an average of about four successful fetches a day. Each fetch writes one observation per product that has a price, and every product page shows how long ago its price was recorded.</p>
       <p>Newegg's catalog feed regenerates once daily, so Newegg prices refresh once a day, with a full reconciliation weekly. Fetching more often would re-read the same file.</p>
       <p>Scheduled jobs occasionally run late or fail. When that happens the site keeps showing the last recorded price rather than guessing, and the timestamp on the page tells you how stale it is. The site is built to be visibly out of date rather than invisibly wrong.</p>
 
