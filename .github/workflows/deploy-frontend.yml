@@ -87,12 +87,46 @@ jobs:
           # regression, which ran for three and a half weeks with correct served
           # HTML and a rendered DOM full of raw Amazon titles.
           #
-          # --gate narrows --strict to the three checks that cannot false-positive
+          # WHAT THIS STEP IS, STATED ACCURATELY. It is a POST-PUBLICATION
+          # VERIFICATION. By the time it runs, actions/deploy-pages above has
+          # already published, so a failure turns this Deploy Frontend run red
+          # and nothing else: it cannot prevent a publish, cannot roll one back,
+          # and blocks no other step, because it is the last command in the last
+          # step of the job. We keep the words "gate" and "gated" below because
+          # they are this repo's terms, but they name WHICH DEFECT CLASSES can
+          # fail the step, not a barrier in front of publication.
+          #
+          # --gate narrows --strict to the five checks that cannot false-positive
           # on live copy or live prices: card-count parity, per-card name fidelity
-          # against search-index.json, and head-field immutability. The block,
-          # heading, link and JSON-LD diffs still print and are advisory, because
-          # their EXPECTED classifier is a heuristic over live prose and a gate
-          # that cries wolf gets switched off.
+          # against search-index.json, head-field immutability, JSON-LD agreeing
+          # with the visible retailer state, and multi-unit price per GB. (It read
+          # "three" until 2026-10-06; the last two were added later and the
+          # comment had not followed.) The block, heading, link and JSON-LD DIFFS
+          # stay advisory, because their EXPECTED classifier is a heuristic over
+          # live prose and a gate that cries wolf gets switched off.
+          #
+          # --strict IS WHAT MAKES ANY OF IT FAIL. --gate on its own never changes
+          # the exit code: the whole exit path in render-audit.js sits inside
+          # `if (flag('strict'))`. A run invoked with --gate alone is advisory
+          # output and cannot fail, whatever it prints.
+          #
+          # THE PAGE LIST IS CHOSEN BY CONSEQUENCE AND BY WHAT EACH PAGE UNIQUELY
+          # EXERCISES, measured 2026-10-06, not by adding every DEFAULT_PAGE:
+          #   /, /ram/, /ssd/, one PDP   the 2026-10-03 listing regression shape
+          #   /price-index/              the page other sites cite; its meta
+          #                              description carries a live figure that is
+          #                              regenerated daily
+          #   /data/                     the Dataset JSON-LD, the downloads and the
+          #                              citation terms machines are pointed at
+          #   the 990 PRO 2 Pack         THE ONLY catalogue product with
+          #                              unitCount > 1. Without it the multi-unit
+          #                              per-GB check is gated and inspects nothing
+          #                              on every page in the list, which is a
+          #                              check reporting 0 for want of a target.
+          # Left out on purpose: /build-cost/, whose figures the claim registry
+          # already cross-checks against /price-index/ and which is the slowest of
+          # the figure pages; and /methodology/, hand-written prose carrying no
+          # live figure of its own.
           #
           # THIS CANNOT BLOCK THE REGEN COMMIT. The regen lives in
           # newegg-refresh.yml, commits and pushes there, and this workflow only
@@ -102,4 +136,4 @@ jobs:
           # and never a reason the day's prices went uncommitted. Stale beats
           # wrong applies to publishing, not to reporting.
           node scripts/render-audit.js --strict --gate \
-            --pages=/,/ram/,/ssd/,/ram/ddr4-ram-laptop-only-gigastone-32gb-kit-3200mhz/
+            --pages=/,/ram/,/ssd/,/ram/ddr4-ram-laptop-only-gigastone-32gb-kit-3200mhz/,/price-index/,/data/,/ssd/samsung-mz-v9p4t0b-am-990-pro-pcie-4-0-4tb/
