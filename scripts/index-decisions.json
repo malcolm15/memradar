@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-06",
+ "generated": "2026-10-07",
  "rule": "requiredByBuild(p) || (healthy(p) && gatesPass(p))",
  "switches": {
   "GATES_ENABLED": true,
@@ -231,7 +231,8 @@
    "bing_citations": 0,
    "reasons": [
     "required_by_build",
-    "sparse_history"
+    "sparse_history",
+    "percentile_extreme"
    ]
   },
   "ram/corsair-vengeance-ddr5-ram-32gb-6000mhz-2": {
@@ -244,7 +245,6 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
-    "percentile_extreme",
     "historical_demand"
    ]
   },
@@ -514,6 +514,7 @@
    "bing_citations": 8,
    "reasons": [
     "long_history",
+    "percentile_extreme",
     "bing_citations",
     "blurb_annotated"
    ]
@@ -899,7 +900,8 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "percentile_extreme"
    ]
   },
   "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-64gb-6000mhz-3": {
@@ -975,7 +977,8 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
-    "family_duplicate"
+    "family_duplicate",
+    "percentile_extreme"
    ]
   },
   "ram/g-skill-trident-z5-rgb-series-ddr5-ram-32gb-6400mhz": {
@@ -1402,8 +1405,7 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
-    "gsc_crawled_not_indexed",
-    "percentile_extreme"
+    "gsc_crawled_not_indexed"
    ]
   },
   "ram/silicon-power-ddr5-64gb-6000mhz": {
@@ -1790,8 +1792,7 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "long_history",
-    "percentile_extreme"
+    "long_history"
    ]
   },
   "ssd/crucial-p310-1tb-ssd": {
@@ -2111,6 +2112,7 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
+    "long_term_unavailable",
     "pergb_group_end"
    ]
   },
@@ -2356,6 +2358,7 @@
    "bing_citations": 0,
    "reasons": [
     "long_history",
+    "pergb_group_end",
     "blurb_annotated"
    ]
   },
@@ -2609,8 +2612,7 @@
    "bing_impressions": 1,
    "bing_citations": 0,
    "reasons": [
-    "long_history",
-    "pergb_group_end"
+    "long_history"
    ]
   },
   "ssd/samsung-ssd-990-pro-1tb": {
@@ -2676,7 +2678,8 @@
    "bing_citations": 0,
    "reasons": [
     "gsc_crawled_not_indexed",
-    "long_history"
+    "long_history",
+    "percentile_extreme"
    ]
   },
   "ssd/silicon-power-2tb-ssd-3d-nand-a55-slc": {
@@ -2689,8 +2692,7 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
-    "gsc_crawled_not_indexed",
-    "percentile_extreme"
+    "gsc_crawled_not_indexed"
    ]
   },
   "ssd/silicon-power-2tb-ud90-nvme-4-0-gen4-pcie": {
