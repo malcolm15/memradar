@@ -38,6 +38,71 @@ when you need to change it. The manual step is the point, not an omission.
 You will need `wrangler login` in an interactive terminal first (the stored
 Cloudflare token was expired as of 2026-08-27).
 
+## Deploy runbook: email on a new issue (2026-10-07)
+
+**The deployed Worker does NOT contain the alert-email change until these steps are run.** The repo records the last commit that touched `ops/supervisor/src/` before this one as `e3b41d1b2` (2026-10-02); the repo does not record which commit is actually live on Cloudflare, so treat `e3b41d1b2` as the best available guess and confirm with step 6.
+
+Follow these in order. Each step says what you should see.
+
+1. **Open a terminal** and go to the Worker directory:
+
+   ```
+   cd ~/Projects/memradar/ops/supervisor
+   ```
+
+   You should see no output. If the path does not exist, use wherever you keep the repo.
+
+2. **Check you are on the committed code:**
+
+   ```
+   git log -1 --oneline -- src/index.js
+   ```
+
+   You should see the commit named "Supervisor: email on a new issue with retry until delivered, scrub secrets from alert text".
+
+3. **Deploy:**
+
+   ```
+   npx wrangler deploy
+   ```
+
+   You should see `Total Upload`, then `Deployed memradar-supervisor` with a version id and `Current Version ID: ...`.
+
+4. **If a login prompt appears.** The README records that the stored Cloudflare token was expired as of 2026-08-27, so a prompt is likely. Wrangler will either open a browser for OAuth or ask you to paste a URL. **Complete it in the browser and run `npx wrangler deploy` again.** Do not set a `CLOUDFLARE_API_TOKEN` environment variable unless you already have one you trust; the browser login is the path this project has used.
+
+5. **Confirm the new version is live:**
+
+   ```
+   npx wrangler deployments list
+   ```
+
+   The newest entry should carry today's date and the version id printed in step 3.
+
+6. **Watch one tick** (optional but the quickest proof it runs):
+
+   ```
+   npx wrangler tail memradar-supervisor
+   ```
+
+   Within 15 minutes you should see a tick log line. Press Ctrl-C to stop.
+
+7. **Send the test email.** This opens no issue, writes no marker and runs no tick:
+
+   ```
+   curl -s -H "x-supervisor-secret: YOUR_QA_SECRET" \
+     "https://memradar-supervisor.<your-workers-subdomain>.workers.dev/?action=test-email"
+   ```
+
+   You should get back `{"test_email":{"ok":true}}`. **An email with the subject `[supervisor] test email` should arrive at `hello@memradar.com`** within a minute or two. If you get `404`, the secret is wrong. If you get `{"ok":false,"reason":"not_configured"}`, `RESEND_API_KEY` is not set on the Worker.
+
+8. **Roll back, if anything looks wrong:**
+
+   ```
+   npx wrangler rollback
+   ```
+
+   It will ask which version to roll back to and for a confirmation. The Worker holds no data and the email dedupe lives on GitHub issues, not in the Worker, so a rollback loses nothing and cannot cause a duplicate email.
+
 ## Secrets
 
 Four, all set out of band. None ever appears in a file, in `wrangler.jsonc`, or

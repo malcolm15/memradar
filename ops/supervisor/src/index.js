@@ -84,7 +84,7 @@ const WATCH = [
   {
     workflow_file: 'price-fetch.yml',
     job_id: 'fetch-prices',
-    cron: '0 */4 * * *',
+    cron: '17 */4 * * *',
     interval_hours: 4,
     p95_minutes: 58.6, // n=28
     margin_hours: 4, // 1.00x interval
@@ -97,7 +97,7 @@ const WATCH = [
   {
     workflow_file: 'newegg-refresh.yml',
     job_id: 'refresh-offers',
-    cron: '0 6 * * *',
+    cron: '23 6 * * *',
     interval_hours: 24,
     p95_minutes: 34.8, // n=6
     margin_hours: 12, // 0.50x interval
@@ -111,7 +111,7 @@ const WATCH = [
   {
     workflow_file: 'newegg-refresh.yml',
     job_id: 'regenerate-pages',
-    cron: '0 9 * * *',
+    cron: '43 9 * * *',
     interval_hours: 24,
     p95_minutes: 477.0, // n=35, measured 2026-08-29 to 2026-10-02
     margin_hours: 6, // 0.25x interval
@@ -168,7 +168,7 @@ const WATCH = [
   {
     workflow_file: 'bluesky-posts.yml',
     job_id: 'post',
-    cron: '0 17 * * *',
+    cron: '37 17 * * *',
     interval_hours: 24,
     p95_minutes: 112.0, // n=1 -- see REVISIT note below
     margin_hours: 24, // 1.00x interval
@@ -618,7 +618,7 @@ function staleBody(e, nowIso) {
   ].join('\n');
 }
 
-async function reconcile(token, verdict) {
+async function reconcile(token, verdict, env) {
   const nowIso = verdict.checked_at;
   const open = await openAlertIssues(token);
   const actions = [];
@@ -626,7 +626,20 @@ async function reconcile(token, verdict) {
   for (const e of verdict.freshness) {
     const title = titleForStale(e);
     if (e.stale) {
-      actions.push({ title, ...(await ensureIssue(token, open, title, staleBody(e, nowIso))) });
+      const r = await ensureIssue(token, open, title, staleBody(e, nowIso));
+      actions.push({ title, ...r });
+      await deliverAlertEmail(env, token, r.number, title, [
+        `${e.workflow_file} / ${e.job_id} has not completed successfully inside its freshness window.`,
+        `age of last success: ${e.age_hours === null ? 'none inside the window' : e.age_hours + 'h'}`,
+        `threshold:           ${e.max_age_hours}h`,
+        `detected at:         ${nowIso}`,
+        '',
+        `issue: https://github.com/${OWNER}/${REPO}/issues/${r.number}`,
+        '',
+        'You are getting this by email because supervisor issues are opened with a token',
+        'issued under your own account, and GitHub does not notify you about your own',
+        'activity, so watching the repo for Issues cannot deliver them.',
+      ]);
     } else {
       const delay = e.age_hours === null ? 'unknown' : `${e.age_hours}h`;
       actions.push({
@@ -669,7 +682,13 @@ async function reconcile(token, verdict) {
     ]
       .filter(Boolean)
       .join('\n');
-    actions.push({ title: TITLE_CONFIG_DRIFT, ...(await ensureIssue(token, open, TITLE_CONFIG_DRIFT, body)) });
+    const r = await ensureIssue(token, open, TITLE_CONFIG_DRIFT, body);
+    actions.push({ title: TITLE_CONFIG_DRIFT, ...r });
+    await deliverAlertEmail(env, token, r.number, TITLE_CONFIG_DRIFT, [
+      'A scheduled job exists that no supervisor config entry watches.',
+      '',
+      `issue: https://github.com/${OWNER}/${REPO}/issues/${r.number}`,
+    ]);
   } else {
     actions.push({
       title: TITLE_CONFIG_DRIFT,
@@ -706,7 +725,7 @@ async function runTick(env, source) {
     signal_2_published_sha: await checkPublishedSha(env, null), // deferred, returns null
   };
   verdict.stale_count = verdict.freshness.filter((f) => f.stale).length;
-  verdict.issue_actions = await reconcile(token, verdict);
+  verdict.issue_actions = await reconcile(token, verdict, env);
 
   // One structured line per tick. Includes the triggering event of each last
   // success so cron-death and job-failure stay distinguishable in the log.
@@ -797,7 +816,69 @@ async function pingHeartbeat(env, kind /* 'ok' | 'fail' */) {
 // to a public repo; change ALERT_TO if you want it elsewhere.
 const ALERT_TO = 'hello@memradar.com';
 
-async function emailTickFailure(env, err, source, stamp, ghError) {
+// The label that records "an alert email was successfully delivered for this
+// incident". A LABEL, not a comment: it is a distinct machine-readable field, a
+// human cannot produce it by typing prose, and it lives on GitHub so it survives
+// Worker restarts, redeploys and rollbacks for free. Issues are already Read and
+// write in the token scope (the Worker opens, comments on and closes issues), so
+// this needs NO scope change.
+const EMAILED_LABEL = 'supervisor-emailed';
+// Applied instead when the retry ceiling is reached, so a persistent mail outage
+// is visible ON THE ISSUE rather than only in Worker logs.
+const EMAIL_FAILED_LABEL = 'supervisor-email-undelivered';
+// Stop retrying after this long. At a 15-minute tick that is 96 attempts a day,
+// and an outage lasting a day is not going to be fixed by attempt 97.
+const EMAIL_RETRY_CEILING_H = 24;
+
+// ---------------------------------------------------------------------------
+// SCRUB. Every error-derived string that reaches an issue body, an issue comment
+// or an email goes through this first.
+//
+// WHY IT EXISTS: this repository is PUBLIC and tick-failure bodies embed
+// err.stack verbatim. Nothing has leaked (every issue was scanned on 2026-10-07
+// and the corpus is clean), but the shape is wrong: one fetch rejection carrying
+// a URL would publish it. SUPERVISOR_HEARTBEAT_URL is the sharp case, because
+// its path UUID IS the credential.
+//
+// IT MUST STAY USEFUL. A scrub that redacts every URL makes a stack trace
+// undiagnosable, so ordinary paths survive and only the dangerous parts go:
+// exact secret values, userinfo, query strings, fragments, and the secret path
+// segment of known credential-style hosts.
+// ---------------------------------------------------------------------------
+function scrub(text, env) {
+  let out = String(text == null ? '' : text);
+  // 1. Exact secret values, longest first so a prefix cannot shadow a longer one.
+  const secrets = [env && env.SUPERVISOR_HEARTBEAT_URL, env && env.SUPERVISOR_GITHUB_TOKEN,
+    env && env.SUPERVISOR_QA_SECRET, env && env.RESEND_API_KEY]
+    .filter((v) => typeof v === 'string' && v.length >= 8)
+    .sort((a, b) => b.length - a.length);
+  for (const v of secrets) out = out.split(v).join('[redacted]');
+  // 2. Credential-style hosts: keep the host so the reader knows WHAT failed,
+  //    drop the path, which is the credential.
+  out = out.replace(/https?:\/\/(hc-ping\.com|[\w.-]*healthchecks\.io)\/\S*/gi,
+    (m, host) => `https://${host}/[redacted-path]`);
+  // 3. userinfo in any URL.
+  out = out.replace(/(https?:\/\/)[^/\s:@]+:[^/\s@]+@/gi, '$1[redacted-userinfo]@');
+  // 4. Query strings and fragments anywhere. The path is kept: "/repos/x/y/
+  //    contents/.github/workflows" is exactly what makes a 404 diagnosable.
+  out = out.replace(/(https?:\/\/[^\s)`'"<>\]]+?)[?#][^\s)`'"<>\]]*/gi, '$1[redacted-query]');
+  return out;
+}
+
+// GENERALISED 2026-10-07. This was tick-failure-only, which meant the one channel
+// that reaches a person outside GitHub fired only when GitHub was unreachable.
+//
+// WHY IT HAD TO BE GENERALISED, and it is not a preference: the Worker opens its
+// issues with SUPERVISOR_GITHUB_TOKEN, a PAT issued under the owner's account, so
+// every supervisor issue is SELF-AUTHORED. GitHub does not notify a user about
+// their own activity, so watching the repo for Issues cannot deliver these.
+// Measured 2026-10-07: issues #3, #6, #10, #11, #12 and #13 are all authored by
+// `malcolm15`. The claim-floor alarms need nothing: they run inside the workflow
+// as github-actions[bot] and Watch does deliver those.
+//
+// Same key, same recipient, no new secret, no new service, no token re-scoping,
+// and no dispatch. The read-only-for-workflows property is unchanged.
+async function sendAlertEmail(env, subject, lines) {
   const key = env.RESEND_API_KEY;
   if (!key) {
     console.warn('RESEND_API_KEY not set: email fallback DISABLED');
@@ -810,33 +891,85 @@ async function emailTickFailure(env, err, source, stamp, ghError) {
       body: JSON.stringify({
         from: 'MemRadar Supervisor <hello@memradar.com>',
         to: [ALERT_TO],
-        subject: `[supervisor] tick failed, and GitHub could not be told (${source})`,
-        text: [
-          'The MemRadar scheduled-workflow supervisor threw, AND could not open a GitHub issue',
-          'about it. That second failure usually means GitHub itself, or the token, is the problem.',
-          '',
-          'While this is unresolved, NO freshness result is trustworthy: a tick that dies before',
-          'evaluating cannot tell you whether a job is stale.',
-          '',
-          `source:     ${source}`,
-          `failed at:  ${stamp}`,
-          '',
-          'tick error:',
-          String(err && err.stack ? err.stack : err).slice(0, 1200),
-          '',
-          'github reporting error:',
-          String(ghError).slice(0, 600),
-          '',
-          'Check: npx wrangler tail memradar-supervisor',
-        ].join('\n'),
+        subject,
+        text: lines.join('\n'),
       }),
     });
     if (!res.ok) throw new Error(`resend ${res.status}: ${(await res.text()).slice(0, 200)}`);
     return { ok: true };
   } catch (e) {
-    console.error(`SUPERVISOR could not send failure email either: ${e}`);
-    return { ok: false, error: String(e) };
+    console.error(`SUPERVISOR alert email failed: ${scrub(e, env)}`);
+    return { ok: false, error: scrub(String(e), env) };
   }
+}
+
+// AT MOST ONE SUCCESSFUL ALERT EMAIL PER INCIDENT, RETRIED UNTIL ONE SUCCEEDS.
+//
+// The first draft emailed only when ensureIssue returned 'opened', which loses
+// the alert for good if that one send fails: every later tick sees 'already_open'
+// and never tries again. Reliable delivery is the entire point, so the marker is
+// "was an email DELIVERED", not "was the issue new".
+//
+// THE MARKER IS A LABEL on the issue. It is a distinct machine-readable field, so
+// no human prose can be mistaken for it; it lives on GitHub, so it survives Worker
+// restarts, redeploys and rollbacks with no new storage; and Issues is already
+// Read and write in the token scope, so it needs no re-scoping.
+//
+// A STALE OR HAND-EDITED ISSUE NEEDS NO SPECIAL CASE, because the rule reads only
+// the current labels. Remove the label by hand and the next tick re-sends once,
+// which is the recovery path if a mail was lost. Add it by hand and the alert is
+// suppressed, which is the documented way to silence one.
+//
+// HONEST FAILURE MODE: if the email succeeds and the label write then fails, the
+// next tick sends a SECOND email. That is the deliberate ordering, because the
+// alternative (label first) can silence an incident that was never reported, and
+// a duplicate alert is strictly better than a missing one. It cannot be mitigated
+// with a Resend idempotency key on the evidence available: nothing in this repo
+// or in the code shows the Resend path in use supports one, so relying on it
+// would be a guess.
+async function deliverAlertEmail(env, token, issueNumber, subject, lines) {
+  if (!issueNumber) return { ok: false, reason: 'no_issue' };
+  let issue;
+  try {
+    issue = await ghRequest(token, `/repos/${OWNER}/${REPO}/issues/${issueNumber}`);
+  } catch (e) {
+    console.error(`alert email: could not read issue #${issueNumber}: ${scrub(e, env)}`);
+    return { ok: false, reason: 'issue_unreadable' };
+  }
+  const labels = (issue.labels || []).map((l) => (typeof l === 'string' ? l : l.name));
+  if (labels.includes(EMAILED_LABEL)) return { ok: false, reason: 'already_delivered' };
+  if (labels.includes(EMAIL_FAILED_LABEL)) return { ok: false, reason: 'ceiling_reached' };
+
+  const ageH = (Date.now() - Date.parse(issue.created_at)) / 3600000;
+  if (ageH > EMAIL_RETRY_CEILING_H) {
+    // Stop retrying, and make the condition visible ON THE ISSUE. A mail outage
+    // that outlives the ceiling is itself something a person needs to see, and
+    // Worker logs are not a channel anybody watches.
+    try {
+      await ghRequest(token, `/repos/${OWNER}/${REPO}/issues/${issueNumber}/labels`, {
+        method: 'POST', body: { labels: [EMAIL_FAILED_LABEL] },
+      });
+    } catch (e) { console.error(`alert email: ceiling label failed: ${scrub(e, env)}`); }
+    console.error(`alert email: ceiling of ${EMAIL_RETRY_CEILING_H}h reached for issue #${issueNumber}`);
+    return { ok: false, reason: 'ceiling_reached' };
+  }
+
+  const sent = await sendAlertEmail(env, subject, lines.map((l) => scrub(l, env)));
+  if (!sent.ok) {
+    if (sent.reason !== 'not_configured') {
+      console.error(`alert email: send failed for issue #${issueNumber}, will retry next tick`);
+    }
+    return { ok: false, reason: sent.reason || 'send_failed' };
+  }
+  try {
+    await ghRequest(token, `/repos/${OWNER}/${REPO}/issues/${issueNumber}/labels`, {
+      method: 'POST', body: { labels: [EMAILED_LABEL] },
+    });
+  } catch (e) {
+    console.error(`alert email: DELIVERED for #${issueNumber} but the marker write failed, expect one duplicate: ${scrub(e, env)}`);
+    return { ok: true, marked: false };
+  }
+  return { ok: true, marked: true };
 }
 
 async function reportTickFailure(env, err, source) {
@@ -853,7 +986,7 @@ async function reportTickFailure(env, err, source) {
     const token = env.SUPERVISOR_GITHUB_TOKEN;
     if (!token) throw new Error('SUPERVISOR_GITHUB_TOKEN is not set');
     const open = await openAlertIssues(token);
-    await ensureIssue(
+    const r = await ensureIssue(
       token,
       open,
       TITLE_TICK_FAILURE,
@@ -862,7 +995,7 @@ async function reportTickFailure(env, err, source) {
         'tick that dies before evaluating cannot tell you a job is stale.',
         '',
         '```',
-        String(err && err.stack ? err.stack : err).slice(0, 1500),
+        scrub(String(err && err.stack ? err.stack : err).slice(0, 1500), env),
         '```',
         '',
         `| | |`,
@@ -873,12 +1006,45 @@ async function reportTickFailure(env, err, source) {
         'This issue closes automatically on the next tick that completes.',
       ].join('\n')
     );
+    await deliverAlertEmail(env, token, r.number, TITLE_TICK_FAILURE, [
+      'The supervisor tick threw. While this is open, no freshness result is trustworthy:',
+      'a tick that dies before evaluating cannot tell you whether a job is stale.',
+      '',
+      `source:    ${source}`,
+      `failed at: ${stamp}`,
+      '',
+      scrub(String(err && err.stack ? err.stack : err).slice(0, 1200), env),
+      '',
+      `issue: https://github.com/${OWNER}/${REPO}/issues/${r.number}`,
+    ]);
   } catch (e2) {
-    console.error(`SUPERVISOR could not report its own failure to GitHub: ${e2}`);
+    console.error(`SUPERVISOR could not report its own failure to GitHub: ${scrub(e2, env)}`);
     // Layer 3: only now, because GitHub being unreachable is the case the
     // email exists for. Sending on every tick failure would train it to be
     // ignored.
-    await emailTickFailure(env, err, source, stamp, e2);
+    // THIS PATH CANNOT USE AN ISSUE MARKER, because GitHub is the thing that is
+    // unreachable. It therefore has no dedupe and can send once per failing tick,
+    // up to 96 a day at the 15-minute cadence. That was true before this change
+    // and is kept deliberately: it fires only when the tick failed AND GitHub
+    // could not be told, which is the one case where a flood is correct.
+    await sendAlertEmail(env, `[supervisor] tick failed, and GitHub could not be told (${source})`, [
+      'The MemRadar scheduled-workflow supervisor threw, AND could not open a GitHub issue',
+      'about it. That second failure usually means GitHub itself, or the token, is the problem.',
+      '',
+      'While this is unresolved, NO freshness result is trustworthy: a tick that dies before',
+      'evaluating cannot tell you whether a job is stale.',
+      '',
+      `source:     ${source}`,
+      `failed at:  ${stamp}`,
+      '',
+      'tick error:',
+      scrub(String(err && err.stack ? err.stack : err).slice(0, 1200), env),
+      '',
+      'github reporting error:',
+      scrub(String(e2).slice(0, 600), env),
+      '',
+      'Check: npx wrangler tail memradar-supervisor',
+    ]);
   }
 }
 
@@ -908,6 +1074,18 @@ export default {
     // whether this endpoint exists.
     if (!env.SUPERVISOR_QA_SECRET || !provided || !constantTimeEqual(provided, env.SUPERVISOR_QA_SECRET)) {
       return new Response('Not found\n', { status: 404 });
+    }
+    // C3: prove email delivery end to end after a deploy, WITHOUT waiting for a
+    // real alarm. Opens no issue, writes no marker, touches no GitHub state and
+    // runs no tick. It sends one email through the same sendAlertEmail path the
+    // alerts use, so a success proves the key, the sender and the recipient.
+    if (new URL(req.url).searchParams.get('action') === 'test-email') {
+      const sent = await sendAlertEmail(env, '[supervisor] test email', [
+        'This is a test, sent by hand through the supervisor QA route.',
+        'No issue was opened, no marker was written, and no tick was run.',
+        `sent at: ${new Date().toISOString()}`,
+      ]);
+      return Response.json({ test_email: sent }, { headers: { 'cache-control': 'no-store' } });
     }
     try {
       const verdict = await runTick(env, 'fetch');
