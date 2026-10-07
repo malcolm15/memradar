@@ -4271,9 +4271,10 @@ function buildMonthlyCsv(products, buildDate) {
   const thisMonth = buildDate.slice(0, 7);
   const median = (a) => { const s = [...a].sort((x, y) => x - y), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
   // One value per product per month FIRST: the median of that product's own
-  // daily prices. The live fetch runs six times a day where the backfill kept
-  // one reading, so without this a product watched since July 2026 would
-  // outvote one tracked for a decade.
+  // daily prices. The live fetch is SCHEDULED six times a day, and some
+  // scheduled runs do not start (measured 2026-09-24 to 2026-10-06: a mean of
+  // 3.85 a day), where the backfill kept one reading, so without this a product
+  // watched since July 2026 would outvote one tracked for a decade.
   const cells = new Map(); // segment|month -> [{price, perGb}]
   for (const p of products) {
     if (!CSV_SEGMENTS.includes(p.segment) || !p.series || !p.series.length) continue;
@@ -5614,12 +5615,13 @@ function stampPolicyDates(prevManifest, nextManifest, buildDate) {
 // endpoint declares medianPricePerGb and serves null: that is the shape this
 // rule exists to prevent.)
 //
-// NEVER PRESENTED AS LIVE. The site hydrates six times a day; these files are
-// written once, so they can be 24h behind. Every payload says so in `notice`
+// NEVER PRESENTED AS LIVE. The site is SCHEDULED to hydrate six times a day and
+// some scheduled runs do not start, so the real figure is lower; these files are
+// written once either way, so they can be 24h behind. Every payload says so in `notice`
 // and carries the date its data was computed.
 const RAYCAST_MARKET_PATH = ['data', 'raycast-v1-market.json'];
 const RAYCAST_PRODUCTS_PATH = ['data', 'raycast-v1-products.json'];
-const RAYCAST_NOTICE = 'Regenerated once a day. memradar.com refreshes prices six times a day, so these figures can be up to 24 hours behind the site. This is not a live feed.';
+const RAYCAST_NOTICE = 'Regenerated once a day. memradar.com collects prices several times a day, so these figures can be up to 24 hours behind the site. This is not a live feed.';
 const SEGMENT_LABELS = { ddr5: 'DDR5 memory', ddr4: 'DDR4 memory', nvme_ssd: 'NVMe SSDs', sata_ssd: 'SATA SSDs' };
 // LICENSING: the per-product monthly history in the products file exists under
 // Keepa's written consent of 2026-09-20, which approved "a public downsampled
