@@ -51,6 +51,9 @@ const BASE = (arg('base', 'https://memradar.com')).replace(/\/$/, '');
 // Quiet window with no <main> mutation that counts as hydration being finished.
 // 1200ms comfortably clears the 120ms search debounce and a slow Supabase round
 // trip on the listing pages without making the run drag.
+// How long the SERVED pass waits for the page's own stylesheet before giving up
+// and saying so. Bounded: the page always completes.
+const CSS_READY_MS = Number(arg('css-ready-ms', '8000'));
 const QUIET_MS = Number(arg('quiet-ms', '1200'));
 const NAV_TIMEOUT = Number(arg('timeout', '60000'));
 const JSON_OUT = arg('json', '');
@@ -778,6 +781,75 @@ async function loadPage(browser, url, { js }) {
 
   await page.goto(BASE + url, { waitUntil: js ? 'networkidle2' : 'domcontentloaded', timeout: NAV_TIMEOUT });
 
+  // THE SERVED SNAPSHOT MUST BE TAKEN WITH THE PAGE'S OWN STYLESHEET APPLIED.
+  //
+  // THE RULE: no visibility judgement before the stylesheet that defines
+  // visibility has applied. visible() reads getComputedStyle, so the block,
+  // heading, link and image diffs are visibility-sensitive on both sides. A
+  // served snapshot taken before the site stylesheet lands sees every
+  // CSS-hidden element as VISIBLE, while the rendered pass always waits for
+  // networkidle2 and so always has CSS. Each such element then reads as
+  // present-then-absent and the diff calls it "REMOVED by JS" when nothing
+  // removed anything.
+  //
+  // WAITING FOR "some stylesheet with rules" IS NOT ENOUGH, and that was the
+  // first version of this fix. An inline <style>, a third-party sheet or a
+  // browser default would satisfy it while the sheet that actually decides
+  // visibility was still in flight. So the readiness test matches the real
+  // dependency: every SAME-ORIGIN <link rel=stylesheet> the document itself
+  // declares must appear in document.styleSheets, matched by href, with
+  // readable non-empty rules.
+  //
+  // Measured 2026-10-06: cold load, 0 applied stylesheets at domcontentloaded;
+  // warm load, 1 sheet and 949 rules.
+  //
+  // BOUNDED, AND NEVER SILENT. The page always completes. If the sheet does not
+  // arrive, or the page links none, the run says so per page and the row carries
+  // it, because a quiet fallback here is how the original defect hid.
+  //
+  // THE NAVIGATION STILL WAITS ONLY FOR domcontentloaded, DELIBERATELY. Waiting
+  // for `load` was tried first and is wrong: `load` does not fire until every
+  // subresource settles, so a stylesheet that hangs took the whole page to the
+  // 60s navigation timeout and the page reported ERROR instead of a warning.
+  // Measured 2026-10-06 on a scratch page whose stylesheet never responds: 61.7s
+  // and "Navigation timeout of 60000 ms exceeded". The explicit wait below is
+  // the real guarantee and it has its own, much shorter bound.
+  let cssWarning = null;
+  if (!js) {
+    const expected = await page.evaluate(() => [...document.querySelectorAll('link[rel~="stylesheet"][href]')]
+      .map((l) => l.href)
+      .filter((h) => { try { return new URL(h).origin === location.origin; } catch (e) { return false; } }));
+    // Which of the page's own stylesheets are NOT yet applied. Matched by href,
+    // so an inline <style>, a cross-origin sheet or a browser default sheet
+    // cannot satisfy it.
+    const notApplied = (hrefs) => hrefs.filter((h) => ![...document.styleSheets].some((s) => {
+      if (s.href !== h) return false;
+      try { return s.cssRules.length > 0; } catch (e) { return false; }
+    }));
+    if (!expected.length) {
+      cssWarning = `NO SITE STYLESHEET LINKED on ${url}: nothing same-origin to wait for, so the `
+        + 'visibility-sensitive diffs (block, heading, link, image) rest on browser defaults alone';
+    } else {
+      // POLLED FROM NODE, NOT page.waitForFunction. This pass runs with
+      // setJavaScriptEnabled(false), and waitForFunction polls using the page's
+      // own timers, so it can never fire here: it timed out on every page,
+      // including ones whose stylesheet had arrived, and produced a warning with
+      // an empty href list. page.evaluate goes through the CDP runtime and does
+      // still work with page JS disabled, so the loop below does.
+      const deadline = Date.now() + CSS_READY_MS;
+      let missing = expected;
+      for (;;) {
+        missing = await page.evaluate(notApplied, expected);
+        if (!missing.length || Date.now() > deadline) break;
+        await new Promise((r) => setTimeout(r, 50));
+      }
+      if (missing.length) {
+        cssWarning = `SERVED SNAPSHOT TAKEN WITHOUT ${missing.join(', ')} for ${url}: `
+          + 'visibility-sensitive diffs (block, heading, link, image) are unreliable for this page';
+      }
+    }
+  }
+
   let hydrationMs = null;
   let sawMutation = false;
   if (js) {
@@ -826,7 +898,7 @@ async function loadPage(browser, url, { js }) {
 
   const data = await page.evaluate(EXTRACT);
   await page.close();
-  return { data, net, hydrationMs, sawMutation, loadMs: Date.now() - t0 };
+  return { data, net, hydrationMs, sawMutation, cssWarning, loadMs: Date.now() - t0 };
 }
 
 (async () => {
@@ -881,6 +953,7 @@ async function loadPage(browser, url, { js }) {
           ],
           sawMutation: on.sawMutation,
           waitTimedOut: !!on.net.timedOut,
+          cssWarning: off.cssWarning,
           dataResponses: on.net.dataResponses.length,
           counts: { served: off.data.counts, rendered: on.data.counts },
           diffs,
@@ -909,6 +982,15 @@ async function loadPage(browser, url, { js }) {
     log(`${pad(r.page, 48)}${lpad(r.tally.EXPECTED, 5)}${lpad(r.tally.DEFECT, 5)}${lpad(r.tally.NOISE, 5)}` +
       `${lpad(r.hydrationMs == null ? 'none' : r.hydrationMs, 9)}${lpad((r.jsBytes / 1024).toFixed(0), 8)}` +
       `${lpad(cards, 12)}${lpad(r.wipes.length, 7)}${lpad(r.firstPartyIssues.length, 6)}`);
+  }
+
+  const cssWarned = report.filter((r) => r.cssWarning);
+  if (cssWarned.length) {
+    log('');
+    log('================ SERVED SNAPSHOT TAKEN WITHOUT ITS STYLESHEET ================');
+    log('  The visibility-sensitive diffs are unreliable on these pages. The five gated');
+    log('  checks are unaffected: none of them reads computed style.');
+    cssWarned.forEach((r) => log(`  ${r.cssWarning}`));
   }
 
   const defects = report.flatMap((r) => (r.diffs || []).filter((d) => d.cls === 'DEFECT').map((d) => ({ page: r.page, ...d })));
