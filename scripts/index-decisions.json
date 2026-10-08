@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-07",
+ "generated": "2026-10-08",
  "rule": "requiredByBuild(p) || (healthy(p) && gatesPass(p))",
  "switches": {
   "GATES_ENABLED": true,
@@ -25,7 +25,8 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
-    "percentile_extreme"
+    "percentile_extreme",
+    "pergb_group_end"
    ]
   },
   "ram/16gb-2x8gb-ddr5-4800mhz-pc5-38400-1rx8": {
@@ -734,6 +735,7 @@
    "bing_citations": 11,
    "reasons": [
     "sparse_history",
+    "percentile_extreme",
     "bing_citations"
    ]
   },
@@ -792,8 +794,7 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
-    "pre2021_history",
-    "pergb_group_end"
+    "pre2021_history"
    ]
   },
   "ram/g-skill-trident-z-rgb-series-ddr4-ram-32gb-3200mhz": {
@@ -1027,7 +1028,6 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
-    "pergb_group_end",
     "latency_distinct"
    ]
   },
@@ -1090,8 +1090,7 @@
    "bing_impressions": 0,
    "bing_citations": 1,
    "reasons": [
-    "long_history",
-    "percentile_extreme"
+    "long_history"
    ]
   },
   "ram/kingston-fury-beast-32gb-6000mhz": {
@@ -1103,7 +1102,9 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "long_history"
+    "long_history",
+    "percentile_extreme",
+    "pergb_group_end"
    ]
   },
   "ram/kingston-fury-beast-32gb-6000mt-s-ddr5": {
@@ -1141,8 +1142,7 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history",
-    "pergb_group_end"
+    "sparse_history"
    ]
   },
   "ram/kingston-fury-beast-rgb-32gb-6000mhz": {
@@ -1215,8 +1215,7 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "long_history",
-    "percentile_extreme"
+    "long_history"
    ]
   },
   "ram/kingston-fury-impact-64gb-5600mhz": {
@@ -1242,7 +1241,8 @@
    "bing_citations": 0,
    "reasons": [
     "long_history",
-    "percentile_extreme"
+    "percentile_extreme",
+    "pergb_group_end"
    ]
   },
   "ram/kingston-fury-renegade-white-rgb-32gb-6400mhz": {
@@ -1254,8 +1254,7 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "long_history",
-    "percentile_extreme"
+    "long_history"
    ]
   },
   "ram/lexar-oc-ddr5-ram-1x8gb-6000mhz-cl38": {
@@ -1456,7 +1455,6 @@
    "bing_citations": 4,
    "reasons": [
     "sparse_history",
-    "percentile_extreme",
     "pergb_group_end",
     "latency_distinct",
     "historical_demand"
@@ -1658,7 +1656,8 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "percentile_extreme"
    ]
   },
   "ssd/bestoss-1tb-nvme-m-2-ssd-pcie-3-0-2280": {
@@ -1719,7 +1718,8 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "percentile_extreme"
    ]
   },
   "ssd/bestoss-m-2-2280-nvme-ssd-2tb-pcie-4-0": {
@@ -1731,7 +1731,8 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "percentile_extreme"
    ]
   },
   "ssd/biwin-black-opal-nv7400-4tb-ssd-gen4x4": {
@@ -2001,7 +2002,8 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "percentile_extreme"
    ]
   },
   "ssd/fikwot-fn203-m-2-sata-ssd-slc-cache-1tb": {
@@ -2163,7 +2165,7 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history"
+    "long_history"
    ]
   },
   "ssd/pny-cs900-2tb-3d-nand-2-5-sata-iii": {
@@ -2358,7 +2360,6 @@
    "bing_citations": 0,
    "reasons": [
     "long_history",
-    "pergb_group_end",
     "blurb_annotated"
    ]
   },
@@ -2612,7 +2613,8 @@
    "bing_impressions": 1,
    "bing_citations": 0,
    "reasons": [
-    "long_history"
+    "long_history",
+    "pergb_group_end"
    ]
   },
   "ssd/samsung-ssd-990-pro-1tb": {
@@ -2678,8 +2680,7 @@
    "bing_citations": 0,
    "reasons": [
     "gsc_crawled_not_indexed",
-    "long_history",
-    "percentile_extreme"
+    "long_history"
    ]
   },
   "ssd/silicon-power-2tb-ssd-3d-nand-a55-slc": {
