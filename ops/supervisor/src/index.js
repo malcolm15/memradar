@@ -823,12 +823,37 @@ const ALERT_TO = 'hello@memradar.com';
 // write in the token scope (the Worker opens, comments on and closes issues), so
 // this needs NO scope change.
 const EMAILED_LABEL = 'supervisor-emailed';
-// Applied instead when the retry ceiling is reached, so a persistent mail outage
-// is visible ON THE ISSUE rather than only in Worker logs.
+// Applied once when delivery has not succeeded inside the fast window, so a
+// persistent mail outage is visible ON THE ISSUE rather than only in Worker logs.
 const EMAIL_FAILED_LABEL = 'supervisor-email-undelivered';
-// Stop retrying after this long. At a 15-minute tick that is 96 attempts a day,
-// and an outage lasting a day is not going to be fixed by attempt 97.
-const EMAIL_RETRY_CEILING_H = 24;
+
+// After this long, stop retrying on EVERY tick and fall back to a slow cadence.
+//
+// IT IS NOT AN ABANDONMENT POINT, AND THAT IS THE WHOLE POINT OF THIS CONSTANT.
+// The first version of this gave up here and applied EMAIL_FAILED_LABEL as a
+// tombstone. That reproduces the exact failure this file exists to fix: the
+// label sits on an issue opened with a token issued under the owner's own
+// account, GitHub does not notify a user about their own activity, so the
+// undelivered label reaches nobody. A mail outage that ended at hour 25 would
+// have lost the incident permanently from the only channel that reaches him.
+// Delivery still matters at hour 25, so the retry continues, just slowly.
+const EMAIL_RETRY_FAST_H = 24;
+
+// THE SLOW CADENCE COMES FROM THE CLOCK, NOT FROM STORED STATE. Past the fast
+// window, attempt only on a tick that lands in the first 15 minutes of a UTC
+// hour divisible by 6 (00, 06, 12, 18). At the */15 tick cadence exactly one
+// tick per six hours qualifies, so this needs no counter, no timestamp and no
+// new storage, and there is nothing for a Worker restart to lose.
+//
+// LATE OR MISSED TICKS DEGRADE IT, THEY DO NOT BREAK IT: a missed window costs
+// six hours, not the incident. A BURST IS IMPOSSIBLE because the first success
+// writes EMAILED_LABEL and every later tick short-circuits on it.
+const SLOW_RETRY_HOUR_DIVISOR = 6;
+const SLOW_RETRY_MINUTE_WINDOW = 15;
+function inSlowRetryWindow(now = new Date()) {
+  return now.getUTCHours() % SLOW_RETRY_HOUR_DIVISOR === 0
+    && now.getUTCMinutes() < SLOW_RETRY_MINUTE_WINDOW;
+}
 
 // ---------------------------------------------------------------------------
 // SCRUB. Every error-derived string that reaches an issue body, an issue comment
@@ -844,6 +869,15 @@ const EMAIL_RETRY_CEILING_H = 24;
 // undiagnosable, so ordinary paths survive and only the dangerous parts go:
 // exact secret values, userinfo, query strings, fragments, and the secret path
 // segment of known credential-style hosts.
+//
+// THE 8-CHARACTER MINIMUM IS A DELIBERATE TRADE, STATED SO NOBODY REMOVES IT BY
+// ACCIDENT. A secret shorter than 8 characters is NOT redacted. The minimum
+// exists because a short value is far more likely to occur in ordinary text by
+// coincidence than to be a real credential: with no minimum, a secret of "the"
+// would turn every "the" in a stack trace into [redacted] and make the report
+// useless. All four secrets in play are long by construction (a UUID ping URL,
+// a ghp_ PAT, a random QA string, a re_ key), so the trade costs nothing today.
+// If a short secret is ever introduced, this guard silently stops covering it.
 // ---------------------------------------------------------------------------
 function scrub(text, env) {
   let out = String(text == null ? '' : text);
@@ -938,20 +972,22 @@ async function deliverAlertEmail(env, token, issueNumber, subject, lines) {
   }
   const labels = (issue.labels || []).map((l) => (typeof l === 'string' ? l : l.name));
   if (labels.includes(EMAILED_LABEL)) return { ok: false, reason: 'already_delivered' };
-  if (labels.includes(EMAIL_FAILED_LABEL)) return { ok: false, reason: 'ceiling_reached' };
 
   const ageH = (Date.now() - Date.parse(issue.created_at)) / 3600000;
-  if (ageH > EMAIL_RETRY_CEILING_H) {
-    // Stop retrying, and make the condition visible ON THE ISSUE. A mail outage
-    // that outlives the ceiling is itself something a person needs to see, and
-    // Worker logs are not a channel anybody watches.
-    try {
-      await ghRequest(token, `/repos/${OWNER}/${REPO}/issues/${issueNumber}/labels`, {
-        method: 'POST', body: { labels: [EMAIL_FAILED_LABEL] },
-      });
-    } catch (e) { console.error(`alert email: ceiling label failed: ${scrub(e, env)}`); }
-    console.error(`alert email: ceiling of ${EMAIL_RETRY_CEILING_H}h reached for issue #${issueNumber}`);
-    return { ok: false, reason: 'ceiling_reached' };
+  if (ageH > EMAIL_RETRY_FAST_H) {
+    // Past the fast window. Record the degraded state ONCE so it is visible on
+    // the issue, then keep trying on the slow cadence. The label is a report,
+    // not a tombstone. Guarded on the current labels so it is not re-applied on
+    // every tick for the rest of the outage.
+    if (!labels.includes(EMAIL_FAILED_LABEL)) {
+      try {
+        await ghRequest(token, `/repos/${OWNER}/${REPO}/issues/${issueNumber}/labels`, {
+          method: 'POST', body: { labels: [EMAIL_FAILED_LABEL] },
+        });
+      } catch (e) { console.error(`alert email: undelivered label failed: ${scrub(e, env)}`); }
+    }
+    if (!inSlowRetryWindow()) return { ok: false, reason: 'slow_retry_waiting' };
+    console.error(`alert email: slow-cadence retry for issue #${issueNumber} (age ${ageH.toFixed(1)}h)`);
   }
 
   const sent = await sendAlertEmail(env, subject, lines.map((l) => scrub(l, env)));
@@ -1023,10 +1059,17 @@ async function reportTickFailure(env, err, source) {
     // email exists for. Sending on every tick failure would train it to be
     // ignored.
     // THIS PATH CANNOT USE AN ISSUE MARKER, because GitHub is the thing that is
-    // unreachable. It therefore has no dedupe and can send once per failing tick,
-    // up to 96 a day at the 15-minute cadence. That was true before this change
-    // and is kept deliberately: it fires only when the tick failed AND GitHub
-    // could not be told, which is the one case where a flood is correct.
+    // unreachable. It therefore HAS NO DEDUPE and can send once per failing
+    // tick, up to 96 a day at the 15-minute cadence. That was true before any of
+    // the 2026-10-07 alert-email work and is UNCHANGED by it: it fires only when
+    // the tick failed AND GitHub could not be told, which is the one case where
+    // a flood is arguably the correct signal.
+    //
+    // FOLLOW-UP TO CONSIDER, NOT DONE HERE: a stateless rate limit on this path,
+    // for example the same clock-derived window the slow retry uses, so a long
+    // GitHub outage does not send 96 identical emails a day. It needs its own
+    // decision, because throttling the only channel that survives a GitHub
+    // outage is not obviously safer than flooding it.
     await sendAlertEmail(env, `[supervisor] tick failed, and GitHub could not be told (${source})`, [
       'The MemRadar scheduled-workflow supervisor threw, AND could not open a GitHub issue',
       'about it. That second failure usually means GitHub itself, or the token, is the problem.',

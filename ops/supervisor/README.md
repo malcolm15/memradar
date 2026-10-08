@@ -38,27 +38,27 @@ when you need to change it. The manual step is the point, not an omission.
 You will need `wrangler login` in an interactive terminal first (the stored
 Cloudflare token was expired as of 2026-08-27).
 
-## Deploy runbook: email on a new issue (2026-10-07)
+## Deploy runbook (2026-10-07)
 
-**The deployed Worker does NOT contain the alert-email change until these steps are run.** The repo records the last commit that touched `ops/supervisor/src/` before this one as `e3b41d1b2` (2026-10-02); the repo does not record which commit is actually live on Cloudflare, so treat `e3b41d1b2` as the best available guess and confirm with step 6.
+**What this deploy changes for you:** when the supervisor opens an alert issue, it will also email you at hello@memradar.com, and it will keep retrying that email until one gets through, because the issues it opens do not notify you. **The two labels it needs are already created**, so there is nothing to set up first.
 
-Follow these in order. Each step says what you should see.
+Nothing is live until you run these steps. Follow them in order; each says what you should see.
 
-1. **Open a terminal** and go to the Worker directory:
-
-   ```
-   cd ~/Projects/memradar/ops/supervisor
-   ```
-
-   You should see no output. If the path does not exist, use wherever you keep the repo.
-
-2. **Check you are on the committed code:**
+1. **Open Terminal** (press Command and Space, type `Terminal`, press Return). Then type this and press Return:
 
    ```
-   git log -1 --oneline -- src/index.js
+   cd /Users/mkonner/Projects/memradar/ops/supervisor
    ```
 
-   You should see the commit named "Supervisor: email on a new issue with retry until delivered, scrub secrets from alert text".
+   You should see no message. If you see `No such file or directory`, the repo is somewhere else on this machine.
+
+2. **Make sure your local copy is current:**
+
+   ```
+   git pull
+   ```
+
+   Up to date looks like `Already up to date.` If instead it lists files and says something like `Fast-forward`, that is fine too, it just means it downloaded newer work.
 
 3. **Deploy:**
 
@@ -66,42 +66,46 @@ Follow these in order. Each step says what you should see.
    npx wrangler deploy
    ```
 
-   You should see `Total Upload`, then `Deployed memradar-supervisor` with a version id and `Current Version ID: ...`.
+   Success looks like several lines ending with `Deployed memradar-supervisor` and a line reading `Current Version ID:` followed by a long id.
 
-4. **If a login prompt appears.** The README records that the stored Cloudflare token was expired as of 2026-08-27, so a prompt is likely. Wrangler will either open a browser for OAuth or ask you to paste a URL. **Complete it in the browser and run `npx wrangler deploy` again.** Do not set a `CLOUDFLARE_API_TOKEN` environment variable unless you already have one you trust; the browser login is the path this project has used.
+4. **If a browser window opens asking you to log in to Cloudflare, that is expected.** The stored login for this project expired on 2026-08-27. Click `Allow` on the Cloudflare page, come back to Terminal, and run `npx wrangler deploy` again. Do not create or paste an API token.
 
-5. **Confirm the new version is live:**
+5. **Find the Worker's address.** In the deploy output from step 3, look for a line beginning `https://memradar-supervisor.` and ending `.workers.dev`. **Copy that whole address**, you need it in step 7.
+
+6. **Only if you do not have the QA secret.** It is a password you chose; it is not written down in this repo on purpose. If you no longer have it, set a new one:
 
    ```
-   npx wrangler deployments list
+   npx wrangler secret put SUPERVISOR_QA_SECRET
    ```
 
-   The newest entry should carry today's date and the version id printed in step 3.
+   It will print `Enter a secret value:` and wait. Type any long random string, press Return, and keep a copy in your password manager. You should then see `Success! Uploaded secret SUPERVISOR_QA_SECRET`. **Nothing else uses this secret**, so changing it breaks nothing.
 
-6. **Watch one tick** (optional but the quickest proof it runs):
+7. **Send yourself a test email.** Replace the two bracketed parts with the address from step 5 and your secret from step 6:
+
+   ```
+   curl -s -H "x-supervisor-secret: [YOUR-SECRET-HERE]" "[YOUR-WORKER-ADDRESS-HERE]/?action=test-email"
+   ```
+
+   - **Good:** `{"test_email":{"ok":true}}`. An email with the subject **`[supervisor] test email`** should arrive at **hello@memradar.com** within about two minutes. Check spam if it has not arrived in five.
+   - `Not found` means the secret is wrong. Redo step 6.
+   - `{"test_email":{"ok":false,"reason":"not_configured"}}` means the Resend key is missing on the Worker; set it with `npx wrangler secret put RESEND_API_KEY`.
+   - `{"test_email":{"ok":false,...}}` with anything else means the email service rejected it; the message says why.
+
+8. **Watch one live check** (optional):
 
    ```
    npx wrangler tail memradar-supervisor
    ```
 
-   Within 15 minutes you should see a tick log line. Press Ctrl-C to stop.
+   Within 15 minutes a line of text appears starting `{"tick":`. That is one check running. Press Control and C together to stop watching.
 
-7. **Send the test email.** This opens no issue, writes no marker and runs no tick:
-
-   ```
-   curl -s -H "x-supervisor-secret: YOUR_QA_SECRET" \
-     "https://memradar-supervisor.<your-workers-subdomain>.workers.dev/?action=test-email"
-   ```
-
-   You should get back `{"test_email":{"ok":true}}`. **An email with the subject `[supervisor] test email` should arrive at `hello@memradar.com`** within a minute or two. If you get `404`, the secret is wrong. If you get `{"ok":false,"reason":"not_configured"}`, `RESEND_API_KEY` is not set on the Worker.
-
-8. **Roll back, if anything looks wrong:**
+9. **If you want to undo the deploy:**
 
    ```
    npx wrangler rollback
    ```
 
-   It will ask which version to roll back to and for a confirmation. The Worker holds no data and the email dedupe lives on GitHub issues, not in the Worker, so a rollback loses nothing and cannot cause a duplicate email.
+   It asks which version to go back to and asks you to confirm. **It undoes the code only.** It does not delete the two labels, does not reopen or close any issue, and does not unsend an email. Nothing is lost by rolling back, because the supervisor stores no data of its own.
 
 ## Secrets
 
