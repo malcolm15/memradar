@@ -78,13 +78,40 @@ Nothing is live until you run these steps. Follow them in order; each says what 
    npx wrangler secret put SUPERVISOR_QA_SECRET
    ```
 
-   It will print `Enter a secret value:` and wait. Type any long random string, press Return, and keep a copy in your password manager. You should then see `Success! Uploaded secret SUPERVISOR_QA_SECRET`. **Nothing else uses this secret**, so changing it breaks nothing.
+   **This command is safe to use as written.** It prints `Enter a secret value:` and waits, and what you type is not shown on screen and is not written to your command history. Type any long random string, press Return, and keep a copy in your password manager. You should then see `Success! Uploaded secret SUPERVISOR_QA_SECRET`. **Nothing else uses this secret**, so changing it breaks nothing.
 
-7. **Send yourself a test email.** Replace the two bracketed parts with the address from step 5 and your secret from step 6:
+   **Do not put the value on the command line**, and do not pipe it in with `echo`. Both of those write the secret into your shell history file in plain text, where it stays. Let the command prompt you.
+
+   **If you have already typed a secret into a command by mistake**, just set a new one with the same command above, because nothing else uses this secret.
+
+7. **Send yourself a test email.** This is done in three short commands so that **the secret is never part of a command you type**, and so never lands in your shell history.
+
+   First, let the shell ask you for the secret. Type this line and press Return:
 
    ```
-   curl -s -H "x-supervisor-secret: [YOUR-SECRET-HERE]" "[YOUR-WORKER-ADDRESS-HERE]/?action=test-email"
+   read -rs "QA_SECRET?Paste the QA secret, then press Return: "
    ```
+
+   (That is the zsh form. zsh is the default shell on macOS and is what this
+   machine reports, though the repo does not state it anywhere. If your terminal
+   ever answers `bad option: -s`, you are in bash; use
+   `read -rs -p "Paste the QA secret, then press Return: " QA_SECRET` instead.)
+
+   It will print the question and wait. Paste the secret and press Return. **Nothing appears on screen as you paste**, which is correct and means it is hidden.
+
+   Then run the test, replacing only the bracketed address with the one from step 5. **The address is not a secret**, so it is fine to type it:
+
+   ```
+   curl -s -H "x-supervisor-secret: $QA_SECRET" "[YOUR-WORKER-ADDRESS-HERE]/?action=test-email"
+   ```
+
+   Finally, clear the secret out of this terminal session:
+
+   ```
+   unset QA_SECRET
+   ```
+
+   That last step matters because until you run it, anything else you start from this same terminal window can read the secret out of the environment.
 
    - **Good:** `{"test_email":{"ok":true}}`. An email with the subject **`[supervisor] test email`** should arrive at **hello@memradar.com** within about two minutes. Check spam if it has not arrived in five.
    - `Not found` means the secret is wrong. Redo step 6.
@@ -160,10 +187,19 @@ The `fetch` handler runs the **identical** check the cron path runs, by calling
 the same `runTick()`. It is gated on a shared secret header and returns 404,
 not 401, to an unauthenticated caller.
 
+**Read the secret with hidden input rather than typing it into the command**, so it
+never reaches your shell history file. zsh form (the macOS default):
+
 ```
-curl -sS -H "x-supervisor-secret: $SUPERVISOR_QA_SECRET" \
+read -rs "QA_SECRET?Paste the QA secret, then press Return: "
+curl -sS -H "x-supervisor-secret: $QA_SECRET" \
   https://memradar-supervisor.<subdomain>.workers.dev/ | jq
+unset QA_SECRET
 ```
+
+In bash the first line is `read -rs -p "Paste the QA secret, then press Return: " QA_SECRET`
+instead. `unset` matters because anything started from the same shell can
+otherwise read the value out of the environment.
 
 Be aware: because it is the same function, **a QA call has the same side
 effects as a tick** and can open or close issues. That is intended (it is a
