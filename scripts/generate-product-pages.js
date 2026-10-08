@@ -3686,7 +3686,7 @@ const WILL_RAM_FALL_KITS = [
 ];
 
 function buildWillRamFall(ctx) {
-  const { generable, buildDate, findings } = ctx;
+  const { generable, buildDate } = ctx;
 
   const bySlug = new Map(generable.map((p) => [p.finalSlug || p.slug, p]));
   for (const slug of WILL_RAM_FALL_KITS) {
@@ -3701,17 +3701,43 @@ function buildWillRamFall(ctx) {
     }
   }
 
-  // The two live restatements read their floor from the SAME findings items
-  // /data/ renders, so the three locations cannot disagree about the number.
-  const floorOf = (id) => {
-    const it = (findings || []).find((x) => x.id === id);
-    if (!it || it.floorPct == null) {
-      throw new Error(`${WILL_RAM_FALL_SLUG}: no floor for ${id}; the post restates a /data/ finding that this build did not emit`);
-    }
-    return it.floorPct;
-  };
-  const ddr4Floor = floorOf('data-ddr4-1y');
-  const ddr5Floor = floorOf('data-ddr5-1y');
+  // THIS POST NO LONGER RESTATES A /data/ FINDING, and that is deliberate.
+  //
+  // Until 2026-10-08 its two year-over-year sentences sat inside data-claim
+  // spans whose data-floor-pct was substituted from the /data/ findings, so the
+  // FLOOR followed the data while the PROSE did not. The cross-location check
+  // compares floors and not prose, so the post could read "more than four
+  // times" on a floor of 200 and nothing would say so. It nearly did: on
+  // 2026-10-08 DDR5 fell to 298.1%, the generated finding stepped down to "more
+  // than tripled" and a floor of 200, and this post would have kept its old
+  // wording on the new floor.
+  //
+  // BOTH SENTENCES ARE NOW PINNED, with September 25, 2026 written into the
+  // template as LITERAL TEXT rather than through <!--REVIEWED_DATE-->. That is
+  // the point: a later re-review moves WILL_RAM_FALL_REVIEWED, and it must not
+  // re-date figures that were measured on September 25. The two dates are
+  // allowed to diverge and the prose names its own.
+  //
+  // THE EVIDENCE FOR THAT DATE, so the next reader does not have to re-derive
+  // it. Commit 7237274d1 (the 2026-09-25 regen) shipped
+  // frontend/data/raycast-v1-market.json with computed_at
+  // 2026-09-25T09:18:42.332Z, ddr5 1y full 353.9% (n=61) and ddr4 1y full
+  // 141.7% (n=27); the same commit's /data/ carried data-floor-pct 300 for ddr5
+  // and 100 for ddr4, which under magnitudeOf puts the WORSE cohort at 300% or
+  // above for ddr5 and 100% or above for ddr4. So "more than four times" and
+  // "more than doubled" were both true on that date on both cohorts. The stable
+  // cohort itself is in no committed artifact; the published floor is what
+  // bounds it.
+  //
+  // NOTHING CHECKS THOSE TWO SENTENCES ANY MORE. They carry no data-claim, so
+  // the claim registry does not see them, which is the same treatment
+  // data-atl-counts already had. If you move WILL_RAM_FALL_REVIEWED, RE-VERIFY
+  // both multiples against the new date by hand first.
+  //
+  // Consequence worth knowing: buildWillRamFall no longer reads ctx.findings at
+  // all, so a withdrawn finding can no longer fail this post's build. DDR4 was
+  // the near case there, not DDR5: its worst cohort sits at 114.3% against the
+  // 100% magnitudeOf needs to emit a finding at all.
 
   const url = `${SITE}/blog/${WILL_RAM_FALL_SLUG}/`;
   const h1 = 'Will RAM prices go back down?';
@@ -3755,11 +3781,9 @@ function buildWillRamFall(ctx) {
     .replace(/<!--OG_TITLE-->/g, esc(h1))
     .replace('<!--JSONLD-->', `<script type="application/ld+json">\n${jsonld}\n  </script>`)
     .replace(/<!--BUILD_DATE-->/g, longDate(buildDate))
-    .replace(/<!--REVIEWED_DATE-->/g, longDate(WILL_RAM_FALL_REVIEWED))
-    .replace(/<!--DDR4_FLOOR-->/g, String(ddr4Floor))
-    .replace(/<!--DDR5_FLOOR-->/g, String(ddr5Floor));
+    .replace(/<!--REVIEWED_DATE-->/g, longDate(WILL_RAM_FALL_REVIEWED));
   if (/<!--[A-Z_0-9]+-->/.test(html)) throw new Error(`${WILL_RAM_FALL_SLUG}: unreplaced anchor ${(/<!--[A-Z_0-9]+-->/.exec(html) || [])[0]}`);
-  return { html, desc, ddr4Floor, ddr5Floor };
+  return { html, desc };
 }
 
 // The third explainer, and the first that argues from an EVENT STUDY rather
@@ -6746,16 +6770,17 @@ async function run() {
     }
   }
 
-  // The second explainer. Needs the /data/ findings for its two live floors,
-  // so it runs after them; independently skippable like every other content
+  // The second explainer. It used to need the /data/ findings for two live
+  // floors and was ordered after them for that reason; since 2026-10-08 its
+  // year-over-year sentences are pinned to their measurement date, so it has no
+  // such dependency. Still independently skippable like every other content
   // build, because a failure here must not take a day's prices with it.
   try {
-    if (!dataFindings) throw new Error('the /data/ findings did not build this run, and the post restates two of them');
-    const wf = buildWillRamFall({ generable, buildDate, findings: dataFindings });
+    const wf = buildWillRamFall({ generable, buildDate });
     const wfDir = path.join(FRONTEND, 'blog', WILL_RAM_FALL_SLUG);
     fs.mkdirSync(wfDir, { recursive: true });
     fs.writeFileSync(path.join(wfDir, 'index.html'), wf.html);
-    log(`Post written: /blog/${WILL_RAM_FALL_SLUG}/ (reviewed ${WILL_RAM_FALL_REVIEWED}, floors ddr4 ${wf.ddr4Floor}% / ddr5 ${wf.ddr5Floor}%, ${WILL_RAM_FALL_KITS.length} kits cited)`);
+    log(`Post written: /blog/${WILL_RAM_FALL_SLUG}/ (reviewed ${WILL_RAM_FALL_REVIEWED}, ${WILL_RAM_FALL_KITS.length} kits cited)`);
   } catch (e) {
     log(`⚠ /blog/${WILL_RAM_FALL_SLUG}/ NOT regenerated: ${e.message}`);
   }
