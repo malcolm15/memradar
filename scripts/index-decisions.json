@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-08",
+ "generated": "2026-10-09",
  "rule": "requiredByBuild(p) || (healthy(p) && gatesPass(p))",
  "switches": {
   "GATES_ENABLED": true,
@@ -232,8 +232,7 @@
    "bing_citations": 0,
    "reasons": [
     "required_by_build",
-    "sparse_history",
-    "percentile_extreme"
+    "sparse_history"
    ]
   },
   "ram/corsair-vengeance-ddr5-ram-32gb-6000mhz-2": {
@@ -387,8 +386,7 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history",
-    "percentile_extreme"
+    "sparse_history"
    ]
   },
   "ram/corsair-vengeance-rgb-rs-ddr5-32gb-6000mhz": {
@@ -1090,7 +1088,8 @@
    "bing_impressions": 0,
    "bing_citations": 1,
    "reasons": [
-    "long_history"
+    "long_history",
+    "percentile_extreme"
    ]
   },
   "ram/kingston-fury-beast-32gb-6000mhz": {
@@ -1142,7 +1141,8 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "pergb_group_end"
    ]
   },
   "ram/kingston-fury-beast-rgb-32gb-6000mhz": {
@@ -1241,8 +1241,7 @@
    "bing_citations": 0,
    "reasons": [
     "long_history",
-    "percentile_extreme",
-    "pergb_group_end"
+    "percentile_extreme"
    ]
   },
   "ram/kingston-fury-renegade-white-rgb-32gb-6400mhz": {
@@ -1391,7 +1390,9 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "percentile_extreme",
+    "pergb_group_end"
    ]
   },
   "ram/silicon-power-ddr4-16gb-kit-3200mhz": {
@@ -1404,7 +1405,8 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
-    "gsc_crawled_not_indexed"
+    "gsc_crawled_not_indexed",
+    "percentile_extreme"
    ]
   },
   "ram/silicon-power-ddr5-64gb-6000mhz": {
@@ -1554,7 +1556,6 @@
    "reasons": [
     "long_history",
     "pre2021_history",
-    "pergb_group_end",
     "blurb_annotated"
    ]
   },
@@ -1643,8 +1644,7 @@
    "bing_citations": 0,
    "reasons": [
     "gsc_crawled_not_indexed",
-    "long_history",
-    "percentile_extreme"
+    "long_history"
    ]
   },
   "ssd/bestoss-1tb-m-2-ssd-nvme-pcie4-0-2280": {
@@ -1669,8 +1669,7 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history",
-    "percentile_extreme"
+    "sparse_history"
    ]
   },
   "ssd/bestoss-2tb-m-2-ssd-nvme-pcie4-0-2280": {
@@ -1769,7 +1768,8 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "percentile_extreme"
    ]
   },
   "ssd/crucial-e100-2tb-m-2-nvme-pcie-gen4": {
@@ -2152,6 +2152,7 @@
    "bing_citations": 6,
    "reasons": [
     "long_history",
+    "percentile_extreme",
     "bing_citations",
     "blurb_annotated"
    ]
@@ -2413,7 +2414,6 @@
    "bing_citations": 7,
    "reasons": [
     "sparse_history",
-    "percentile_extreme",
     "bing_citations"
    ]
   },
@@ -2717,7 +2717,8 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "percentile_extreme"
    ]
   },
   "ssd/six-nvme-m-2-ssd-pcie-4-0-1tb-m-2-2280": {
@@ -2779,7 +2780,8 @@
    "bing_citations": 2,
    "reasons": [
     "family_duplicate",
-    "long_history"
+    "long_history",
+    "percentile_extreme"
    ]
   },
   "ssd/timetec-1tb-ssd-nvme-pcie-gen3x4-8gb-s-m-2": {
