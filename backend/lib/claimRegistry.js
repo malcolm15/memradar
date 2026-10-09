@@ -323,6 +323,31 @@ const CLAIM_REGISTRY = [
     floorLabel: '3.0x ("several times" reads as three or more)',
   },
   {
+    // ADDED 2026-10-09 WITH THE SNIPPET REWRITE, for the reason
+    // ssd-guide-meta-both-up records: a magnitude claim in a meta description is
+    // still a published magnitude claim, it is what a search result shows and
+    // what feed readers syndicate, and the registry is meant to be a COMPLETE
+    // inventory. The old description carried no magnitude and needed no entry;
+    // the new one does.
+    //
+    // IT SHARES THIS FLOOR WITH THE VERDICT ON PURPOSE. The description's phrase
+    // is derived in buildExplainer from the ddr5 1y market_stats row against the
+    // SAME 3.0x threshold explainer-verdict-ddr5-several-times carries, taking
+    // the worse of the full and stable cohorts exactly as this check does, so
+    // the description can never claim more than the verdict. It is a separate
+    // entry rather than a note on that one because the two fail differently: the
+    // description STEPS DOWN on its own to "more than twice" and then to no
+    // magnitude at all, while the verdict is hand-written prose that breaches
+    // and waits for a human.
+    id: 'explainer-meta-ddr5-several-times',
+    page: '/blog/why-ram-prices-are-so-high/',
+    where: 'meta description, Open Graph, Twitter, and the JSON-LD description',
+    sentence: 'DDR5 now costs several times what it did a year ago',
+    requires: [{ segment: 'ddr5', period: '1y' }],
+    floorRatio: 3.0,
+    floorLabel: '3.0x, the same floor as the verdict sentence it is derived from',
+  },
+  {
     // REWORDED 2026-09-21, from "more than doubled" / "well over double".
     // ddr4 1y fell to +98.7% on the stable cohort against a 2.0x floor, so all
     // three of these sentences BREACHED in the 2026-09-20 stats run. Refloored

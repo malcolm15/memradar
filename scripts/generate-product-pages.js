@@ -3598,18 +3598,65 @@ function buildExplainer(ctx) {
   const firstYear = new Date(chartP.series[0].day + 'T00:00:00Z').getUTCFullYear();
   const caption = `${esc(chartP._titleName)}, tracked continuously since ${firstYear}. The 2017 to 2018 spike, the long slide to 2024, and the 2025 surge on one axis.`;
 
-  // TITLE FROM THE H1, so the two cannot drift.
+  // THE H1 IS UNCHANGED AND STAYS HAND-WRITTEN. It is the second most-cited
+  // page in Bing AI answers, so the H1, the body and the JSON-LD headline are
+  // left exactly as they were.
   const h1 = 'Why Is RAM So Expensive in 2026?';
-  const pageTitle = `${h1} | MemRadar`;
 
-  // Meta description carries a real, band-verified number. Asserted rather than
-  // eyeballed: the first draft ran to 207 characters, which Google truncates.
-  // Variants longest-first; take the first that fits. The counts are live, so a
-  // fixed string that fits today can fall out of band when a digit is added.
-  const descVariants = [
-    `Why is RAM so expensive in 2026? AI demand absorbed the DRAM capacity and prices multiplied. ${d.ge15} of ${d.total} tracked products now sit at 1.5x their all-time low or more.`,
-    `Why is RAM so expensive in 2026? AI demand took the DRAM capacity and prices multiplied. ${d.ge15} of ${d.total} tracked products sit at 1.5x their all-time low or more.`,
-    `Why RAM is so expensive in 2026: AI demand took the DRAM capacity. ${d.ge15} of ${d.total} tracked products sit at 1.5x their all-time low or more.`,
+  // THE TITLE NO LONGER DERIVES FROM THE H1, and that is a deliberate trade
+  // made on 2026-10-09. It used to, with the comment "so the two cannot drift",
+  // and the cost of decoupling them is real: the two can now disagree. What
+  // bought it was click-through. Measured over three months on Bing, this post
+  // took 836 impressions at average position 5.9 and TWO clicks, a 0.24% CTR,
+  // against 1.5 to 2.2% for /price-index/, /ram/, /ssd/ and the homepage at
+  // positions 6.6 to 7.4. Its query family is "why ram price increase so much",
+  // "why are ram prices so high" and "why is ram so expensive", and the title
+  // below matches that phrasing where the H1 does not.
+  //
+  // THE YEAR IS GENERATED FROM THE BUILD DATE, not typed. The H1 and the
+  // JSON-LD headline still carry a literal 2026, which is a known residual:
+  // both go stale on 2027-01-01 and need a human edit, because changing them
+  // changes a page that gets cited. The title at least will not.
+  const titleYear = new Date(buildDate + 'T00:00:00Z').getUTCFullYear();
+  const ogTitle = `Why Are RAM Prices So High in ${titleYear}?`;
+  const pageTitle = `${ogTitle} | MemRadar`;
+
+  // THE DESCRIPTION'S MAGNITUDE IS DERIVED FROM market_stats, NOT COPIED FROM
+  // THE VERDICT. The verdict's "several times" is hand-written prose in the
+  // template, held honest by the registry entry
+  // explainer-verdict-ddr5-several-times at floorRatio 3.0. There is no shared
+  // variable to read, so this derives the phrase from the SAME ROW AND THE SAME
+  // THRESHOLD that entry is checked against, taking the WORSE of the full and
+  // stable cohorts exactly as the claim check does. The description therefore
+  // cannot claim more than the data supports, and cannot outrun the body: if
+  // DDR5 stops clearing 3.0x, the phrase steps down to "more than twice" and
+  // then disappears, while the verdict's own floor check breaches and asks for
+  // a human edit. The description degrades on its own; the body does not.
+  const ddr5Row = (ctx.marketStats || []).find((r) => r.segment === 'ddr5' && r.period === '1y' && r.pct_change != null);
+  const ddr5Worst = ddr5Row ? Math.min(Number(ddr5Row.pct_change), (() => {
+    const st = stablePctOf(ddr5Row);
+    return st == null ? Number(ddr5Row.pct_change) : st;
+  })()) : null;
+  // ratio, not percent: the registry entry carries floorRatio 3.0, and 3.0x is
+  // what "several times" was registered to mean.
+  const ddr5Ratio = ddr5Worst == null ? null : 1 + ddr5Worst / 100;
+  const ddr5Phrase = ddr5Ratio == null ? null : ddr5Ratio >= 3 ? 'several times' : ddr5Ratio >= 2 ? 'more than twice' : null;
+
+  // Meta description. ONE VARIANT PER BRANCH, because both phrase values fit:
+  // 158 characters with "several times" and 160 with "more than twice", against
+  // the 120 to 160 band. The .find() and the throw below are kept rather than
+  // simplified away, and that is deliberate. If a future phrase is longer than
+  // "more than twice" the description overflows, and then the right outcome is
+  // the throw: the call site catches it and logs "explainer NOT regenerated",
+  // so the page keeps yesterday's copy instead of publishing a truncated
+  // snippet. A silent trim is the one thing not wanted here.
+  const descVariants = ddr5Phrase ? [
+    `Memory makers moved DRAM wafers to AI chips, and DDR5 costs ${ddr5Phrase} what it did a year ago. Tracked prices, the 2018 precedent, and what ends the surge.`,
+  ] : [
+    // NO MAGNITUDE AT ALL. Reached when market_stats is unreadable, when the
+    // ddr5 1y row is missing, or when DDR5 no longer clears 2.0x on the worse
+    // cohort. Every clause here is true regardless of where prices sit.
+    'Memory makers moved DRAM wafers to AI chips and the consumer market is buying what is left. Tracked prices, the 2018 precedent, and what ends the surge.',
   ];
   const desc = descVariants.find((v) => v.length >= DESC_MIN && v.length <= 160);
   if (!desc) {
@@ -3643,7 +3690,7 @@ function buildExplainer(ctx) {
   const html = tpl
     .replace(/<!--META_DESC-->/g, esc(desc))
     .replace(/<!--PAGE_TITLE-->/g, esc(pageTitle))
-    .replace(/<!--OG_TITLE-->/g, esc(h1))
+    .replace(/<!--OG_TITLE-->/g, esc(ogTitle))
     .replace('<!--JSONLD-->', `<script type="application/ld+json">\n${jsonld}\n  </script>`)
     .replace(/<!--BUILD_DATE-->/g, longDate(buildDate))
     .replace('<!--DIST_BLOCK-->', buildDistBlock(d))
@@ -6697,7 +6744,10 @@ async function run() {
     // the guide is NOT using, so the two pages never show the same line, and it
     // is independently skippable for the same reason the guides are.
     try {
-      const ex = buildExplainer({ generable, buildDate, buildDateLong, guideChartSku: deepest('ram') && deepest('ram').sku });
+      // marketStats added 2026-10-09 for the meta description's DDR5 phrase.
+      // msErr leaves msRows null and the builder falls back to a description with
+      // no magnitude, which is why it is passed raw rather than guarded here.
+      const ex = buildExplainer({ generable, buildDate, buildDateLong, marketStats: msRows, guideChartSku: deepest('ram') && deepest('ram').sku });
       const exDir = path.join(FRONTEND, 'blog', EXPLAINER_SLUG);
       fs.mkdirSync(exDir, { recursive: true });
       fs.writeFileSync(path.join(exDir, 'index.html'), ex.html);
