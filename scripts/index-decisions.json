@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-09",
+ "generated": "2026-10-10",
  "rule": "requiredByBuild(p) || (healthy(p) && gatesPass(p))",
  "switches": {
   "GATES_ENABLED": true,
@@ -834,8 +834,7 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
-    "duplicate_variant",
-    "percentile_extreme"
+    "duplicate_variant"
    ]
   },
   "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-32gb-6000mhz-2": {
@@ -989,7 +988,8 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "percentile_extreme"
    ]
   },
   "ram/g-skill-trident-z5-rgb-series-ddr5-ram-64gb-6000mhz": {
@@ -1001,7 +1001,8 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "percentile_extreme"
    ]
   },
   "ram/g-skill-trident-z5-rgb-series-ddr5-ram-64gb-6400mhz": {
@@ -1064,7 +1065,9 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "percentile_extreme",
+    "pergb_group_end"
    ]
   },
   "ram/kingston-fury-beast-32gb-5200mhz": {
@@ -1088,8 +1091,7 @@
    "bing_impressions": 0,
    "bing_citations": 1,
    "reasons": [
-    "long_history",
-    "percentile_extreme"
+    "long_history"
    ]
   },
   "ram/kingston-fury-beast-32gb-6000mhz": {
@@ -1141,8 +1143,7 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history",
-    "pergb_group_end"
+    "sparse_history"
    ]
   },
   "ram/kingston-fury-beast-rgb-32gb-6000mhz": {
@@ -1166,7 +1167,8 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "long_history"
+    "long_history",
+    "percentile_extreme"
    ]
   },
   "ram/kingston-fury-beast-rgb-8gb-6000mt-s-ddr5": {
@@ -1405,8 +1407,7 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
-    "gsc_crawled_not_indexed",
-    "percentile_extreme"
+    "gsc_crawled_not_indexed"
    ]
   },
   "ram/silicon-power-ddr5-64gb-6000mhz": {
@@ -1892,6 +1893,7 @@
    "bing_citations": 5,
    "reasons": [
     "long_history",
+    "percentile_extreme",
     "pergb_group_end",
     "bing_citations",
     "blurb_annotated"
@@ -2152,7 +2154,6 @@
    "bing_citations": 6,
    "reasons": [
     "long_history",
-    "percentile_extreme",
     "bing_citations",
     "blurb_annotated"
    ]
