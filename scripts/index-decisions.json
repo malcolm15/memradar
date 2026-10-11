@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-10",
+ "generated": "2026-10-11",
  "rule": "requiredByBuild(p) || (healthy(p) && gatesPass(p))",
  "switches": {
   "GATES_ENABLED": true,
@@ -129,7 +129,8 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "pergb_group_end"
    ]
   },
   "ram/a-tech-32gb-3200mhz": {
@@ -581,7 +582,6 @@
    "bing_citations": 17,
    "reasons": [
     "long_history",
-    "percentile_extreme",
     "historical_demand",
     "bing_citations",
     "blurb_annotated"
@@ -846,8 +846,7 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history",
-    "percentile_extreme"
+    "sparse_history"
    ]
   },
   "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-32gb-6000mhz-3": {
@@ -988,8 +987,7 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history",
-    "percentile_extreme"
+    "sparse_history"
    ]
   },
   "ram/g-skill-trident-z5-rgb-series-ddr5-ram-64gb-6000mhz": {
@@ -1052,8 +1050,7 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "long_history",
-    "percentile_extreme"
+    "long_history"
    ]
   },
   "ram/kingston-fury-beast-16gb-6000mt-s-ddr5": {
@@ -1065,9 +1062,7 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history",
-    "percentile_extreme",
-    "pergb_group_end"
+    "sparse_history"
    ]
   },
   "ram/kingston-fury-beast-32gb-5200mhz": {
@@ -1091,7 +1086,8 @@
    "bing_impressions": 0,
    "bing_citations": 1,
    "reasons": [
-    "long_history"
+    "long_history",
+    "percentile_extreme"
    ]
   },
   "ram/kingston-fury-beast-32gb-6000mhz": {
@@ -1143,7 +1139,8 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "pergb_group_end"
    ]
   },
   "ram/kingston-fury-beast-rgb-32gb-6000mhz": {
@@ -1242,8 +1239,7 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "long_history",
-    "percentile_extreme"
+    "long_history"
    ]
   },
   "ram/kingston-fury-renegade-white-rgb-32gb-6400mhz": {
@@ -1316,7 +1312,7 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
-    "pergb_group_end"
+    "percentile_extreme"
    ]
   },
   "ram/patriot-viper-steel-ddr4-ram-16gb-3200mhz": {
@@ -2348,8 +2344,9 @@
    "bing_impressions": 2,
    "bing_citations": 21,
    "reasons": [
-    "sparse_history",
-    "bing_citations"
+    "long_history",
+    "bing_citations",
+    "blurb_annotated"
    ]
   },
   "ssd/samsung-990-evo-plus-ssd-4tb": {
@@ -2694,7 +2691,8 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
-    "gsc_crawled_not_indexed"
+    "gsc_crawled_not_indexed",
+    "percentile_extreme"
    ]
   },
   "ssd/silicon-power-2tb-ud90-nvme-4-0-gen4-pcie": {
@@ -2718,8 +2716,7 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history",
-    "percentile_extreme"
+    "sparse_history"
    ]
   },
   "ssd/six-nvme-m-2-ssd-pcie-4-0-1tb-m-2-2280": {
@@ -2820,7 +2817,8 @@
    "bing_impressions": 1,
    "bing_citations": 0,
    "reasons": [
-    "long_history"
+    "long_history",
+    "percentile_extreme"
    ]
   },
   "ssd/western-digital-2tb-wd-green-sn350-nvme": {
