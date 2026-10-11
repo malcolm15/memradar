@@ -1,0 +1,82 @@
+#!/bin/sh
+# MemRadar pre-commit secret scan.
+#
+# WHY: GitHub's secret scanning and push protection are a public-repo
+# entitlement. Once this repo is private they are gone unless the paid Secret
+# Protection add-on is bought, so this hook plus .github/workflows/secret-scan.yml
+# are the replacement. This one is the fast half: it runs before the commit
+# exists, so a caught secret never enters the history at all.
+#
+# ENABLE ONCE PER CLONE (hooks are not committed state):
+#   git config core.hooksPath .githooks
+# Verify with:  git config --get core.hooksPath
+#
+# A FAILING SCAN IS NOT A STYLE NOTE. If this fires, the first action is to
+# ROTATE the credential, not to remove it from the diff. Anything that has been
+# pushed is already out, and rewriting history does not retract it; forks,
+# clones and GitHub's own unreachable-object views keep the old blob.
+#
+# Do not pass --no-verify to get past this. If a finding is a false positive,
+# allowlist it in .gitleaks.toml by exact path or exact fingerprint, with a
+# comment saying why, so the exception is reviewable.
+
+set -u
+
+# `gitleaks git --staged` reads git objects, so it sees exactly the staged diff.
+# Deliberately NOT `gitleaks dir`: that walks the filesystem, ignores
+# .gitignore, and would drag in this repo's 1.5 GB gitignored scripts/output/
+# on every single commit.
+SCAN_ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || SCAN_ROOT=.
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+  cat >&2 <<'MSG'
+
+  COMMIT BLOCKED: gitleaks is not installed.
+
+  This hook is the replacement for GitHub secret scanning, which does not
+  apply to private repositories without a paid add-on. It blocks rather than
+  passing silently, because a secret scan that quietly does nothing is worse
+  than no secret scan: it also manufactures confidence.
+
+  Install it:
+
+      brew install gitleaks
+
+  Then commit again. Keep it on the same version the CI workflow pins
+  (see GITLEAKS_VERSION in .github/workflows/secret-scan.yml), so the hook
+  and CI cannot disagree about whether something is a finding.
+
+MSG
+  exit 1
+fi
+
+# -v is NOT decoration. Without it gitleaks prints only "leaks found: N" and
+# the developer has no idea which rule fired or which line to look at, which
+# makes the guidance below unactionable. With --redact the verbose output gives
+# rule id, file, line and commit while the matched value stays REDACTED.
+gitleaks git --pre-commit --staged --redact --no-banner -v "$SCAN_ROOT"
+status=$?
+
+if [ "$status" -ne 0 ]; then
+  cat >&2 <<'MSG'
+
+  COMMIT BLOCKED: gitleaks found a possible secret in the staged changes.
+
+  The value above is redacted on purpose; the rule id, file and line tell you
+  where to look.
+
+  WHAT TO DO, IN THIS ORDER:
+    1. ROTATE the credential if it is real. That is the fix. Removing it from
+       the diff only stops it spreading further.
+    2. Move it into .env (gitignored) or a GitHub Actions secret.
+    3. If it is genuinely NOT a secret, add an allowlist entry to
+       .gitleaks.toml keyed on the exact path or the exact fingerprint, never
+       a broad regex, with a comment giving the reason.
+
+  Do not use --no-verify.
+
+MSG
+  exit "$status"
+fi
+
+exit 0
