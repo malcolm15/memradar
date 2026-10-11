@@ -9,9 +9,21 @@ stale. No dispatch, no self-healing.
 On 2026-08-27 five scheduled slots across two workflows were **never created by
 GitHub at all**: no run record, nothing queued, nothing cancelled, no published
 incident covering the window, and no concurrency group that could have
-suppressed them. The repo is public so Actions minutes cannot gate it. The
-failure is upstream of run creation, which means nothing inside GitHub reports
-it. The only way to notice is to ask, from outside, whether the work happened.
+suppressed them. Actions minutes were not the cause either, because the repo
+was public then and public repos have no cap. The failure is upstream of run
+creation, which means nothing inside GitHub reports it. The only way to notice
+is to ask, from outside, whether the work happened.
+
+**On a private repo that minutes elimination no longer holds.** Minutes are
+capped at 3,000 a month on GitHub Pro (the allowance as published in October
+2026), and an exhausted quota or a spending limit halts scheduled workflows
+with exactly the 2026-08-27 signature: no run created and nothing to report it.
+**If scheduled runs stop being created, check Settings, Billing and licensing,
+Usage before debugging anything else.** For scale, and this is a dated snapshot
+rather than a standing fact: **measured 2026-10-10 across the preceding 30 days
+the repo used 815 minutes, 27% of the allowance**, with a scheduled-only floor
+of 487 a month. Re-measure rather than quoting those figures later. On those
+numbers exhaustion is a first thing to rule out rather than a likely cause.
 
 It keys on **(workflow file, job id)**, never workflow file alone.
 `newegg-refresh.yml` carries two crons gating two different jobs, and a run
@@ -162,12 +174,42 @@ A fine-grained PAT scoped to `malcolm15/memradar` only:
 |---|---|---|
 | Actions | **Read** | list workflow runs and jobs |
 | Contents | **Read** | read `.github/workflows/*` for the config self-audit |
+| Deployments | **Read** | `newestPagesDeployment()`, `src/index.js:530` and `:541` |
 | Issues | **Read and write** | open, comment on, and close alert issues |
 
 **Actions must stay Read.** Stage 1 is designed so that it cannot trigger a
 workflow even by mistake, and the token scope is the enforcement, not the code.
 If a future stage wants dispatch, re-scope the token deliberately and
 separately, as its own decision.
+
+**Deployments was missing from this table until 2026-10-11, and the call it
+covers has been running the whole time.** `newestPagesDeployment()` reads
+`/repos/{owner}/{repo}/deployments?environment=github-pages` at `src/index.js:530`
+and then `/deployments/{id}/statuses` at `:541`. Both succeeded without the
+permission because **deployments on a PUBLIC repo are public data**: the same
+request with no token at all returned HTTP 200 when measured on 2026-10-10,
+while an unauthenticated request for a repository that does not exist returned
+404. So the token was never exercising that permission, and on a private repo
+it will need it explicitly.
+
+**It fails loudly rather than silently, which is the only good news here.**
+`newestPagesDeployment(token)` is awaited inline in the verdict object at
+`src/index.js:724` and `ghRequest` throws on any non-ok status (`:268`), so a
+403 fails the whole tick, opens a `[supervisor] TICK FAILURE` issue and takes
+the email path. It does not quietly drop the deployment field.
+
+### Repository access, not just permissions
+
+**Set Repository access to "Only select repositories" with `malcolm15/memradar`
+listed.** A fine-grained PAT set to **"Public repositories"** keeps working
+today and stops working the moment the repo is private, and that mode cannot be
+upgraded in place.
+
+**Edit the existing token's permissions rather than regenerating it.** The value
+is stored as the `SUPERVISOR_GITHUB_TOKEN` Worker secret, and this Worker is
+deployed by hand only, so a regenerated token means a `wrangler secret put` and
+a redeploy. Editing permissions on the token that already exists changes nothing
+the Worker holds.
 
 ## Prerequisite
 
