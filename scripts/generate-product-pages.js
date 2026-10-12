@@ -28,6 +28,7 @@ const supabase = require('../backend/lib/supabase');
 const { classifySegment, stablePctOf } = require('../backend/lib/marketStats');
 const { neweggDeepLink } = require('../backend/lib/rakutenLink');
 const { getState, setState } = require('../backend/lib/botState');
+const PI_ARCHIVE = require('../backend/lib/priceIndexArchive');
 
 const CONFIRM = process.argv.includes('--confirm');
 // Shrink guard: abort rather than delete if a run would emit materially fewer
@@ -6622,6 +6623,56 @@ async function run() {
       rows: msErr || !msRows ? 0 : msRows.length,
       error: msErr ? msErr.message : null,
     }));
+  }
+
+  // 2a-ii) THE MONTHLY FREEZE. Runs before the page is built, so /price-index/
+  // renders from the record this run just froze rather than from one a day old.
+  //
+  // IT CANNOT FAIL THE REGEN. Every path here returns rather than throwing: a
+  // month that cannot be frozen is a figure published a day later, while a
+  // thrown error is a day with no prices published at all. The alarm paths emit
+  // a PRICE_INDEX_ALARM_JSON line that the workflow step after Regenerate turns
+  // into a deduped issue, the same shape as stats-freshness-issue.js.
+  //
+  // THE TIMESTAMP IS READ ONCE, HERE, AND PASSED DOWN. Nothing inside
+  // priceIndexArchive.js or pairedYoy.js reads a clock, so a frozen record does
+  // not depend on when the regen happened to run, and a determinism proof can
+  // pass the same instant twice and compare byte for byte.
+  //
+  // REACHED ONLY ON --confirm, by position: run() returns inside the
+  // `if (!CONFIRM)` dry-run report block (opens at line 6175, returns at 6368)
+  // well before market_stats is read, so a dry run never gets here. There is
+  // deliberately no second CONFIRM test; two guards for one condition is how
+  // they drift apart.
+  {
+    const freezeAt = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
+    const archive = PI_ARCHIVE.readArchive();
+    if (!archive) {
+      log('⚠ price index archive missing - no month can be frozen this run. Run scripts/build-price-index-archive.js once to create it.');
+      console.log(`PRICE_INDEX_ALARM_JSON ${JSON.stringify({ kind: 'missing_archive', path: PI_ARCHIVE.ARCHIVE_PATH })}`);
+    } else {
+      const month = PI_ARCHIVE.lastCompleteMonth(freezeAt);
+      try {
+        PI_ARCHIVE.freezeMonth({
+          archive, products, rows: allRows, month, at: freezeAt,
+          commit: PI_ARCHIVE.commitLabel(), log,
+        });
+        // DRIFT over every frozen month, not a recent window. The causes are
+        // input destruction and rewriting (a backfill re-run, a deleted product
+        // under the ON DELETE CASCADE at backend/schema.sql:22, an edited name
+        // that moves a product between segments), and all three reach the whole
+        // history at once, so a three-month window would miss exactly the case
+        // worth catching. Measured 2026-10-08: the full 24-month, 96-record
+        // scan costs 1.4 seconds against a regen that takes minutes, and it
+        // needs no extra query because products and allRows are already loaded.
+        PI_ARCHIVE.driftCheck({ archive: PI_ARCHIVE.readArchive() || archive, products, rows: allRows, log });
+      } catch (err) {
+        // Belt and braces. freezeMonth and driftCheck are written not to throw;
+        // if one ever does, it must still not cost the day's prices.
+        log(`⚠ price index freeze/drift failed, deliberately non-fatal: ${err.message}`);
+        console.log(`PRICE_INDEX_ALARM_JSON ${JSON.stringify({ kind: 'threw', month: PI_ARCHIVE.lastCompleteMonth(freezeAt), why: err.message })}`);
+      }
+    }
   }
 
   if (msErr) {

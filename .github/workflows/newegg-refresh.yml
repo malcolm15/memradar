@@ -86,6 +86,20 @@ jobs:
     # the refresh job is filtered out.
     if: (github.event_name == 'schedule' && github.event.schedule == '43 9 * * *') || (github.event_name == 'workflow_dispatch' && inputs.job == 'regen')
     runs-on: ubuntu-latest
+    # ONE REGEN AT A TIME. There was no concurrency group here before
+    # 2026-10-08, and the monthly freeze is what made it matter: two regens
+    # overlapping would both read the archive with the month absent, both build
+    # the four records, and both write, so the second would overwrite the first
+    # with its own frozen_at and generated_commit. The pages themselves were
+    # idempotent enough to survive it; an append-only archive is not.
+    #
+    # cancel-in-progress is FALSE deliberately. Cancelling a regen mid-write is
+    # the one thing worse than running two: the generator deletes page dirs
+    # before writing them, so a cancelled run can leave pages missing. The
+    # second run waits instead.
+    concurrency:
+      group: regenerate-pages
+      cancel-in-progress: false
     timeout-minutes: 20
     permissions:
       contents: write
@@ -166,6 +180,22 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REGEN_LOG: ${{ runner.temp }}/regen.log
         run: node scripts/stats-freshness-issue.js --confirm
+
+      # PRICE INDEX ARCHIVE ALARMS. The monthly freeze and the drift check emit
+      # PRICE_INDEX_ALARM_JSON lines rather than calling gh themselves: the
+      # generator has no token and reporting from its own log is the shape
+      # stats-freshness-issue.js already uses. Same guards for the same reason:
+      # if: always() so a regen that failed later still routes what it found,
+      # and continue-on-error plus a script that exits 0 on every path, because
+      # an archive that needs a human is not a reason to withhold the day's
+      # prices.
+      - name: Route price index archive alarms to issues
+        if: always()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REGEN_LOG: ${{ runner.temp }}/regen.log
+        run: node scripts/price-index-archive-issue.js --confirm
 
       - name: Commit the regenerated pages
         id: commit
