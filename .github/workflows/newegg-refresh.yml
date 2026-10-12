@@ -220,12 +220,20 @@ jobs:
           # transcripts for a page that no longer carried them. A file left out
           # of this list is not merely uncommitted, it is silently stale.
           #
+          # scripts/price-index-monthly-archive.json JOINED THE LIST ON
+          # 2026-10-08 and it is the worst file to leave out. It is APPEND ONLY
+          # and the freeze writes a month exactly once, when it finds 0 of 4
+          # records for it: left uncommitted, the runner's copy dies with the
+          # job, the next regen finds the month absent again, and the month is
+          # re-frozen from scratch every day with a new frozen_at. A figure
+          # whose publication date moves daily is not a frozen figure.
+          #
           # What this gate still does is avoid an empty commit, and report a
           # TRUTHFUL page count. pages_changed comes from the lastmod manifest
           # (hash diff vs HEAD), NOT from `git status`, which would also count
           # files dirty only because the shared ?v= stamp moved - exactly the
           # churn contentHash normalises away.
-          CHANGED=$(git status --porcelain frontend/ scripts/lastmod-manifest.json scripts/indexnow-state.json scripts/build-cost-pins.json scripts/index-decisions.json | wc -l | tr -d ' ')
+          CHANGED=$(git status --porcelain frontend/ scripts/lastmod-manifest.json scripts/indexnow-state.json scripts/build-cost-pins.json scripts/index-decisions.json scripts/price-index-monthly-archive.json | wc -l | tr -d ' ')
           PAGES=$(node scripts/count-content-changes.js)
           if [ "$CHANGED" = "0" ]; then
             echo "committed=false" >> "$GITHUB_OUTPUT"
@@ -234,7 +242,7 @@ jobs:
           else
             git config user.name "MemRadar"
             git config user.email "malcolmkonner@gmail.com"
-            git add -A frontend/ scripts/lastmod-manifest.json scripts/indexnow-state.json scripts/build-cost-pins.json scripts/index-decisions.json
+            git add -A frontend/ scripts/lastmod-manifest.json scripts/indexnow-state.json scripts/build-cost-pins.json scripts/index-decisions.json scripts/price-index-monthly-archive.json
             git commit -q -m "chore: daily page regeneration ($PAGES pages with content changes)"
             git push -q
             echo "committed=true" >> "$GITHUB_OUTPUT"
