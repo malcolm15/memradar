@@ -127,10 +127,18 @@ async function runPriceFetch(opts = {}) {
   const counts = { ram: { catalog: 0, saved: 0 }, ssd: { catalog: 0, saved: 0 } };
   let outOfStock = 0;
 
+  // .order('id') ADDED 2026-10-08. Without it PostgREST returns rows in no
+  // guaranteed order, and this list is what gets chunked into Keepa requests at
+  // MAX_BATCH=100 (backend/lib/keepa.js:110-117). Unordered chunking makes
+  // "which ASINs shared a request" unanswerable after the fact, which is
+  // exactly the question a partial-batch investigation has to ask: the Phase 1b
+  // audit had to RECONSTRUCT chunk membership from id order and say so, because
+  // the code did not guarantee it. Ordering costs nothing at 235 rows.
   const { data: products, error: prodErr } = await supabase
     .from('products')
     .select('id, sku, category, product_url')
-    .eq('retailer', 'amazon');
+    .eq('retailer', 'amazon')
+    .order('id');
   if (prodErr) throw prodErr;
   for (const p of products) {
     if (counts[p.category]) counts[p.category].catalog++;
@@ -147,6 +155,25 @@ async function runPriceFetch(opts = {}) {
     log
   );
   log(`Fetched ${keepaProducts.length} products from Keepa`);
+
+  // ASINs WE ASKED FOR AND DID NOT GET BACK. This is a THIRD outcome, distinct
+  // from the two the counts above already describe: a product with a price, and
+  // a product Keepa answered about with no offer (null price, counted in
+  // out_of_stock and recorded in retailer_offers). An ASIN simply absent from
+  // the response is answered about by nobody, and before this line existed it
+  // was INVISIBLE: the write loop iterates keepaProducts, so a missing ASIN
+  // silently produced no price_history row in a run that concluded success,
+  // indistinguishable afterwards from a genuine stockout.
+  //
+  // That ambiguity is recorded as a caveat on every archive record whose month
+  // predates this commit, because it cannot be resolved retrospectively. From
+  // here on it is a log line and a summary field.
+  const missing = keepa.missingFromKeepa(products.map((p) => p.sku), keepaProducts);
+  if (missing.length) {
+    log(`⚠ ${missing.length} requested ASIN(s) MISSING from the Keepa response (not a stockout: nobody answered about these): ${missing.join(', ')}`);
+  } else {
+    log('All requested ASINs present in the Keepa response');
+  }
 
   const fetchedAt = new Date().toISOString();
   const currentPriceByProductId = new Map(); // for the alert-check step
@@ -360,6 +387,9 @@ async function runPriceFetch(opts = {}) {
     ram: counts.ram,
     ssd: counts.ssd,
     out_of_stock: outOfStock,
+    // SEPARATE FROM out_of_stock ON PURPOSE. out_of_stock is "Keepa answered
+    // and there was no offer"; this is "Keepa did not answer about it".
+    missing_from_keepa: missing,
     amazon_offers: amazonOffers,
     market_stats: marketStats,
     market_stats_computed_at: marketStatsComputedAt,

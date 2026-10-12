@@ -225,8 +225,24 @@ function statsMaxPrice(product) {
   return null;
 }
 
+// REQUESTED ASINs THE RESPONSE DOES NOT MENTION AT ALL. A third outcome,
+// distinct from a product with a price and a product Keepa answered about with
+// no offer: an absent ASIN is answered about by nobody. It lives here rather
+// than in priceFetch.js because it is a fact about a Keepa response, and
+// because this file is pure and already has a real-assert self-test, so the
+// logic is testable with no database and no env.
+//
+// Compared against `product.asin`, which is the field priceFetch maps on
+// (`byAsin.get(kp.asin)`). A response entry with no asin is treated as
+// answering about nothing, which is the conservative reading.
+function missingFromKeepa(requestedAsins, keepaProducts) {
+  const returned = new Set((keepaProducts || []).map((kp) => kp && kp.asin).filter(Boolean));
+  return requestedAsins.filter((a) => !returned.has(a)).sort();
+}
+
 module.exports = {
   CSV,
+  missingFromKeepa,
   keepaMinutesToDate,
   dateToKeepaMinutes,
   centsToDollars,
@@ -240,6 +256,40 @@ module.exports = {
 // Self-test: node backend/lib/keepa.js
 if (require.main === module) {
   const assert = require('assert');
+
+  // ---- missingFromKeepa, against MOCKED responses. No fetch, no tokens.
+  {
+    const requested = ['B000000001', 'B000000002', 'B000000003'];
+    // The ordinary case: everything came back.
+    assert.deepStrictEqual(
+      missingFromKeepa(requested, [{ asin: 'B000000001' }, { asin: 'B000000002' }, { asin: 'B000000003' }]),
+      [], 'nothing missing when every ASIN is present');
+    // One omitted entirely. THIS is the case that was invisible before.
+    assert.deepStrictEqual(
+      missingFromKeepa(requested, [{ asin: 'B000000001' }, { asin: 'B000000003' }]),
+      ['B000000002'], 'an omitted ASIN is reported');
+    // A null-price product is NOT missing: Keepa answered about it. That is an
+    // out-of-stock, counted separately, and conflating the two is the whole
+    // point of this function existing.
+    assert.deepStrictEqual(
+      missingFromKeepa(requested, [{ asin: 'B000000001' }, { asin: 'B000000002', stats: { current: [-1, -1] } }, { asin: 'B000000003' }]),
+      [], 'a product Keepa answered about with no offer is not missing');
+    // A whole chunk dropped.
+    assert.deepStrictEqual(missingFromKeepa(requested, []), requested, 'an empty response means all of them');
+    // Defensive shapes.
+    assert.deepStrictEqual(missingFromKeepa(requested, null), requested, 'a null response means all of them');
+    assert.deepStrictEqual(
+      missingFromKeepa(requested, [{ asin: 'B000000001' }, null, { foo: 1 }]),
+      ['B000000002', 'B000000003'], 'entries with no asin answer about nothing');
+    // Sorted, so the log line is stable run to run.
+    assert.deepStrictEqual(
+      missingFromKeepa(['B000000003', 'B000000001', 'B000000002'], []),
+      ['B000000001', 'B000000002', 'B000000003'], 'output is sorted');
+    // Extra ASINs in the response are not our problem.
+    assert.deepStrictEqual(
+      missingFromKeepa(['B000000001'], [{ asin: 'B000000001' }, { asin: 'B0ZZZZZZZZ' }]),
+      [], 'an unrequested ASIN in the response is ignored');
+  }
 
   // Keepa epoch: minute 0 must be exactly 2011-01-01T00:00:00Z.
   assert.strictEqual(keepaMinutesToDate(0).toISOString(), '2011-01-01T00:00:00.000Z');
