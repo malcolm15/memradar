@@ -1,0 +1,1741 @@
+{
+ "note": "Real price_history rows, trimmed to the windows the pairedYoy self-test needs. Captured 2026-10-08 from the live database, read-only. Do not hand-edit: regenerate by the same query if the windows ever need to change.",
+ "captured": "2026-10-08",
+ "windows": {
+  "backfill": {
+   "B0CJ8ZHMVF": [
+    "2025-03-01",
+    "2025-11-01"
+   ],
+   "B0BNTRRLYP": [
+    "2025-07-01",
+    "2025-11-01"
+   ]
+  },
+  "live": {
+   "skus": [
+    "B09T8TH7PG",
+    "B0CJ8ZHMVF",
+    "B0BNTRRLYP",
+    "B0CRNNVYM2"
+   ],
+   "from": "2026-09-09",
+   "to": "2026-09-26"
+  }
+ },
+ "products": [
+  {
+   "id": 4,
+   "sku": "B0CJ8ZHMVF",
+   "name": "CORSAIR Vengeance DDR5 RAM 32GB (2x16GB) Up to 6000MHz CL36-44-44-96 1.35V AMD EXPO Intel XMP 3.0 Computer Memory – Grey (CMK32GX5M2E6000Z36)",
+   "category": "ram"
+  },
+  {
+   "id": 8,
+   "sku": "B0BNTRRLYP",
+   "name": "TEAMGROUP T-Force Vulcan DDR5 32GB (2x16GB) 6000MHz (PC5-48000) CL38 Desktop Memory Module Ram (Black) for Chipset 600 700 Series XMP 3.0 Ready - FLBD532G6000HC38ADC01",
+   "category": "ram"
+  },
+  {
+   "id": 18,
+   "sku": "B0CRNNVYM2",
+   "name": "Acer Predator Vesta II RGB DDR5 RAM 32GB (16GBx2) 6000MHz CL30 PC5-48000, Intel XMP 3.0 AMD EXPO Compatible Computer Memory, Black BL.9BWWR.327",
+   "category": "ram"
+  },
+  {
+   "id": 121,
+   "sku": "B09T8TH7PG",
+   "name": "FURY Beast 64GB (2x32GB) 5600MT/s DDR5 CL40 Desktop Memory | Intel XMP 3.0 | Kit of 2| KF556C40BBK2-64",
+   "category": "ram"
+  }
+ ],
+ "rows": [
+  {
+   "id": 50,
+   "product_id": 4,
+   "price": 99.99,
+   "in_stock": true,
+   "fetched_at": "2025-04-04T23:59:00+00:00"
+  },
+  {
+   "id": 51,
+   "product_id": 4,
+   "price": 103.99,
+   "in_stock": true,
+   "fetched_at": "2025-04-14T23:59:00+00:00"
+  },
+  {
+   "id": 52,
+   "product_id": 4,
+   "price": 113.99,
+   "in_stock": true,
+   "fetched_at": "2025-04-23T23:59:00+00:00"
+  },
+  {
+   "id": 53,
+   "product_id": 4,
+   "price": 99.99,
+   "in_stock": true,
+   "fetched_at": "2025-04-30T23:59:00+00:00"
+  },
+  {
+   "id": 54,
+   "product_id": 4,
+   "price": 109.99,
+   "in_stock": true,
+   "fetched_at": "2025-07-02T23:59:00+00:00"
+  },
+  {
+   "id": 55,
+   "product_id": 4,
+   "price": 94.99,
+   "in_stock": true,
+   "fetched_at": "2025-07-28T23:59:00+00:00"
+  },
+  {
+   "id": 56,
+   "product_id": 4,
+   "price": 99.99,
+   "in_stock": true,
+   "fetched_at": "2025-08-11T23:59:00+00:00"
+  },
+  {
+   "id": 57,
+   "product_id": 4,
+   "price": 104.99,
+   "in_stock": true,
+   "fetched_at": "2025-08-25T23:59:00+00:00"
+  },
+  {
+   "id": 58,
+   "product_id": 4,
+   "price": 99.99,
+   "in_stock": true,
+   "fetched_at": "2025-09-01T23:59:00+00:00"
+  },
+  {
+   "id": 59,
+   "product_id": 4,
+   "price": 100.98,
+   "in_stock": true,
+   "fetched_at": "2025-09-18T23:59:00+00:00"
+  },
+  {
+   "id": 60,
+   "product_id": 4,
+   "price": 107.99,
+   "in_stock": true,
+   "fetched_at": "2025-09-22T23:59:00+00:00"
+  },
+  {
+   "id": 61,
+   "product_id": 4,
+   "price": 133.99,
+   "in_stock": true,
+   "fetched_at": "2025-10-01T23:59:00+00:00"
+  },
+  {
+   "id": 62,
+   "product_id": 4,
+   "price": 133.99,
+   "in_stock": true,
+   "fetched_at": "2025-10-16T23:59:00+00:00"
+  },
+  {
+   "id": 63,
+   "product_id": 4,
+   "price": 139.99,
+   "in_stock": true,
+   "fetched_at": "2025-10-17T23:59:00+00:00"
+  },
+  {
+   "id": 64,
+   "product_id": 4,
+   "price": 139.99,
+   "in_stock": true,
+   "fetched_at": "2025-10-18T23:59:00+00:00"
+  },
+  {
+   "id": 65,
+   "product_id": 4,
+   "price": 139.99,
+   "in_stock": false,
+   "fetched_at": "2025-10-19T23:59:00+00:00"
+  },
+  {
+   "id": 66,
+   "product_id": 4,
+   "price": 139.99,
+   "in_stock": false,
+   "fetched_at": "2025-10-20T23:59:00+00:00"
+  },
+  {
+   "id": 67,
+   "product_id": 4,
+   "price": 139.99,
+   "in_stock": false,
+   "fetched_at": "2025-10-21T23:59:00+00:00"
+  },
+  {
+   "id": 68,
+   "product_id": 4,
+   "price": 139.99,
+   "in_stock": true,
+   "fetched_at": "2025-10-22T23:59:00+00:00"
+  },
+  {
+   "id": 69,
+   "product_id": 4,
+   "price": 146.84,
+   "in_stock": true,
+   "fetched_at": "2025-10-23T23:59:00+00:00"
+  },
+  {
+   "id": 70,
+   "product_id": 4,
+   "price": 204.81,
+   "in_stock": true,
+   "fetched_at": "2025-10-24T23:59:00+00:00"
+  },
+  {
+   "id": 71,
+   "product_id": 4,
+   "price": 204.95,
+   "in_stock": true,
+   "fetched_at": "2025-10-25T23:59:00+00:00"
+  },
+  {
+   "id": 72,
+   "product_id": 4,
+   "price": 204.79,
+   "in_stock": true,
+   "fetched_at": "2025-10-26T23:59:00+00:00"
+  },
+  {
+   "id": 73,
+   "product_id": 4,
+   "price": 204.7,
+   "in_stock": true,
+   "fetched_at": "2025-10-27T23:59:00+00:00"
+  },
+  {
+   "id": 74,
+   "product_id": 4,
+   "price": 204.79,
+   "in_stock": true,
+   "fetched_at": "2025-10-28T23:59:00+00:00"
+  },
+  {
+   "id": 75,
+   "product_id": 4,
+   "price": 205.09,
+   "in_stock": true,
+   "fetched_at": "2025-10-29T23:59:00+00:00"
+  },
+  {
+   "id": 76,
+   "product_id": 4,
+   "price": 205.41,
+   "in_stock": true,
+   "fetched_at": "2025-10-30T23:59:00+00:00"
+  },
+  {
+   "id": 77,
+   "product_id": 4,
+   "price": 203.18,
+   "in_stock": true,
+   "fetched_at": "2025-10-31T23:59:00+00:00"
+  },
+  {
+   "id": 855,
+   "product_id": 8,
+   "price": 80.99,
+   "in_stock": true,
+   "fetched_at": "2025-07-13T23:59:00+00:00"
+  },
+  {
+   "id": 856,
+   "product_id": 8,
+   "price": 80.99,
+   "in_stock": true,
+   "fetched_at": "2025-07-14T23:59:00+00:00"
+  },
+  {
+   "id": 857,
+   "product_id": 8,
+   "price": 82.99,
+   "in_stock": true,
+   "fetched_at": "2025-07-18T23:59:00+00:00"
+  },
+  {
+   "id": 858,
+   "product_id": 8,
+   "price": 82.49,
+   "in_stock": true,
+   "fetched_at": "2025-07-20T23:59:00+00:00"
+  },
+  {
+   "id": 859,
+   "product_id": 8,
+   "price": 82.99,
+   "in_stock": true,
+   "fetched_at": "2025-07-21T23:59:00+00:00"
+  },
+  {
+   "id": 860,
+   "product_id": 8,
+   "price": 84.99,
+   "in_stock": true,
+   "fetched_at": "2025-07-29T23:59:00+00:00"
+  },
+  {
+   "id": 861,
+   "product_id": 8,
+   "price": 84.99,
+   "in_stock": true,
+   "fetched_at": "2025-08-20T23:59:00+00:00"
+  },
+  {
+   "id": 862,
+   "product_id": 8,
+   "price": 85.99,
+   "in_stock": true,
+   "fetched_at": "2025-08-21T23:59:00+00:00"
+  },
+  {
+   "id": 863,
+   "product_id": 8,
+   "price": 84.99,
+   "in_stock": true,
+   "fetched_at": "2025-08-25T23:59:00+00:00"
+  },
+  {
+   "id": 864,
+   "product_id": 8,
+   "price": 84.99,
+   "in_stock": true,
+   "fetched_at": "2025-09-08T23:59:00+00:00"
+  },
+  {
+   "id": 865,
+   "product_id": 8,
+   "price": 84.99,
+   "in_stock": false,
+   "fetched_at": "2025-09-09T23:59:00+00:00"
+  },
+  {
+   "id": 866,
+   "product_id": 8,
+   "price": 86.99,
+   "in_stock": true,
+   "fetched_at": "2025-09-15T23:59:00+00:00"
+  },
+  {
+   "id": 867,
+   "product_id": 8,
+   "price": 86.99,
+   "in_stock": true,
+   "fetched_at": "2025-09-16T23:59:00+00:00"
+  },
+  {
+   "id": 868,
+   "product_id": 8,
+   "price": 86.99,
+   "in_stock": true,
+   "fetched_at": "2025-09-17T23:59:00+00:00"
+  },
+  {
+   "id": 869,
+   "product_id": 8,
+   "price": 86.99,
+   "in_stock": true,
+   "fetched_at": "2025-09-18T23:59:00+00:00"
+  },
+  {
+   "id": 870,
+   "product_id": 8,
+   "price": 86.99,
+   "in_stock": true,
+   "fetched_at": "2025-09-19T23:59:00+00:00"
+  },
+  {
+   "id": 871,
+   "product_id": 8,
+   "price": 85.63,
+   "in_stock": true,
+   "fetched_at": "2025-09-20T23:59:00+00:00"
+  },
+  {
+   "id": 872,
+   "product_id": 8,
+   "price": 85.63,
+   "in_stock": true,
+   "fetched_at": "2025-09-21T23:59:00+00:00"
+  },
+  {
+   "id": 873,
+   "product_id": 8,
+   "price": 86.99,
+   "in_stock": true,
+   "fetched_at": "2025-09-22T23:59:00+00:00"
+  },
+  {
+   "id": 874,
+   "product_id": 8,
+   "price": 86.99,
+   "in_stock": true,
+   "fetched_at": "2025-09-23T23:59:00+00:00"
+  },
+  {
+   "id": 875,
+   "product_id": 8,
+   "price": 92.99,
+   "in_stock": true,
+   "fetched_at": "2025-09-24T23:59:00+00:00"
+  },
+  {
+   "id": 876,
+   "product_id": 8,
+   "price": 92.99,
+   "in_stock": true,
+   "fetched_at": "2025-09-25T23:59:00+00:00"
+  },
+  {
+   "id": 877,
+   "product_id": 8,
+   "price": 95.69,
+   "in_stock": true,
+   "fetched_at": "2025-09-26T23:59:00+00:00"
+  },
+  {
+   "id": 878,
+   "product_id": 8,
+   "price": 85.63,
+   "in_stock": true,
+   "fetched_at": "2025-09-27T23:59:00+00:00"
+  },
+  {
+   "id": 879,
+   "product_id": 8,
+   "price": 99.94,
+   "in_stock": true,
+   "fetched_at": "2025-09-28T23:59:00+00:00"
+  },
+  {
+   "id": 880,
+   "product_id": 8,
+   "price": 97.59,
+   "in_stock": true,
+   "fetched_at": "2025-09-29T23:59:00+00:00"
+  },
+  {
+   "id": 881,
+   "product_id": 8,
+   "price": 99.94,
+   "in_stock": true,
+   "fetched_at": "2025-09-30T23:59:00+00:00"
+  },
+  {
+   "id": 882,
+   "product_id": 8,
+   "price": 94.94,
+   "in_stock": true,
+   "fetched_at": "2025-10-01T23:59:00+00:00"
+  },
+  {
+   "id": 883,
+   "product_id": 8,
+   "price": 89.99,
+   "in_stock": true,
+   "fetched_at": "2025-10-02T23:59:00+00:00"
+  },
+  {
+   "id": 884,
+   "product_id": 8,
+   "price": 99.94,
+   "in_stock": true,
+   "fetched_at": "2025-10-03T23:59:00+00:00"
+  },
+  {
+   "id": 885,
+   "product_id": 8,
+   "price": 129.38,
+   "in_stock": true,
+   "fetched_at": "2025-10-04T23:59:00+00:00"
+  },
+  {
+   "id": 886,
+   "product_id": 8,
+   "price": 129.38,
+   "in_stock": true,
+   "fetched_at": "2025-10-05T23:59:00+00:00"
+  },
+  {
+   "id": 887,
+   "product_id": 8,
+   "price": 129.99,
+   "in_stock": true,
+   "fetched_at": "2025-10-07T23:59:00+00:00"
+  },
+  {
+   "id": 888,
+   "product_id": 8,
+   "price": 149.99,
+   "in_stock": true,
+   "fetched_at": "2025-10-08T23:59:00+00:00"
+  },
+  {
+   "id": 889,
+   "product_id": 8,
+   "price": 172.99,
+   "in_stock": true,
+   "fetched_at": "2025-10-17T23:59:00+00:00"
+  },
+  {
+   "id": 890,
+   "product_id": 8,
+   "price": 177.99,
+   "in_stock": true,
+   "fetched_at": "2025-10-20T23:59:00+00:00"
+  },
+  {
+   "id": 91642,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-09T02:42:11.607+00:00"
+  },
+  {
+   "id": 91695,
+   "product_id": 121,
+   "price": 1144.15,
+   "in_stock": true,
+   "fetched_at": "2026-09-09T02:42:11.607+00:00"
+  },
+  {
+   "id": 91815,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-09T02:42:11.607+00:00"
+  },
+  {
+   "id": 91867,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-09T08:33:39.944+00:00"
+  },
+  {
+   "id": 91920,
+   "product_id": 121,
+   "price": 1144.15,
+   "in_stock": true,
+   "fetched_at": "2026-09-09T08:33:39.944+00:00"
+  },
+  {
+   "id": 92040,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-09T08:33:39.944+00:00"
+  },
+  {
+   "id": 92092,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-09T15:47:49.639+00:00"
+  },
+  {
+   "id": 92145,
+   "product_id": 121,
+   "price": 1144.15,
+   "in_stock": true,
+   "fetched_at": "2026-09-09T15:47:49.639+00:00"
+  },
+  {
+   "id": 92265,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-09T15:47:49.639+00:00"
+  },
+  {
+   "id": 92317,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-09T19:00:57.972+00:00"
+  },
+  {
+   "id": 92370,
+   "product_id": 121,
+   "price": 1144.15,
+   "in_stock": true,
+   "fetched_at": "2026-09-09T19:00:57.972+00:00"
+  },
+  {
+   "id": 92490,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-09T19:00:57.972+00:00"
+  },
+  {
+   "id": 92542,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-09T22:10:51.002+00:00"
+  },
+  {
+   "id": 92595,
+   "product_id": 121,
+   "price": 1144.15,
+   "in_stock": true,
+   "fetched_at": "2026-09-09T22:10:51.002+00:00"
+  },
+  {
+   "id": 92716,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-09T22:10:51.002+00:00"
+  },
+  {
+   "id": 92768,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-10T02:44:20.37+00:00"
+  },
+  {
+   "id": 92821,
+   "product_id": 121,
+   "price": 1336.65,
+   "in_stock": true,
+   "fetched_at": "2026-09-10T02:44:20.37+00:00"
+  },
+  {
+   "id": 92942,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-10T02:44:20.37+00:00"
+  },
+  {
+   "id": 92994,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-10T08:35:32.221+00:00"
+  },
+  {
+   "id": 93047,
+   "product_id": 121,
+   "price": 1336.65,
+   "in_stock": true,
+   "fetched_at": "2026-09-10T08:35:32.221+00:00"
+  },
+  {
+   "id": 93168,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-10T08:35:32.221+00:00"
+  },
+  {
+   "id": 93220,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-10T15:42:57.146+00:00"
+  },
+  {
+   "id": 93273,
+   "product_id": 121,
+   "price": 1336.65,
+   "in_stock": true,
+   "fetched_at": "2026-09-10T15:42:57.146+00:00"
+  },
+  {
+   "id": 93394,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-10T15:42:57.146+00:00"
+  },
+  {
+   "id": 93446,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-10T18:53:26.619+00:00"
+  },
+  {
+   "id": 93499,
+   "product_id": 121,
+   "price": 1538.47,
+   "in_stock": true,
+   "fetched_at": "2026-09-10T18:53:26.619+00:00"
+  },
+  {
+   "id": 93619,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-10T18:53:26.619+00:00"
+  },
+  {
+   "id": 93670,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-10T22:12:42.426+00:00"
+  },
+  {
+   "id": 93723,
+   "product_id": 121,
+   "price": 1336.65,
+   "in_stock": true,
+   "fetched_at": "2026-09-10T22:12:42.426+00:00"
+  },
+  {
+   "id": 93843,
+   "product_id": 8,
+   "price": 485.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-10T22:12:42.426+00:00"
+  },
+  {
+   "id": 93894,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-11T02:37:42.091+00:00"
+  },
+  {
+   "id": 93947,
+   "product_id": 121,
+   "price": 1336.65,
+   "in_stock": true,
+   "fetched_at": "2026-09-11T02:37:42.091+00:00"
+  },
+  {
+   "id": 94067,
+   "product_id": 8,
+   "price": 485.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-11T02:37:42.091+00:00"
+  },
+  {
+   "id": 94118,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-11T08:30:09.62+00:00"
+  },
+  {
+   "id": 94171,
+   "product_id": 121,
+   "price": 1336.65,
+   "in_stock": true,
+   "fetched_at": "2026-09-11T08:30:09.62+00:00"
+  },
+  {
+   "id": 94291,
+   "product_id": 8,
+   "price": 485.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-11T08:30:09.62+00:00"
+  },
+  {
+   "id": 94342,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-11T15:44:25.035+00:00"
+  },
+  {
+   "id": 94395,
+   "product_id": 121,
+   "price": 1336.65,
+   "in_stock": true,
+   "fetched_at": "2026-09-11T15:44:25.035+00:00"
+  },
+  {
+   "id": 94515,
+   "product_id": 8,
+   "price": 485.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-11T15:44:25.035+00:00"
+  },
+  {
+   "id": 94566,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-11T18:55:45.027+00:00"
+  },
+  {
+   "id": 94619,
+   "product_id": 121,
+   "price": 1336.65,
+   "in_stock": true,
+   "fetched_at": "2026-09-11T18:55:45.027+00:00"
+  },
+  {
+   "id": 94739,
+   "product_id": 8,
+   "price": 485.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-11T18:55:45.027+00:00"
+  },
+  {
+   "id": 94790,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-11T22:09:39.586+00:00"
+  },
+  {
+   "id": 94843,
+   "product_id": 121,
+   "price": 1336.65,
+   "in_stock": true,
+   "fetched_at": "2026-09-11T22:09:39.586+00:00"
+  },
+  {
+   "id": 94963,
+   "product_id": 8,
+   "price": 485.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-11T22:09:39.586+00:00"
+  },
+  {
+   "id": 95014,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-12T02:46:50.193+00:00"
+  },
+  {
+   "id": 95186,
+   "product_id": 8,
+   "price": 485.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-12T02:46:50.193+00:00"
+  },
+  {
+   "id": 95237,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-12T08:18:27.329+00:00"
+  },
+  {
+   "id": 95409,
+   "product_id": 8,
+   "price": 485.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-12T08:18:27.329+00:00"
+  },
+  {
+   "id": 95460,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-12T14:52:17.572+00:00"
+  },
+  {
+   "id": 95632,
+   "product_id": 8,
+   "price": 485.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-12T14:52:17.572+00:00"
+  },
+  {
+   "id": 95683,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-12T18:02:28.611+00:00"
+  },
+  {
+   "id": 95855,
+   "product_id": 8,
+   "price": 485.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-12T18:02:28.611+00:00"
+  },
+  {
+   "id": 95906,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-12T21:54:08.429+00:00"
+  },
+  {
+   "id": 96078,
+   "product_id": 8,
+   "price": 485.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-12T21:54:08.429+00:00"
+  },
+  {
+   "id": 96130,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-13T02:45:07.376+00:00"
+  },
+  {
+   "id": 96302,
+   "product_id": 8,
+   "price": 485.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-13T02:45:07.376+00:00"
+  },
+  {
+   "id": 96354,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-13T08:43:12.488+00:00"
+  },
+  {
+   "id": 96526,
+   "product_id": 8,
+   "price": 485.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-13T08:43:12.488+00:00"
+  },
+  {
+   "id": 96578,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-13T15:29:32.326+00:00"
+  },
+  {
+   "id": 96750,
+   "product_id": 8,
+   "price": 485.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-13T15:29:32.326+00:00"
+  },
+  {
+   "id": 96802,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-13T18:29:09.168+00:00"
+  },
+  {
+   "id": 96974,
+   "product_id": 8,
+   "price": 485.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-13T18:29:09.168+00:00"
+  },
+  {
+   "id": 97025,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-13T22:02:11.214+00:00"
+  },
+  {
+   "id": 97198,
+   "product_id": 8,
+   "price": 485.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-13T22:02:11.214+00:00"
+  },
+  {
+   "id": 97248,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-14T02:59:46.373+00:00"
+  },
+  {
+   "id": 97422,
+   "product_id": 8,
+   "price": 485.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-14T02:59:46.373+00:00"
+  },
+  {
+   "id": 97472,
+   "product_id": 4,
+   "price": 534.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-14T09:29:28.675+00:00"
+  },
+  {
+   "id": 97646,
+   "product_id": 8,
+   "price": 485.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-14T09:29:28.675+00:00"
+  },
+  {
+   "id": 97696,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-14T17:29:26.27+00:00"
+  },
+  {
+   "id": 97869,
+   "product_id": 8,
+   "price": 485.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-14T17:29:26.27+00:00"
+  },
+  {
+   "id": 97919,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-14T22:55:10.85+00:00"
+  },
+  {
+   "id": 98091,
+   "product_id": 8,
+   "price": 485.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-14T22:55:10.85+00:00"
+  },
+  {
+   "id": 98142,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-15T03:02:20.978+00:00"
+  },
+  {
+   "id": 98314,
+   "product_id": 8,
+   "price": 449.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-15T03:02:20.978+00:00"
+  },
+  {
+   "id": 98364,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-15T09:08:23.474+00:00"
+  },
+  {
+   "id": 98536,
+   "product_id": 8,
+   "price": 449.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-15T09:08:23.474+00:00"
+  },
+  {
+   "id": 98586,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-15T16:05:32.1+00:00"
+  },
+  {
+   "id": 98758,
+   "product_id": 8,
+   "price": 449.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-15T16:05:32.1+00:00"
+  },
+  {
+   "id": 98808,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-15T22:39:36.277+00:00"
+  },
+  {
+   "id": 98980,
+   "product_id": 8,
+   "price": 449.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-15T22:39:36.277+00:00"
+  },
+  {
+   "id": 99030,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-16T02:58:37.808+00:00"
+  },
+  {
+   "id": 99202,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-16T02:58:37.808+00:00"
+  },
+  {
+   "id": 99252,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-16T09:00:21.82+00:00"
+  },
+  {
+   "id": 99424,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-16T09:00:21.82+00:00"
+  },
+  {
+   "id": 99474,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-16T15:58:57.252+00:00"
+  },
+  {
+   "id": 99645,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-16T15:58:57.252+00:00"
+  },
+  {
+   "id": 99695,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-16T19:27:10.014+00:00"
+  },
+  {
+   "id": 99867,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-16T19:27:10.014+00:00"
+  },
+  {
+   "id": 99917,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-16T22:35:41.975+00:00"
+  },
+  {
+   "id": 100089,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-16T22:35:41.975+00:00"
+  },
+  {
+   "id": 100138,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-17T03:01:33.796+00:00"
+  },
+  {
+   "id": 100310,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-17T03:01:33.796+00:00"
+  },
+  {
+   "id": 100360,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-17T09:06:51.831+00:00"
+  },
+  {
+   "id": 100531,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-17T09:06:51.831+00:00"
+  },
+  {
+   "id": 100582,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-17T16:05:09.977+00:00"
+  },
+  {
+   "id": 100754,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-17T16:05:09.977+00:00"
+  },
+  {
+   "id": 100804,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-17T22:36:39.024+00:00"
+  },
+  {
+   "id": 100976,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-17T22:36:39.024+00:00"
+  },
+  {
+   "id": 101026,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-18T02:49:34.888+00:00"
+  },
+  {
+   "id": 101197,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-18T02:49:34.888+00:00"
+  },
+  {
+   "id": 101248,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-18T08:40:58.001+00:00"
+  },
+  {
+   "id": 101419,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-18T08:40:58.001+00:00"
+  },
+  {
+   "id": 101470,
+   "product_id": 4,
+   "price": 548.11,
+   "in_stock": true,
+   "fetched_at": "2026-09-18T15:41:19.925+00:00"
+  },
+  {
+   "id": 101641,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-18T15:41:19.925+00:00"
+  },
+  {
+   "id": 101691,
+   "product_id": 4,
+   "price": 567.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-18T18:49:23.36+00:00"
+  },
+  {
+   "id": 101862,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-18T18:49:23.36+00:00"
+  },
+  {
+   "id": 101911,
+   "product_id": 4,
+   "price": 567.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-18T22:11:46.099+00:00"
+  },
+  {
+   "id": 102082,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-18T22:11:46.099+00:00"
+  },
+  {
+   "id": 102131,
+   "product_id": 4,
+   "price": 567.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-19T02:48:04.644+00:00"
+  },
+  {
+   "id": 102302,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-19T02:48:04.644+00:00"
+  },
+  {
+   "id": 102351,
+   "product_id": 4,
+   "price": 567.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-19T08:28:03.527+00:00"
+  },
+  {
+   "id": 102522,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-19T08:28:03.527+00:00"
+  },
+  {
+   "id": 102571,
+   "product_id": 4,
+   "price": 567.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-19T15:13:26.399+00:00"
+  },
+  {
+   "id": 102742,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-19T15:13:26.399+00:00"
+  },
+  {
+   "id": 102791,
+   "product_id": 4,
+   "price": 567.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-19T18:21:33.692+00:00"
+  },
+  {
+   "id": 102962,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-19T18:21:33.692+00:00"
+  },
+  {
+   "id": 103012,
+   "product_id": 4,
+   "price": 567.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-19T22:03:51.352+00:00"
+  },
+  {
+   "id": 103184,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-19T22:03:51.352+00:00"
+  },
+  {
+   "id": 103234,
+   "product_id": 4,
+   "price": 567.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-20T02:59:51.058+00:00"
+  },
+  {
+   "id": 103406,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-20T02:59:51.058+00:00"
+  },
+  {
+   "id": 103456,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-20T08:59:44.551+00:00"
+  },
+  {
+   "id": 103628,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-20T08:59:44.551+00:00"
+  },
+  {
+   "id": 103678,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-20T15:17:55.605+00:00"
+  },
+  {
+   "id": 103850,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-20T15:17:55.605+00:00"
+  },
+  {
+   "id": 103900,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-20T18:26:32.704+00:00"
+  },
+  {
+   "id": 104072,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-20T18:26:32.704+00:00"
+  },
+  {
+   "id": 104122,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-20T22:07:36.896+00:00"
+  },
+  {
+   "id": 104294,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-20T22:07:36.896+00:00"
+  },
+  {
+   "id": 104344,
+   "product_id": 4,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-21T02:57:20.342+00:00"
+  },
+  {
+   "id": 104516,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-21T02:57:20.342+00:00"
+  },
+  {
+   "id": 104566,
+   "product_id": 4,
+   "price": 567.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-21T09:31:43.597+00:00"
+  },
+  {
+   "id": 104738,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-21T09:31:43.597+00:00"
+  },
+  {
+   "id": 104788,
+   "product_id": 4,
+   "price": 567.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-21T17:43:03.696+00:00"
+  },
+  {
+   "id": 104841,
+   "product_id": 121,
+   "price": 335.51,
+   "in_stock": true,
+   "fetched_at": "2026-09-21T17:43:03.696+00:00"
+  },
+  {
+   "id": 104961,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-21T17:43:03.696+00:00"
+  },
+  {
+   "id": 105011,
+   "product_id": 4,
+   "price": 567.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-21T22:58:12.194+00:00"
+  },
+  {
+   "id": 105183,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-21T22:58:12.194+00:00"
+  },
+  {
+   "id": 105233,
+   "product_id": 4,
+   "price": 567.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-22T02:57:47.005+00:00"
+  },
+  {
+   "id": 105405,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-22T02:57:47.005+00:00"
+  },
+  {
+   "id": 105455,
+   "product_id": 4,
+   "price": 567.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-22T08:58:25.23+00:00"
+  },
+  {
+   "id": 105627,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-22T08:58:25.23+00:00"
+  },
+  {
+   "id": 105677,
+   "product_id": 4,
+   "price": 568,
+   "in_stock": true,
+   "fetched_at": "2026-09-22T16:07:57.922+00:00"
+  },
+  {
+   "id": 105849,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-22T16:07:57.922+00:00"
+  },
+  {
+   "id": 105899,
+   "product_id": 4,
+   "price": 568,
+   "in_stock": true,
+   "fetched_at": "2026-09-22T16:25:36.966+00:00"
+  },
+  {
+   "id": 106070,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-22T16:25:36.966+00:00"
+  },
+  {
+   "id": 106120,
+   "product_id": 4,
+   "price": 568,
+   "in_stock": true,
+   "fetched_at": "2026-09-22T22:39:30.578+00:00"
+  },
+  {
+   "id": 106291,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-22T22:39:30.578+00:00"
+  },
+  {
+   "id": 106342,
+   "product_id": 4,
+   "price": 568,
+   "in_stock": true,
+   "fetched_at": "2026-09-23T02:57:40.52+00:00"
+  },
+  {
+   "id": 106513,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-23T02:57:40.52+00:00"
+  },
+  {
+   "id": 106564,
+   "product_id": 4,
+   "price": 568,
+   "in_stock": true,
+   "fetched_at": "2026-09-23T09:00:43.333+00:00"
+  },
+  {
+   "id": 106735,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-23T09:00:43.333+00:00"
+  },
+  {
+   "id": 106786,
+   "product_id": 4,
+   "price": 568,
+   "in_stock": true,
+   "fetched_at": "2026-09-23T15:57:57.646+00:00"
+  },
+  {
+   "id": 106957,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-23T15:57:57.646+00:00"
+  },
+  {
+   "id": 107008,
+   "product_id": 4,
+   "price": 567.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-23T19:30:38.837+00:00"
+  },
+  {
+   "id": 107179,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-23T19:30:38.837+00:00"
+  },
+  {
+   "id": 107230,
+   "product_id": 4,
+   "price": 567.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-23T22:38:17.031+00:00"
+  },
+  {
+   "id": 107401,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-23T22:38:17.031+00:00"
+  },
+  {
+   "id": 107452,
+   "product_id": 4,
+   "price": 567.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-24T02:48:04.605+00:00"
+  },
+  {
+   "id": 107623,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-24T02:48:04.605+00:00"
+  },
+  {
+   "id": 107674,
+   "product_id": 4,
+   "price": 567.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-24T08:57:00.564+00:00"
+  },
+  {
+   "id": 107845,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-24T08:57:00.564+00:00"
+  },
+  {
+   "id": 107897,
+   "product_id": 4,
+   "price": 567.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-24T16:21:19.583+00:00"
+  },
+  {
+   "id": 108068,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-24T16:21:19.583+00:00"
+  },
+  {
+   "id": 108119,
+   "product_id": 4,
+   "price": 567.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-24T22:57:33.268+00:00"
+  },
+  {
+   "id": 108289,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-24T22:57:33.268+00:00"
+  },
+  {
+   "id": 108341,
+   "product_id": 4,
+   "price": 567.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-25T03:04:31.826+00:00"
+  },
+  {
+   "id": 108511,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-25T03:04:31.826+00:00"
+  },
+  {
+   "id": 108563,
+   "product_id": 4,
+   "price": 567.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-25T09:18:03.343+00:00"
+  },
+  {
+   "id": 108615,
+   "product_id": 121,
+   "price": 1517.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-25T09:18:03.343+00:00"
+  },
+  {
+   "id": 108734,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-25T09:18:03.343+00:00"
+  },
+  {
+   "id": 108786,
+   "product_id": 4,
+   "price": 567.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-25T16:21:46.777+00:00"
+  },
+  {
+   "id": 108838,
+   "product_id": 121,
+   "price": 1517.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-25T16:21:46.777+00:00"
+  },
+  {
+   "id": 108958,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-25T16:21:46.777+00:00"
+  },
+  {
+   "id": 109010,
+   "product_id": 4,
+   "price": 567.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-25T23:01:17.879+00:00"
+  },
+  {
+   "id": 109063,
+   "product_id": 121,
+   "price": 1517.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-25T23:01:17.879+00:00"
+  },
+  {
+   "id": 109183,
+   "product_id": 8,
+   "price": 489.99,
+   "in_stock": true,
+   "fetched_at": "2026-09-25T23:01:17.879+00:00"
+  }
+ ]
+}

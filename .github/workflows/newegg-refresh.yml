@@ -110,11 +110,19 @@ jobs:
       # uses real assert, but the generator does not import it, so it stays out.
       # A self-test built on console.assert prints "Assertion failed" and then
       # exits 0; adding one here would buy a green step and no safety.
+      #
+      # pairedYoy.js joined on 2026-10-08 and meets all three: the generator
+      # imports it for the monthly freeze, its fixtures are committed so it
+      # needs no database, and it fails the process on a bad assertion. Four
+      # deliberate breaks were shown to exit 1 before it shipped: the carry cap,
+      # the live no-offer rule, the last-reading-of-the-day rule, and the
+      # quantile convention.
       - name: Self-tests for code the generator depends on
         run: |
           set -euo pipefail
           node backend/lib/productParsers.js
           node backend/lib/rakutenLink.js
+          node backend/lib/pairedYoy.js
 
       - name: Regenerate
         id: regen
