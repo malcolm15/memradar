@@ -3695,3 +3695,152 @@ html.dark .listing-card-buy--elevated { color: #fca5a5; background: rgba(220, 38
   white-space: nowrap;
 }
 html.dark .data-finding-date { color: #64748b; }
+
+/* ── /price-index/ record module (pim-) ──
+   Added 2026-10-12 for the frozen monthly record, the change chart and the
+   permanent month pages (/price-index/<YYYY-MM>/). ADDITIVE ONLY: nothing above
+   this comment changed, and every selector here is pim- prefixed, so the six
+   other pages that share the pi- classes (methodology, data, build-cost, both
+   guides and the explainer) cannot be reached by it. The 950 to 1100 px
+   breakout at the end of this block matches only pim- selectors for the same
+   reason.
+   SPECIFICITY: these elements sit inside .content-page, whose `p` (0,1,1) and
+   `ul li` (0,1,2) rules beat a bare class, so every rule that styles a p or an
+   li is written with a .content-page or .pim- ancestor (the .rc-install
+   lesson). Series colours are custom properties so the inline chart SVG, which
+   also carries them as presentation attributes for a CSS-less render, can be
+   restepped for dark mode without a second SVG. */
+.content-page .page-header .pim-monthline { font-size: 0.95rem; color: #374151; margin-top: 10px; line-height: 1.6; }
+.pim-monthline a { white-space: nowrap; }
+.pim-sep { color: #9ca3af; margin: 0 6px; }
+.pim-record { margin: 0 0 8px; }
+.content-page .pim-headline { font-size: 1.32rem; line-height: 1.4; font-weight: 700; color: #111827; letter-spacing: -0.2px; margin: 0 0 22px; }
+.content-page .pim-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: 0 0 24px; list-style: none; padding: 0; }
+.content-page .pim-cards .pim-card { border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px 16px 12px; background: #fff; display: flex; flex-direction: column; min-width: 0; margin: 0; line-height: 1.4; }
+.pim-card .pim-card-seg { font-size: 0.74rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #6b7280; margin: 0 0 6px; line-height: 1.3; }
+.pim-card .pim-card-pct { font-size: 2rem; font-weight: 800; letter-spacing: -0.5px; line-height: 1.1; margin: 0 0 6px; font-variant-numeric: tabular-nums; color: #111827; }
+.content-page .pim-card-pct.pi-up { color: #dc2626; }
+.content-page .pim-card-pct.pi-neutral { color: #ea580c; }
+.content-page .pim-card-pct.pi-down { color: #16a34a; }
+.pim-card .pim-card-span { font-size: 0.82rem; color: #6b7280; line-height: 1.45; margin: 0 0 10px; }
+.pim-card .pim-card-note { font-size: 0.82rem; color: #374151; line-height: 1.5; margin: 0 0 10px; flex: 1; }
+.pim-card .pim-card-note--caution { color: #b45309; font-weight: 600; }
+.pim-card .pim-card-foot { font-size: 0.8rem; color: #6b7280; line-height: 1.45; border-top: 1px solid #f1f5f9; padding-top: 8px; margin: auto 0 0; }
+.pim-mom { font-weight: 700; font-variant-numeric: tabular-nums; }
+.pim-mom.pim-mom--flat { color: #9ca3af; }
+.content-page .pim-def { font-size: 0.95rem; color: #374151; line-height: 1.75; margin-bottom: 12px; }
+.pim-cite { border: 1px solid #e5e7eb; border-left: 3px solid var(--brand-primary); border-radius: 6px; background: #f8fafc; padding: 14px 16px; margin: 20px 0 8px; }
+.content-page .pim-cite .pim-cite-text { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.84rem; line-height: 1.6; color: #111827; margin: 0 0 10px; overflow-wrap: anywhere; }
+.content-page .pim-cite .pim-cite-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; font-size: 0.84rem; color: #374151; margin: 0; line-height: 1.5; }
+.pim-copy { font: inherit; font-size: 0.84rem; font-weight: 600; color: var(--brand-primary); background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 12px; min-height: 32px; cursor: pointer; }
+.pim-copy:hover { border-color: var(--brand-primary); }
+.pim-copy:focus-visible { outline: 3px solid var(--brand-primary); outline-offset: 2px; }
+.pim-copy[hidden] { display: none; }
+.pim-copy-status { font-size: 0.8rem; color: #16a34a; }
+.pim-copy-status:empty { display: none; }
+.content-page .pim-cite .pim-corrections { font-size: 0.82rem; color: #6b7280; margin: 10px 0 0; line-height: 1.5; }
+.pim-cite .pim-corrections-table { margin-top: 8px; }
+.pim-chart-section { margin-top: 8px; }
+.pim-chart-wrap { margin: 12px 0 4px; }
+.pim-chart-scroll { display: flex; align-items: stretch; }
+.pim-chart-scroll .pim-chart { flex: 1 1 auto; min-width: 0; }
+.pim-chart { display: block; width: 100%; height: auto; }
+.pim-chart-axis { display: none; }
+.content-page .pim-caption { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #9ca3af; margin: 20px 0 -12px; line-height: 1.4; }
+.content-page .pim-chart-caption { font-size: 0.82rem; color: #9ca3af; line-height: 1.5; margin: 8px 0 0; }
+.content-page .pim-legend { list-style: none; display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 10px 0 0; padding: 0; }
+.content-page .pim-legend li { font-size: 0.82rem; color: #374151; margin: 0; line-height: 1.4; }
+.pim-swatch { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; background: var(--pim-c); }
+.pim-c-ddr5 { --pim-c: #3A5BC7; }
+.pim-c-ddr4 { --pim-c: #C2410C; }
+.pim-c-nvme_ssd { --pim-c: #0D9488; }
+.pim-c-sata_ssd { --pim-c: #7C3AED; }
+.pim-chart .pim-line { fill: none; stroke: var(--pim-c); }
+.pim-chart .pim-bar { fill: var(--pim-c); }
+.pim-chart .pim-dot { fill: var(--pim-c); }
+.pim-chart .pim-ink { fill: #111827; }
+.pim-chart .pim-muted { fill: #4b5563; }
+.pim-chart .pim-rule { stroke: #9ca3af; }
+.pim-chart .pim-grid { stroke: #e5e7eb; }
+.pim-chart .pim-ref { stroke: #6b7280; }
+.pim-chart .pim-surface { fill: #ffffff; }
+.content-page .pim-table-note { font-size: 0.8rem; color: #9ca3af; margin: 0 0 20px; line-height: 1.5; }
+.pim-n { display: block; font-size: 0.72rem; font-weight: 500; color: #9ca3af; margin-top: 2px; }
+.pi-cell.pim-flat { color: #9ca3af; }
+.pi-table thead th.pim-th-primary { color: #111827; }
+.content-page .pim-live-note { font-size: 0.9rem; color: #374151; }
+.pim-records td a { font-weight: 600; }
+.pim-records td.pim-dash { color: #9ca3af; font-weight: 500; }
+.pi-table td.pim-sku { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.8rem; text-align: left; }
+.pi-table td.pim-name { text-align: left; white-space: normal; min-width: 180px; font-size: 0.86rem; }
+.pim-nav { display: flex; justify-content: space-between; gap: 16px; margin: 28px 0 0; font-size: 0.92rem; }
+.pim-nav-prev, .pim-nav-next { flex: 1; }
+.pim-nav-next { text-align: right; }
+html.dark .content-page .page-header .pim-monthline { color: #cbd5e1; }
+html.dark .content-page .pim-headline { color: #f1f5f9; }
+html.dark .content-page .pim-cards .pim-card { background: #1a2332; border-color: #2d3f55; }
+html.dark .pim-card .pim-card-seg, html.dark .pim-card .pim-card-span, html.dark .pim-card .pim-card-foot { color: #94a3b8; }
+html.dark .pim-card .pim-card-pct { color: #f1f5f9; }
+html.dark .content-page .pim-card-pct.pi-up { color: #f87171; }
+html.dark .content-page .pim-card-pct.pi-neutral { color: #fb923c; }
+html.dark .content-page .pim-card-pct.pi-down { color: #4ade80; }
+html.dark .pim-card .pim-card-note { color: #cbd5e1; }
+html.dark .pim-card .pim-card-note--caution { color: #fbbf24; }
+html.dark .pim-card .pim-card-foot { border-top-color: #2d3f55; }
+html.dark .pim-mom.pim-mom--flat { color: #64748b; }
+html.dark .content-page .pim-def { color: #cbd5e1; }
+html.dark .pim-cite { background: #1a2332; border-color: #2d3f55; border-left-color: var(--brand-light); }
+html.dark .content-page .pim-cite .pim-cite-text { color: #f1f5f9; }
+html.dark .content-page .pim-cite .pim-cite-actions { color: #cbd5e1; }
+html.dark .pim-copy { background: #0f1623; color: var(--brand-light); border-color: #2d3f55; }
+html.dark .pim-copy:hover { border-color: var(--brand-light); }
+html.dark .pim-copy-status { color: #4ade80; }
+html.dark .content-page .pim-cite .pim-corrections, html.dark .content-page .pim-chart-caption, html.dark .content-page .pim-table-note { color: #64748b; }
+html.dark .pim-n { color: #64748b; }
+html.dark .pi-cell.pim-flat { color: #64748b; }
+html.dark .content-page .pim-legend li, html.dark .content-page .pim-live-note { color: #cbd5e1; }
+html.dark .pim-c-ddr5 { --pim-c: #6488DE; }
+html.dark .pim-c-ddr4 { --pim-c: #C9842A; }
+html.dark .pim-c-nvme_ssd { --pim-c: #1A9F8F; }
+html.dark .pim-c-sata_ssd { --pim-c: #9478F0; }
+html.dark .pim-chart .pim-ink { fill: #f1f5f9; }
+html.dark .pim-chart .pim-muted { fill: #94a3b8; }
+html.dark .pim-chart .pim-rule { stroke: #64748b; }
+html.dark .pim-chart .pim-grid { stroke: #1e293b; }
+html.dark .pim-chart .pim-ref { stroke: #94a3b8; }
+html.dark .pim-chart .pim-surface { fill: #0f1623; }
+html.dark .pi-table thead th.pim-th-primary { color: #f1f5f9; }
+html.dark .pim-records td.pim-dash { color: #64748b; }
+@media (max-width: 480px) {
+  .content-page .pim-cards { grid-template-columns: 1fr; }
+  .content-page .pim-headline { font-size: 1.18rem; }
+  .pim-card .pim-card-pct { font-size: 1.8rem; }
+}
+/* The breakout: from 950 px the record cards and the chart leave the 720 px
+   reading column and widen to at most 1100 px, centred on the page. Only
+   pim- selectors are listed here, so no other page can match this block. */
+@media (min-width: 950px) {
+  .content-page .pim-wide { width: min(1100px, calc(100vw - 72px)); max-width: none; margin-left: calc(50% - min(1100px, calc(100vw - 72px)) / 2); }
+  .content-page .pim-cards { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+/* Under 760 px the 1200-unit chart would scale its labels below legibility, so
+   it keeps a working width and scrolls sideways, the same treatment the index
+   table already gets, with its own hint line. The scroll container is
+   direction: rtl so that, with no JavaScript, every browser opens it at its
+   right edge, which is the newest months; the two children are set back to
+   ltr so nothing inside them is mirrored. In an rtl flex row the DOM order
+   (svg, axis) lays out visually as (axis, svg), and the axis sticks to the
+   left of the scrollport over the SVG's own labels, which have scrolled away. */
+.content-page .pim-chart-hint { display: none; font-size: 0.76rem; color: #9ca3af; margin: 0 0 18px; }
+@media (max-width: 760px) {
+  .pim-chart-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; direction: rtl; }
+  .pim-chart-scroll > * { direction: ltr; }
+  .pim-chart-scroll .pim-chart { flex: none; width: 720px; min-width: 720px; }
+  /* The background starts below the legend row (the top 8% of the SVG), so the
+     axis column covers the SVG's own tick labels but not the chart's title line. */
+  .pim-chart-axis { display: block; position: sticky; left: 0; flex: none; width: 50px; background: linear-gradient(#ffffff00 0 8%, #ffffff 8%); z-index: 1; }
+  .pim-chart-axis span { position: absolute; right: 5px; transform: translateY(-50%); font-size: 0.62rem; line-height: 1; color: #4b5563; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  html.dark .pim-chart-axis { background: linear-gradient(#0f162300 0 8%, #0f1623 8%); }
+  html.dark .pim-chart-axis span { color: #94a3b8; }
+  .content-page .pim-chart-hint { display: block; }
+}
