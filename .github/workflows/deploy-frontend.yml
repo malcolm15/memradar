@@ -132,6 +132,11 @@ jobs:
           # catalogue holds none, nothing is added and the run prints a VACUOUS
           # CHECK warning for that check without failing, because a catalogue with
           # no multi-pack is an ordinary state and not a defect.
+          # THE NEWEST PRICE INDEX MONTH PAGE IS DERIVED, NOT LISTED HERE
+          # (2026-10-12). /price-index/<YYYY-MM>/ is a permanent record and a new
+          # one appears whenever a month freezes, so under --gate the audit reads
+          # the newest such <loc> from the live sitemap.xml (the generator's own
+          # list, built from the archive) and audits it as a blocking page.
           # Left out on purpose: /build-cost/, whose figures the claim registry
           # already cross-checks against /price-index/ and which is the slowest of
           # the figure pages; and /methodology/, hand-written prose carrying no

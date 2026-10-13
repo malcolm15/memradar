@@ -947,7 +947,12 @@ async function loadPage(browser, url, { js }) {
     // extracted the page BEFORE the Supabase round trip landed, reporting 117
     // cards against the real 119. So a page that ships a data-fetching script
     // must also show a settled fetch before it is read.
-    const expectsData = net.scripts.some((x) => /supabase|product-data|home-drops|product-listing|pdp-hydrate|price-index|guide-live/.test(x.url));
+    // EXACT PATH, NOT SUBSTRING, FOR THE MONTH RECORDS. /price-index/<YYYY-MM>/
+    // is static by contract and loads none of these scripts, so the script test
+    // alone would already say no; the path rule states the contract where a
+    // future script include on the template could not quietly re-enable the wait.
+    const staticRecord = /^\/price-index\/\d{4}-\d{2}\/$/.test(new URL(url, 'https://memradar.com').pathname);
+    const expectsData = !staticRecord && net.scripts.some((x) => /supabase|product-data|home-drops|product-listing|pdp-hydrate|price-index|guide-live/.test(x.url));
     const deadline = Date.now() + 25000;
     for (;;) {
       const st = await page.evaluate(() => {
@@ -988,6 +993,7 @@ async function loadPage(browser, url, { js }) {
   // origin under audit, never from the working tree, or the audit would compare a
   // deployed page against an undeployed build.
   let index = null;
+  const referenceFailures = []; // gate inputs that could not be read; blocking under --strict --gate
   try {
     const rows = await (await fetch(`${BASE}/search-index.json`)).json();
     index = { bySku: new Map(rows.map((e) => [e.sku, e])), count: rows.length, rows };
@@ -1024,6 +1030,43 @@ async function loadPage(browser, url, { js }) {
     }
   } catch (e) {
     log(`  *** /search-index.json unreadable (${e.message}); the card name check is DISABLED, which is not a pass`);
+  }
+  // THE NEWEST PRICE INDEX MONTH PAGE IS DERIVED, NOT LISTED. /price-index/<YYYY-MM>/
+  // is a permanent record generated from the archive, and a new one appears
+  // whenever a month freezes, so a hard-coded URL in the deploy command would
+  // stop checking the newest page the first time that happened. The sitemap is
+  // the generator's own list of month pages (built from the same archive), so
+  // the newest <loc> matching the month-page shape is audited. DERIVED, NOT
+  // DISCOVERED: unlike a multi-unit PDP, this is a stable surface, so a page
+  // that fails to land is a blocking defect exactly as a hand-listed page is.
+  if (flag('gate')) {
+    try {
+      // fetch() resolves on a 404 with an empty-looking body, which would read as
+      // "no month page" and pass; the status is checked before the body is trusted.
+      const res = await fetch(`${BASE}/sitemap.xml`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const xml = await res.text();
+      const months = [...xml.matchAll(/<loc>https:\/\/memradar\.com(\/price-index\/\d{4}-\d{2}\/)<\/loc>/g)].map((m) => m[1]).sort();
+      const newest = months[months.length - 1];
+      if (!newest) {
+        // Since 2026-10-12 the sitemap always carries at least one month page,
+        // so a sitemap with none is the same failure as no sitemap: the gate
+        // would be auditing less than it was asked to.
+        throw new Error('no /price-index/<YYYY-MM>/ entry in the served sitemap');
+      } else if (PAGES.some((p) => p.url === newest)) {
+        log(`  month-page derivation: ${newest} is already listed`);
+      } else {
+        PAGES.push({ url: newest, kind: 'reference', derived: true });
+        log(`  month-page derivation: ${months.length} month page(s) in /sitemap.xml, newest ${newest} added to this run (blocking, like a hand-listed page)`);
+      }
+    } catch (e) {
+      // A REFERENCE THE GATE DEPENDS ON IS A BLOCKING FAILURE UNDER --strict.
+      // Without the sitemap the newest month page is simply not audited, and
+      // a run that silently audits less than it was asked to is the passing-
+      // for-the-wrong-reason shape this file exists to stop.
+      referenceFailures.push(`/sitemap.xml unreadable (${e.message}): the newest Price Index month page could not be derived`);
+      log(`  *** ${referenceFailures[referenceFailures.length - 1]}, which is not a pass`);
+    }
   }
   log('');
   const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || undefined;
@@ -1263,6 +1306,11 @@ async function loadPage(browser, url, { js }) {
     const gateOnly = flag('gate');
     const blocking = gateOnly ? defects.filter((d) => GATED.some((g) => g.test(d))) : defects;
     log('');
+    if (gateOnly && referenceFailures.length) {
+      log(`*** --strict: exiting 1 because a reference the gate depends on could not be read:`);
+      referenceFailures.forEach((r) => log(`      ${r}`));
+      process.exit(1);
+    }
     if (gateOnly) {
       log(`--gate: blocking on ${GATED.map((g) => g.name).join(', ')} only`);
       const advisory = defects.length - blocking.length;

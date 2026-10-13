@@ -3417,6 +3417,126 @@ function pimDistribution(rec) {
     { '@type': 'DataDownload', name: `${monthLabel(rec.month)} record: segment figures and rule (JSON)`, contentUrl: `${SITE}${paths.json}`, encodingFormat: 'application/json' },
   ];
 }
+// The permanent month page. STATIC: no live fetch, no hydration, and nothing
+// on it is build-dated, so its content hash, its sitemap lastmod and its
+// IndexNow state all settle on the first build and never move again.
+function buildPriceIndexMonthPage({ archive, month, pageMonths, generable }) {
+  const rec = pimRecord(archive, month);
+  const bySku = new Map(generable.map((p) => [p.sku, p]));
+  const prev = PY.addMonths(month, -1);
+  const next = PY.addMonths(month, 1);
+  const url = `${SITE}${pimMonthUrl(month)}`;
+  const title = `MemRadar Price Index: ${monthLabel(month)}`;
+  // Short month names: the long form ran to 177 characters, past the 158
+  // ceiling every other page's description is held to.
+  const metaDesc = `Same-product RAM and SSD price changes, ${pimShortMonth(month)} vs ${pimShortMonth(rec.base_month)}: ${PI_SEGMENTS.map((seg) => `${seg.label.replace(' SSD', '')} ${pimWhole(rec.recs[seg.key].median)}`).join(', ')}. Frozen record with every paired product.`;
+  if (title.length > 60) throw new Error(`month page title over 60: ${title}`);
+  if (metaDesc.length < 120 || metaDesc.length > 158) throw new Error(`month page meta description out of band (${metaDesc.length}): ${metaDesc}`);
+
+  const productCell = (sku) => {
+    const p = bySku.get(sku);
+    if (!p) return `<td class="pim-name">${esc(sku)}</td>`;
+    return `<td class="pim-name"><a href="/${p.category}/${p.finalSlug}/">${esc(p._titleName || shortName(p))}</a><span class="pim-n">${esc(sku)}</span></td>`;
+  };
+  const pairs = PI_SEGMENTS.map((seg) => {
+    const r = rec.recs[seg.key];
+    const rows = r.pairs.map((p) => `            <tr>${productCell(p.sku)}<td>${money(p.base_price)}</td><td>${money(p.current_price)}</td><td class="${piCellClass((p.current_price / p.base_price - 1) * 100)}">${pimOne((p.current_price / p.base_price - 1) * 100)}</td><td>${p.base_covered_days} / ${p.current_covered_days}</td></tr>`).join('\n');
+    return `      <h3>${seg.label}: ${r.n} ${pimUnit(seg.key, r.n)}, median ${pimTwo(r.median)}</h3>
+      <div class="pi-table-wrap" tabindex="0" role="region" aria-label="${seg.label} paired listings, scrollable">
+        <table class="pi-table pim-pairs">
+          <thead><tr><th scope="col">Listing</th><th scope="col">${pimShortMonth(rec.base_month)}</th><th scope="col">${pimShortMonth(month)}</th><th scope="col">Change</th><th scope="col">Covered days</th></tr></thead>
+          <tbody>
+${rows}
+          </tbody>
+        </table>
+      </div>`;
+  }).join('\n');
+  const pairsHtml = `      <h2 id="pim-pairs">Every paired listing</h2>
+      <p>The ${PI_SEGMENTS.reduce((t, seg) => t + rec.recs[seg.key].n, 0)} listings behind the four figures, each compared with itself: its median daily price in ${monthLabel(rec.base_month)} against its median daily price in ${monthLabel(month)}, smallest change first. Covered days are the calendar days that contributed to each monthly price (base / current); a listing needs at least 20 in both months to be paired.</p>
+${pairs}`;
+
+  const exclusions = rec.recs.ddr5.exclusions || {};
+  const exclLabel = { relisting_duplicates: 'Relisted duplicates', multi_unit: 'Multi-unit listings', service_bundles: 'Service-plan bundles' };
+  const exclWhy = {
+    relisting_duplicates: 'the same product under a second ASIN, so the pair would count one product twice',
+    multi_unit: 'a listing that sells more than one unit, so its price is not one product\'s price',
+    service_bundles: 'a drive sold with a protection plan, which is a different product from the drive alone',
+  };
+  const exclHtml = `      <h2 id="pim-exclusions">Excluded by rule</h2>
+      <p>These listings are left out of every segment by an explicit list stored in the record, whatever their prices did. Hardware variants (heatsink versions, colours) stay in.</p>
+      <ul>
+${Object.keys(exclusions).map((k) => `        <li><strong>${esc(exclLabel[k] || k)}</strong> (${esc(exclWhy[k] || 'excluded by rule')}): ${exclusions[k].length ? exclusions[k].map((sku) => { const p = bySku.get(sku); return p ? `<a href="/${p.category}/${p.finalSlug}/">${esc(p._titleName || shortName(p))}</a> (${esc(sku)})` : esc(sku); }).join(', ') : 'none'}</li>`).join('\n')}
+      </ul>`;
+  const correctionsHtml = `      <h2 id="pim-corrections">Corrections</h2>
+${pimCorrectionsHtml(rec)}`;
+  const navParts = [];
+  if (pageMonths.includes(prev)) navParts.push(`<span class="pim-nav-prev"><a href="${pimMonthUrl(prev)}">Previous: ${monthLabel(prev)}</a></span>`);
+  if (pageMonths.includes(next)) navParts.push(`<span class="pim-nav-next"><a href="${pimMonthUrl(next)}">Next: ${monthLabel(next)}</a></span>`);
+  const navHtml = navParts.length ? `      <nav class="pim-nav" aria-label="Other monthly records">${navParts.join('')}</nav>` : '';
+  const prevNextLinks = [
+    pageMonths.includes(prev) ? `<link rel="prev" href="${SITE}${pimMonthUrl(prev)}">` : '',
+    pageMonths.includes(next) ? `<link rel="next" href="${SITE}${pimMonthUrl(next)}">` : '',
+  ].filter(Boolean).join('\n  ');
+
+  const jsonld = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Dataset',
+        '@id': `${url}#dataset`,
+        name: `MemRadar Memory Price Index, ${monthLabel(month)} record`,
+        url,
+        description: `${pimHeadline(rec)} ${metaDesc}`,
+        creator: { '@type': 'Organization', name: 'MemRadar', url: SITE + '/' },
+        isAccessibleForFree: true,
+        license: DATASET_LICENSE,
+        creditText: pimCitationText(rec),
+        temporalCoverage: `${rec.base_month}/${month}`,
+        isPartOf: { '@type': 'Dataset', '@id': DATASET_ID, name: 'MemRadar Memory Price Index', url: `${SITE}/price-index/` },
+        variableMeasured: PI_SEGMENTS.map((sg) => ({ '@type': 'PropertyValue', name: sg.label + ' median same-product price change', value: rec.recs[sg.key].median, unitText: 'percent' })),
+        distribution: pimDistribution(rec),
+        datePublished: rec.frozen_at,
+        dateModified: rec.latest_correction || rec.frozen_at,
+      },
+      { '@type': 'WebPage', name: title, url, isPartOf: { '@type': 'WebPage', '@id': `${SITE}/price-index/`, name: 'The MemRadar Memory Price Index' } },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: SITE + '/' },
+          { '@type': 'ListItem', position: 2, name: 'Price Index', item: SITE + '/price-index/' },
+          { '@type': 'ListItem', position: 3, name: monthLabel(month), item: url },
+        ],
+      },
+    ],
+  }, null, 2);
+
+  const tpl = fs.readFileSync(path.join(FRONTEND, 'price-index', 'month-template.html'), 'utf8');
+  for (const anchor of ['<!--TITLE-->', '<!--CANONICAL-->', '<meta name="robots" content="noindex">', '<!--JSONLD-->', '<!--H1-->', '<!--MONTH_LINE-->', '<!--RECORD-->', '<!--PROVENANCE-->', '<!--NAV-->']) {
+    if (!tpl.includes(anchor)) throw new Error(`month template is missing ${anchor}`);
+  }
+  return tpl
+    .replace('<!--TITLE-->', esc(title))
+    .replace(/<!--META_DESC-->/g, esc(metaDesc))
+    .replace(/<!--CANONICAL-->/g, url)
+    .replace('<meta name="robots" content="noindex">', '<meta name="robots" content="index,follow">')
+    .replace('<!--PREV_NEXT-->', prevNextLinks)
+    .replace(/<!--OG_TITLE-->/g, esc(title))
+    .replace('<!--JSONLD-->', `<script type="application/ld+json">\n${jsonld}\n  </script>`)
+    .replace('<!--H1-->', esc(title))
+    .replace('<!--MONTH_LINE-->', pimMonthLine(archive, rec, pageMonths, { onIndex: false }))
+    .replace('<!--RECORD-->', pimRecordHtml(archive, rec))
+    .replace('<!--FULL_FIGURES-->', pimFullFiguresHtml(rec))
+    .replace('<!--PAIRS-->', pairsHtml)
+    .replace('<!--EXCLUSIONS-->', exclHtml)
+    .replace('<!--CORRECTIONS-->', correctionsHtml)
+    .replace('<!--PROVENANCE-->', rec.recs.ddr5.reconstructed
+      ? `This is a reconstructed launch record: it was computed on that date from the stored price history, together with the other launch months, rather than frozen at the end of ${monthLabel(month)}. Records for months after the launch series are frozen after their month ends, once a price fetch timestamped after the month boundary has landed.`
+      : `It was computed on the first regeneration after a price fetch timestamped past the end of ${monthLabel(month)}.`)
+    .replace(/<!--FROZEN_LONG-->/g, longDate(rec.frozen_at))
+    .replace(/<!--MONTH_LONG-->/g, monthLabel(month))
+    .replace('<!--NAV-->', navHtml);
+}
+
 function buildPriceIndex(ctx) {
   const { marketStats, products, statsBySku, computedAt, buildCostSectionHtml, archive, pageMonths } = ctx;
   if (!archive) throw new Error('price index: no archive, so no record to render');
@@ -6209,7 +6329,7 @@ function staticFileFor(loc) {
 // productEntries: [{ url, lastmod }]. Static entries are carried over from the
 // existing sitemap but their lastmod is re-resolved from the page file's
 // content hash (seeded with file mtime the first time a page is seen).
-function buildSitemap(existingXml, productEntries, prevManifest, manifest) {
+function buildSitemap(existingXml, productEntries, prevManifest, manifest, extraGuaranteed = []) {
   const staticEntries = [];
   const re = /<url>[\s\S]*?<\/url>/g;
   let m;
@@ -6244,7 +6364,10 @@ function buildSitemap(existingXml, productEntries, prevManifest, manifest) {
     // it changes when the extension does, which is not on a schedule.
     { loc: SITE + '/raycast/', changefreq: 'monthly', priority: '0.5' },
   ];
-  for (const g of GUARANTEED_STATIC) {
+  // extraGuaranteed: the Price Index month pages, derived from the archive by
+  // the caller rather than listed here, so the second month page cannot be
+  // silently missing from the sitemap the way a hand list would allow.
+  for (const g of [...GUARANTEED_STATIC, ...extraGuaranteed]) {
     if (staticEntries.some((e) => e.includes(`<loc>${g.loc}</loc>`))) continue;
     let lastmod = new Date().toISOString().slice(0, 10);
     try {
@@ -6855,6 +6978,9 @@ async function run() {
   // both state, derived ONCE so the pages cannot disagree. Needs msRows, which
   // is fetched just below, so it is resolved after that.
   let buildFigures = null;
+  // Sitemap entries for the permanent Price Index month pages, filled in by
+  // the price index build below and read by buildSitemap.
+  let piMonthPageEntries = [];
 
   // 2b) The Memory Price Index page (generated, so its baked table refreshes
   // with every regeneration; it also hydrates from market_stats on load).
@@ -7006,6 +7132,28 @@ async function run() {
       const outDir = path.join(FRONTEND, 'price-index');
       fs.mkdirSync(outDir, { recursive: true });
       fs.writeFileSync(path.join(outDir, 'index.html'), html);
+      // The permanent month pages and their downloads, one directory per
+      // frozen month from PI_MONTH_PAGES_FROM forward. Rewritten every run
+      // from the same frozen record, so the bytes do not change unless the
+      // record gains a correction.
+      const dlDir = path.join(FRONTEND, 'data', 'price-index');
+      fs.mkdirSync(dlDir, { recursive: true });
+      for (const month of pageMonths) {
+        // Independently skippable, like the guides: a month page that fails to
+        // build stays at its last good version and never withholds the day's
+        // prices. The warning is the signal.
+        try {
+          const rec = pimRecord(piArchive, month);
+          const pageDir = path.join(outDir, month);
+          fs.mkdirSync(pageDir, { recursive: true });
+          fs.writeFileSync(path.join(pageDir, 'index.html'), buildPriceIndexMonthPage({ archive: piArchive, month, pageMonths, generable }));
+          const dl = pimDownloads(piArchive, rec);
+          fs.writeFileSync(path.join(FRONTEND, dl.paths.json), dl.json);
+        } catch (e) {
+          log(`⚠ /price-index/${month}/ NOT regenerated: ${e.message}`);
+        }
+      }
+      piMonthPageEntries = pageMonths.map((m) => ({ loc: `${SITE}${pimMonthUrl(m)}`, changefreq: 'yearly', priority: '0.5' }));
       log(`Price index written: ${msRows.length} market_stats rows, computed ${computedAt.slice(0, 10)}; record ${pimFrozenMonths(piArchive).pop()}, ${pageMonths.length} month page(s): ${pageMonths.join(', ') || 'none'}`);
     }
   }
@@ -7263,7 +7411,7 @@ async function run() {
     for (const { key } of POLICY_DATED) if (prevManifest[key] && !manifest[key]) manifest[key] = prevManifest[key];
     log(`⚠ policy "Last updated" NOT stamped: ${e.message}`);
   }
-  fs.writeFileSync(SITEMAP_PATH, buildSitemap(existingXml, productEntries, prevManifest, manifest));
+  fs.writeFileSync(SITEMAP_PATH, buildSitemap(existingXml, productEntries, prevManifest, manifest, piMonthPageEntries));
   // Counted, not hardcoded: the old literal "11 static" went stale the moment
   // the guides and the price index were added, and a log line that quietly
   // lies is how you stop trusting the log.
