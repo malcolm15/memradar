@@ -1540,7 +1540,9 @@ Everything else checked out: the six-times-daily cadence (`0 */4 * * *` = 00/04/
 
 ## Dataset JSON-LD (one node, two pages, 2026-09-22)
 
-**`datasetJsonLd()` emits one node with `@id` `https://memradar.com/data/#dataset`, rendered identically on `/data/` and `/price-index/`**, so the two pages describe the same dataset rather than two. `/data/` is the node's `url` because that is the page hosting the files.
+**`datasetJsonLd()` emits one node with `@id` `https://memradar.com/data/#dataset` on both `/data/` and `/price-index/`**, so the two pages describe the same dataset rather than two. The node is the same on both pages except that **the `/price-index/` copy adds the latest frozen record's JSON file as an extra distribution** (`extraDistribution`, since `4f9ef89a8`); aligning `/data/` is planned with the Nov 1 report. `/data/` is the node's `url` because that is the page hosting the files.
+
+**isPartOf on month pages is a plain URL (https://memradar.com/data/), never a Dataset object: Google treats any Dataset-typed object as a standalone Dataset item that must carry name and description.**
 
 Three things it fixes, all found in the audit of the old inline block:
 - **`temporalCoverage` was `2015-11-12/..`**, the first day of one product's history. That describes the raw `price_history` table, not anything a reader can download: three of four segments have no row before 2021. It is now the monthly CSV's own closed bounds, **`2019-11/2026-08`**, from `buildMonthlyCsv`'s `bounds`, and identical on both pages by construction.

@@ -3083,8 +3083,12 @@ const PI_PERIODS = ['1m', '3m', '6m', '1y'];
 const PI_LIVE_PERIODS = ['1m', '3m', '6m'];
 
 // ------------------------------------------------------------- Dataset JSON-LD
-// ONE DEFINITION, EMITTED IDENTICALLY ON /data/ AND /price-index/, with a
-// shared @id so the two pages describe the SAME dataset rather than two.
+// ONE DEFINITION, EMITTED ON /data/ AND /price-index/ with a shared @id, so the
+// two pages describe the SAME dataset rather than two. The node is the same on
+// both pages except that the /price-index/ copy adds the latest frozen record's
+// JSON file as an extra distribution (extraDistribution, since 4f9ef89a8).
+// Aligning /data/ is planned with the Nov 1 report, where /data/ can also list
+// the record file visibly.
 //
 // It used to live inline on /price-index/ only, and three things were wrong
 // with it. It declared temporalCoverage "2015-11-12/..", the first day of one
@@ -5527,8 +5531,9 @@ function buildDataPage(ctx) {
         isAccessibleForFree: true,
       },
       // THE SAME Dataset NODE /price-index/ EMITS, same @id, so the two pages
-      // describe one dataset rather than two. This is the page that hosts the
-      // files, which is why the node's url and license point here.
+      // describe one dataset rather than two (the /price-index/ copy also lists
+      // the latest frozen record's file; see datasetJsonLd). This is the page
+      // that hosts the files, which is why the node's url and license point here.
       datasetJsonLd({ csvBounds: ctx.csvBounds, buildDate }),
       { '@type': 'BreadcrumbList', itemListElement: [
         { '@type': 'ListItem', position: 1, name: 'Home', item: SITE + '/' },
