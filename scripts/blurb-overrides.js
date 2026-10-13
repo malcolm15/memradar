@@ -51,6 +51,16 @@
 //   all-time high or low as a standing status, counts or shares over the
 //   whole history, family position, catalogue comparisons, retailer stock
 //   state, and anything from an incomplete year stated as a year figure.
+//   Clarification (2026-10-13): a minimum or maximum over a complete
+//   calendar year (observations span January through December) counts like a
+//   complete-year median; runs of named days ('every day from A to B', 'on N
+//   days between A and B', a list of dates) count as dated record facts, and
+//   'every day' requires a reading on every calendar day in the span. A
+//   minimum over an incomplete year, a part-year or an open period is not
+//   allowed. Describe a complete year by its January-to-December span, never
+//   as implying daily coverage. Do not single out some moves from a run of
+//   similar ones in a way that implies they were the only ones.
+//   Classification facts stay in the classification file's terms.
 //   Do not upgrade an observation into a stronger claim. "No in-stock
 //   observation between X and Y" is allowed; "there was no stock" is not.
 //   "Amazon had no offer on DATE" only where the classification file says
