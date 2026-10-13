@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-12",
+ "generated": "2026-10-13",
  "rule": "requiredByBuild(p) || (healthy(p) && gatesPass(p))",
  "switches": {
   "GATES_ENABLED": true,
@@ -64,6 +64,7 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
+    "percentile_extreme",
     "pre2021_history"
    ]
   },
@@ -77,6 +78,7 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
+    "percentile_extreme",
     "pre2021_history"
    ]
   },
@@ -286,6 +288,7 @@
    "bing_citations": 0,
    "reasons": [
     "long_history",
+    "percentile_extreme",
     "pre2021_history",
     "blurb_annotated"
    ]
@@ -313,8 +316,7 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
-    "gsc_crawled_not_indexed",
-    "percentile_extreme"
+    "gsc_crawled_not_indexed"
    ]
   },
   "ram/corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz": {
@@ -862,7 +864,8 @@
    "bing_impressions": 0,
    "bing_citations": 4,
    "reasons": [
-    "long_history"
+    "long_history",
+    "percentile_extreme"
    ]
   },
   "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-32gb-6000mhz-4": {
@@ -1340,8 +1343,7 @@
    "bing_impressions": 1,
    "bing_citations": 4,
    "reasons": [
-    "sparse_history",
-    "percentile_extreme"
+    "sparse_history"
    ]
   },
   "ram/pro-ddr5-ram-32gb-kit-6400mhz": {
@@ -1656,8 +1658,7 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history",
-    "percentile_extreme"
+    "sparse_history"
    ]
   },
   "ssd/bestoss-1tb-nvme-m-2-ssd-pcie-3-0-2280": {
@@ -1767,7 +1768,7 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history",
+    "long_history",
     "percentile_extreme"
    ]
   },
@@ -2765,8 +2766,7 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "long_history",
-    "percentile_extreme"
+    "long_history"
    ]
   },
   "ssd/teamgroup-t-force-vulcan-z-2tb-slc-cache-2": {
