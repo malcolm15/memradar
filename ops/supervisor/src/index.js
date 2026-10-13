@@ -248,21 +248,59 @@ function ghHeaders(token) {
 // current by definition, and a cache miss is just a normal request.
 const etagCache = new Map();
 
-async function ghRequest(token, path, { method = 'GET', body = null, conditional = false } = {}) {
+// TRANSIENT GITHUB READS ARE RETRIED; WRITES NEVER ARE (2026-10-13). Every tick
+// failure since 2026-09-24 was one 5xx on one read (522, 524, 502, 502) that
+// cleared by the next tick, and one throw ended the whole tick. A GET that gets
+// one of these statuses, or a network error, is retried after 2s and then 5s.
+// A POST or PATCH is never retried: one that reached GitHub before the error
+// would be duplicated (a second issue, a second comment).
+//
+// THE BUDGET IS PER TICK, NEVER MODULE STATE. Cloudflare can reuse an isolate
+// across cron invocations, so a module-level counter would carry retries spent
+// in one tick into the next. runTick() creates the context below at its start
+// and passes it to every caller; reportTickFailure() creates its own for the
+// reporting pass, because it runs after a tick has already died.
+const TRANSIENT_STATUSES = new Set([502, 503, 504, 520, 522, 524]);
+const RETRY_DELAYS_MS = [2000, 5000];
+const RETRY_BUDGET_PER_TICK = 6;
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function newTickContext(token) {
+  return { token, retriesLeft: RETRY_BUDGET_PER_TICK, retriesUsed: 0 };
+}
+
+async function ghRequest(gh, path, { method = 'GET', body = null, conditional = false } = {}) {
   const url = `https://api.github.com${path}`;
-  const headers = ghHeaders(token);
+  const headers = ghHeaders(gh.token);
   const cached = conditional && method === 'GET' ? etagCache.get(url) : null;
   if (cached) headers['If-None-Match'] = cached.etag;
   if (body) headers['Content-Type'] = 'application/json';
 
-  const res = await fetch(url, {
-    method,
-    headers,
-    body: body ? JSON.stringify(body) : undefined,
-    // Do not let the Workers runtime interpose its own cache. The API sends
-    // `cache-control: private, max-age=60`; we want every tick to ask.
-    cache: 'no-store',
-  });
+  let res;
+  for (let attempt = 0; ; attempt++) {
+    const mayRetry = method === 'GET' && attempt < RETRY_DELAYS_MS.length && gh.retriesLeft > 0;
+    try {
+      res = await fetch(url, {
+        method,
+        headers,
+        body: body ? JSON.stringify(body) : undefined,
+        // Do not let the Workers runtime interpose its own cache. The API sends
+        // `cache-control: private, max-age=60`; we want every tick to ask.
+        cache: 'no-store',
+      });
+    } catch (err) {
+      if (!mayRetry) throw err;
+      gh.retriesLeft -= 1;
+      gh.retriesUsed += 1;
+      await sleep(RETRY_DELAYS_MS[attempt]);
+      continue;
+    }
+    if (!TRANSIENT_STATUSES.has(res.status) || !mayRetry) break;
+    gh.retriesLeft -= 1;
+    gh.retriesUsed += 1;
+    try { await res.body?.cancel(); } catch (_) { /* nothing to release */ }
+    await sleep(RETRY_DELAYS_MS[attempt]);
+  }
 
   if (res.status === 304 && cached) return cached.body;
   if (!res.ok) {
@@ -289,7 +327,7 @@ function runsPerPage(entry) {
   return Math.min(HARD_RUN_CAP, inWindow * 2 + 6);
 }
 
-async function findLastSuccess(token, entry, nowMs) {
+async function findLastSuccess(gh, entry, nowMs) {
   const horizonMs = nowMs - entry.max_age_hours * 3600 * 1000;
   const perPage = runsPerPage(entry);
 
@@ -302,7 +340,7 @@ async function findLastSuccess(token, entry, nowMs) {
   // and a run where the job we care about succeeded alongside a failing
   // sibling would be hidden by the filter.
   const list = await ghRequest(
-    token,
+    gh,
     `/repos/${OWNER}/${REPO}/actions/workflows/${entry.workflow_file}/runs?per_page=${perPage}`,
     { conditional: true }
   );
@@ -326,7 +364,7 @@ async function findLastSuccess(token, entry, nowMs) {
     }
 
     examined++;
-    const jobsRes = await ghRequest(token, `/repos/${OWNER}/${REPO}/actions/runs/${run.id}/jobs?per_page=50`);
+    const jobsRes = await ghRequest(gh, `/repos/${OWNER}/${REPO}/actions/runs/${run.id}/jobs?per_page=50`);
     const job = (jobsRes?.jobs || []).find((j) => j.name === entry.job_id);
 
     // Only `success` counts. `cancelled` is explicitly NOT a success:
@@ -359,11 +397,35 @@ async function findLastSuccess(token, entry, nowMs) {
   return { found: false, examined, page_exhausted: pageExhausted };
 }
 
-async function evaluateFreshness(token, nowMs) {
+async function evaluateFreshness(gh, nowMs) {
   const results = [];
   for (const entry of WATCH) {
     const key = `${entry.workflow_file} / ${entry.job_id}`;
-    const last = await findLastSuccess(token, entry, nowMs);
+    // A LOOKUP THAT STILL FAILS AFTER ITS RETRIES IS UNKNOWN THIS TICK, never
+    // stale and never fresh. It does not stop the other jobs being evaluated,
+    // reconcile() leaves any open STALE issue for it exactly as it is, and the
+    // tick withholds the Healthchecks success ping. Only a tick where EVERY
+    // lookup failed throws (see runTick), so a dead tick still opens TICK FAILURE.
+    let last;
+    try {
+      last = await findLastSuccess(gh, entry, nowMs);
+    } catch (err) {
+      results.push({
+        key,
+        workflow_file: entry.workflow_file,
+        job_id: entry.job_id,
+        cron: entry.cron,
+        max_age_hours: entry.max_age_hours,
+        stale: false,
+        unknown: true,
+        age_hours: null,
+        last_success: null,
+        runs_examined: 0,
+        page_exhausted: false,
+        error: String(err && err.message ? err.message : err).slice(0, 300),
+      });
+      continue;
+    }
     const ageHours = last.found ? (nowMs - Date.parse(last.created_at)) / 3600000 : null;
     results.push({
       key,
@@ -447,8 +509,8 @@ function parseWorkflow(text) {
   return { activeCrons, jobIds };
 }
 
-async function auditConfigCoverage(token) {
-  const dir = await ghRequest(token, `/repos/${OWNER}/${REPO}/contents/.github/workflows`, {
+async function auditConfigCoverage(gh) {
+  const dir = await ghRequest(gh, `/repos/${OWNER}/${REPO}/contents/.github/workflows`, {
     conditional: true,
   });
   const files = (dir || []).filter((f) => f.type === 'file' && /\.ya?ml$/.test(f.name));
@@ -457,7 +519,7 @@ async function auditConfigCoverage(token) {
   const unwatched = [];
 
   for (const f of files) {
-    const meta = await ghRequest(token, `/repos/${OWNER}/${REPO}/contents/.github/workflows/${f.name}`, {
+    const meta = await ghRequest(gh, `/repos/${OWNER}/${REPO}/contents/.github/workflows/${f.name}`, {
       conditional: true,
     });
     const { activeCrons, jobIds } = parseWorkflow(b64utf8(meta.content));
@@ -524,9 +586,9 @@ async function checkPublishedSha(_env, _deployment) {
 }
 
 // The deployment half of signal 2. Reported for visibility, not yet alerted on.
-async function newestPagesDeployment(token) {
+async function newestPagesDeployment(gh) {
   const deps = await ghRequest(
-    token,
+    gh,
     `/repos/${OWNER}/${REPO}/deployments?environment=github-pages&per_page=1`,
     { conditional: true }
   );
@@ -538,7 +600,7 @@ async function newestPagesDeployment(token) {
   // nothing about whether anything was published. Only an explicit
   // state === "success" status does. (Also note: `pages/builds/latest` is not
   // an alternative here; it 404s because this repo is build_type=workflow.)
-  const statuses = await ghRequest(token, `/repos/${OWNER}/${REPO}/deployments/${dep.id}/statuses?per_page=1`);
+  const statuses = await ghRequest(gh, `/repos/${OWNER}/${REPO}/deployments/${dep.id}/statuses?per_page=1`);
   const st = (statuses || [])[0];
   return {
     deployment_id: dep.id,
@@ -557,35 +619,35 @@ const titleForStale = (e) => `[supervisor] STALE: ${e.workflow_file} / ${e.job_i
 const TITLE_CONFIG_DRIFT = '[supervisor] CONFIG DRIFT: unwatched scheduled job';
 const TITLE_TICK_FAILURE = '[supervisor] TICK FAILURE';
 
-async function openAlertIssues(token) {
+async function openAlertIssues(gh) {
   // Labeled list, NOT repo.open_issues_count -- that field counts pull
   // requests too and would be wrong the moment a PR is opened.
   const issues = await ghRequest(
-    token,
+    gh,
     `/repos/${OWNER}/${REPO}/issues?state=open&labels=${encodeURIComponent(ALERT_LABEL)}&per_page=100`
   );
   // The issues endpoint returns PRs as well; filter them out explicitly.
   return (issues || []).filter((i) => !i.pull_request);
 }
 
-async function ensureIssue(token, open, title, body) {
+async function ensureIssue(gh, open, title, body) {
   const existing = open.find((i) => i.title === title);
   if (existing) return { action: 'already_open', number: existing.number };
-  const created = await ghRequest(token, `/repos/${OWNER}/${REPO}/issues`, {
+  const created = await ghRequest(gh, `/repos/${OWNER}/${REPO}/issues`, {
     method: 'POST',
     body: { title, body, labels: [ALERT_LABEL] },
   });
   return { action: 'opened', number: created.number };
 }
 
-async function resolveIssue(token, open, title, comment) {
+async function resolveIssue(gh, open, title, comment) {
   const existing = open.find((i) => i.title === title);
   if (!existing) return { action: 'noop' };
-  await ghRequest(token, `/repos/${OWNER}/${REPO}/issues/${existing.number}/comments`, {
+  await ghRequest(gh, `/repos/${OWNER}/${REPO}/issues/${existing.number}/comments`, {
     method: 'POST',
     body: { body: comment },
   });
-  await ghRequest(token, `/repos/${OWNER}/${REPO}/issues/${existing.number}`, {
+  await ghRequest(gh, `/repos/${OWNER}/${REPO}/issues/${existing.number}`, {
     method: 'PATCH',
     body: { state: 'closed', state_reason: 'completed' },
   });
@@ -618,17 +680,24 @@ function staleBody(e, nowIso) {
   ].join('\n');
 }
 
-async function reconcile(token, verdict, env) {
+async function reconcile(gh, verdict, env) {
   const nowIso = verdict.checked_at;
-  const open = await openAlertIssues(token);
+  const open = await openAlertIssues(gh);
   const actions = [];
 
   for (const e of verdict.freshness) {
     const title = titleForStale(e);
+    // Unknown is neither stale nor fresh: an open STALE issue stays exactly as
+    // it is. Without this the else-branch would close it on no evidence, and
+    // read e.last_success, which is null.
+    if (e.unknown) {
+      actions.push({ title, action: 'unknown_this_tick' });
+      continue;
+    }
     if (e.stale) {
-      const r = await ensureIssue(token, open, title, staleBody(e, nowIso));
+      const r = await ensureIssue(gh, open, title, staleBody(e, nowIso));
       actions.push({ title, ...r });
-      await deliverAlertEmail(env, token, r.number, title, [
+      await deliverAlertEmail(env, gh, r.number, title, [
         `${e.workflow_file} / ${e.job_id} has not completed successfully inside its freshness window.`,
         `age of last success: ${e.age_hours === null ? 'none inside the window' : e.age_hours + 'h'}`,
         `threshold:           ${e.max_age_hours}h`,
@@ -645,7 +714,7 @@ async function reconcile(token, verdict, env) {
       actions.push({
         title,
         ...(await resolveIssue(
-          token,
+          gh,
           open,
           title,
           `Recovered at ${nowIso}. Last success ${e.last_success.created_at} ` +
@@ -682,9 +751,9 @@ async function reconcile(token, verdict, env) {
     ]
       .filter(Boolean)
       .join('\n');
-    const r = await ensureIssue(token, open, TITLE_CONFIG_DRIFT, body);
+    const r = await ensureIssue(gh, open, TITLE_CONFIG_DRIFT, body);
     actions.push({ title: TITLE_CONFIG_DRIFT, ...r });
-    await deliverAlertEmail(env, token, r.number, TITLE_CONFIG_DRIFT, [
+    await deliverAlertEmail(env, gh, r.number, TITLE_CONFIG_DRIFT, [
       'A scheduled job exists that no supervisor config entry watches.',
       '',
       `issue: https://github.com/${OWNER}/${REPO}/issues/${r.number}`,
@@ -692,14 +761,14 @@ async function reconcile(token, verdict, env) {
   } else {
     actions.push({
       title: TITLE_CONFIG_DRIFT,
-      ...(await resolveIssue(token, open, TITLE_CONFIG_DRIFT, `Config coverage restored at ${nowIso}.`)),
+      ...(await resolveIssue(gh, open, TITLE_CONFIG_DRIFT, `Config coverage restored at ${nowIso}.`)),
     });
   }
 
   // A tick that reaches here succeeded, so clear any standing failure issue.
   actions.push({
     title: TITLE_TICK_FAILURE,
-    ...(await resolveIssue(token, open, TITLE_TICK_FAILURE, `Supervisor tick completed normally at ${nowIso}.`)),
+    ...(await resolveIssue(gh, open, TITLE_TICK_FAILURE, `Supervisor tick completed normally at ${nowIso}.`)),
   });
 
   return actions;
@@ -714,18 +783,23 @@ async function runTick(env, source) {
 
   const token = env.SUPERVISOR_GITHUB_TOKEN;
   if (!token) throw new Error('SUPERVISOR_GITHUB_TOKEN is not set');
+  const gh = newTickContext(token); // per tick; see RETRY_BUDGET_PER_TICK
 
   const nowMs = Date.now();
   const verdict = {
     source,
     checked_at: new Date(nowMs).toISOString(),
-    freshness: await evaluateFreshness(token, nowMs),
-    config_audit: await auditConfigCoverage(token),
-    pages_deployment: await newestPagesDeployment(token),
+    freshness: await evaluateFreshness(gh, nowMs),
+    config_audit: await auditConfigCoverage(gh),
+    pages_deployment: await newestPagesDeployment(gh),
     signal_2_published_sha: await checkPublishedSha(env, null), // deferred, returns null
   };
   verdict.stale_count = verdict.freshness.filter((f) => f.stale).length;
-  verdict.issue_actions = await reconcile(token, verdict, env);
+  verdict.unknown = verdict.freshness.filter((f) => f.unknown).map((f) => f.key);
+  if (verdict.freshness.length && verdict.unknown.length === verdict.freshness.length) {
+    throw new Error(`every freshness lookup failed this tick: ${verdict.freshness.map((f) => f.error).join(' | ')}`);
+  }
+  verdict.issue_actions = await reconcile(gh, verdict, env);
 
   // One structured line per tick. Includes the triggering event of each last
   // success so cron-death and job-failure stay distinguishable in the log.
@@ -734,6 +808,8 @@ async function runTick(env, source) {
       tick: verdict.checked_at,
       source,
       stale: verdict.stale_count,
+      unknown: verdict.unknown,
+      retries_used: gh.retriesUsed,
       jobs: verdict.freshness.map((f) => ({
         k: f.key,
         stale: f.stale,
@@ -753,7 +829,14 @@ async function runTick(env, source) {
   // did not fully succeed. Do not move this earlier, and do not wrap the tick
   // in a try/catch that pings anyway: that would convert the one check that
   // catches "nothing ran" into a check that always says everything is fine.
-  verdict.heartbeat = await pingHeartbeat(env, 'ok');
+  //
+  // A TICK WITH ANY UNKNOWN LOOKUP IS NOT A CLEAN TICK, so the success ping is
+  // withheld. A lookup that stays unknown therefore makes the external
+  // Healthchecks monitor overdue according to its configured period and grace,
+  // with no state kept here, while a single unknown tick stays quiet.
+  verdict.heartbeat = verdict.unknown.length
+    ? { ok: false, skipped: `unknown lookups: ${verdict.unknown.join(', ')}` }
+    : await pingHeartbeat(env, 'ok');
 
   return verdict;
 }
@@ -820,7 +903,7 @@ const ALERT_TO = 'hello@memradar.com';
 // incident". A LABEL, not a comment: it is a distinct machine-readable field, a
 // human cannot produce it by typing prose, and it lives on GitHub so it survives
 // Worker restarts, redeploys and rollbacks for free. Issues are already Read and
-// write in the token scope (the Worker opens, comments on and closes issues), so
+// write in the gh scope (the Worker opens, comments on and closes issues), so
 // this needs NO scope change.
 const EMAILED_LABEL = 'supervisor-emailed';
 // Applied once when delivery has not succeeded inside the fast window, so a
@@ -832,7 +915,7 @@ const EMAIL_FAILED_LABEL = 'supervisor-email-undelivered';
 // IT IS NOT AN ABANDONMENT POINT, AND THAT IS THE WHOLE POINT OF THIS CONSTANT.
 // The first version of this gave up here and applied EMAIL_FAILED_LABEL as a
 // tombstone. That reproduces the exact failure this file exists to fix: the
-// label sits on an issue opened with a token issued under the owner's own
+// label sits on an issue opened with a gh issued under the owner's own
 // account, GitHub does not notify a user about their own activity, so the
 // undelivered label reaches nobody. A mail outage that ended at hour 25 would
 // have lost the incident permanently from the only channel that reaches him.
@@ -910,7 +993,7 @@ function scrub(text, env) {
 // `malcolm15`. The claim-floor alarms need nothing: they run inside the workflow
 // as github-actions[bot] and Watch does deliver those.
 //
-// Same key, same recipient, no new secret, no new service, no token re-scoping,
+// Same key, same recipient, no new secret, no new service, no gh re-scoping,
 // and no dispatch. The read-only-for-workflows property is unchanged.
 async function sendAlertEmail(env, subject, lines) {
   const key = env.RESEND_API_KEY;
@@ -947,7 +1030,7 @@ async function sendAlertEmail(env, subject, lines) {
 // THE MARKER IS A LABEL on the issue. It is a distinct machine-readable field, so
 // no human prose can be mistaken for it; it lives on GitHub, so it survives Worker
 // restarts, redeploys and rollbacks with no new storage; and Issues is already
-// Read and write in the token scope, so it needs no re-scoping.
+// Read and write in the gh scope, so it needs no re-scoping.
 //
 // A STALE OR HAND-EDITED ISSUE NEEDS NO SPECIAL CASE, because the rule reads only
 // the current labels. Remove the label by hand and the next tick re-sends once,
@@ -961,11 +1044,11 @@ async function sendAlertEmail(env, subject, lines) {
 // with a Resend idempotency key on the evidence available: nothing in this repo
 // or in the code shows the Resend path in use supports one, so relying on it
 // would be a guess.
-async function deliverAlertEmail(env, token, issueNumber, subject, lines) {
+async function deliverAlertEmail(env, gh, issueNumber, subject, lines) {
   if (!issueNumber) return { ok: false, reason: 'no_issue' };
   let issue;
   try {
-    issue = await ghRequest(token, `/repos/${OWNER}/${REPO}/issues/${issueNumber}`);
+    issue = await ghRequest(gh, `/repos/${OWNER}/${REPO}/issues/${issueNumber}`);
   } catch (e) {
     console.error(`alert email: could not read issue #${issueNumber}: ${scrub(e, env)}`);
     return { ok: false, reason: 'issue_unreadable' };
@@ -981,7 +1064,7 @@ async function deliverAlertEmail(env, token, issueNumber, subject, lines) {
     // every tick for the rest of the outage.
     if (!labels.includes(EMAIL_FAILED_LABEL)) {
       try {
-        await ghRequest(token, `/repos/${OWNER}/${REPO}/issues/${issueNumber}/labels`, {
+        await ghRequest(gh, `/repos/${OWNER}/${REPO}/issues/${issueNumber}/labels`, {
           method: 'POST', body: { labels: [EMAIL_FAILED_LABEL] },
         });
       } catch (e) { console.error(`alert email: undelivered label failed: ${scrub(e, env)}`); }
@@ -998,7 +1081,7 @@ async function deliverAlertEmail(env, token, issueNumber, subject, lines) {
     return { ok: false, reason: sent.reason || 'send_failed' };
   }
   try {
-    await ghRequest(token, `/repos/${OWNER}/${REPO}/issues/${issueNumber}/labels`, {
+    await ghRequest(gh, `/repos/${OWNER}/${REPO}/issues/${issueNumber}/labels`, {
       method: 'POST', body: { labels: [EMAILED_LABEL] },
     });
   } catch (e) {
@@ -1021,9 +1104,10 @@ async function reportTickFailure(env, err, source) {
   try {
     const token = env.SUPERVISOR_GITHUB_TOKEN;
     if (!token) throw new Error('SUPERVISOR_GITHUB_TOKEN is not set');
-    const open = await openAlertIssues(token);
+    const gh = newTickContext(token); // its own budget: the failed tick's context is gone
+    const open = await openAlertIssues(gh);
     const r = await ensureIssue(
-      token,
+      gh,
       open,
       TITLE_TICK_FAILURE,
       [
@@ -1042,7 +1126,7 @@ async function reportTickFailure(env, err, source) {
         'This issue closes automatically on the next tick that completes.',
       ].join('\n')
     );
-    await deliverAlertEmail(env, token, r.number, TITLE_TICK_FAILURE, [
+    await deliverAlertEmail(env, gh, r.number, TITLE_TICK_FAILURE, [
       'The supervisor tick threw. While this is open, no freshness result is trustworthy:',
       'a tick that dies before evaluating cannot tell you whether a job is stale.',
       '',
