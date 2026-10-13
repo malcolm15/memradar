@@ -128,7 +128,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
   <meta name="theme-color" content="#0f1623">
-  <link rel="stylesheet" href="../css/style.css?v=20261012">
+  <link rel="stylesheet" href="../css/style.css?v=20261013">
 </head>
 <body>
 
@@ -165,7 +165,7 @@
   </header>
 
   <main>
-    <div class="content-page pi-page">
+    <div class="content-page pi-page pi-measure">
       <div class="page-header">
         <h1>The MemRadar Memory Price Index</h1>
         <p class="pim-monthline"><strong>September 2026 record</strong>, frozen October 12, 2026 <span class="pim-sep" aria-hidden="true">&middot;</span> <a href="/price-index/2026-09/">Full record with every paired product</a> <span class="pim-sep" aria-hidden="true">&middot;</span> <a href="/price-index/#pim-records">All records</a></p>
@@ -173,7 +173,7 @@
 
       <section class="pim-record" aria-labelledby="pim-headline">
         <p class="pim-headline" id="pim-headline">Across 61 DDR5 kits tracked in both months, the median same-product price change from September 2025 to September 2026 was +406%.</p>
-        <ul class="pim-cards pim-wide">
+        <ul class="pim-cards">
         <li class="pim-card">
           <p class="pim-card-seg">DDR5</p>
           <p class="pim-card-pct pi-up">+406%</p>
@@ -218,7 +218,7 @@
 
       <section class="pim-chart-section" aria-labelledby="pim-chart-h">
         <h2 id="pim-chart-h">RAM and SSD price change chart, October 2024 to September 2026</h2>
-        <figure class="pim-chart-wrap pim-wide">
+        <figure class="pim-chart-wrap">
           <div class="pim-chart-scroll">
 <svg xmlns="http://www.w3.org/2000/svg" class="pim-chart" viewBox="0 0 1200 620" role="img" aria-labelledby="pim-chart-title" aria-describedby="pim-chart-desc">
 <title id="pim-chart-title">RAM and SSD price change chart, October 2024 to September 2026</title>
@@ -412,7 +412,7 @@
         <h2 id="pim-records">All records</h2>
         <p class="pim-table-note">Every archived month, newest first: the median same-product change against the same month a year earlier and the number of listings paired, per segment. The October 2024 to September 2026 launch series was reconstructed from stored price history and frozen on October 12, 2026. Later records are frozen after their month ends, once a price fetch timestamped after the month boundary has landed, and are never recomputed; a correction is added as a dated entry rather than rewriting a record. Months from September 2026 onward link to their permanent record with every paired product. * fewer than 20 listings qualified; treat with caution.</p>
         <p class="pim-caption" id="pim-records-caption">Chart data: median change and n per segment, October 2024 to September 2026</p>
-        <div class="pi-table-wrap pim-wide" tabindex="0" role="region" aria-labelledby="pim-records-caption">
+        <div class="pi-table-wrap" tabindex="0" role="region" aria-labelledby="pim-records-caption">
           <table class="pi-table pim-records" id="pim-records-table">
             <thead><tr><th scope="col">Month</th><th scope="col">DDR5</th><th scope="col">n</th><th scope="col">DDR4</th><th scope="col">n</th><th scope="col">NVMe SSD</th><th scope="col">n</th><th scope="col">SATA SSD</th><th scope="col">n</th></tr></thead>
             <tbody>
@@ -448,7 +448,7 @@
 
       <h2 id="pim-full">Full figures for this record</h2>
       <p class="pim-caption" id="pim-full-caption">September 2025 to September 2026, per segment</p>
-      <div class="pi-table-wrap pim-wide" tabindex="0" role="region" aria-labelledby="pim-full-caption">
+      <div class="pi-table-wrap" tabindex="0" role="region" aria-labelledby="pim-full-caption">
         <table class="pi-table pim-full">
           <thead><tr><th scope="col">Segment</th><th scope="col">n</th><th scope="col">Median</th><th scope="col">p25 to p75</th><th scope="col">Share that rose</th><th scope="col">Leave-one-out low to high</th></tr></thead>
           <tbody>
@@ -525,9 +525,11 @@
       <p>Figures over longer windows rest on smaller, older product sets, since a product only counts if we tracked it that far back. As the catalog grows, a long-window figure can move when its cohort changes, independently of any price movement.</p>
       <p>Amazon price history is licensed from <strong>Keepa</strong>; Newegg pricing comes from an official <strong>Rakuten Advertising</strong> product feed. Prices refresh every few hours and the live reading is normally recomputed once a day. The catalog holds 235 products, 119 memory and 116 storage, with the deepest price history running back to 2015.</p>
 
-      <h2>Citing this data</h2>
-      <p>This data may be referenced and quoted with attribution. Suggested attribution line:</p>
-      <p class="pi-citation">Source: MemRadar Memory Price Index, memradar.com/price-index/</p>
+      <h2 id="citing">Citing this data</h2>
+      <p>This page has two kinds of Price Index figures, and each should be cited differently.</p>
+      <p><strong>The monthly record</strong>, the year-over-year figure: use the citation in <a href="#pimCitation">the record's citation box above</a>. It names the record, the date it was frozen and its permanent page, so the figure can be checked after the next record is published.</p>
+      <p><strong>The live market reading</strong>, the one-, three- and six-month figures: attribute it as the live reading, with the date it was computed, since it is recomputed and the figures move.</p>
+      <p class="pi-citation">Source: MemRadar Memory Price Index, live market reading computed <span id="piCitedDate">October 13, 2026 11:51 UTC</span>, memradar.com/price-index/</p>
       <p>If you are citing this data for a story, our <a href="/data/">data page for journalists and researchers</a> carries current findings, citation guidance, and custom cuts on request.</p>
       <p>A monthly series of segment medians is available as a <a href="/data/memradar-price-index-monthly.csv" download>CSV download</a>; it reports price levels, not the period changes in the table above.</p>
       <p>For questions about methodology or figures, email <a href="mailto:hello@memradar.com">hello@memradar.com</a>.</p>
@@ -597,12 +599,12 @@
     </div>
   </footer>
 
-  <script src="../js/main.js?v=20261012"></script>
-  <script src="../js/theme.js?v=20261012"></script>
-  <script src="../js/mobile-nav.js?v=20261012"></script>
+  <script src="../js/main.js?v=20261013"></script>
+  <script src="../js/theme.js?v=20261013"></script>
+  <script src="../js/mobile-nav.js?v=20261013"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="../js/supabase-client.js?v=20261012"></script>
-  <script src="../js/price-index.js?v=20261012"></script>
-  <script src="../js/search.js?v=20261012"></script>
+  <script src="../js/supabase-client.js?v=20261013"></script>
+  <script src="../js/price-index.js?v=20261013"></script>
+  <script src="../js/search.js?v=20261013"></script>
 </body>
 </html>

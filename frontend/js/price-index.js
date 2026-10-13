@@ -71,7 +71,10 @@
         var hh = String(when.getUTCHours()); if (hh.length < 2) hh = '0' + hh;
         var mm = String(when.getUTCMinutes()); if (mm.length < 2) mm = '0' + mm;
         var asOf = document.getElementById('piAsOf');
+        var cited = document.getElementById('piCitedDate');
         if (asOf) asOf.textContent = 'Last computed ' + d + ' ' + hh + ':' + mm + ' UTC';
+        // The live-reading citation carries the same computed stamp as "Last computed".
+        if (cited) cited.textContent = d + ' ' + hh + ':' + mm + ' UTC';
       }
     })
     .catch(function (e) { console.log('[price-index] hydration failed, keeping baked values:', e && e.message); });
