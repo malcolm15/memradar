@@ -312,6 +312,33 @@ const {
 } = require('../backend/lib/productParsers');
 const GLOSSARY = require('./glossary.js');
 const BLURBS = require('./blurb-overrides.js');
+// EVERY ENTRY IS VALIDATED AT LOAD, so a malformed entry stops the build
+// before anything is read or written, dry run included. The contract is
+// object-only: { text, admit, guide? }, with admit a required boolean. A plain
+// string is rejected rather than read as admitting, because the failure this
+// guards against is a page reaching the index that nobody decided to put
+// there: whether a blurb admits its page must be written on the entry itself.
+function validateBlurbEntry(sku, entry) {
+  if (typeof entry === 'string') {
+    throw new Error(`${sku} is a plain-text blurb: write it as { text, admit: true } or { text, admit: false } (a blurb never admits a page by default)`);
+  }
+  if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+    throw new Error(`blurb for ${sku} must be an object { text, admit, guide? }, got ${Array.isArray(entry) ? 'array' : typeof entry}`);
+  }
+  const extra = Object.keys(entry).filter((k) => !['text', 'admit', 'guide'].includes(k));
+  if (extra.length) throw new Error(`blurb for ${sku} has unknown field(s): ${extra.join(', ')}`);
+  if (typeof entry.text !== 'string' || !entry.text.trim()) throw new Error(`blurb for ${sku} has no text`);
+  if (!Object.prototype.hasOwnProperty.call(entry, 'admit')) {
+    throw new Error(`blurb for ${sku} is an object entry without "admit": state admit: true or admit: false explicitly (an omitted flag never means index this page)`);
+  }
+  if (typeof entry.admit !== 'boolean') throw new Error(`blurb for ${sku} has admit: ${JSON.stringify(entry.admit)}, which is not a boolean`);
+}
+for (const [sku, entry] of Object.entries(BLURBS)) validateBlurbEntry(sku, entry);
+// THE ONE PLACE THAT SAYS WHETHER A BLURB ADMITS ITS PAGE: only an entry that
+// says admit: true. Entries were validated above.
+function blurbAdmitsIndex(entry) {
+  return !!entry && entry.admit === true;
+}
 const CHART_IMAGES = require('./chart-images.js');
 
 // ------------------------------------------------------------------- slugs
@@ -1297,14 +1324,14 @@ function factGate(p, ctx) {
   return priced || gatePre2021History(p) || gateLatencyDistinct(p, ctx);
 }
 
-// Membership in scripts/blurb-overrides.js for this SKU, which is the predicate
-// the gate executes. NOT the presence of a pdp-blurb section in built HTML:
-// buildBlurb renders from this same map, so the map is the source and the
-// section is its output, and keying on the output would make the rule depend on
-// a page the rule helps build.
+// A blurb admits its page when its entry says admit: true (blurbAdmitsIndex)
+// AND the page has KEEP_MIN_READINGS of history. Read from
+// scripts/blurb-overrides.js, NOT from a pdp-blurb section in built HTML:
+// buildBlurb renders every entry, admitting or not, so the rendered section no
+// longer implies admission at all.
 function gateBlurb(p) {
   if (!BLURB_ADMITS_INDEX) return false;
-  return Object.prototype.hasOwnProperty.call(BLURBS, p.sku) && p.stats.days >= KEEP_MIN_READINGS;
+  return blurbAdmitsIndex(BLURBS[p.sku]) && p.stats.days >= KEEP_MIN_READINGS;
 }
 
 // HARD EXCLUSIONS outrank every gate including demand. Note what is NOT here:
@@ -1360,6 +1387,10 @@ function indexReasons(p, ctx) {
   // readable and a page can still be inspected for why it looks the way it
   // does. A reason code is a record, not a vote.
   if (gateBlurb(p)) out.push('blurb_annotated');
+  // A blurb shown to readers that deliberately does not admit. Recorded so
+  // index-decisions.json says why a page carries an About section and is still
+  // noindex; informational only, never read by any admit or exclude decision.
+  else if (BLURBS[p.sku] && !blurbAdmitsIndex(BLURBS[p.sku])) out.push('blurb_display_only');
   return out;
 }
 
@@ -1595,7 +1626,8 @@ function buildPriceAnalysis(ctx) {
 // ========================================================================
 
 // ---- R3 (2026-09-02): HAND-CURATED PRODUCT BLURB ------------------------
-// Renders only on the pages that have an entry in scripts/blurb-overrides.js.
+// Renders on every page that has an entry in scripts/blurb-overrides.js,
+// whether or not the entry admits the page to the index (blurbAdmitsIndex).
 // Pages without one render NOTHING, no placeholder, no generated substitute:
 // an auto-written blurb would be exactly the scaled content R1 removed, and the
 // value of these is that a person wrote them about a specific product line.
@@ -1603,11 +1635,9 @@ function buildPriceAnalysis(ctx) {
 // CONTENT, NOT STRUCTURE. This is a conditional block on the existing template,
 // the same override pattern as the titles. The R2 template freeze holds.
 //
-// Baked, never hydrated: static prose with no figures in it. The blurbs carry
-// no prices and no price history by design, because the page already has both
-// and prose that quoted them would go stale between regenerations.
-// An entry is either a plain string, or { text, guide } where guide is 'ram' or
-// 'ssd'. The optional guide adds a trailing link to that buying guide.
+// Baked, never hydrated. Blurbs may quote prices only in dated or closed-interval forms (rule set 2026-10-04, header of blurb-overrides.js), which cannot go stale between regenerations; never a current price.
+// An entry is { text, admit, guide? }; guide ('ram' or 'ssd') adds a trailing
+// link to that buying guide. Admission is gateBlurb's business, never this one's.
 //
 // THE LINK IS TEMPLATE-OWNED, THE COPY IS NOT. The blurb text still goes through
 // esc() as plain prose and no author ever writes markup; the anchor is built
@@ -1620,8 +1650,8 @@ const GUIDE_FOR = { ram: 'should-i-buy-ram-now', ssd: 'should-i-buy-an-ssd-now' 
 function buildBlurb(ctx) {
   const entry = BLURBS[ctx.p.sku];
   if (!entry) return '';
-  const body = typeof entry === 'string' ? entry : entry.text;
-  const guideKey = typeof entry === 'string' ? null : entry.guide;
+  const body = entry.text;
+  const guideKey = entry.guide || null;
   if (!body) throw new Error(`blurb for ${ctx.p.sku} has no text`);
 
   let guideLink = '';
