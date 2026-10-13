@@ -29,6 +29,9 @@ const { classifySegment, stablePctOf } = require('../backend/lib/marketStats');
 const { neweggDeepLink } = require('../backend/lib/rakutenLink');
 const { getState, setState } = require('../backend/lib/botState');
 const PI_ARCHIVE = require('../backend/lib/priceIndexArchive');
+const PY = require('../backend/lib/pairedYoy');
+const STATS = require('../backend/lib/stats');
+const CHANGE_CHART = require('./chart-images');
 
 const CONFIRM = process.argv.includes('--confirm');
 // Shrink guard: abort rather than delete if a run would emit materially fewer
@@ -3061,7 +3064,7 @@ const PI_PERIODS = ['1m', '3m', '6m', '1y'];
 const DATASET_ID = `${SITE}/data/#dataset`;
 const DATASET_LICENSE = `${SITE}/data/#how-to-cite`;
 
-function datasetJsonLd({ csvBounds, buildDate }) {
+function datasetJsonLd({ csvBounds, buildDate, extraDistribution = [] }) {
   if (!csvBounds) throw new Error('Dataset JSON-LD: no CSV bounds, so temporalCoverage cannot be stated honestly');
   const distribution = [
     {
@@ -3076,6 +3079,8 @@ function datasetJsonLd({ csvBounds, buildDate }) {
       contentUrl: `${SITE}/data/raycast-v1-market.json`,
       encodingFormat: 'application/json',
     },
+    // The latest record's own file (pimDownloads): the segment figures as JSON.
+    ...extraDistribution,
   ];
   // THE PER-PRODUCT FILE IS NOT PUBLISHED AND MUST NEVER BE DECLARED HERE.
   // Keepa's consent covers a downsampled per-product file FOR THE EXTENSION,
@@ -3112,17 +3117,316 @@ function piCellClass(pct) {
   return 'pi-up';
 }
 const piPct = (v) => (v == null ? 'n/a' : (v >= 0 ? '+' : '') + v + '%');
+// The Price Index's live reading: one decimal on every figure, and a value
+// under 0.05% in absolute terms reads 0.0% in the neutral grey with no sign,
+// the same rule as the record cards' month-over-month footer. price-index.js
+// applies the identical rule when it hydrates. piPct stays as it is for the
+// guides and /methodology/, which render the shared matrix.
+const piLiveFlat = (v) => v != null && Math.abs(v) < 0.05;
+const piLivePct = (v) => (v == null ? 'n/a' : piLiveFlat(v) ? '0.0%' : (v > 0 ? '+' : '') + v.toFixed(1) + '%');
+const piLiveClass = (v) => (v == null ? 'pi-na' : piLiveFlat(v) ? 'pim-flat' : piCellClass(v));
 
+// ------------------------------------------------ the frozen monthly record
+// Everything from here to buildPriceIndex renders from
+// scripts/price-index-monthly-archive.json and nothing else. A record's
+// published statistics are a function of its stored pairs alone, so both pages
+// can be reproduced from the file with no database, and a figure cannot move
+// between regens unless the archive does, which it is built not to.
+const PI_MONTH_PAGES_FROM = '2026-09'; // permanent month pages exist from this record forward
+const PI_CAUTION_N = 20;               // the qualifying floor; a figure under it carries a caution
+const PI_SENSITIVITY_PP = 5;           // a leave-one-out spread at or above this is called out
+const PI_UNIT = { ddr5: 'kit', ddr4: 'kit', nvme_ssd: 'drive', sata_ssd: 'drive' };
+const PI_HEADLINE_LABEL = { ddr5: 'DDR5', nvme_ssd: 'NVMe' };
+const pimUnit = (seg, n) => PI_UNIT[seg] + (n === 1 ? '' : 's');
+const pimWhole = (v) => `${v > 0 ? '+' : ''}${Math.round(v)}%`;
+const pimTwo = (v) => `${v > 0 ? '+' : ''}${Number(v).toFixed(2)}%`;
+const pimOne = (v) => `${v > 0 ? '+' : ''}${Number(v).toFixed(1)}%`;
+const pimShortMonth = (m) => `${MONTH_LONG[Number(m.slice(5))].slice(0, 3)} ${m.slice(0, 4)}`;
+const pimMonthUrl = (m) => `/price-index/${m}/`;
+const pimSep = '<span class="pim-sep" aria-hidden="true">&middot;</span>';
+
+function pimMonths(archive) {
+  return [...new Set(Object.values(archive.records).map((r) => r.month))].sort();
+}
+// Only complete months render anywhere: a partial month is an archive alarm,
+// not a record, and monthState is the one place that decides which it is.
+function pimFrozenMonths(archive) {
+  return pimMonths(archive).filter((m) => PI_ARCHIVE.monthState(archive, m).state === 'frozen');
+}
+function pimPageMonths(archive) {
+  return pimFrozenMonths(archive).filter((m) => m >= PI_MONTH_PAGES_FROM);
+}
+function pimRecord(archive, month) {
+  const recs = {};
+  for (const seg of PI_SEGMENTS) {
+    recs[seg.key] = archive.records[PI_ARCHIVE.recordKey(seg.key, month)];
+    if (!recs[seg.key]) throw new Error(`price index: no ${seg.key} record for ${month}`);
+  }
+  const corrections = (archive.corrections || []).filter((c) => c.month === month);
+  return {
+    month,
+    base_month: recs.ddr5.base_month,
+    frozen_at: recs.ddr5.frozen_at,
+    recs,
+    corrections,
+    // The visible publication date stays frozen_at; this only feeds dateModified.
+    latest_correction: corrections.map((c) => c.date).sort().pop() || null,
+  };
+}
+// Month over month, derived from the archive alone: the listings paired in
+// BOTH this month's record and the previous month's, each compared with
+// itself. It is a subset of the full catalog (a listing must also have
+// qualified a year earlier in both months), which is the price of a figure a
+// reader can recompute from the two published pairs files.
+function pimMom(archive, seg, month) {
+  const prev = PY.addMonths(month, -1);
+  const a = archive.records[PI_ARCHIVE.recordKey(seg, month)];
+  const b = archive.records[PI_ARCHIVE.recordKey(seg, prev)];
+  if (!a || !b) return null;
+  const cur = new Map(a.pairs.map((p) => [p.sku, p.current_price]));
+  const changes = b.pairs.filter((p) => cur.has(p.sku)).map((p) => (cur.get(p.sku) / p.current_price - 1) * 100);
+  if (!changes.length) return null;
+  return { prev, n: changes.length, pct: STATS.median(changes) };
+}
+function pimHeadlineSeg(rec) {
+  return rec.recs.ddr5.n >= PI_CAUTION_N ? 'ddr5' : 'nvme_ssd';
+}
+function pimHeadline(rec) {
+  const seg = pimHeadlineSeg(rec);
+  const r = rec.recs[seg];
+  return `Across ${r.n} ${PI_HEADLINE_LABEL[seg]} ${pimUnit(seg, r.n)} tracked in both months, the median same-product price change from ${monthLabel(rec.base_month)} to ${monthLabel(rec.month)} was ${pimWhole(r.median)}.`;
+}
+// At most one context line per card, by priority. Caution first because it
+// changes how the figure should be read; sensitivity next because it bounds
+// the figure; the NVMe disclosure and the middle pair are explanatory.
+function pimCardContext(seg, r) {
+  const u = PI_UNIT[seg];
+  if (r.n < PI_CAUTION_N) return { cls: ' pim-card-note--caution', text: `Caution: only ${r.n} ${pimUnit(seg, r.n)} qualified, under the ${PI_CAUTION_N} this index treats as enough to quote` };
+  if (r.loo_high - r.loo_low >= PI_SENSITIVITY_PP) return { cls: '', text: `Sensitive: dropping any one ${u} moves this between ${pimWhole(r.loo_low)} and ${pimWhole(r.loo_high)}` };
+  if (seg === 'nvme_ssd') return { cls: '', text: 'Includes heatsink versions of drives; excludes bundles with a service plan' };
+  if (r.middle_pair) return { cls: '', text: `Middle of ${r.n} changes: a ${u} that went from ${money(r.middle_pair.base_price)} to ${money(r.middle_pair.current_price)}` };
+  return null;
+}
+function pimCards(archive, rec) {
+  return PI_SEGMENTS.map((seg) => {
+    const r = rec.recs[seg.key];
+    const ctxLine = pimCardContext(seg.key, r);
+    const mom = pimMom(archive, seg.key, rec.month);
+    let foot = '';
+    if (mom) {
+      const flat = Math.abs(mom.pct) < 0.05;
+      const cls = flat ? 'pim-mom--flat' : piCellClass(mom.pct);
+      foot = `\n          <p class="pim-card-foot">vs. ${monthLabel(mom.prev)} (n ${mom.n}): <span class="pim-mom ${cls}">${flat ? '0.0%' : pimOne(mom.pct)}</span></p>`;
+    }
+    return `        <li class="pim-card">
+          <p class="pim-card-seg">${seg.label}</p>
+          <p class="pim-card-pct ${piCellClass(r.median)}">${pimWhole(r.median)}</p>
+          <p class="pim-card-span">${pimShortMonth(rec.base_month)} to ${pimShortMonth(rec.month)} &middot; n = ${r.n} ${pimUnit(seg.key, r.n)}</p>${ctxLine ? `\n          <p class="pim-card-note${ctxLine.cls}">${esc(ctxLine.text)}</p>` : ''}${foot}
+        </li>`;
+  }).join('\n');
+}
+function pimDefinition(rec) {
+  return `      <p class="pim-def"><strong>What this measures.</strong> For each product with at least 20 days of price coverage in both months, we take its median daily price in ${monthLabel(rec.month)} and compare it with its own median daily price in ${monthLabel(rec.base_month)}. The figure is the middle value across those products. Each comparison follows one listing (the same Amazon ASIN) across both months, so products launched in between are left out rather than mixed in.</p>
+      <p class="pim-def">History covers only products in MemRadar's catalog, which was assembled in July 2026; products discontinued before then are not represented. <a href="/methodology/#price-index">How the record is built, and what it cannot tell you.</a></p>`;
+}
+function pimCitationText(rec) {
+  const parts = PI_SEGMENTS.map((seg) => `${seg.label} ${pimWhole(rec.recs[seg.key].median)} (n=${rec.recs[seg.key].n})`).join(', ');
+  return `MemRadar Memory Price Index, ${monthLabel(rec.month)} record (frozen ${longDate(rec.frozen_at)}). Median same-product price change, ${monthLabel(rec.base_month)} to ${monthLabel(rec.month)}: ${parts}. ${SITE}${pimMonthUrl(rec.month)}`;
+}
+// The record JSON only. A per-listing download (each paired listing's two
+// monthly prices as a file) was built and withdrawn on 2026-10-12 pending
+// Keepa's written confirmation: display on memradar.com is covered by consent
+// 1, a downloadable per-product file is not. The month page's HTML list stays.
+function pimDownloadPaths(month) {
+  return { json: `/data/price-index/${month}.json` };
+}
+function pimCorrectionsHtml(rec) {
+  if (!rec.corrections.length) return '      <p class="pim-corrections">No corrections to this record.</p>';
+  const rows = rec.corrections.map((c) => `            <tr><td>${esc(c.date)}</td><td>${esc(PI_SEGMENTS.find((x) => x.key === c.segment).label)}</td><td>${esc(c.field)}</td><td>${esc(String(c.original))}</td><td>${esc(String(c.revised))}</td><td class="pim-name">${esc(c.reason)}</td><td class="pim-sku">${esc(c.commit)}</td></tr>`).join('\n');
+  return `      <p class="pim-corrections">Corrections to this record. The original figures stand above as published; each correction carries its revised value, date and reason.</p>
+      <div class="pi-table-wrap" tabindex="0" role="region" aria-label="Corrections to this record, scrollable">
+        <table class="pi-table pim-corrections-table">
+          <thead><tr><th scope="col">Date</th><th scope="col">Segment</th><th scope="col">Field</th><th scope="col">Original</th><th scope="col">Revised</th><th scope="col">Reason</th><th scope="col">Commit</th></tr></thead>
+          <tbody>
+${rows}
+          </tbody>
+        </table>
+      </div>`;
+}
+function pimCitationBox(rec) {
+  const dl = pimDownloadPaths(rec.month);
+  return `      <div class="pim-cite">
+        <p class="pim-cite-text" id="pimCitation">${esc(pimCitationText(rec))}</p>
+        <p class="pim-cite-actions"><button type="button" class="pim-copy" id="pimCopy" hidden>Copy citation</button><span class="pim-copy-status" id="pimCopyStatus" aria-live="polite"></span><span>Download: <a href="${dl.json}" download>record JSON</a> (segment figures, no listing data)</span></p>
+${pimCorrectionsHtml(rec)}
+      </div>`;
+}
+// The record block shared by /price-index/ and the month page: headline, the
+// four cards, the definition and the citation box.
+function pimRecordHtml(archive, rec) {
+  return `      <section class="pim-record" aria-labelledby="pim-headline">
+        <p class="pim-headline" id="pim-headline">${esc(pimHeadline(rec))}</p>
+        <ul class="pim-cards pim-wide">
+${pimCards(archive, rec)}
+        </ul>
+${pimDefinition(rec)}
+${pimCitationBox(rec)}
+      </section>`;
+}
+function pimFullFiguresHtml(rec) {
+  const rows = PI_SEGMENTS.map((seg) => {
+    const r = rec.recs[seg.key];
+    return `            <tr><th scope="row">${seg.label}</th><td>${r.n}</td><td>${pimTwo(r.median)}</td><td>${pimTwo(r.p25)} to ${pimTwo(r.p75)}</td><td>${Math.round(r.rose_share)}%</td><td>${pimTwo(r.loo_low)} to ${pimTwo(r.loo_high)}</td></tr>`;
+  }).join('\n');
+  return `      <h2 id="pim-full">Full figures for this record</h2>
+      <p class="pim-caption" id="pim-full-caption">${monthLabel(rec.base_month)} to ${monthLabel(rec.month)}, per segment</p>
+      <div class="pi-table-wrap pim-wide" tabindex="0" role="region" aria-labelledby="pim-full-caption">
+        <table class="pi-table pim-full">
+          <thead><tr><th scope="col">Segment</th><th scope="col">n</th><th scope="col">Median</th><th scope="col">p25 to p75</th><th scope="col">Share that rose</th><th scope="col">Leave-one-out low to high</th></tr></thead>
+          <tbody>
+${rows}
+          </tbody>
+        </table>
+      </div>
+      <p class="pi-scrollhint">Scroll the table sideways to see every column.</p>
+      <p class="pim-table-note">n is the number of listings paired. p25 and p75 are the quartiles of the per-product changes. Leave-one-out is the range the median takes when any single listing is dropped.</p>`;
+}
+// HOW EACH RECORD CAME TO BE FROZEN, stated from the archive rather than from
+// copy. The launch series carries reconstructed: true on every record: it was
+// computed from stored history on one day, not at each month's end, and no
+// sentence may imply otherwise. Later records freeze on the first regeneration
+// after a price fetch timestamped past the month boundary (freezeMonth).
+function pimProvenanceSentence(archive, months) {
+  const recon = months.filter((m) => archive.records[PI_ARCHIVE.recordKey('ddr5', m)].reconstructed);
+  const parts = [];
+  if (recon.length) {
+    const last = archive.records[PI_ARCHIVE.recordKey('ddr5', recon[recon.length - 1])];
+    parts.push(`The ${monthLabel(recon[0])} to ${monthLabel(recon[recon.length - 1])} launch series was reconstructed from stored price history and frozen on ${longDate(last.frozen_at)}.`);
+  }
+  parts.push(`${recon.length ? 'Later records' : 'Records'} are frozen after their month ends, once a price fetch timestamped after the month boundary has landed, and are never recomputed; a correction is added as a dated entry rather than rewriting a record.`);
+  return parts.join(' ');
+}
+// The chart and its data table: every archived month, all four segments. The
+// table is the accessible form of the chart and the all-records index both,
+// which is why the month cell links to the permanent page where one exists.
+function pimChartHtml(archive, pageMonths) {
+  const months = pimFrozenMonths(archive);
+  const records = {};
+  for (const m of months) for (const seg of PI_SEGMENTS) {
+    const r = archive.records[PI_ARCHIVE.recordKey(seg.key, m)];
+    records[`${seg.key}|${m}`] = { n: r.n, median: r.median };
+  }
+  const chart = CHANGE_CHART.changeChartSvg({ records, months, refN: PI_CAUTION_N });
+  const pages = new Set(pageMonths);
+  const head = PI_SEGMENTS.map((seg) => `<th scope="col">${seg.label}</th><th scope="col">n</th>`).join('');
+  let lowN = false;
+  const rows = [...months].reverse().map((m) => {
+    const cells = PI_SEGMENTS.map((seg) => {
+      const r = archive.records[PI_ARCHIVE.recordKey(seg.key, m)];
+      const low = r.n < PI_CAUTION_N;
+      if (low) lowN = true;
+      return `<td>${pimTwo(r.median)}</td><td${low ? ' class="pim-dash"' : ''}>${r.n}${low ? '*' : ''}</td>`;
+    }).join('');
+    const label = pages.has(m) ? `<a href="${pimMonthUrl(m)}">${monthLabel(m)}</a>` : monthLabel(m);
+    return `            <tr><th scope="row">${label}</th>${cells}</tr>`;
+  }).join('\n');
+  return {
+    heading: chart.heading,
+    html: `      <section class="pim-chart-section" aria-labelledby="pim-chart-h">
+        <h2 id="pim-chart-h">${esc(chart.heading)}</h2>
+        <figure class="pim-chart-wrap pim-wide">
+          <div class="pim-chart-scroll">
+${chart.svg}
+            <div class="pim-chart-axis" aria-hidden="true">${chart.axis}</div>
+          </div>
+          <figcaption class="pim-chart-caption">Median same-product price change against the same month a year earlier, for every archived monthly record. The bars show how many products were paired in each month; the dotted line marks n = ${PI_CAUTION_N}, below which a figure is treated with caution. Every value is in the table below.</figcaption>
+        </figure>
+        <p class="pim-chart-hint">Scroll the chart sideways on a narrow screen.</p>
+        <h2 id="pim-records">All records</h2>
+        <p class="pim-table-note">Every archived month, newest first: the median same-product change against the same month a year earlier and the number of listings paired, per segment. ${pimProvenanceSentence(archive, months)} Months from ${monthLabel(PI_MONTH_PAGES_FROM)} onward link to their permanent record with every paired product.${lowN ? ` * fewer than ${PI_CAUTION_N} listings qualified; treat with caution.` : ''}</p>
+        <p class="pim-caption" id="pim-records-caption">Chart data: median change and n per segment, ${monthLabel(months[0])} to ${monthLabel(months[months.length - 1])}</p>
+        <div class="pi-table-wrap pim-wide" tabindex="0" role="region" aria-labelledby="pim-records-caption">
+          <table class="pi-table pim-records" id="pim-records-table">
+            <thead><tr><th scope="col">Month</th>${head}</tr></thead>
+            <tbody>
+${rows}
+            </tbody>
+          </table>
+        </div>
+        <p class="pi-scrollhint">Scroll the table sideways to see every column.</p>
+      </section>`,
+  };
+}
+function pimMonthLine(archive, rec, pageMonths, { onIndex }) {
+  const prev = PY.addMonths(rec.month, -1);
+  const next = PY.addMonths(rec.month, 1);
+  const parts = [`<strong>${monthLabel(rec.month)} record</strong>, frozen ${longDate(rec.frozen_at)}`];
+  if (onIndex) parts.push(`<a href="${pimMonthUrl(rec.month)}">Full record with every paired product</a>`);
+  else parts.push('<a href="/price-index/">Latest record and chart</a>');
+  if (pageMonths.includes(prev)) parts.push(`<a href="${pimMonthUrl(prev)}">Previous month: ${monthLabel(prev)}</a>`);
+  if (!onIndex && pageMonths.includes(next)) parts.push(`<a href="${pimMonthUrl(next)}">Next month: ${monthLabel(next)}</a>`);
+  parts.push(`<a href="/price-index/#pim-records">All records</a>`);
+  return parts.join(` ${pimSep} `);
+}
+// The per-record download: AGGREGATES ONLY. Each segment record minus its
+// pairs, its middle pair and its exclusion SKU lists, so the file carries no
+// listing-level value of any kind: no ASIN, no per-product price, no name.
+// Those stay on the month page, where display on memradar.com is covered.
+// Asserted below rather than trusted to review: the serialised file must
+// contain no ASIN-shaped string and none of the listing-level keys.
+const PIM_JSON_FORBIDDEN_KEYS = ['pairs', 'sku', 'asin', 'base_price', 'current_price', 'middle_pair', 'name', 'exclusions'];
+function pimDownloads(archive, rec) {
+  const paths = pimDownloadPaths(rec.month);
+  const records = {};
+  for (const seg of PI_SEGMENTS) {
+    const { pairs, middle_pair, exclusions, ...rest } = rec.recs[seg.key];
+    records[seg.key] = {
+      ...rest,
+      pair_count: pairs.length,
+      exclusion_counts: Object.fromEntries(Object.entries(exclusions || {}).map(([k, v]) => [k, v.length])),
+    };
+  }
+  const corrections = rec.corrections.map(({ replacement, ...c }) => c); // a replacement record carries pairs
+  const json = JSON.stringify({
+    metric_id: archive.metric_id,
+    metric_version: archive.metric_version,
+    month: rec.month,
+    base_month: rec.base_month,
+    frozen_at: rec.frozen_at,
+    definition: archive.definition,
+    source: `${SITE}${pimMonthUrl(rec.month)}`,
+    contents: 'Segment-level figures only. The paired listings behind them are shown on the source page and are not distributed as a file.',
+    attribution: 'MemRadar Memory Price Index, memradar.com/price-index/. These figures are medians computed by MemRadar across products from licensed Keepa price history, not the raw licensed data.',
+    corrections,
+    records,
+  }, null, 2) + '\n';
+  if (/B0[A-Z0-9]{8}/.test(json)) throw new Error('record JSON carries an ASIN-shaped value');
+  const keys = new Set();
+  JSON.parse(json, (k, v) => { keys.add(k); return v; });
+  for (const k of PIM_JSON_FORBIDDEN_KEYS) if (keys.has(k)) throw new Error(`record JSON carries a listing-level key: ${k}`);
+  return { paths, json };
+}
+function pimDistribution(rec) {
+  const paths = pimDownloadPaths(rec.month);
+  return [
+    { '@type': 'DataDownload', name: `${monthLabel(rec.month)} record: segment figures and rule (JSON)`, contentUrl: `${SITE}${paths.json}`, encodingFormat: 'application/json' },
+  ];
+}
 function buildPriceIndex(ctx) {
-  const { marketStats, products, statsBySku, computedAt, buildCostSectionHtml } = ctx;
+  const { marketStats, products, statsBySku, computedAt, buildCostSectionHtml, archive, pageMonths } = ctx;
+  if (!archive) throw new Error('price index: no archive, so no record to render');
   const bySegPeriod = new Map();
   marketStats.forEach((r) => bySegPeriod.set(r.segment + '|' + r.period, r));
 
+  // The live market reading: per-period matched-subset medians from
+  // market_stats, hydrated by price-index.js. Each cell carries the figure and
+  // its n in separate spans so both can hydrate from the same row.
   const rows = PI_SEGMENTS.map((seg) => {
     const cells = PI_PERIODS.map((per) => {
       const r = bySegPeriod.get(seg.key + '|' + per);
       const pct = r && r.pct_change != null ? Number(r.pct_change) : null;
-      return `              <td class="pi-cell ${piCellClass(pct)}" id="pi-${seg.key}-${per}" data-seg="${seg.key}" data-period="${per}">${piPct(pct)}</td>`;
+      const n = r && r.product_count != null ? Number(r.product_count) : null;
+      return `              <td><span class="pi-cell ${piLiveClass(pct)}" id="pi-${seg.key}-${per}" data-seg="${seg.key}" data-period="${per}">${piLivePct(pct)}</span><span class="pim-n" id="pi-${seg.key}-${per}-n">${n == null ? '' : 'n ' + n}</span></td>`;
     }).join('\n');
     return `            <tr>\n              <th scope="row">${seg.label}</th>\n${cells}\n            </tr>`;
   }).join('\n');
@@ -3213,19 +3517,35 @@ function buildPriceIndex(ctx) {
     }
   }
   notables.push(`<strong>${nearLow} of ${products.length} tracked products sit within 5% of their all-time low</strong>, the closest thing to a buying opportunity in the current market.`);
-  notables.push(`<strong>The index draws on ${observations.toLocaleString('en-US')} daily price points</strong>, the deepest series running back to ${oldestYear}.`);
+  // `observations` sums p.series.length: one entry per product per UTC day on
+  // which an in-stock price is stored (buildDailySeries). Before 2026-07-22 the
+  // stored history is Keepa change points, so a day is present only when the
+  // price moved; "daily price points" overstated it and the sentence now says
+  // what the count is.
+  notables.push(`<strong>The index draws on ${observations.toLocaleString('en-US')} product-days of stored prices</strong>, with the deepest series running back to ${oldestYear}.`);
 
   const flagship = ctx.flagship.map((f) =>
     `        <li><a href="../${f.category}/${f.slug}/">${esc(f.short)}</a>, tracked since ${f.since}</li>`).join('\n');
 
   const computedDate = longDate(computedAt);
+  // "Last computed <date time> UTC" for the live reading: the stats run's own
+  // timestamp to the minute, which is what distinguishes a morning compute from
+  // a hand-run afternoon one on the page itself.
+  const computedStamp = `${computedDate} ${computedAt.slice(11, 16)} UTC`;
+  // The record: always the newest frozen month, and it must have a month page,
+  // because the citation text and the record line both point at it.
+  const latestMonth = pimFrozenMonths(archive).pop();
+  if (!latestMonth) throw new Error('price index: the archive holds no complete month');
+  if (!pageMonths.includes(latestMonth)) throw new Error(`price index: the latest record ${latestMonth} has no month page`);
+  const rec = pimRecord(archive, latestMonth);
+  const chart = pimChartHtml(archive, pageMonths);
   const headline = y.length ? `${segLabel(y[0].segment)} is up ${piPct(Number(y[0].pct_change))} year over year` : 'Median price changes across RAM and SSD';
   const metaDesc = esc(`${headline}. Median price changes across ${products.length} tracked RAM and SSD products, from live price history. Updated daily.`);
 
   const jsonld = JSON.stringify({
     '@context': 'https://schema.org',
     '@graph': [
-      datasetJsonLd({ csvBounds: ctx.csvBounds, buildDate: computedAt.slice(0, 10) }),
+      datasetJsonLd({ csvBounds: ctx.csvBounds, buildDate: computedAt.slice(0, 10), extraDistribution: pimDistribution(rec) }),
       { '@type': 'WebPage', name: 'The MemRadar Memory Price Index', url: SITE + '/price-index/' },
       {
         '@type': 'BreadcrumbList',
@@ -3238,9 +3558,16 @@ function buildPriceIndex(ctx) {
   }, null, 2);
 
   const tpl = fs.readFileSync(path.join(FRONTEND, 'price-index', 'template.html'), 'utf8');
+  for (const anchor of ['<!--MONTH_LINE-->', '<!--RECORD-->', '<!--CHART-->', '<!--FULL_FIGURES-->', '<!--COMPUTED_STAMP-->', '<!--INDEX_ROWS-->']) {
+    if (!tpl.includes(anchor)) throw new Error(`price index template is missing ${anchor}`);
+  }
   return tpl
     .replace(/<!--META_DESC-->/g, metaDesc)
     .replace('<!--JSONLD-->', `<script type="application/ld+json">\n${jsonld}\n  </script>`)
+    .replace('<!--MONTH_LINE-->', pimMonthLine(archive, rec, pageMonths, { onIndex: true }))
+    .replace('<!--RECORD-->', pimRecordHtml(archive, rec))
+    .replace('<!--CHART-->', chart.html)
+    .replace('<!--FULL_FIGURES-->', pimFullFiguresHtml(rec))
     .replace('<!--INDEX_ROWS-->', rows)
     .replace('<!--NOTABLES-->', notables.map((n) => `        <li>${n}</li>`).join('\n'))
     .replace('<!--BUILD_COST_SECTION-->', buildCostSectionHtml || '')
@@ -3249,6 +3576,7 @@ function buildPriceIndex(ctx) {
     .replace(/<!--RAM_COUNT-->/g, String(ram))
     .replace(/<!--SSD_COUNT-->/g, String(ssd))
     .replace(/<!--OLDEST_YEAR-->/g, oldestYear)
+    .replace(/<!--COMPUTED_STAMP-->/g, computedStamp)
     .replace(/<!--COMPUTED_DATE-->/g, computedDate);
 }
 
@@ -4668,6 +4996,7 @@ function buildCostSection(figures) {
   if (!cur || !d4 || cur.floorPct == null || d4.floorPct == null) return '';
   const spark = sparkline(cur.rows.map((r) => Number(r[2])), 'pi-bc');
   return `      <h2>What a build's memory and storage costs</h2>
+      <p>This is a dollar basket of one DDR5 kit and two NVMe drives, so it moves differently from the per-segment medians above.</p>
       <p>The index above measures change. This measures level: what a fixed basket of parts cost, added up. In <strong>${monthLabel(cur.month)}</strong>, the memory and storage for a current build (a 32GB DDR5-6000 kit, a 1TB NVMe drive and a 2TB NVMe drive) cost <strong>${usdWhole(cur.total)}</strong>. The same parts around a DDR4 board (a 32GB DDR4-3200 kit and a 1TB NVMe drive) cost <strong>${usdWhole(d4.total)}</strong>.</p>
       <p>Against the same month a year earlier, the current build is <span data-claim="buildcost-current-yoy" data-floor-pct="${cur.floorPct}">up more than ${cur.floorPct}%</span> and the DDR4 build is <span data-claim="buildcost-ddr4-yoy" data-floor-pct="${d4.floorPct}">up more than ${d4.floorPct}%</span>. These are regular Amazon listing prices, not deals. Each month's figure is fixed once that month ends; the current month is not shown.</p>
       ${spark}
@@ -6723,12 +7052,21 @@ async function run() {
     }));
     const computedAt = msRows.map((r) => r.computed_at).sort().pop();
     buildFigures = buildCostFigures(buildCsvRows, msRows);
-    const html = buildPriceIndex({ marketStats: msRows, products: generable, statsBySku, flagship, computedAt, csvBounds, buildCostSectionHtml: buildCostSection(buildFigures) });
-    const outDir = path.join(FRONTEND, 'price-index');
-    fs.mkdirSync(outDir, { recursive: true });
-    fs.writeFileSync(path.join(outDir, 'index.html'), html);
-
-    log(`Price index written: ${msRows.length} market_stats rows, computed ${computedAt.slice(0, 10)}`);
+    // THE RECORD COMES FROM THE ARCHIVE AS IT STANDS AFTER THE FREEZE ABOVE,
+    // re-read here because the freeze block's handle is scoped to it. No
+    // archive means no record, and a page with no record is not the Price
+    // Index, so the page is left at its last good build (stale beats wrong).
+    const piArchive = PI_ARCHIVE.readArchive();
+    if (!piArchive) {
+      log('⚠ price index archive missing - /price-index/ and its month pages NOT regenerated this run');
+    } else {
+      const pageMonths = pimPageMonths(piArchive);
+      const html = buildPriceIndex({ marketStats: msRows, products: generable, statsBySku, flagship, computedAt, csvBounds, buildCostSectionHtml: buildCostSection(buildFigures), archive: piArchive, pageMonths });
+      const outDir = path.join(FRONTEND, 'price-index');
+      fs.mkdirSync(outDir, { recursive: true });
+      fs.writeFileSync(path.join(outDir, 'index.html'), html);
+      log(`Price index written: ${msRows.length} market_stats rows, computed ${computedAt.slice(0, 10)}; record ${pimFrozenMonths(piArchive).pop()}, ${pageMonths.length} month page(s): ${pageMonths.join(', ') || 'none'}`);
+    }
   }
 
   // 2b-ii) /build-cost/. Needs the monthly series AND the market_stats 1y rows

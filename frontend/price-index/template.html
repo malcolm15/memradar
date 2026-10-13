@@ -85,20 +85,26 @@
     <div class="content-page pi-page">
       <div class="page-header">
         <h1>The MemRadar Memory Price Index</h1>
-        <p class="pi-lede">Median price changes across <!--PRODUCT_COUNT--> tracked RAM and SSD products, computed from live price history and updated daily.</p>
-        <p class="pi-asof" id="piAsOf">Last computed <!--COMPUTED_DATE--></p>
-        <!-- The trio (/ram/, /ssd/, /price-index/) answers one question for one
-             searcher, so each links the other two in the first screen rather
-             than only in the footer. These two links already existed under
-             "Explore the data" at 90% of the way down <main>, which is not
-             where someone arriving on a category-intent query will find them. -->
-        <p class="pi-lede pi-explore">Or browse the tracked products themselves: <a href="../ram/">RAM Price Tracker</a> &middot; <a href="../ssd/">SSD Price Tracker</a></p>
+        <p class="pim-monthline"><!--MONTH_LINE--></p>
       </div>
 
-      <div class="pi-table-wrap" tabindex="0" role="region" aria-label="Memory price index table, scrollable">
+<!--RECORD-->
+      <!-- The trio (/ram/, /ssd/, /price-index/) answers one question for one
+           searcher, so each links the other two near the top rather than only
+           in the footer. Below the record, not above it: the record is what
+           the page is for. -->
+      <p class="pi-explore">Or browse the tracked products themselves: <a href="../ram/">RAM Price Tracker</a> &middot; <a href="../ssd/">SSD Price Tracker</a></p>
+
+<!--CHART-->
+
+<!--FULL_FIGURES-->
+
+      <h2 id="pim-live">Live market reading</h2>
+      <p class="pim-live-note">What prices have done lately, normally recomputed once a day from each product's latest prices. Short periods only; for the year-over-year figure, use the monthly record above.</p>
+      <div class="pi-table-wrap" tabindex="0" role="region" aria-label="Live market reading table, scrollable">
         <table class="pi-table" id="piTable">
           <thead>
-            <tr><th scope="col">Segment</th><th scope="col">1 month</th><th scope="col">3 months</th><th scope="col">6 months</th><th scope="col">1 year</th></tr>
+            <tr><th scope="col">Segment</th><th scope="col" class="pim-th-primary">1 month</th><th scope="col">3 months</th><th scope="col">6 months</th><th scope="col">1 year</th></tr>
           </thead>
           <tbody>
 <!--INDEX_ROWS-->
@@ -106,7 +112,8 @@
         </table>
       </div>
       <p class="pi-scrollhint">Scroll the table sideways to see every period.</p>
-      <p class="pi-tablenote">Last computed <span id="piComputedNote"><!--COMPUTED_DATE--></span> · median-based · per-period fairness subsets</p>
+      <p class="pi-asof" id="piAsOf">Last computed <!--COMPUTED_STAMP--></p>
+      <p class="pi-tablenote">Medians over per-period matched subsets; n is the subset size.</p>
 
       <h2>Notable numbers</h2>
       <ul class="pi-notables">
@@ -115,11 +122,12 @@
 
 <!--BUILD_COST_SECTION-->
       <h2>Methodology</h2>
-      <p>The summary below covers the index itself. <a href="/methodology/">How MemRadar tracks prices</a> is the full reference: where the data comes from, how every figure is calculated, and what it cannot tell you.</p>
+      <p>The monthly record at the top is the index's year-over-year figure. It compares each listing with itself a year earlier, using the median of its daily prices in each month. For months after the launch series, a record is frozen after its month ends, once a price fetch timestamped after the month boundary has landed, and is never recomputed; the launch series from October 2024 to September 2026 was reconstructed from stored price history and frozen on October 12, 2026. A correction is listed with its date rather than rewriting the figure. The live market reading and the summary below cover the short-period figures.</p>
+      <p>The summary below covers the live reading. <a href="/methodology/">How MemRadar tracks prices</a> is the full reference: where the data comes from, how every figure is calculated, and what it cannot tell you.</p>
       <p>Every figure is a <strong>median</strong>, not an average. A single mispriced listing at $1,900 drags a mean badly in a segment of thirty products; the median reports the typical price and stays stable as the catalog changes.</p>
       <p>Each period compares <strong>the same set of products in both timeframes</strong>. A product only counts toward a period if we have both a current price and a price from that period's baseline window, and both medians are computed over that same subset. Products added recently cannot distort a one-year figure by appearing on only one side of it. Subset sizes differ between periods for this reason, and that is the honest result rather than a flaw.</p>
       <p>Figures over longer windows rest on smaller, older product sets, since a product only counts if we tracked it that far back. As the catalog grows, a long-window figure can move when its cohort changes, independently of any price movement.</p>
-      <p>Amazon price history is licensed from <strong>Keepa</strong>; Newegg pricing comes from an official <strong>Rakuten Advertising</strong> product feed. Prices refresh every few hours and the index is recomputed daily. The catalog holds <!--PRODUCT_COUNT--> products, <!--RAM_COUNT--> memory and <!--SSD_COUNT--> storage, with the deepest price history running back to <!--OLDEST_YEAR-->.</p>
+      <p>Amazon price history is licensed from <strong>Keepa</strong>; Newegg pricing comes from an official <strong>Rakuten Advertising</strong> product feed. Prices refresh every few hours and the live reading is normally recomputed once a day. The catalog holds <!--PRODUCT_COUNT--> products, <!--RAM_COUNT--> memory and <!--SSD_COUNT--> storage, with the deepest price history running back to <!--OLDEST_YEAR-->.</p>
 
       <h2>Citing this data</h2>
       <p>This data may be referenced and quoted with attribution. Suggested attribution line:</p>

@@ -87,6 +87,12 @@
           "name": "Segment medians and period changes (JSON)",
           "contentUrl": "https://memradar.com/data/raycast-v1-market.json",
           "encodingFormat": "application/json"
+        },
+        {
+          "@type": "DataDownload",
+          "name": "September 2026 record: segment figures and rule (JSON)",
+          "contentUrl": "https://memradar.com/data/price-index/2026-09.json",
+          "encodingFormat": "application/json"
         }
       ],
       "dateModified": "2026-10-12"
@@ -162,65 +168,353 @@
     <div class="content-page pi-page">
       <div class="page-header">
         <h1>The MemRadar Memory Price Index</h1>
-        <p class="pi-lede">Median price changes across 235 tracked RAM and SSD products, computed from live price history and updated daily.</p>
-        <p class="pi-asof" id="piAsOf">Last computed October 12, 2026</p>
-        <!-- The trio (/ram/, /ssd/, /price-index/) answers one question for one
-             searcher, so each links the other two in the first screen rather
-             than only in the footer. These two links already existed under
-             "Explore the data" at 90% of the way down <main>, which is not
-             where someone arriving on a category-intent query will find them. -->
-        <p class="pi-lede pi-explore">Or browse the tracked products themselves: <a href="../ram/">RAM Price Tracker</a> &middot; <a href="../ssd/">SSD Price Tracker</a></p>
+        <p class="pim-monthline"><strong>September 2026 record</strong>, frozen October 12, 2026 <span class="pim-sep" aria-hidden="true">&middot;</span> <a href="/price-index/2026-09/">Full record with every paired product</a> <span class="pim-sep" aria-hidden="true">&middot;</span> <a href="/price-index/#pim-records">All records</a></p>
       </div>
 
-      <div class="pi-table-wrap" tabindex="0" role="region" aria-label="Memory price index table, scrollable">
+      <section class="pim-record" aria-labelledby="pim-headline">
+        <p class="pim-headline" id="pim-headline">Across 61 DDR5 kits tracked in both months, the median same-product price change from September 2025 to September 2026 was +406%.</p>
+        <ul class="pim-cards pim-wide">
+        <li class="pim-card">
+          <p class="pim-card-seg">DDR5</p>
+          <p class="pim-card-pct pi-up">+406%</p>
+          <p class="pim-card-span">Sep 2025 to Sep 2026 &middot; n = 61 kits</p>
+          <p class="pim-card-note">Middle of 61 changes: a kit that went from $90.99 to $459.99</p>
+          <p class="pim-card-foot">vs. August 2026 (n 58): <span class="pim-mom pi-neutral">+6.4%</span></p>
+        </li>
+        <li class="pim-card">
+          <p class="pim-card-seg">DDR4</p>
+          <p class="pim-card-pct pi-up">+172%</p>
+          <p class="pim-card-span">Sep 2025 to Sep 2026 &middot; n = 28 kits</p>
+          <p class="pim-card-foot">vs. August 2026 (n 28): <span class="pim-mom pi-neutral">+4.1%</span></p>
+        </li>
+        <li class="pim-card">
+          <p class="pim-card-seg">NVMe SSD</p>
+          <p class="pim-card-pct pi-up">+152%</p>
+          <p class="pim-card-span">Sep 2025 to Sep 2026 &middot; n = 66 drives</p>
+          <p class="pim-card-note">Includes heatsink versions of drives; excludes bundles with a service plan</p>
+          <p class="pim-card-foot">vs. August 2026 (n 64): <span class="pim-mom pi-neutral">+0.3%</span></p>
+        </li>
+        <li class="pim-card">
+          <p class="pim-card-seg">SATA SSD</p>
+          <p class="pim-card-pct pi-up">+156%</p>
+          <p class="pim-card-span">Sep 2025 to Sep 2026 &middot; n = 27 drives</p>
+          <p class="pim-card-note">Sensitive: dropping any one drive moves this between +154% and +165%</p>
+          <p class="pim-card-foot">vs. August 2026 (n 26): <span class="pim-mom pim-mom--flat">0.0%</span></p>
+        </li>
+        </ul>
+      <p class="pim-def"><strong>What this measures.</strong> For each product with at least 20 days of price coverage in both months, we take its median daily price in September 2026 and compare it with its own median daily price in September 2025. The figure is the middle value across those products. Each comparison follows one listing (the same Amazon ASIN) across both months, so products launched in between are left out rather than mixed in.</p>
+      <p class="pim-def">History covers only products in MemRadar's catalog, which was assembled in July 2026; products discontinued before then are not represented. <a href="/methodology/#price-index">How the record is built, and what it cannot tell you.</a></p>
+      <div class="pim-cite">
+        <p class="pim-cite-text" id="pimCitation">MemRadar Memory Price Index, September 2026 record (frozen October 12, 2026). Median same-product price change, September 2025 to September 2026: DDR5 +406% (n=61), DDR4 +172% (n=28), NVMe SSD +152% (n=66), SATA SSD +156% (n=27). https://memradar.com/price-index/2026-09/</p>
+        <p class="pim-cite-actions"><button type="button" class="pim-copy" id="pimCopy" hidden>Copy citation</button><span class="pim-copy-status" id="pimCopyStatus" aria-live="polite"></span><span>Download: <a href="/data/price-index/2026-09.json" download>record JSON</a> (segment figures, no listing data)</span></p>
+      <p class="pim-corrections">No corrections to this record.</p>
+      </div>
+      </section>
+      <!-- The trio (/ram/, /ssd/, /price-index/) answers one question for one
+           searcher, so each links the other two near the top rather than only
+           in the footer. Below the record, not above it: the record is what
+           the page is for. -->
+      <p class="pi-explore">Or browse the tracked products themselves: <a href="../ram/">RAM Price Tracker</a> &middot; <a href="../ssd/">SSD Price Tracker</a></p>
+
+      <section class="pim-chart-section" aria-labelledby="pim-chart-h">
+        <h2 id="pim-chart-h">RAM and SSD price change chart, October 2024 to September 2026</h2>
+        <figure class="pim-chart-wrap pim-wide">
+          <div class="pim-chart-scroll">
+<svg xmlns="http://www.w3.org/2000/svg" class="pim-chart" viewBox="0 0 1200 620" role="img" aria-labelledby="pim-chart-title" aria-describedby="pim-chart-desc">
+<title id="pim-chart-title">RAM and SSD price change chart, October 2024 to September 2026</title>
+<desc id="pim-chart-desc">Median same-product price change against the same month a year earlier, for DDR5, DDR4, NVMe SSD, SATA SSD, one line each, with the number of products paired each month as bars and a dotted reference at n equals 20. The table that follows carries every value.</desc>
+<rect class="pim-surface" width="1200" height="620" fill="#FFFFFF"/>
+<g font-family="'Liberation Sans', Arial, Helvetica, sans-serif">
+<line class="pim-line pim-c-ddr5" x1="84" y1="30" x2="118" y2="30" stroke="#3A5BC7" stroke-width="3.5" stroke-linecap="round"/>
+<text class="pim-ink" x="126" y="35" font-size="16" font-weight="700" fill="#111827">DDR5</text>
+<line class="pim-line pim-c-ddr4" x1="202" y1="30" x2="236" y2="30" stroke="#C2410C" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="10 6"/>
+<text class="pim-ink" x="244" y="35" font-size="16" font-weight="700" fill="#111827">DDR4</text>
+<line class="pim-line pim-c-nvme_ssd" x1="320" y1="30" x2="354" y2="30" stroke="#0D9488" stroke-width="3.5" stroke-linecap="round"/>
+<text class="pim-ink" x="362" y="35" font-size="16" font-weight="700" fill="#111827">NVMe SSD</text>
+<line class="pim-line pim-c-sata_ssd" x1="480" y1="30" x2="514" y2="30" stroke="#7C3AED" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="2 6"/>
+<text class="pim-ink" x="522" y="35" font-size="16" font-weight="700" fill="#111827">SATA SSD</text>
+<text class="pim-muted" x="1050" y="35" font-size="15" text-anchor="end" fill="#4B5563">Median same-product change vs. the same month a year earlier</text>
+<line class="pim-grid" x1="84" y1="410.0" x2="1050" y2="410.0" stroke="#E5E7EB" stroke-width="1"/>
+<text class="pim-muted" x="72" y="415.0" font-size="15" text-anchor="end" fill="#4B5563">-50%</text>
+<line class="pim-rule" x1="84" y1="376.0" x2="1050" y2="376.0" stroke="#9CA3AF" stroke-width="1.5"/>
+<text class="pim-muted" x="72" y="381.0" font-size="15" text-anchor="end" fill="#4B5563">0%</text>
+<line class="pim-grid" x1="84" y1="342.0" x2="1050" y2="342.0" stroke="#E5E7EB" stroke-width="1"/>
+<text class="pim-muted" x="72" y="347.0" font-size="15" text-anchor="end" fill="#4B5563">+50%</text>
+<line class="pim-grid" x1="84" y1="308.0" x2="1050" y2="308.0" stroke="#E5E7EB" stroke-width="1"/>
+<text class="pim-muted" x="72" y="313.0" font-size="15" text-anchor="end" fill="#4B5563">+100%</text>
+<line class="pim-grid" x1="84" y1="274.0" x2="1050" y2="274.0" stroke="#E5E7EB" stroke-width="1"/>
+<text class="pim-muted" x="72" y="279.0" font-size="15" text-anchor="end" fill="#4B5563">+150%</text>
+<line class="pim-grid" x1="84" y1="240.0" x2="1050" y2="240.0" stroke="#E5E7EB" stroke-width="1"/>
+<text class="pim-muted" x="72" y="245.0" font-size="15" text-anchor="end" fill="#4B5563">+200%</text>
+<line class="pim-grid" x1="84" y1="206.0" x2="1050" y2="206.0" stroke="#E5E7EB" stroke-width="1"/>
+<text class="pim-muted" x="72" y="211.0" font-size="15" text-anchor="end" fill="#4B5563">+250%</text>
+<line class="pim-grid" x1="84" y1="172.0" x2="1050" y2="172.0" stroke="#E5E7EB" stroke-width="1"/>
+<text class="pim-muted" x="72" y="177.0" font-size="15" text-anchor="end" fill="#4B5563">+300%</text>
+<line class="pim-grid" x1="84" y1="138.0" x2="1050" y2="138.0" stroke="#E5E7EB" stroke-width="1"/>
+<text class="pim-muted" x="72" y="143.0" font-size="15" text-anchor="end" fill="#4B5563">+350%</text>
+<line class="pim-grid" x1="84" y1="104.0" x2="1050" y2="104.0" stroke="#E5E7EB" stroke-width="1"/>
+<text class="pim-muted" x="72" y="109.0" font-size="15" text-anchor="end" fill="#4B5563">+400%</text>
+<line class="pim-grid" x1="84" y1="70.0" x2="1050" y2="70.0" stroke="#E5E7EB" stroke-width="1"/>
+<text class="pim-muted" x="72" y="75.0" font-size="15" text-anchor="end" fill="#4B5563">+450%</text>
+<path class="pim-line pim-c-ddr5" d="M104.1,380.6L144.4,380.9L184.6,382.7L224.9,385.3L265.1,387.5L305.4,390.0L345.6,385.8L385.9,385.6L426.1,385.2L466.4,381.7L506.6,377.5L546.9,371.8L587.1,357.2L627.4,272.7L667.6,189.8L707.9,150.5L748.1,122.9L788.4,121.8L828.6,134.1L868.9,128.4L909.1,135.5L949.4,128.6L989.6,104.9L1029.9,100.2" fill="none" stroke="#3A5BC7" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<path class="pim-line pim-c-ddr4" d="M104.1,384.5L144.4,388.3L184.6,388.5L224.9,389.8L265.1,392.2L305.4,393.8L345.6,390.2L385.9,388.4L426.1,385.7L466.4,366.7L506.6,361.0L546.9,357.4L587.1,317.8L627.4,265.0L667.6,215.2L707.9,181.1L748.1,137.9L788.4,123.6L828.6,130.1L868.9,148.5L909.1,171.2L949.4,242.7L989.6,260.0L1029.9,259.2" fill="none" stroke="#C2410C" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="10 6"/>
+<path class="pim-line pim-c-nvme_ssd" d="M104.1,365.5L144.4,371.1L184.6,373.7L224.9,381.0L265.1,381.1L305.4,382.0L345.6,381.4L385.9,380.2L426.1,382.6L466.4,379.9L506.6,379.3L546.9,379.0L587.1,375.5L627.4,363.0L667.6,340.8L707.9,313.0L748.1,284.7L788.4,279.2L828.6,270.6L868.9,275.6L909.1,282.6L949.4,289.5L989.6,280.1L1029.9,272.7" fill="none" stroke="#0D9488" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<path class="pim-line pim-c-sata_ssd" d="M104.1,346.9L144.4,361.9L184.6,368.1L224.9,377.7L265.1,379.5L305.4,378.3L345.6,380.4L385.9,380.8L426.1,378.7L466.4,381.3L506.6,381.0L546.9,380.5L587.1,372.9L627.4,365.8L667.6,338.7L707.9,301.4L748.1,307.9L788.4,287.5L828.6,270.6L868.9,256.3L909.1,271.8L949.4,267.2L989.6,275.8L1029.9,270.2" fill="none" stroke="#7C3AED" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="2 6"/>
+<circle class="pim-dot pim-c-ddr5" cx="1029.9" cy="100.2" r="5" fill="#3A5BC7"/>
+<text class="pim-ink" x="1064" y="105.2" font-size="15" font-weight="700" fill="#111827">DDR5 +406%</text>
+<circle class="pim-dot pim-c-ddr4" cx="1029.9" cy="259.2" r="5" fill="#C2410C"/>
+<text class="pim-ink" x="1064" y="264.2" font-size="15" font-weight="700" fill="#111827">DDR4 +172%</text>
+<circle class="pim-dot pim-c-sata_ssd" cx="1029.9" cy="270.2" r="5" fill="#7C3AED"/>
+<text class="pim-ink" x="1064" y="286.2" font-size="15" font-weight="700" fill="#111827">SATA SSD +156%</text>
+<circle class="pim-dot pim-c-nvme_ssd" cx="1029.9" cy="272.7" r="5" fill="#0D9488"/>
+<text class="pim-ink" x="1064" y="308.2" font-size="15" font-weight="700" fill="#111827">NVMe SSD +152%</text>
+<text class="pim-muted" x="84" y="450" font-size="15" font-weight="700" fill="#4B5563">Products paired each month (n)</text>
+<rect class="pim-bar pim-c-ddr5" x="88.4" y="511.4" width="6.3" height="44.6" fill="#3A5BC7"/>
+<rect class="pim-bar pim-c-ddr4" x="96.8" y="524.3" width="6.3" height="31.7" fill="#C2410C"/>
+<rect class="pim-bar pim-c-nvme_ssd" x="105.1" y="526.6" width="6.3" height="29.4" fill="#0D9488"/>
+<rect class="pim-bar pim-c-sata_ssd" x="113.5" y="531.3" width="6.3" height="24.7" fill="#7C3AED"/>
+<rect class="pim-bar pim-c-ddr5" x="128.7" y="510.2" width="6.3" height="45.8" fill="#3A5BC7"/>
+<rect class="pim-bar pim-c-ddr4" x="137.0" y="523.1" width="6.3" height="32.9" fill="#C2410C"/>
+<rect class="pim-bar pim-c-nvme_ssd" x="145.4" y="524.3" width="6.3" height="31.7" fill="#0D9488"/>
+<rect class="pim-bar pim-c-sata_ssd" x="153.7" y="533.7" width="6.3" height="22.3" fill="#7C3AED"/>
+<rect class="pim-bar pim-c-ddr5" x="168.9" y="507.8" width="6.3" height="48.2" fill="#3A5BC7"/>
+<rect class="pim-bar pim-c-ddr4" x="177.3" y="524.3" width="6.3" height="31.7" fill="#C2410C"/>
+<rect class="pim-bar pim-c-nvme_ssd" x="185.6" y="523.1" width="6.3" height="32.9" fill="#0D9488"/>
+<rect class="pim-bar pim-c-sata_ssd" x="194.0" y="532.5" width="6.3" height="23.5" fill="#7C3AED"/>
+<rect class="pim-bar pim-c-ddr5" x="209.2" y="510.2" width="6.3" height="45.8" fill="#3A5BC7"/>
+<rect class="pim-bar pim-c-ddr4" x="217.5" y="524.3" width="6.3" height="31.7" fill="#C2410C"/>
+<rect class="pim-bar pim-c-nvme_ssd" x="225.9" y="523.1" width="6.3" height="32.9" fill="#0D9488"/>
+<rect class="pim-bar pim-c-sata_ssd" x="234.2" y="533.7" width="6.3" height="22.3" fill="#7C3AED"/>
+<rect class="pim-bar pim-c-ddr5" x="249.4" y="511.4" width="6.3" height="44.6" fill="#3A5BC7"/>
+<rect class="pim-bar pim-c-ddr4" x="257.8" y="525.5" width="6.3" height="30.5" fill="#C2410C"/>
+<rect class="pim-bar pim-c-nvme_ssd" x="266.1" y="519.6" width="6.3" height="36.4" fill="#0D9488"/>
+<rect class="pim-bar pim-c-sata_ssd" x="274.5" y="531.3" width="6.3" height="24.7" fill="#7C3AED"/>
+<rect class="pim-bar pim-c-ddr5" x="289.7" y="511.4" width="6.3" height="44.6" fill="#3A5BC7"/>
+<rect class="pim-bar pim-c-ddr4" x="298.0" y="529.0" width="6.3" height="27.0" fill="#C2410C"/>
+<rect class="pim-bar pim-c-nvme_ssd" x="306.4" y="516.0" width="6.3" height="40.0" fill="#0D9488"/>
+<rect class="pim-bar pim-c-sata_ssd" x="314.7" y="529.0" width="6.3" height="27.0" fill="#7C3AED"/>
+<rect class="pim-bar pim-c-ddr5" x="329.9" y="501.9" width="6.3" height="54.1" fill="#3A5BC7"/>
+<rect class="pim-bar pim-c-ddr4" x="338.3" y="537.2" width="6.3" height="18.8" fill="#C2410C"/>
+<rect class="pim-bar pim-c-nvme_ssd" x="346.6" y="517.2" width="6.3" height="38.8" fill="#0D9488"/>
+<rect class="pim-bar pim-c-sata_ssd" x="355.0" y="529.0" width="6.3" height="27.0" fill="#7C3AED"/>
+<rect class="pim-bar pim-c-ddr5" x="370.2" y="505.5" width="6.3" height="50.5" fill="#3A5BC7"/>
+<rect class="pim-bar pim-c-ddr4" x="378.5" y="534.9" width="6.3" height="21.1" fill="#C2410C"/>
+<rect class="pim-bar pim-c-nvme_ssd" x="386.9" y="516.0" width="6.3" height="40.0" fill="#0D9488"/>
+<rect class="pim-bar pim-c-sata_ssd" x="395.2" y="531.3" width="6.3" height="24.7" fill="#7C3AED"/>
+<rect class="pim-bar pim-c-ddr5" x="410.4" y="499.6" width="6.3" height="56.4" fill="#3A5BC7"/>
+<rect class="pim-bar pim-c-ddr4" x="418.8" y="526.6" width="6.3" height="29.4" fill="#C2410C"/>
+<rect class="pim-bar pim-c-nvme_ssd" x="427.1" y="511.4" width="6.3" height="44.6" fill="#0D9488"/>
+<rect class="pim-bar pim-c-sata_ssd" x="435.5" y="531.3" width="6.3" height="24.7" fill="#7C3AED"/>
+<rect class="pim-bar pim-c-ddr5" x="450.7" y="499.6" width="6.3" height="56.4" fill="#3A5BC7"/>
+<rect class="pim-bar pim-c-ddr4" x="459.0" y="524.3" width="6.3" height="31.7" fill="#C2410C"/>
+<rect class="pim-bar pim-c-nvme_ssd" x="467.4" y="510.2" width="6.3" height="45.8" fill="#0D9488"/>
+<rect class="pim-bar pim-c-sata_ssd" x="475.7" y="530.1" width="6.3" height="25.9" fill="#7C3AED"/>
+<rect class="pim-bar pim-c-ddr5" x="490.9" y="501.9" width="6.3" height="54.1" fill="#3A5BC7"/>
+<rect class="pim-bar pim-c-ddr4" x="499.3" y="525.5" width="6.3" height="30.5" fill="#C2410C"/>
+<rect class="pim-bar pim-c-nvme_ssd" x="507.6" y="512.5" width="6.3" height="43.5" fill="#0D9488"/>
+<rect class="pim-bar pim-c-sata_ssd" x="516.0" y="530.1" width="6.3" height="25.9" fill="#7C3AED"/>
+<rect class="pim-bar pim-c-ddr5" x="531.2" y="497.3" width="6.3" height="58.8" fill="#3A5BC7"/>
+<rect class="pim-bar pim-c-ddr4" x="539.5" y="524.3" width="6.3" height="31.7" fill="#C2410C"/>
+<rect class="pim-bar pim-c-nvme_ssd" x="547.9" y="509.0" width="6.3" height="47.0" fill="#0D9488"/>
+<rect class="pim-bar pim-c-sata_ssd" x="556.2" y="530.1" width="6.3" height="25.9" fill="#7C3AED"/>
+<rect class="pim-bar pim-c-ddr5" x="571.4" y="496.1" width="6.3" height="59.9" fill="#3A5BC7"/>
+<rect class="pim-bar pim-c-ddr4" x="579.8" y="525.5" width="6.3" height="30.5" fill="#C2410C"/>
+<rect class="pim-bar pim-c-nvme_ssd" x="588.1" y="500.8" width="6.3" height="55.2" fill="#0D9488"/>
+<rect class="pim-bar pim-c-sata_ssd" x="596.5" y="530.1" width="6.3" height="25.9" fill="#7C3AED"/>
+<rect class="pim-bar pim-c-ddr5" x="611.7" y="505.5" width="6.3" height="50.5" fill="#3A5BC7"/>
+<rect class="pim-bar pim-c-ddr4" x="620.0" y="524.3" width="6.3" height="31.7" fill="#C2410C"/>
+<rect class="pim-bar pim-c-nvme_ssd" x="628.4" y="501.9" width="6.3" height="54.1" fill="#0D9488"/>
+<rect class="pim-bar pim-c-sata_ssd" x="636.7" y="531.3" width="6.3" height="24.7" fill="#7C3AED"/>
+<rect class="pim-bar pim-c-ddr5" x="651.9" y="503.1" width="6.3" height="52.9" fill="#3A5BC7"/>
+<rect class="pim-bar pim-c-ddr4" x="660.3" y="525.5" width="6.3" height="30.5" fill="#C2410C"/>
+<rect class="pim-bar pim-c-nvme_ssd" x="668.6" y="498.4" width="6.3" height="57.6" fill="#0D9488"/>
+<rect class="pim-bar pim-c-sata_ssd" x="677.0" y="529.0" width="6.3" height="27.0" fill="#7C3AED"/>
+<rect class="pim-bar pim-c-ddr5" x="692.2" y="504.3" width="6.3" height="51.7" fill="#3A5BC7"/>
+<rect class="pim-bar pim-c-ddr4" x="700.5" y="525.5" width="6.3" height="30.5" fill="#C2410C"/>
+<rect class="pim-bar pim-c-nvme_ssd" x="708.9" y="498.4" width="6.3" height="57.6" fill="#0D9488"/>
+<rect class="pim-bar pim-c-sata_ssd" x="717.2" y="529.0" width="6.3" height="27.0" fill="#7C3AED"/>
+<rect class="pim-bar pim-c-ddr5" x="732.4" y="500.8" width="6.3" height="55.2" fill="#3A5BC7"/>
+<rect class="pim-bar pim-c-ddr4" x="740.8" y="525.5" width="6.3" height="30.5" fill="#C2410C"/>
+<rect class="pim-bar pim-c-nvme_ssd" x="749.1" y="496.1" width="6.3" height="59.9" fill="#0D9488"/>
+<rect class="pim-bar pim-c-sata_ssd" x="757.5" y="533.7" width="6.3" height="22.3" fill="#7C3AED"/>
+<rect class="pim-bar pim-c-ddr5" x="772.7" y="492.6" width="6.3" height="63.4" fill="#3A5BC7"/>
+<rect class="pim-bar pim-c-ddr4" x="781.0" y="525.5" width="6.3" height="30.5" fill="#C2410C"/>
+<rect class="pim-bar pim-c-nvme_ssd" x="789.4" y="496.1" width="6.3" height="59.9" fill="#0D9488"/>
+<rect class="pim-bar pim-c-sata_ssd" x="797.7" y="529.0" width="6.3" height="27.0" fill="#7C3AED"/>
+<rect class="pim-bar pim-c-ddr5" x="812.9" y="491.4" width="6.3" height="64.6" fill="#3A5BC7"/>
+<rect class="pim-bar pim-c-ddr4" x="821.3" y="529.0" width="6.3" height="27.0" fill="#C2410C"/>
+<rect class="pim-bar pim-c-nvme_ssd" x="829.6" y="492.6" width="6.3" height="63.4" fill="#0D9488"/>
+<rect class="pim-bar pim-c-sata_ssd" x="838.0" y="530.1" width="6.3" height="25.9" fill="#7C3AED"/>
+<rect class="pim-bar pim-c-ddr5" x="853.2" y="490.2" width="6.3" height="65.8" fill="#3A5BC7"/>
+<rect class="pim-bar pim-c-ddr4" x="861.5" y="529.0" width="6.3" height="27.0" fill="#C2410C"/>
+<rect class="pim-bar pim-c-nvme_ssd" x="869.9" y="489.0" width="6.3" height="67.0" fill="#0D9488"/>
+<rect class="pim-bar pim-c-sata_ssd" x="878.2" y="529.0" width="6.3" height="27.0" fill="#7C3AED"/>
+<rect class="pim-bar pim-c-ddr5" x="893.4" y="486.7" width="6.3" height="69.3" fill="#3A5BC7"/>
+<rect class="pim-bar pim-c-ddr4" x="901.8" y="525.5" width="6.3" height="30.5" fill="#C2410C"/>
+<rect class="pim-bar pim-c-nvme_ssd" x="910.1" y="489.0" width="6.3" height="67.0" fill="#0D9488"/>
+<rect class="pim-bar pim-c-sata_ssd" x="918.5" y="527.8" width="6.3" height="28.2" fill="#7C3AED"/>
+<rect class="pim-bar pim-c-ddr5" x="933.7" y="480.8" width="6.3" height="75.2" fill="#3A5BC7"/>
+<rect class="pim-bar pim-c-ddr4" x="942.0" y="523.1" width="6.3" height="32.9" fill="#C2410C"/>
+<rect class="pim-bar pim-c-nvme_ssd" x="950.4" y="480.8" width="6.3" height="75.2" fill="#0D9488"/>
+<rect class="pim-bar pim-c-sata_ssd" x="958.7" y="524.3" width="6.3" height="31.7" fill="#7C3AED"/>
+<rect class="pim-bar pim-c-ddr5" x="973.9" y="484.3" width="6.3" height="71.7" fill="#3A5BC7"/>
+<rect class="pim-bar pim-c-ddr4" x="982.3" y="523.1" width="6.3" height="32.9" fill="#C2410C"/>
+<rect class="pim-bar pim-c-nvme_ssd" x="990.6" y="477.3" width="6.3" height="78.7" fill="#0D9488"/>
+<rect class="pim-bar pim-c-sata_ssd" x="999.0" y="524.3" width="6.3" height="31.7" fill="#7C3AED"/>
+<rect class="pim-bar pim-c-ddr5" x="1014.2" y="484.3" width="6.3" height="71.7" fill="#3A5BC7"/>
+<rect class="pim-bar pim-c-ddr4" x="1022.5" y="523.1" width="6.3" height="32.9" fill="#C2410C"/>
+<rect class="pim-bar pim-c-nvme_ssd" x="1030.9" y="478.4" width="6.3" height="77.6" fill="#0D9488"/>
+<rect class="pim-bar pim-c-sata_ssd" x="1039.2" y="524.3" width="6.3" height="31.7" fill="#7C3AED"/>
+<line class="pim-rule" x1="84" y1="556" x2="1050" y2="556" stroke="#9CA3AF" stroke-width="1.5"/>
+<line class="pim-ref" x1="84" y1="532.5" x2="1050" y2="532.5" stroke="#6B7280" stroke-width="1.5" stroke-dasharray="2 5" stroke-linecap="round"/>
+<text class="pim-muted" x="1064" y="537.5" font-size="14" fill="#4B5563">n = 20</text>
+<text class="pim-muted" x="72" y="561.0" font-size="14" text-anchor="end" fill="#4B5563">0</text>
+<text class="pim-muted" x="72" y="467.0" font-size="14" text-anchor="end" fill="#4B5563">80</text>
+<line class="pim-rule" x1="104.1" y1="556" x2="104.1" y2="562" stroke="#9CA3AF" stroke-width="1.5"/>
+<text class="pim-muted" x="104.1" y="584" font-size="14" text-anchor="middle" fill="#4B5563">Oct 2024</text>
+<line class="pim-rule" x1="144.4" y1="556" x2="144.4" y2="562" stroke="#9CA3AF" stroke-width="1.5"/>
+<line class="pim-rule" x1="184.6" y1="556" x2="184.6" y2="562" stroke="#9CA3AF" stroke-width="1.5"/>
+<line class="pim-rule" x1="224.9" y1="556" x2="224.9" y2="562" stroke="#9CA3AF" stroke-width="1.5"/>
+<text class="pim-muted" x="224.9" y="584" font-size="14" text-anchor="middle" fill="#4B5563">Jan 2025</text>
+<line class="pim-rule" x1="265.1" y1="556" x2="265.1" y2="562" stroke="#9CA3AF" stroke-width="1.5"/>
+<line class="pim-rule" x1="305.4" y1="556" x2="305.4" y2="562" stroke="#9CA3AF" stroke-width="1.5"/>
+<line class="pim-rule" x1="345.6" y1="556" x2="345.6" y2="562" stroke="#9CA3AF" stroke-width="1.5"/>
+<text class="pim-muted" x="345.6" y="584" font-size="14" text-anchor="middle" fill="#4B5563">Apr 2025</text>
+<line class="pim-rule" x1="385.9" y1="556" x2="385.9" y2="562" stroke="#9CA3AF" stroke-width="1.5"/>
+<line class="pim-rule" x1="426.1" y1="556" x2="426.1" y2="562" stroke="#9CA3AF" stroke-width="1.5"/>
+<line class="pim-rule" x1="466.4" y1="556" x2="466.4" y2="562" stroke="#9CA3AF" stroke-width="1.5"/>
+<text class="pim-muted" x="466.4" y="584" font-size="14" text-anchor="middle" fill="#4B5563">Jul 2025</text>
+<line class="pim-rule" x1="506.6" y1="556" x2="506.6" y2="562" stroke="#9CA3AF" stroke-width="1.5"/>
+<line class="pim-rule" x1="546.9" y1="556" x2="546.9" y2="562" stroke="#9CA3AF" stroke-width="1.5"/>
+<line class="pim-rule" x1="587.1" y1="556" x2="587.1" y2="562" stroke="#9CA3AF" stroke-width="1.5"/>
+<text class="pim-muted" x="587.1" y="584" font-size="14" text-anchor="middle" fill="#4B5563">Oct 2025</text>
+<line class="pim-rule" x1="627.4" y1="556" x2="627.4" y2="562" stroke="#9CA3AF" stroke-width="1.5"/>
+<line class="pim-rule" x1="667.6" y1="556" x2="667.6" y2="562" stroke="#9CA3AF" stroke-width="1.5"/>
+<line class="pim-rule" x1="707.9" y1="556" x2="707.9" y2="562" stroke="#9CA3AF" stroke-width="1.5"/>
+<text class="pim-muted" x="707.9" y="584" font-size="14" text-anchor="middle" fill="#4B5563">Jan 2026</text>
+<line class="pim-rule" x1="748.1" y1="556" x2="748.1" y2="562" stroke="#9CA3AF" stroke-width="1.5"/>
+<line class="pim-rule" x1="788.4" y1="556" x2="788.4" y2="562" stroke="#9CA3AF" stroke-width="1.5"/>
+<line class="pim-rule" x1="828.6" y1="556" x2="828.6" y2="562" stroke="#9CA3AF" stroke-width="1.5"/>
+<text class="pim-muted" x="828.6" y="584" font-size="14" text-anchor="middle" fill="#4B5563">Apr 2026</text>
+<line class="pim-rule" x1="868.9" y1="556" x2="868.9" y2="562" stroke="#9CA3AF" stroke-width="1.5"/>
+<line class="pim-rule" x1="909.1" y1="556" x2="909.1" y2="562" stroke="#9CA3AF" stroke-width="1.5"/>
+<line class="pim-rule" x1="949.4" y1="556" x2="949.4" y2="562" stroke="#9CA3AF" stroke-width="1.5"/>
+<text class="pim-muted" x="949.4" y="584" font-size="14" text-anchor="middle" fill="#4B5563">Jul 2026</text>
+<line class="pim-rule" x1="989.6" y1="556" x2="989.6" y2="562" stroke="#9CA3AF" stroke-width="1.5"/>
+<line class="pim-rule" x1="1029.9" y1="556" x2="1029.9" y2="562" stroke="#9CA3AF" stroke-width="1.5"/>
+<text class="pim-muted" x="1029.9" y="584" font-size="14" text-anchor="middle" fill="#4B5563">Sep 2026</text>
+</g></svg>
+            <div class="pim-chart-axis" aria-hidden="true"><span style="top:66.13%">-50%</span><span style="top:60.65%">0%</span><span style="top:55.16%">+50%</span><span style="top:49.68%">+100%</span><span style="top:44.19%">+150%</span><span style="top:38.71%">+200%</span><span style="top:33.23%">+250%</span><span style="top:27.74%">+300%</span><span style="top:22.26%">+350%</span><span style="top:16.77%">+400%</span><span style="top:11.29%">+450%</span><span style="top:89.68%">0</span><span style="top:74.52%">80</span></div>
+          </div>
+          <figcaption class="pim-chart-caption">Median same-product price change against the same month a year earlier, for every archived monthly record. The bars show how many products were paired in each month; the dotted line marks n = 20, below which a figure is treated with caution. Every value is in the table below.</figcaption>
+        </figure>
+        <p class="pim-chart-hint">Scroll the chart sideways on a narrow screen.</p>
+        <h2 id="pim-records">All records</h2>
+        <p class="pim-table-note">Every archived month, newest first: the median same-product change against the same month a year earlier and the number of listings paired, per segment. The October 2024 to September 2026 launch series was reconstructed from stored price history and frozen on October 12, 2026. Later records are frozen after their month ends, once a price fetch timestamped after the month boundary has landed, and are never recomputed; a correction is added as a dated entry rather than rewriting a record. Months from September 2026 onward link to their permanent record with every paired product. * fewer than 20 listings qualified; treat with caution.</p>
+        <p class="pim-caption" id="pim-records-caption">Chart data: median change and n per segment, October 2024 to September 2026</p>
+        <div class="pi-table-wrap pim-wide" tabindex="0" role="region" aria-labelledby="pim-records-caption">
+          <table class="pi-table pim-records" id="pim-records-table">
+            <thead><tr><th scope="col">Month</th><th scope="col">DDR5</th><th scope="col">n</th><th scope="col">DDR4</th><th scope="col">n</th><th scope="col">NVMe SSD</th><th scope="col">n</th><th scope="col">SATA SSD</th><th scope="col">n</th></tr></thead>
+            <tbody>
+            <tr><th scope="row"><a href="/price-index/2026-09/">September 2026</a></th><td>+405.54%</td><td>61</td><td>+171.72%</td><td>28</td><td>+151.90%</td><td>66</td><td>+155.57%</td><td>27</td></tr>
+            <tr><th scope="row">August 2026</th><td>+398.64%</td><td>61</td><td>+170.66%</td><td>28</td><td>+141.07%</td><td>67</td><td>+147.38%</td><td>27</td></tr>
+            <tr><th scope="row">July 2026</th><td>+363.84%</td><td>64</td><td>+195.96%</td><td>28</td><td>+127.22%</td><td>64</td><td>+160.03%</td><td>27</td></tr>
+            <tr><th scope="row">June 2026</th><td>+353.68%</td><td>59</td><td>+301.17%</td><td>26</td><td>+137.35%</td><td>57</td><td>+153.27%</td><td>24</td></tr>
+            <tr><th scope="row">May 2026</th><td>+364.12%</td><td>56</td><td>+334.60%</td><td>23</td><td>+147.67%</td><td>57</td><td>+176.04%</td><td>23</td></tr>
+            <tr><th scope="row">April 2026</th><td>+355.67%</td><td>55</td><td>+361.59%</td><td>23</td><td>+155.02%</td><td>54</td><td>+155.03%</td><td>22</td></tr>
+            <tr><th scope="row">March 2026</th><td>+373.78%</td><td>54</td><td>+371.20%</td><td>26</td><td>+142.37%</td><td>51</td><td>+130.09%</td><td>23</td></tr>
+            <tr><th scope="row">February 2026</th><td>+372.27%</td><td>47</td><td>+350.20%</td><td>26</td><td>+134.32%</td><td>51</td><td>+100.10%</td><td class="pim-dash">19*</td></tr>
+            <tr><th scope="row">January 2026</th><td>+331.64%</td><td>44</td><td>+286.63%</td><td>26</td><td>+92.68%</td><td>49</td><td>+109.66%</td><td>23</td></tr>
+            <tr><th scope="row">December 2025</th><td>+273.78%</td><td>45</td><td>+236.46%</td><td>26</td><td>+51.79%</td><td>49</td><td>+54.87%</td><td>23</td></tr>
+            <tr><th scope="row">November 2025</th><td>+151.98%</td><td>43</td><td>+163.30%</td><td>27</td><td>+19.15%</td><td>46</td><td>+15.00%</td><td>21</td></tr>
+            <tr><th scope="row">October 2025</th><td>+27.68%</td><td>51</td><td>+85.55%</td><td>26</td><td>+0.67%</td><td>47</td><td>+4.56%</td><td>22</td></tr>
+            <tr><th scope="row">September 2025</th><td>+6.14%</td><td>50</td><td>+27.28%</td><td>27</td><td>-4.37%</td><td>40</td><td>-6.67%</td><td>22</td></tr>
+            <tr><th scope="row">August 2025</th><td>-2.14%</td><td>46</td><td>+22.13%</td><td>26</td><td>-4.89%</td><td>37</td><td>-7.29%</td><td>22</td></tr>
+            <tr><th scope="row">July 2025</th><td>-8.35%</td><td>48</td><td>+13.70%</td><td>27</td><td>-5.72%</td><td>39</td><td>-7.78%</td><td>22</td></tr>
+            <tr><th scope="row">June 2025</th><td>-13.48%</td><td>48</td><td>-14.29%</td><td>25</td><td>-9.64%</td><td>38</td><td>-4.04%</td><td>21</td></tr>
+            <tr><th scope="row">May 2025</th><td>-14.15%</td><td>43</td><td>-18.19%</td><td class="pim-dash">18*</td><td>-6.17%</td><td>34</td><td>-7.00%</td><td>21</td></tr>
+            <tr><th scope="row">April 2025</th><td>-14.38%</td><td>46</td><td>-20.85%</td><td class="pim-dash">16*</td><td>-7.94%</td><td>33</td><td>-6.48%</td><td>23</td></tr>
+            <tr><th scope="row">March 2025</th><td>-20.57%</td><td>38</td><td>-26.24%</td><td>23</td><td>-8.77%</td><td>34</td><td>-3.37%</td><td>23</td></tr>
+            <tr><th scope="row">February 2025</th><td>-16.88%</td><td>38</td><td>-23.82%</td><td>26</td><td>-7.46%</td><td>31</td><td>-5.20%</td><td>21</td></tr>
+            <tr><th scope="row">January 2025</th><td>-13.64%</td><td>39</td><td>-20.26%</td><td>27</td><td>-7.42%</td><td>28</td><td>-2.49%</td><td class="pim-dash">19*</td></tr>
+            <tr><th scope="row">December 2024</th><td>-9.86%</td><td>41</td><td>-18.34%</td><td>27</td><td>+3.44%</td><td>28</td><td>+11.69%</td><td>20</td></tr>
+            <tr><th scope="row">November 2024</th><td>-7.20%</td><td>39</td><td>-18.03%</td><td>28</td><td>+7.14%</td><td>27</td><td>+20.78%</td><td class="pim-dash">19*</td></tr>
+            <tr><th scope="row">October 2024</th><td>-6.83%</td><td>38</td><td>-12.50%</td><td>27</td><td>+15.39%</td><td>25</td><td>+42.86%</td><td>21</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="pi-scrollhint">Scroll the table sideways to see every column.</p>
+      </section>
+
+      <h2 id="pim-full">Full figures for this record</h2>
+      <p class="pim-caption" id="pim-full-caption">September 2025 to September 2026, per segment</p>
+      <div class="pi-table-wrap pim-wide" tabindex="0" role="region" aria-labelledby="pim-full-caption">
+        <table class="pi-table pim-full">
+          <thead><tr><th scope="col">Segment</th><th scope="col">n</th><th scope="col">Median</th><th scope="col">p25 to p75</th><th scope="col">Share that rose</th><th scope="col">Leave-one-out low to high</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">DDR5</th><td>61</td><td>+405.54%</td><td>+368.36% to +450.03%</td><td>100%</td><td>+402.78% to +406.45%</td></tr>
+            <tr><th scope="row">DDR4</th><td>28</td><td>+171.72%</td><td>+159.29% to +201.27%</td><td>100%</td><td>+170.78% to +172.66%</td></tr>
+            <tr><th scope="row">NVMe SSD</th><td>66</td><td>+151.90%</td><td>+129.51% to +169.56%</td><td>100%</td><td>+151.07% to +152.74%</td></tr>
+            <tr><th scope="row">SATA SSD</th><td>27</td><td>+155.57%</td><td>+143.24% to +253.58%</td><td>100%</td><td>+154.47% to +164.65%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="pi-scrollhint">Scroll the table sideways to see every column.</p>
+      <p class="pim-table-note">n is the number of listings paired. p25 and p75 are the quartiles of the per-product changes. Leave-one-out is the range the median takes when any single listing is dropped.</p>
+
+      <h2 id="pim-live">Live market reading</h2>
+      <p class="pim-live-note">What prices have done lately, normally recomputed once a day from each product's latest prices. Short periods only; for the year-over-year figure, use the monthly record above.</p>
+      <div class="pi-table-wrap" tabindex="0" role="region" aria-label="Live market reading table, scrollable">
         <table class="pi-table" id="piTable">
           <thead>
-            <tr><th scope="col">Segment</th><th scope="col">1 month</th><th scope="col">3 months</th><th scope="col">6 months</th><th scope="col">1 year</th></tr>
+            <tr><th scope="col">Segment</th><th scope="col" class="pim-th-primary">1 month</th><th scope="col">3 months</th><th scope="col">6 months</th><th scope="col">1 year</th></tr>
           </thead>
           <tbody>
             <tr>
               <th scope="row">DDR5</th>
-              <td class="pi-cell pi-neutral" id="pi-ddr5-1m" data-seg="ddr5" data-period="1m">+4.9%</td>
-              <td class="pi-cell pi-up" id="pi-ddr5-3m" data-seg="ddr5" data-period="3m">+16%</td>
-              <td class="pi-cell pi-up" id="pi-ddr5-6m" data-seg="ddr5" data-period="6m">+19.6%</td>
-              <td class="pi-cell pi-up" id="pi-ddr5-1y" data-seg="ddr5" data-period="1y">+269.8%</td>
+              <td><span class="pi-cell pi-neutral" id="pi-ddr5-1m" data-seg="ddr5" data-period="1m">+4.9%</span><span class="pim-n" id="pi-ddr5-1m-n">n 79</span></td>
+              <td><span class="pi-cell pi-up" id="pi-ddr5-3m" data-seg="ddr5" data-period="3m">+16.0%</span><span class="pim-n" id="pi-ddr5-3m-n">n 79</span></td>
+              <td><span class="pi-cell pi-up" id="pi-ddr5-6m" data-seg="ddr5" data-period="6m">+19.6%</span><span class="pim-n" id="pi-ddr5-6m-n">n 73</span></td>
+              <td><span class="pi-cell pi-up" id="pi-ddr5-1y" data-seg="ddr5" data-period="1y">+269.8%</span><span class="pim-n" id="pi-ddr5-1y-n">n 64</span></td>
             </tr>
             <tr>
               <th scope="row">DDR4</th>
-              <td class="pi-cell pi-neutral" id="pi-ddr4-1m" data-seg="ddr4" data-period="1m">+0%</td>
-              <td class="pi-cell pi-neutral" id="pi-ddr4-3m" data-seg="ddr4" data-period="3m">+3.4%</td>
-              <td class="pi-cell pi-down" id="pi-ddr4-6m" data-seg="ddr4" data-period="6m">-5%</td>
-              <td class="pi-cell pi-up" id="pi-ddr4-1y" data-seg="ddr4" data-period="1y">+114.3%</td>
+              <td><span class="pi-cell pim-flat" id="pi-ddr4-1m" data-seg="ddr4" data-period="1m">0.0%</span><span class="pim-n" id="pi-ddr4-1m-n">n 32</span></td>
+              <td><span class="pi-cell pi-neutral" id="pi-ddr4-3m" data-seg="ddr4" data-period="3m">+3.4%</span><span class="pim-n" id="pi-ddr4-3m-n">n 33</span></td>
+              <td><span class="pi-cell pi-down" id="pi-ddr4-6m" data-seg="ddr4" data-period="6m">-5.0%</span><span class="pim-n" id="pi-ddr4-6m-n">n 26</span></td>
+              <td><span class="pi-cell pi-up" id="pi-ddr4-1y" data-seg="ddr4" data-period="1y">+114.3%</span><span class="pim-n" id="pi-ddr4-1y-n">n 27</span></td>
             </tr>
             <tr>
               <th scope="row">NVMe SSD</th>
-              <td class="pi-cell pi-neutral" id="pi-nvme_ssd-1m" data-seg="nvme_ssd" data-period="1m">+3.6%</td>
-              <td class="pi-cell pi-neutral" id="pi-nvme_ssd-3m" data-seg="nvme_ssd" data-period="3m">+7.2%</td>
-              <td class="pi-cell pi-neutral" id="pi-nvme_ssd-6m" data-seg="nvme_ssd" data-period="6m">+5.1%</td>
-              <td class="pi-cell pi-up" id="pi-nvme_ssd-1y" data-seg="nvme_ssd" data-period="1y">+130.8%</td>
+              <td><span class="pi-cell pi-neutral" id="pi-nvme_ssd-1m" data-seg="nvme_ssd" data-period="1m">+3.6%</span><span class="pim-n" id="pi-nvme_ssd-1m-n">n 76</span></td>
+              <td><span class="pi-cell pi-neutral" id="pi-nvme_ssd-3m" data-seg="nvme_ssd" data-period="3m">+7.2%</span><span class="pim-n" id="pi-nvme_ssd-3m-n">n 77</span></td>
+              <td><span class="pi-cell pi-neutral" id="pi-nvme_ssd-6m" data-seg="nvme_ssd" data-period="6m">+5.1%</span><span class="pim-n" id="pi-nvme_ssd-6m-n">n 67</span></td>
+              <td><span class="pi-cell pi-up" id="pi-nvme_ssd-1y" data-seg="nvme_ssd" data-period="1y">+130.8%</span><span class="pim-n" id="pi-nvme_ssd-1y-n">n 67</span></td>
             </tr>
             <tr>
               <th scope="row">SATA SSD</th>
-              <td class="pi-cell pi-neutral" id="pi-sata_ssd-1m" data-seg="sata_ssd" data-period="1m">+2.8%</td>
-              <td class="pi-cell pi-neutral" id="pi-sata_ssd-3m" data-seg="sata_ssd" data-period="3m">+4.2%</td>
-              <td class="pi-cell pi-up" id="pi-sata_ssd-6m" data-seg="sata_ssd" data-period="6m">+29.9%</td>
-              <td class="pi-cell pi-up" id="pi-sata_ssd-1y" data-seg="sata_ssd" data-period="1y">+153.3%</td>
+              <td><span class="pi-cell pi-neutral" id="pi-sata_ssd-1m" data-seg="sata_ssd" data-period="1m">+2.8%</span><span class="pim-n" id="pi-sata_ssd-1m-n">n 32</span></td>
+              <td><span class="pi-cell pi-neutral" id="pi-sata_ssd-3m" data-seg="sata_ssd" data-period="3m">+4.2%</span><span class="pim-n" id="pi-sata_ssd-3m-n">n 32</span></td>
+              <td><span class="pi-cell pi-up" id="pi-sata_ssd-6m" data-seg="sata_ssd" data-period="6m">+29.9%</span><span class="pim-n" id="pi-sata_ssd-6m-n">n 25</span></td>
+              <td><span class="pi-cell pi-up" id="pi-sata_ssd-1y" data-seg="sata_ssd" data-period="1y">+153.3%</span><span class="pim-n" id="pi-sata_ssd-1y-n">n 26</span></td>
             </tr>
           </tbody>
         </table>
       </div>
       <p class="pi-scrollhint">Scroll the table sideways to see every period.</p>
-      <p class="pi-tablenote">Last computed <span id="piComputedNote">October 12, 2026</span> · median-based · per-period fairness subsets</p>
+      <p class="pi-asof" id="piAsOf">Last computed October 12, 2026 17:58 UTC</p>
+      <p class="pi-tablenote">Medians over per-period matched subsets; n is the subset size.</p>
 
       <h2>Notable numbers</h2>
       <ul class="pi-notables">
         <li><strong><span id="piTopSeg">DDR5</span> prices are up <span id="piTopPct">+269.8%</span> versus a year ago</strong>, the steepest rise of any segment we track.</li>
         <li><strong>Every segment is up more than 90% year over year.</strong> The memory and storage market has not returned to its pre-2026 pricing.</li>
         <li><strong>3 of 235 tracked products sit within 5% of their all-time low</strong>, the closest thing to a buying opportunity in the current market.</li>
-        <li><strong>The index draws on 75,275 daily price points</strong>, the deepest series running back to 2015.</li>
+        <li><strong>The index draws on 75,275 product-days of stored prices</strong>, with the deepest series running back to 2015.</li>
       </ul>
 
       <h2>What a build's memory and storage costs</h2>
+      <p>This is a dollar basket of one DDR5 kit and two NVMe drives, so it moves differently from the per-segment medians above.</p>
       <p>The index above measures change. This measures level: what a fixed basket of parts cost, added up. In <strong>September 2026</strong>, the memory and storage for a current build (a 32GB DDR5-6000 kit, a 1TB NVMe drive and a 2TB NVMe drive) cost <strong>$1,066</strong>. The same parts around a DDR4 board (a 32GB DDR4-3200 kit and a 1TB NVMe drive) cost <strong>$410</strong>.</p>
       <p>Against the same month a year earlier, the current build is <span data-claim="buildcost-current-yoy" data-floor-pct="210">up more than 210%</span> and the DDR4 build is <span data-claim="buildcost-ddr4-yoy" data-floor-pct="130">up more than 130%</span>. These are regular Amazon listing prices, not deals. Each month's figure is fixed once that month ends; the current month is not shown.</p>
       <svg class="buildcost-spark" viewBox="0 0 560 120" role="img" aria-labelledby="pi-bc-t" preserveAspectRatio="none">
@@ -230,11 +524,12 @@
       <p><a href="/build-cost/">The full series, the basket definitions and what the figures do not tell you</a>, back to January 2023.</p>
 
       <h2>Methodology</h2>
-      <p>The summary below covers the index itself. <a href="/methodology/">How MemRadar tracks prices</a> is the full reference: where the data comes from, how every figure is calculated, and what it cannot tell you.</p>
+      <p>The monthly record at the top is the index's year-over-year figure. It compares each listing with itself a year earlier, using the median of its daily prices in each month. For months after the launch series, a record is frozen after its month ends, once a price fetch timestamped after the month boundary has landed, and is never recomputed; the launch series from October 2024 to September 2026 was reconstructed from stored price history and frozen on October 12, 2026. A correction is listed with its date rather than rewriting the figure. The live market reading and the summary below cover the short-period figures.</p>
+      <p>The summary below covers the live reading. <a href="/methodology/">How MemRadar tracks prices</a> is the full reference: where the data comes from, how every figure is calculated, and what it cannot tell you.</p>
       <p>Every figure is a <strong>median</strong>, not an average. A single mispriced listing at $1,900 drags a mean badly in a segment of thirty products; the median reports the typical price and stays stable as the catalog changes.</p>
       <p>Each period compares <strong>the same set of products in both timeframes</strong>. A product only counts toward a period if we have both a current price and a price from that period's baseline window, and both medians are computed over that same subset. Products added recently cannot distort a one-year figure by appearing on only one side of it. Subset sizes differ between periods for this reason, and that is the honest result rather than a flaw.</p>
       <p>Figures over longer windows rest on smaller, older product sets, since a product only counts if we tracked it that far back. As the catalog grows, a long-window figure can move when its cohort changes, independently of any price movement.</p>
-      <p>Amazon price history is licensed from <strong>Keepa</strong>; Newegg pricing comes from an official <strong>Rakuten Advertising</strong> product feed. Prices refresh every few hours and the index is recomputed daily. The catalog holds 235 products, 119 memory and 116 storage, with the deepest price history running back to 2015.</p>
+      <p>Amazon price history is licensed from <strong>Keepa</strong>; Newegg pricing comes from an official <strong>Rakuten Advertising</strong> product feed. Prices refresh every few hours and the live reading is normally recomputed once a day. The catalog holds 235 products, 119 memory and 116 storage, with the deepest price history running back to 2015.</p>
 
       <h2>Citing this data</h2>
       <p>This data may be referenced and quoted with attribution. Suggested attribution line:</p>
