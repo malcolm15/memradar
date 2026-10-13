@@ -350,9 +350,14 @@ and nothing said so."
 
 ### The dead-man switch (layer 0, covers both)
 
-**healthchecks.io**, pinged at the end of every **successful** tick. Grace
-period **45 minutes** (three missed ticks), so one delayed or dropped tick does
-not page you but a dead Worker does.
+**healthchecks.io**, pinged at the end of a tick that **completed with no
+unknown lookups**. A tick with any unknown lookup (a freshness lookup that still
+failed after its retries) withholds the ping; see CLAUDE.md, "Retries, unknown
+lookups and the heartbeat". Grace period **45 minutes**. With the check's
+schedule of `*/15 * * * *` (as shown in its alert emails, October 2026), the
+check goes DOWN about 60 minutes after the last success ping, roughly four
+consecutive scheduled ticks without one, so one delayed or dropped tick does not
+page you but a dead Worker does.
 
 The independence is the entire feature, so it was **verified rather than
 assumed**:
