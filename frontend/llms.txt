@@ -1,14 +1,14 @@
 # MemRadar
 
-MemRadar tracks retail prices for 235 RAM and SSD products and keeps the history, so a shopper can tell a fair price from a bad one instead of guessing. Price history reaches back to 2015 for the longest-tracked products and is licensed from Keepa; current prices are compared across Amazon and Newegg, and the whole catalog is re-checked several times a day. The Memory Price Index aggregates that history into median price changes per segment (DDR5, DDR4, NVMe SSD, SATA SSD) over 1 month, 3 months, 6 months and 1 year, recomputed daily. Everything on the site is derived from recorded observations: there are no review scores, no star ratings, and no editorial claims that the data does not support.
+MemRadar tracks retail prices for 235 RAM and SSD products and keeps the history, so a shopper can tell a fair price from a bad one instead of guessing. Price history reaches back to 2015 for the longest-tracked products and is licensed from Keepa; current prices are compared across Amazon and Newegg, and the whole catalog is re-checked several times a day. The Memory Price Index publishes an archived monthly record of same-product price change per segment (DDR5, DDR4, NVMe SSD, SATA SSD) against the same month a year earlier, plus a live reading over 1, 3 and 6 months that is normally recomputed once a day. Everything on the site is derived from recorded observations: there are no review scores, no star ratings, and no editorial claims that the data does not support.
 
 ## Current findings
 
 - The median DDR5 memory kit has more than tripled over the past year. Computed October 12, 2026.
 - DDR4, the older generation, has more than doubled over the same year. Computed October 12, 2026.
 - Storage followed memory up: NVMe and SATA solid state drives have both more than doubled year over year. Computed October 12, 2026.
-- 207 of the 235 products MemRadar tracks, 88%, currently sell for at least one and a half times their lowest recorded price. Computed October 12, 2026.
-- 152 of the 235 tracked products sell for more than three times their lowest recorded price. Computed October 12, 2026.
+- 207 of the 235 products MemRadar tracks, 88%, currently sell for at least one and a half times their lowest recorded price. Computed October 13, 2026.
+- 152 of the 235 tracked products sell for more than three times their lowest recorded price. Computed October 13, 2026.
 
 Each figure carries the date it was computed. Figures over longer windows rest on smaller, older product sets, so they are stated as magnitudes rather than to a decimal place. The same findings, with the same wording, are on https://memradar.com/data/.
 
@@ -17,7 +17,7 @@ Each figure carries the date it was computed. Figures over longer windows rest o
 - [Homepage](https://memradar.com/): Search the catalog, see the Market Pulse summary of segment price changes, and the largest current price drops.
 - [RAM](https://memradar.com/ram/): All tracked DDR5 and DDR4 kits with live prices, filterable by type, capacity, speed and brand.
 - [SSDs](https://memradar.com/ssd/): All tracked NVMe and SATA drives with live prices, filterable by type, form factor, capacity and brand.
-- [Memory Price Index](https://memradar.com/price-index/): Median price change per segment across four time windows, recomputed daily from the full price history.
+- [Memory Price Index](https://memradar.com/price-index/): An archived monthly record of same-product RAM and SSD price change against a year earlier (median per segment; from September 2026 onward each record has its own page listing every paired listing; the October 2024 to September 2026 launch series was reconstructed from stored history, later months are frozen after they end), plus a live reading over one, three and six months, normally recomputed once a day.
 - [Data for journalists](https://memradar.com/data/): Current findings, how to cite, catalog composition, and the downloadable files below.
 - [Build-Cost Index](https://memradar.com/build-cost/): What the memory and storage for a fixed PC build specification cost each month, back to January 2023, with the basket definitions and what the figures do not tell you.
 - [MemRadar for Raycast](https://memradar.com/raycast/): a free Raycast extension for macOS and Windows that searches MemRadar's RAM and SSD prices and shows each product's monthly price history.
