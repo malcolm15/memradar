@@ -3522,7 +3522,7 @@ ${pimCorrectionsHtml(rec)}`;
         license: DATASET_LICENSE,
         creditText: pimCitationText(rec),
         temporalCoverage: `${rec.base_month}/${month}`,
-        isPartOf: { '@type': 'Dataset', '@id': DATASET_ID, name: 'MemRadar Memory Price Index', url: `${SITE}/price-index/` },
+        isPartOf: `${SITE}/data/`,
         variableMeasured: PI_SEGMENTS.map((sg) => ({ '@type': 'PropertyValue', name: sg.label + ' median same-product price change', value: rec.recs[sg.key].median, unitText: 'percent' })),
         distribution: pimDistribution(rec),
         datePublished: rec.frozen_at,
