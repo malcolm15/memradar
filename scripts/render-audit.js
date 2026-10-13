@@ -130,6 +130,7 @@ const GATE_NAMES = [
   'head-field immutability',
   'json-ld agrees with the visible retailer state',
   'multi-unit price per GB uses the offer capacity',
+  "dataset items meet Google's requirements",
 ];
 
 function landedOn(requested, finalUrl) {
@@ -183,6 +184,9 @@ const BLAME = {
   unknown: () => ['(no client file identified; inspect the page scripts)'],
 };
 function blameFor(kindOfPage, reason, where) {
+  if (/json-ld dataset$/.test(where)) {
+    return ['scripts/generate-product-pages.js (datasetJsonLd, buildPriceIndexMonthPage)'];
+  }
   if (/card_count|product card/i.test(reason) || /listing-card/i.test(where)) {
     return kindOfPage === 'homepage' ? BLAME.home_drops() : BLAME.listing_cards();
   }
@@ -650,6 +654,65 @@ function checkJsonLdAgainstVisible(side, data) {
   return { defects: out, candidates };
 }
 
+// DATASET ITEMS vs GOOGLE'S DATASET REQUIREMENTS. Served side only: no script
+// on the site writes JSON-LD on these pages, so the generator's own output is
+// what gets checked. Google treats EVERY node typed Dataset as a Dataset item,
+// nested ones included, so a Dataset object used as isPartOf or hasPart must be
+// complete or be a plain URL. Requirements, from Google's Dataset documentation:
+// name and description required, description 50 to 5000 characters, and every
+// DataDownload needs contentUrl. A JSON-LD block that does not parse is checked
+// here too, because nothing else blocks on it: extract() records it as
+// { __parse_error } on both sides, so the served-vs-rendered diff sees no change.
+// Candidates are the Dataset and DataDownload nodes inspected.
+const DATASET_DESC_MIN = 50;
+const DATASET_DESC_MAX = 5000;
+function checkDatasetItems(side, data) {
+  const out = [];
+  let candidates = 0;
+  const say = (reason, at, got) =>
+    out.push({ cls: 'DEFECT', where: `${side} json-ld dataset`, reason, served: at, rendered: got });
+  const typesOf = (n) => [].concat(n['@type'] || []);
+  const textProblem = (v) => {
+    if (v === undefined) return 'missing';
+    if (typeof v !== 'string') return `not a string (${Array.isArray(v) ? 'array' : typeof v})`;
+    if (!v.trim()) return 'empty';
+    return null;
+  };
+  const walk = (v, at, viaKey) => {
+    if (Array.isArray(v)) { v.forEach((x, i) => walk(x, `${at}[${i}]`, viaKey)); return; }
+    if (!v || typeof v !== 'object') return;
+    const types = typesOf(v);
+    if (types.includes('Dataset')) {
+      candidates += 1;
+      const before = out.length;
+      const np = textProblem(v.name);
+      if (np) say(`Dataset name is ${np}`, at, v.name === undefined ? '(absent)' : JSON.stringify(v.name));
+      const dp = textProblem(v.description);
+      if (dp) say(`Dataset description is ${dp}`, at, v.description === undefined ? '(absent)' : JSON.stringify(v.description));
+      else if (v.description.length < DATASET_DESC_MIN || v.description.length > DATASET_DESC_MAX) {
+        say(`Dataset description is ${v.description.length} characters, outside ${DATASET_DESC_MIN} to ${DATASET_DESC_MAX}`, at, v.description.slice(0, 80));
+      }
+      if ((viaKey === 'isPartOf' || viaKey === 'hasPart') && out.length > before) {
+        say(`Dataset object used as ${viaKey} is not a complete Dataset item: use a URL instead`, at, JSON.stringify(v).slice(0, 160));
+      }
+    }
+    if (types.includes('DataDownload')) {
+      candidates += 1;
+      const cp = textProblem(v.contentUrl);
+      if (cp) say(`DataDownload contentUrl is ${cp}`, at, v.contentUrl === undefined ? '(absent)' : JSON.stringify(v.contentUrl));
+    }
+    for (const [k, x] of Object.entries(v)) if (k !== '@context') walk(x, `${at}.${k}`, k);
+  };
+  data.jsonld.forEach((block, i) => {
+    if (block && Object.prototype.hasOwnProperty.call(block, '__parse_error')) {
+      say('JSON-LD block does not parse', `json-ld[${i}]`, block.__parse_error);
+      return;
+    }
+    walk(block, `json-ld[${i}]`, null);
+  });
+  return { defects: out, candidates };
+}
+
 function diffPage(page, served, rendered, net, index) {
   const d = [];
   const push = (cls, reason, where, servedVal, renderedVal, extra) =>
@@ -794,7 +857,8 @@ function diffPage(page, served, rendered, net, index) {
   const jsonldRendered = checkJsonLdAgainstVisible('rendered', rendered);
   const perGbServed = checkOfferPerGb('served', served, index);
   const perGbRendered = checkOfferPerGb('rendered', rendered, index);
-  [jsonldServed, jsonldRendered, perGbServed, perGbRendered]
+  const datasetServed = checkDatasetItems('served', served);
+  [jsonldServed, jsonldRendered, perGbServed, perGbRendered, datasetServed]
     .forEach((r) => r.defects.forEach((x) => d.push(x)));
 
   // ---- blame
@@ -816,6 +880,8 @@ function diffPage(page, served, rendered, net, index) {
     'head-field immutability': HEAD_FIELDS.length,
     'json-ld agrees with the visible retailer state': jsonldServed.candidates + jsonldRendered.candidates,
     'multi-unit price per GB uses the offer capacity': perGbServed.candidates + perGbRendered.candidates,
+    // Dataset and DataDownload nodes inspected on the served side, any depth.
+    "dataset items meet Google's requirements": datasetServed.candidates,
   };
   return { diffs: d, gateCandidates };
 }
@@ -1301,6 +1367,9 @@ async function loadPage(browser, url, { js }) {
     // Cannot false-positive on live copy or a price move: it compares the page's
     // own displayed price against the page's own stated figure.
     { name: 'multi-unit price per GB uses the offer capacity', test: (d) => / offer price per GB$/.test(d.where) },
+    // Absolute and served-side only: the page's own JSON-LD against Google's
+    // published Dataset requirements, so it cannot false-positive on a price move.
+    { name: "dataset items meet Google's requirements", test: (d) => / json-ld dataset$/.test(d.where) },
   ];
   if (flag('strict')) {
     const gateOnly = flag('gate');
