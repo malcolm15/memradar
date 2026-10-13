@@ -86,13 +86,19 @@ const WATCH = [
     job_id: 'fetch-prices',
     cron: '17 */4 * * *',
     interval_hours: 4,
-    p95_minutes: 58.6, // n=28
+    // Raised 2026-10-13 for degraded GitHub schedule delivery (Oct 8 onward); REVISIT when an external dispatcher lands.
+    // Was p95 58.6 min (n=28), max_age_hours 8.98. Re-derived from scheduled
+    // runs 2026-10-08 to 2026-10-13 (n=19): median delay 115 min, p95 236 min.
+    // At 8.98h, 10 of 47 gaps between successful runs since 2026-09-30 would
+    // have alerted; at 11.93h, 3 would.
+    p95_minutes: 236.0, // n=19, 2026-10-08 to 2026-10-13
     margin_hours: 4, // 1.00x interval
-    max_age_hours: 8.98, // 4 + 0.977 + 4 = 8.977
+    max_age_hours: 11.93, // 4 + 3.933 + 4 = 11.933
     // MARGIN 1.00x: one missed 4h slot is genuinely fine, the next is 4h away
     // and the PDP hydration layer shows a relative timestamp. Two consecutive
     // misses is the ~9h-stale state cleared by hand on 2026-08-27, which is
-    // worth an issue. 8.98h tolerates exactly one miss and catches two.
+    // worth an issue. 11.93h still tolerates one miss and catches two
+    // consecutive misses (12h between successes), with almost no headroom.
   },
   {
     workflow_file: 'newegg-refresh.yml',
