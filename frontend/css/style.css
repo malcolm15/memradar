@@ -3696,6 +3696,17 @@ html.dark .listing-card-buy--elevated { color: #fca5a5; background: rgba(220, 38
 }
 html.dark .data-finding-date { color: #64748b; }
 
+/* ── /price-index/ shared content width ──
+   /price-index/ and /price-index/<YYYY-MM>/ share one container on desktop:
+   the record line, headline, cards, citation box, chart, both tables and
+   every later section start and end on the same edges. 900 px (852 inside
+   the padding) is wide enough for the 9-column records table and the chart's
+   labels, so nothing breaks out of the column any more. The pi-measure
+   variant caps running prose at about 70 characters from the same left edge;
+   modules, headings and captions keep the full container width in both. */
+.content-page.pi-page { max-width: 900px; }
+.content-page.pi-measure :is(p, li, figcaption):not(.pim-card, .pim-card *, .pim-headline, .pim-cite *, .pim-caption, .pim-monthline, .pim-legend li, .pi-citation) { max-width: 70ch; }
+
 /* ── /price-index/ record module (pim-) ──
    Added 2026-10-12 for the frozen monthly record, the change chart and the
    permanent month pages (/price-index/<YYYY-MM>/). ADDITIVE ONLY: nothing above
@@ -3703,7 +3714,8 @@ html.dark .data-finding-date { color: #64748b; }
    other pages that share the pi- classes (methodology, data, build-cost, both
    guides and the explainer) cannot be reached by it. The 950 to 1100 px
    breakout at the end of this block matches only pim- selectors for the same
-   reason.
+   reason. (The 950 to 1100 px breakout was removed on 2026-10-13: every
+   module now shares the container width above.)
    SPECIFICITY: these elements sit inside .content-page, whose `p` (0,1,1) and
    `ul li` (0,1,2) rules beat a bare class, so every rule that styles a p or an
    li is written with a .content-page or .pim- ancestor (the .rc-install
@@ -3815,13 +3827,6 @@ html.dark .pim-records td.pim-dash { color: #64748b; }
   .content-page .pim-cards { grid-template-columns: 1fr; }
   .content-page .pim-headline { font-size: 1.18rem; }
   .pim-card .pim-card-pct { font-size: 1.8rem; }
-}
-/* The breakout: from 950 px the record cards and the chart leave the 720 px
-   reading column and widen to at most 1100 px, centred on the page. Only
-   pim- selectors are listed here, so no other page can match this block. */
-@media (min-width: 950px) {
-  .content-page .pim-wide { width: min(1100px, calc(100vw - 72px)); max-width: none; margin-left: calc(50% - min(1100px, calc(100vw - 72px)) / 2); }
-  .content-page .pim-cards { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 /* Under 760 px the 1200-unit chart would scale its labels below legibility, so
    it keeps a working width and scrolls sideways, the same treatment the index
