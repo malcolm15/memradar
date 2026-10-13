@@ -190,6 +190,21 @@ const WATCH = [
     // bot_state key the supervisor reads), NOT a smarter run scan -- no scan
     // can separate two crons that land on one job id.
   },
+  {
+    workflow_file: 'secret-scan.yml',
+    job_id: 'scan',
+    cron: '29 11 * * 1',
+    // SCHEDULED RUNS ONLY. Every push to main also runs this same job id, so
+    // without the filter a push-triggered scan would read as fresh and the
+    // weekly cron could die unnoticed (the same blind spot as the Bluesky
+    // weekly post above). The weekly run is the one that rescans full history,
+    // including the daily regen commits the push trigger never sees.
+    event: 'schedule',
+    interval_hours: 168,
+    p95_minutes: 532.0, // PROVISIONAL: one observed scheduled run (2026-10-12), not a statistically meaningful p95; REVISIT after several weekly runs
+    margin_hours: 24,
+    max_age_hours: 200.87, // 168 + 8.867 + 24 = 200.867
+  },
 ];
 
 // REVISIT 2026-09-10 (two weeks out): the p95 for `regenerate-pages` and for
@@ -341,7 +356,8 @@ async function findLastSuccess(gh, entry, nowMs) {
   // sibling would be hidden by the filter.
   const list = await ghRequest(
     gh,
-    `/repos/${OWNER}/${REPO}/actions/workflows/${entry.workflow_file}/runs?per_page=${perPage}`,
+    `/repos/${OWNER}/${REPO}/actions/workflows/${entry.workflow_file}/runs?per_page=${perPage}` +
+      (entry.event ? `&event=${encodeURIComponent(entry.event)}` : ''),
     { conditional: true }
   );
 
