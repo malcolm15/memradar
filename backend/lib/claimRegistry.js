@@ -102,11 +102,6 @@ function bakedFloor(file, re, url, what) {
   return { floorPct: Number(m[1]), source: `baked into ${url} as ${m[1]}%` };
 }
 
-const bakedPriceIndexFloor = () => bakedFloor(
-  PAGE('price-index', 'index.html'),
-  /Every segment is up more than (\d+)% year over year/,
-  '/price-index/', '"Every segment is up more than N%"');
-
 // /data/ bakes each floored finding's requirement into a data-floor-pct
 // attribute on its own <li>. The attribute exists ONLY for this: it lets the
 // prose stay words ("more than doubled") instead of being bent into a shape a
@@ -454,24 +449,10 @@ const CLAIM_REGISTRY = [
     floorLabel: '2.0x on BOTH drive segments',
   },
 
-  // ------------------------------------------------------------- Price Index
-  {
-    id: 'price-index-every-segment-up',
-    page: '/price-index/',
-    where: 'notable numbers #2',
-    sentence: 'Every segment is up more than N% year over year.',
-    // Every segment, so every segment is a requirement: the claim is only as
-    // strong as the weakest one, which is the same rule the generator used to
-    // derive the number in the first place.
-    requires: [
-      { segment: 'ddr5', period: '1y' },
-      { segment: 'ddr4', period: '1y' },
-      { segment: 'nvme_ssd', period: '1y' },
-      { segment: 'sata_ssd', period: '1y' },
-    ],
-    resolveFloor: bakedPriceIndexFloor,
-    floorLabel: 'the tens-floor baked into the page',
-  },
+  // The Price Index's own 1-year sentence ("Every segment is up more than N%
+  // year over year", id price-index-every-segment-up) was retired with the live
+  // 1-year column on 2026-10-12: the page's annual figure is the frozen monthly
+  // record, which is not a market_stats figure and has no floor to monitor.
 
   {
     // Registered 2026-09-22, with the fix that brought its floor under the

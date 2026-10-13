@@ -3046,6 +3046,11 @@ const PI_SEGMENTS = [
   { key: 'sata_ssd', label: 'SATA SSD' },
 ];
 const PI_PERIODS = ['1m', '3m', '6m', '1y'];
+// The Price Index's own live reading carries no 1-year column: its annual
+// figure is the frozen monthly record. The guides and /methodology/ keep all
+// four windows through PI_PERIODS, so this is a second list rather than an
+// edit to the shared one.
+const PI_LIVE_PERIODS = ['1m', '3m', '6m'];
 
 // ------------------------------------------------------------- Dataset JSON-LD
 // ONE DEFINITION, EMITTED IDENTICALLY ON /data/ AND /price-index/, with a
@@ -3422,7 +3427,7 @@ function buildPriceIndex(ctx) {
   // market_stats, hydrated by price-index.js. Each cell carries the figure and
   // its n in separate spans so both can hydrate from the same row.
   const rows = PI_SEGMENTS.map((seg) => {
-    const cells = PI_PERIODS.map((per) => {
+    const cells = PI_LIVE_PERIODS.map((per) => {
       const r = bySegPeriod.get(seg.key + '|' + per);
       const pct = r && r.pct_change != null ? Number(r.pct_change) : null;
       const n = r && r.product_count != null ? Number(r.product_count) : null;
@@ -3435,22 +3440,6 @@ function buildPriceIndex(ctx) {
   // generator already holds. Each is written as a liftable sentence.
   const ram = products.filter((p) => p.category === 'ram').length;
   const ssd = products.length - ram;
-  // THE SEGMENT LIST IS EXPLICIT, NOT "everything with period 1y". Two published
-  // sentences derive from `y`: the steepest-segment callout below, and the
-  // "Every segment is up more than N%" tens-floor, which is a registry entry and
-  // the most-cited line on the site. `market_stats` is keyed on (segment, period)
-  // and nothing stops a future row carrying a segment that is NOT one of the four
-  // this page tabulates: the build-cost baskets land there as pseudo-segments
-  // precisely so the registry and floor machinery can read them unchanged. Without
-  // this filter such a row would silently join the steepest-segment race and the
-  // floor's worst-cohort minimum, changing what two sentences MEAN while leaving
-  // their wording alone. It would also ship green, because today's baskets happen
-  // to sit inside the four segments' range. Same shape as the SSD-guide meta
-  // floor: a generated floor nobody had listed.
-  const PI_KEYS = new Set(PI_SEGMENTS.map((s) => s.key));
-  const y = marketStats.filter((r) => PI_KEYS.has(r.segment) && r.period === '1y' && r.pct_change != null)
-    .sort((a, b) => b.pct_change - a.pct_change);
-  const segLabel = (k) => (PI_SEGMENTS.find((s) => s.key === k) || {}).label || k;
   let nearLow = 0, observations = 0, oldestDay = '9999-99-99';
   for (const p of products) {
     const st = statsBySku.get(p.sku);
@@ -3460,62 +3449,12 @@ function buildPriceIndex(ctx) {
     if (st.current != null && st.atl != null && st.current <= st.atl * 1.05) nearLow++;
   }
   const oldestYear = oldestDay.slice(0, 4);
+  // The two 1-year notables (the steepest-segment callout and the "every
+  // segment is up more than N%" tens-floor) left with the live 1-year column
+  // on 2026-10-12, along with their registry entry: the frozen record above
+  // is now the page's annual figure. The two below derive from product
+  // history, which nothing on this page displays live.
   const notables = [];
-  if (y.length) {
-    // Both the SEGMENT and the FIGURE hydrate (price-index.js), because this
-    // sentence names a leader: if another segment overtakes DDR5, updating
-    // only the number would produce a worse error than leaving it stale.
-    // Rule: any figure that also appears in a hydrated element on this page
-    // must itself hydrate from the same source.
-    notables.push(`<strong><span id="piTopSeg">${segLabel(y[0].segment)}</span> prices are up <span id="piTopPct">${piPct(Number(y[0].pct_change))}</span> versus a year ago</strong>, the steepest rise of any segment we track.`);
-    if (y.length > 1) {
-      // Floor the WEAKEST 1y move down to the nearest 10. Two reasons it is
-      // rounded rather than exact: it must stay true as the data moves (this
-      // page gets checked by strangers with motive), and the table below
-      // HYDRATES from market_stats on load while these sentences stay baked
-      // until the next regeneration - so the claim needs enough headroom to
-      // survive a day of drift without contradicting the table beside it.
-      //
-      // WEAKEST ON BOTH COHORTS, not just the full one. This originally read
-      // y[y.length - 1].pct_change, the weakest FULL-cohort figure, and the
-      // published-claim monitor caught the result: at a 130 floor, NVMe was
-      // +134.9% on the full cohort but +127.3% on the stable one, so the site's
-      // most citable page carried the only magnitude claim that failed the
-      // cohort rule every other one is held to. "Every segment" means every
-      // segment on either reading, so the floor takes the worse of the two.
-      const worst = y.map((r) => {
-        const stable = stablePctOf(r);
-        return { segment: r.segment, row: r, pct: stable == null ? Number(r.pct_change) : Math.min(Number(r.pct_change), stable), stableKnown: stable != null };
-      });
-      // A missing delta means the stable figure is UNKNOWN, never "the same".
-      // Silently falling back to the full cohort would rebuild the exact bug
-      // above, so it says so instead.
-      const noStable = worst.filter((w) => !w.stableKnown).map((w) => w.segment);
-      if (noStable.length) {
-        log(`⚠ price index tens-floor: no stable-cohort figure for ${noStable.join(', ')} - that segment is floored on the full cohort ALONE and the sentence is not cohort-verified`);
-      }
-      // GENERATED TENS-FLOORS CARRY HEADROOM THAT SCALES WITH THE BINDING
-      // SEGMENT'S JACKKNIFE SPREAD, floored at 5pp and capped at 20pp. See
-      // GENERATED_FLOOR_HEADROOM_CAP_PP for the 2026-09-26/27 measurement that
-      // replaced the flat 5pp.
-      //
-      // Hand-written prose gets 25pp because a human sentence cannot step down on its
-      // own: it sits there being false until someone edits it. Generated prose
-      // re-derives its own number every regen, so it only needs enough headroom to
-      // survive what can move the figure BETWEEN a regen and the next stats run: a
-      // baseline sliding out of its window, or a forced recompute.
-      //
-      // MEASURED 2026-09-22, which is why this exists. floor10(worst) baked 130 from
-      // a worst of 133.3, and a forced stats run seven hours later put DDR4's full
-      // cohort at 129.5. The published sentence was false by 0.5pp the same day, on
-      // /price-index/, /ram/ and /ssd/ at once. floor10(worst - 5) would have baked
-      // 120 and survived it.
-      const tf = generatedTensFloor(worst);
-      const floorPct = tf.floorPct;
-      log(`price index tens-floor: ${floorPct}% from ${tf.binding.segment} at ${tf.binding.pct.toFixed(1)}% less ${tf.headroom}pp headroom (jackknife ${tf.jackknife == null ? 'absent, using ' + GENERATED_FLOOR_NO_JACKKNIFE_PP : tf.jackknife}pp)`);
-      notables.push(`<strong>Every segment is up more than ${floorPct}% year over year.</strong> The memory and storage market has not returned to its pre-2026 pricing.`);
-    }
-  }
   notables.push(`<strong>${nearLow} of ${products.length} tracked products sit within 5% of their all-time low</strong>, the closest thing to a buying opportunity in the current market.`);
   // `observations` sums p.series.length: one entry per product per UTC day on
   // which an in-stock price is stored (buildDailySeries). Before 2026-07-22 the
@@ -3539,8 +3478,10 @@ function buildPriceIndex(ctx) {
   if (!pageMonths.includes(latestMonth)) throw new Error(`price index: the latest record ${latestMonth} has no month page`);
   const rec = pimRecord(archive, latestMonth);
   const chart = pimChartHtml(archive, pageMonths);
-  const headline = y.length ? `${segLabel(y[0].segment)} is up ${piPct(Number(y[0].pct_change))} year over year` : 'Median price changes across RAM and SSD';
-  const metaDesc = esc(`${headline}. Median price changes across ${products.length} tracked RAM and SSD products, from live price history. Updated daily.`);
+  // Meta, og and twitter descriptions written from the record itself. There is
+  // no fallback: a page with no record throws above rather than describing
+  // itself generically.
+  const metaDesc = esc(`The MemRadar Memory Price Index: same-product RAM and SSD price changes. ${monthLabel(rec.month)} vs a year earlier: ${PI_SEGMENTS.map((seg) => `${seg.label.replace(' SSD', '')} ${pimWhole(rec.recs[seg.key].median)}`).join(', ')}.`);
 
   const jsonld = JSON.stringify({
     '@context': 'https://schema.org',

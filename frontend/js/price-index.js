@@ -29,13 +29,6 @@
   var table = document.getElementById('piTable');
   if (!sb || !table) return;
 
-  var SEGMENT_LABELS = {
-    ddr5: 'DDR5',
-    ddr4: 'DDR4',
-    nvme_ssd: 'NVMe SSD',
-    sata_ssd: 'SATA SSD'
-  };
-
   // The same rule as the generator's piLivePct/piLiveClass: one decimal, and a
   // value under 0.05% in absolute terms reads 0.0% in the neutral grey with no
   // sign. The two must stay in step or the hydrated cell disagrees with the
@@ -57,20 +50,10 @@
     .then(function (res) {
       if (res.error || !res.data || !res.data.length) return; // keep baked
       var newest = null;
-      var topSeg = null; // steepest 1y move, recomputed from the same fetch
       res.data.forEach(function (row) {
-        // SEGMENT_LABELS is the allow-list, not just a lookup. market_stats is
-        // keyed on (segment, period) and carries rows this page does not
-        // tabulate - the build-cost baskets are stored there as pseudo-segments
-        // so the claim-floor machinery can read them unchanged. Without this
-        // guard such a row could win the steepest-1y race and the hydrated
-        // sentence would disagree with the baked one. The generator applies the
-        // same filter; the two must stay in step.
-        var known = Object.prototype.hasOwnProperty.call(SEGMENT_LABELS, row.segment);
-        if (known && row.period === '1y' && row.pct_change != null &&
-            (!topSeg || Number(row.pct_change) > Number(topSeg.pct_change))) {
-          topSeg = row;
-        }
+        // Only cells the page carries are written: market_stats also holds
+        // the build-cost baskets as pseudo-segments and a 1y row per segment,
+        // and getElementById simply finds nothing for those.
         var cell = document.getElementById('pi-' + row.segment + '-' + row.period);
         if (cell) {
           var pct = row.pct_change == null ? null : Number(row.pct_change);
@@ -82,18 +65,6 @@
         if (nEl) nEl.textContent = row.product_count == null ? '' : 'n ' + row.product_count;
         if (row.computed_at && (!newest || row.computed_at > newest)) newest = row.computed_at;
       });
-      // Notable number #1 names the steepest segment AND its figure, both of
-      // which sit beside the hydrated table. Update both from the same rows so
-      // the sentence and the table can never disagree. (#2's floor is rounded
-      // down to the nearest 10 and absorbs drift by design; #3 and #4 are
-      // derived from data nothing on this page displays live, so they cannot
-      // visibly contradict anything - see CLAUDE.md.)
-      if (topSeg) {
-        var segEl = document.getElementById('piTopSeg');
-        var pctEl = document.getElementById('piTopPct');
-        if (segEl) segEl.textContent = SEGMENT_LABELS[topSeg.segment] || topSeg.segment;
-        if (pctEl) pctEl.textContent = fmt(Number(topSeg.pct_change));
-      }
       if (newest) {
         var when = new Date(newest);
         var d = when.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
