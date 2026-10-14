@@ -3701,11 +3701,19 @@ html.dark .data-finding-date { color: #64748b; }
    the record line, headline, cards, citation box, chart, both tables and
    every later section start and end on the same edges. 900 px (852 inside
    the padding) is wide enough for the 9-column records table and the chart's
-   labels, so nothing breaks out of the column any more. The pi-measure
-   variant caps running prose at about 70 characters from the same left edge;
-   modules, headings and captions keep the full container width in both. */
+   labels, so nothing breaks out of the column.
+   TEXT FILLS THE COLUMN ON DESKTOP (2026-10-14). On 2026-10-12 (variant b)
+   the pi-measure rule capped running prose at 70ch. It was reversed on
+   2026-10-14 because ch scales with each element's font size: body prose
+   stopped at 670 px, the live-reading note at 635, the chart caption at 578
+   and the table notes at 564, all short of the 852 px edge the cards, tables
+   and chart reach. Desktop text now shares that edge, the same width /data/
+   and /methodology/ use. The cap is kept at 768 px and below, where it already
+   applied, so mobile and small tablets are unchanged. */
 .content-page.pi-page { max-width: 900px; }
-.content-page.pi-measure :is(p, li, figcaption):not(.pim-card, .pim-card *, .pim-headline, .pim-cite *, .pim-caption, .pim-monthline, .pim-legend li, .pi-citation) { max-width: 70ch; }
+@media (max-width: 768px) {
+  .content-page.pi-measure :is(p, li, figcaption):not(.pim-card, .pim-card *, .pim-headline, .pim-cite *, .pim-caption, .pim-monthline, .pim-legend li, .pi-citation) { max-width: 70ch; }
+}
 
 /* ── /price-index/ record module (pim-) ──
    Added 2026-10-12 for the frozen monthly record, the change chart and the

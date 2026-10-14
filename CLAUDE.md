@@ -1191,6 +1191,8 @@ Generated flagship page at `/price-index/` (template `frontend/price-index/templ
 
 Other conventions on this page: the 4x4 table stays a real matrix at every width (it scrolls horizontally below 560px with a visible hint and a focusable region) because the matrix shape is what makes it screenshot-able; flagship cross-links use clean names plus capacity, NOT `_titleName` (its collision suffix leaks ASIN fragments like "DDR4 QR0C", which reads as a typo); Dataset JSON-LD carries `creditText` matching the visible citation block verbatim. Footer nav only, plus a contextual "Full price index" link under the homepage Market Pulse.
 
+**DESKTOP LAYOUT (2026-10-14): `/price-index/` and its month pages use a 900px column (852px of content) and the text fills it**, the same width `/data/` and `/methodology/` use, so cards, tables, the chart and every text block share one left and one right edge. The `pi-measure` 70ch cap now applies only at 768px and below (`style.css`, beside `.content-page.pi-page`): a `ch` cap scales with font size, so on desktop it had ended each text style at a different width short of the module edge.
+
 ## Social Bot (`@memradar`)
 
 Automated posting on GitHub Actions. **Bluesky is the primary and only live target** (`.github/workflows/bluesky-posts.yml` → `scripts/run-social-post.js --platform=bluesky`, client `backend/lib/blueskyClient.js`). Daily 17:00 UTC biggest-drop post, weekly Sunday 18:00 UTC market summary, ~35 posts/month.
