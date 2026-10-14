@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-13",
+ "generated": "2026-10-14",
  "rule": "requiredByBuild(p) || (healthy(p) && gatesPass(p))",
  "switches": {
   "GATES_ENABLED": true,
@@ -11,8 +11,8 @@
  "rule_order": "requiredByBuild wins outright. Otherwise: healthy AND not hard excluded AND ((readings >= KEEP_MIN_READINGS AND a fact gate) OR google impressions >= IMPRESSION_FLOOR OR bing AI citations >= CITATION_FLOOR). Both demand terms are admit-only. Hard exclusions are below_min_readings, long_term_unavailable, duplicate_variant, gsc_crawled_not_indexed and family_duplicate; sparse_history is informational and does not block either demand term. The family rule carves out members above EITHER demand floor, so a heavily cited or heavily shown family member is never marked family_duplicate.",
  "note": "Reason codes are recorded for every page whether or not they bind under the current switches, so this file reads the same shape before and after the gates go live. Written by scripts/generate-product-pages.js; do not hand-edit. NO FIELD HERE CHANGES WITHOUT A DECISION CHANGING: per-page reading counts and stale-day counts were deliberately dropped because they move every single day and would have rewritten all 235 records nightly, burying the handful of lines that mean something. Readings still decide the outcome through the long_history and sparse_history codes, and staleness through long_term_unavailable, which move only when a threshold is actually crossed. So a diff on this file is a diff worth reading: a verdict flipped, a reason appeared or went, a family winner moved, or the impressions input was replaced.",
  "counts": {
-  "indexable": 63,
-  "noindex": 172
+  "indexable": 64,
+  "noindex": 171
  },
  "pages": {
   "ram/16gb-1x16gb-ddr4-2666mhz-pc4-21300-2rx8": {
@@ -131,8 +131,7 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history",
-    "pergb_group_end"
+    "sparse_history"
    ]
   },
   "ram/a-tech-32gb-3200mhz": {
@@ -222,7 +221,8 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "blurb_display_only"
    ]
   },
   "ram/corsair-vengeance-ddr5-ram-32gb-6000mhz": {
@@ -303,6 +303,7 @@
    "bing_citations": 2,
    "reasons": [
     "sparse_history",
+    "percentile_extreme",
     "historical_demand"
    ]
   },
@@ -403,8 +404,7 @@
    "bing_impressions": 0,
    "bing_citations": 1,
    "reasons": [
-    "sparse_history",
-    "percentile_extreme"
+    "sparse_history"
    ]
   },
   "ram/corsair-vengeance-rgb-rs-ddr5-ram-16gb-5200mhz": {
@@ -506,7 +506,8 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "long_history"
+    "long_history",
+    "percentile_extreme"
    ]
   },
   "ram/crucial-16gb-ddr5-ram-5600mhz": {
@@ -587,7 +588,6 @@
    "bing_citations": 17,
    "reasons": [
     "long_history",
-    "percentile_extreme",
     "historical_demand",
     "bing_citations",
     "blurb_annotated"
@@ -603,7 +603,6 @@
    "bing_citations": 1,
    "reasons": [
     "long_history",
-    "percentile_extreme",
     "historical_demand",
     "blurb_annotated"
    ]
@@ -864,8 +863,7 @@
    "bing_impressions": 0,
    "bing_citations": 4,
    "reasons": [
-    "long_history",
-    "percentile_extreme"
+    "long_history"
    ]
   },
   "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-32gb-6000mhz-4": {
@@ -1144,8 +1142,7 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history",
-    "pergb_group_end"
+    "sparse_history"
    ]
   },
   "ram/kingston-fury-beast-rgb-32gb-6000mhz": {
@@ -1244,7 +1241,8 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "long_history"
+    "long_history",
+    "pergb_group_end"
    ]
   },
   "ram/kingston-fury-renegade-white-rgb-32gb-6400mhz": {
@@ -1317,7 +1315,7 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
-    "percentile_extreme"
+    "pergb_group_end"
    ]
   },
   "ram/patriot-viper-steel-ddr4-ram-16gb-3200mhz": {
@@ -1407,7 +1405,8 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
-    "gsc_crawled_not_indexed"
+    "gsc_crawled_not_indexed",
+    "percentile_extreme"
    ]
   },
   "ram/silicon-power-ddr5-64gb-6000mhz": {
@@ -1473,7 +1472,8 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
-    "latency_distinct"
+    "latency_distinct",
+    "blurb_display_only"
    ]
   },
   "ram/teamgroup-t-force-delta-rgb-ddr5-ram-32gb-6000mhz": {
@@ -1486,6 +1486,7 @@
    "bing_citations": 0,
    "reasons": [
     "long_history",
+    "percentile_extreme",
     "historical_demand",
     "blurb_annotated"
    ]
@@ -1500,6 +1501,7 @@
    "bing_citations": 0,
    "reasons": [
     "long_history",
+    "percentile_extreme",
     "historical_demand",
     "blurb_annotated"
    ]
@@ -2321,6 +2323,7 @@
    "reasons": [
     "required_by_build",
     "long_history",
+    "percentile_extreme",
     "pre2021_history",
     "blurb_annotated"
    ]
@@ -2427,6 +2430,8 @@
    "bing_citations": 6,
    "reasons": [
     "long_history",
+    "percentile_extreme",
+    "pergb_group_end",
     "bing_citations",
     "blurb_annotated"
    ]
@@ -2468,7 +2473,6 @@
    "bing_citations": 3,
    "reasons": [
     "long_history",
-    "pergb_group_end",
     "blurb_annotated"
    ]
   },
@@ -2718,7 +2722,8 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "percentile_extreme"
    ]
   },
   "ssd/six-nvme-m-2-ssd-pcie-4-0-1tb-m-2-2280": {
@@ -2785,14 +2790,14 @@
   },
   "ssd/timetec-1tb-ssd-nvme-pcie-gen3x4-8gb-s-m-2": {
    "sku": "B08GJBTCF6",
-   "indexable": false,
+   "indexable": true,
    "first_tracked": "2020-09-04",
    "google_impressions": 29,
    "google_position": 12.48,
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history",
+    "long_history",
     "pre2021_history",
     "pergb_group_end"
    ]
@@ -2846,8 +2851,7 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "long_history",
-    "pergb_group_end"
+    "long_history"
    ]
   },
   "ssd/western-digital-wd-black-2tb-sn770-nvme": {
@@ -2971,7 +2975,8 @@
    "bing_citations": 0,
    "reasons": [
     "family_duplicate",
-    "long_history"
+    "long_history",
+    "percentile_extreme"
    ]
   },
   "ssd/western-digital-wd-black-sn850x-4tb-nvme": {
@@ -3035,7 +3040,8 @@
    "bing_citations": 2,
    "reasons": [
     "sparse_history",
-    "gsc_crawled_not_indexed"
+    "gsc_crawled_not_indexed",
+    "pergb_group_end"
    ]
   },
   "ssd/western-digital-wd-blue-sn5100-1tb-nvme": {
