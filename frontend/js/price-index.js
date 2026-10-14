@@ -8,22 +8,8 @@
 // the generator's piCellClass() and market-pulse.js exactly - rising prices
 // are bad for buyers, so >=10% up is red, a smaller rise orange, a fall green.
 (function () {
-  // Copy citation: progressive enhancement over the plain-text citation. The
-  // button ships hidden and is shown only where the clipboard API exists, so
-  // without JS (or without the API) the text is still there to select.
-  var copyBtn = document.getElementById('pimCopy');
-  var citation = document.getElementById('pimCitation');
-  if (copyBtn && citation && navigator.clipboard && navigator.clipboard.writeText) {
-    copyBtn.hidden = false;
-    copyBtn.addEventListener('click', function () {
-      var status = document.getElementById('pimCopyStatus');
-      navigator.clipboard.writeText(citation.textContent.trim()).then(function () {
-        if (status) status.textContent = 'Copied';
-      }, function () {
-        if (status) status.textContent = 'Select the text above to copy it';
-      });
-    });
-  }
+  // The record citation's copy buttons live in pim-cite.js, which the month
+  // page loads too; this file only hydrates the live reading.
 
   var sb = window.memradarSupabase;
   var table = document.getElementById('piTable');

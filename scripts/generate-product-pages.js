@@ -3272,6 +3272,34 @@ function pimCitationText(rec) {
   const parts = PI_SEGMENTS.map((seg) => `${seg.label} ${pimWhole(rec.recs[seg.key].median)} (n=${rec.recs[seg.key].n})`).join(', ');
   return `MemRadar Memory Price Index, ${monthLabel(rec.month)} record (frozen ${longDate(rec.frozen_at)}). Median same-product price change, ${monthLabel(rec.base_month)} to ${monthLabel(rec.month)}: ${parts}. ${SITE}${pimMonthUrl(rec.month)}`;
 }
+// THE RECORD CITATION IN THREE FORMS (2026-10-14), one builder for the
+// /price-index/ record box and the month page alike. Source names the record
+// and links its permanent page; the key finding is generated from the frozen
+// record (never hand-written), led by the headline's segment, its figure
+// printed by pimWhole(), the headline's own formatter; the formal reference
+// carries the freeze date and, only
+// when the record's own corrections[] has an entry, the latest correction
+// date. Never a build, regen or current date. pimCitationText() stays: it
+// still feeds the month page's JSON-LD creditText.
+function pimCiteForms(rec, segKey = pimHeadlineSeg(rec)) {
+  const url = `${SITE}${pimMonthUrl(rec.month)}`;
+  const name = `MemRadar Memory Price Index, ${monthLabel(rec.month)}`;
+  const r = rec.recs[segKey];
+  const label = PI_SEGMENTS.find((s) => s.key === segKey).label;
+  const lead = `Across ${r.n} matched ${label} listing${r.n === 1 ? '' : 's'}, the median same-product price change from ${monthLabel(rec.base_month)} to ${monthLabel(rec.month)}`;
+  // ONE SOURCE OF TRUTH FOR THE FIGURE: pimWhole(), which also prints the
+  // headline. "Essentially unchanged" exactly when it prints zero, "0%" or
+  // "+0%". That is -0.5 <= median < 0.5 and NOT symmetric: Math.round() rounds
+  // half up, so -0.5 prints "0%" and +0.5 prints "+1%". It never prints "-0%",
+  // because a template prints -0 as "0".
+  const fig = pimWhole(r.median);
+  const finding = /^\+?0%$/.test(fig)
+    ? `${lead} was essentially unchanged at 0%, according to MemRadar.`
+    : `${lead} was ${fig}, according to MemRadar.`;
+  const corrected = rec.latest_correction ? ` Last corrected ${longDate(rec.latest_correction)}.` : '';
+  const formal = `MemRadar. "Memory Price Index, ${monthLabel(rec.month)} record." Frozen ${longDate(rec.frozen_at)}.${corrected} ${url}`;
+  return { url, path: pimMonthUrl(rec.month), name, sourcePlain: `${name}, ${url}`, finding, formal };
+}
 // The record JSON only. A per-listing download (each paired listing's two
 // monthly prices as a file) was built and withdrawn on 2026-10-12 pending
 // Keepa's written confirmation: display on memradar.com is covered by consent
@@ -3294,9 +3322,21 @@ ${rows}
 }
 function pimCitationBox(rec) {
   const dl = pimDownloadPaths(rec.month);
-  return `      <div class="pim-cite">
-        <p class="pim-cite-text" id="pimCitation">${esc(pimCitationText(rec))}</p>
-        <p class="pim-cite-actions"><button type="button" class="pim-copy" id="pimCopy" hidden>Copy citation</button><span class="pim-copy-status" id="pimCopyStatus" aria-live="polite"></span><span>Download: <a href="${dl.json}" download>record JSON</a> (segment figures, no listing data)</span></p>
+  const f = pimCiteForms(rec);
+  // id="pimCitation" moves to the box, so the /price-index/ citing section's
+  // #pimCitation link still lands on it. Buttons ship hidden; pim-cite.js
+  // shows them where the clipboard API exists, and the text stays selectable.
+  return `      <div class="pim-cite" id="pimCitation">
+        <p class="pim-cite-title">Cite this record</p>
+        <dl class="pim-cite-forms">
+          <dt>Source</dt>
+          <dd><span class="pim-cite-line"><a href="${f.path}" id="pimCiteSourceLink">${esc(f.name)}</a></span><button type="button" class="pim-copy" data-copy="source" data-plain="${esc(f.sourcePlain)}" data-url="${esc(f.url)}" hidden>Copy source</button></dd>
+          <dt>Key finding</dt>
+          <dd><span class="pim-cite-line" id="pimCiteFinding">${esc(f.finding)}</span><button type="button" class="pim-copy" data-copy="finding" hidden>Copy finding</button></dd>
+          <dt>Formal reference</dt>
+          <dd><span class="pim-cite-line pim-cite-formal" id="pimCiteFormal">${esc(f.formal)}</span></dd>
+        </dl>
+        <p class="pim-cite-actions"><span class="pim-copy-status" id="pimCopyStatus" aria-live="polite"></span><span>Download: <a href="${dl.json}" download>record JSON</a> (segment figures, no listing data)</span></p>
 ${pimCorrectionsHtml(rec)}
       </div>`;
 }
