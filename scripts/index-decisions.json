@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-14",
+ "generated": "2026-10-15",
  "rule": "requiredByBuild(p) || (healthy(p) && gatesPass(p))",
  "switches": {
   "GATES_ENABLED": true,
@@ -131,7 +131,8 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "pergb_group_end"
    ]
   },
   "ram/a-tech-32gb-3200mhz": {
@@ -317,7 +318,8 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
-    "gsc_crawled_not_indexed"
+    "gsc_crawled_not_indexed",
+    "percentile_extreme"
    ]
   },
   "ram/corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz": {
@@ -902,8 +904,7 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history",
-    "percentile_extreme"
+    "sparse_history"
    ]
   },
   "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-64gb-6000mhz-3": {
@@ -1041,8 +1042,7 @@
    "bing_impressions": 0,
    "bing_citations": 1,
    "reasons": [
-    "sparse_history",
-    "pergb_group_end"
+    "sparse_history"
    ]
   },
   "ram/kingston-fury-beast-16gb-5200mhz": {
@@ -1090,7 +1090,8 @@
    "bing_impressions": 0,
    "bing_citations": 1,
    "reasons": [
-    "long_history"
+    "long_history",
+    "percentile_extreme"
    ]
   },
   "ram/kingston-fury-beast-32gb-6000mhz": {
@@ -1229,7 +1230,8 @@
    "bing_citations": 0,
    "reasons": [
     "long_history",
-    "percentile_extreme"
+    "percentile_extreme",
+    "pergb_group_end"
    ]
   },
   "ram/kingston-fury-renegade-white-rgb-16gb-6400mhz": {
@@ -1315,7 +1317,7 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
-    "pergb_group_end"
+    "percentile_extreme"
    ]
   },
   "ram/patriot-viper-steel-ddr4-ram-16gb-3200mhz": {
@@ -1405,8 +1407,7 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
-    "gsc_crawled_not_indexed",
-    "percentile_extreme"
+    "gsc_crawled_not_indexed"
    ]
   },
   "ram/silicon-power-ddr5-64gb-6000mhz": {
@@ -1647,8 +1648,7 @@
    "bing_citations": 0,
    "reasons": [
     "gsc_crawled_not_indexed",
-    "long_history",
-    "percentile_extreme"
+    "long_history"
    ]
   },
   "ssd/bestoss-1tb-m-2-ssd-nvme-pcie4-0-2280": {
@@ -1732,8 +1732,7 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history",
-    "percentile_extreme"
+    "sparse_history"
    ]
   },
   "ssd/biwin-black-opal-nv7400-4tb-ssd-gen4x4": {
@@ -2042,7 +2041,9 @@
    "bing_impressions": 2,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "percentile_extreme",
+    "pergb_group_end"
    ]
   },
   "ssd/fikwot-fs810-2tb-ssd": {
@@ -2685,7 +2686,8 @@
    "bing_citations": 0,
    "reasons": [
     "gsc_crawled_not_indexed",
-    "long_history"
+    "long_history",
+    "pergb_group_end"
    ]
   },
   "ssd/silicon-power-2tb-ssd-3d-nand-a55-slc": {
@@ -2722,8 +2724,7 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history",
-    "percentile_extreme"
+    "sparse_history"
    ]
   },
   "ssd/six-nvme-m-2-ssd-pcie-4-0-1tb-m-2-2280": {
@@ -2837,7 +2838,6 @@
    "bing_citations": 8,
    "reasons": [
     "long_history",
-    "pergb_group_end",
     "bing_citations",
     "blurb_annotated"
    ]
@@ -2900,8 +2900,7 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history",
-    "percentile_extreme"
+    "sparse_history"
    ]
   },
   "ssd/western-digital-wd-black-sn770m-1tb": {
@@ -3040,8 +3039,7 @@
    "bing_citations": 2,
    "reasons": [
     "sparse_history",
-    "gsc_crawled_not_indexed",
-    "pergb_group_end"
+    "gsc_crawled_not_indexed"
    ]
   },
   "ssd/western-digital-wd-blue-sn5100-1tb-nvme": {

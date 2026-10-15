@@ -1,7 +1,7 @@
 {
  "version": 1,
- "generated": "2026-10-14",
- "computed_at": "2026-10-14T13:45:41.482+00:00",
+ "generated": "2026-10-15",
+ "computed_at": "2026-10-15T13:28:14.856+00:00",
  "update_frequency": "daily",
  "notice": "Regenerated once a day. memradar.com collects prices several times a day, so these figures can be up to 24 hours behind the site. This is not a live feed.",
  "method": "Every figure is a median, never a mean: a single expensive kit would drag an average. pct_change compares the same products with themselves across that window, so product_count is the size of that matched set and the periods are not directly comparable with each other. median_price_usd is the median current price across every tracked product in the segment; median_usd_per_gb is the same median over those whose capacity we can parse. Neither is a per-period figure.",
@@ -14,24 +14,24 @@
    "label": "DDR5 memory",
    "periods": {
     "1m": {
-     "pct_change": 7.8,
-     "product_count": 77
+     "pct_change": 5.9,
+     "product_count": 76
     },
     "3m": {
-     "pct_change": 19.6,
-     "product_count": 78
+     "pct_change": 19.5,
+     "product_count": 77
     },
     "6m": {
-     "pct_change": 23.8,
-     "product_count": 73
+     "pct_change": 23.4,
+     "product_count": 71
     },
     "1y": {
-     "pct_change": 259.7,
-     "product_count": 64
+     "pct_change": 255.1,
+     "product_count": 62
     }
    },
    "median_price_usd": 574.99,
-   "median_usd_per_gb": 18.09
+   "median_usd_per_gb": 18.12
   },
   {
    "segment": "ddr4",
@@ -50,7 +50,7 @@
      "product_count": 27
     },
     "1y": {
-     "pct_change": 117.2,
+     "pct_change": 101.1,
      "product_count": 27
     }
    },
@@ -62,23 +62,23 @@
    "label": "NVMe SSDs",
    "periods": {
     "1m": {
-     "pct_change": 8.4,
-     "product_count": 78
-    },
-    "3m": {
-     "pct_change": 13.9,
+     "pct_change": 6.5,
      "product_count": 79
     },
+    "3m": {
+     "pct_change": 12.3,
+     "product_count": 80
+    },
     "6m": {
-     "pct_change": -2.1,
+     "pct_change": -0.1,
      "product_count": 68
     },
     "1y": {
-     "pct_change": 142.2,
-     "product_count": 68
+     "pct_change": 146.1,
+     "product_count": 70
     }
    },
-   "median_price_usd": 309.99,
+   "median_price_usd": 314.99,
    "median_usd_per_gb": 0.18
   },
   {
@@ -86,23 +86,23 @@
    "label": "SATA SSDs",
    "periods": {
     "1m": {
-     "pct_change": 2.6,
-     "product_count": 33
+     "pct_change": 5.9,
+     "product_count": 32
     },
     "3m": {
-     "pct_change": 0.9,
-     "product_count": 33
+     "pct_change": 3.8,
+     "product_count": 32
     },
     "6m": {
-     "pct_change": 25.3,
-     "product_count": 26
+     "pct_change": 14.9,
+     "product_count": 24
     },
     "1y": {
-     "pct_change": 127.9,
-     "product_count": 29
+     "pct_change": 180.6,
+     "product_count": 27
     }
    },
-   "median_price_usd": 235.49,
+   "median_price_usd": 236.5,
    "median_usd_per_gb": 0.2
   }
  ],
