@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-15",
+ "generated": "2026-10-16",
  "rule": "requiredByBuild(p) || (healthy(p) && gatesPass(p))",
  "switches": {
   "GATES_ENABLED": true,
@@ -223,6 +223,7 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
+    "percentile_extreme",
     "blurb_display_only"
    ]
   },
@@ -318,8 +319,7 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
-    "gsc_crawled_not_indexed",
-    "percentile_extreme"
+    "gsc_crawled_not_indexed"
    ]
   },
   "ram/corsair-vengeance-rgb-ddr5-ram-32gb-6000mhz": {
@@ -508,8 +508,7 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "long_history",
-    "percentile_extreme"
+    "long_history"
    ]
   },
   "ram/crucial-16gb-ddr5-ram-5600mhz": {
@@ -605,6 +604,7 @@
    "bing_citations": 1,
    "reasons": [
     "long_history",
+    "percentile_extreme",
     "historical_demand",
     "blurb_annotated"
    ]
@@ -865,7 +865,8 @@
    "bing_impressions": 0,
    "bing_citations": 4,
    "reasons": [
-    "long_history"
+    "long_history",
+    "percentile_extreme"
    ]
   },
   "ram/g-skill-trident-z5-neo-rgb-series-ddr5-ram-32gb-6000mhz-4": {
@@ -954,7 +955,8 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "percentile_extreme"
    ]
   },
   "ram/g-skill-trident-z5-rgb-series-ddr5-ram-32gb-6000mhz": {
@@ -966,7 +968,8 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "percentile_extreme"
    ]
   },
   "ram/g-skill-trident-z5-rgb-series-ddr5-ram-32gb-6000mhz-2": {
@@ -979,8 +982,7 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
-    "family_duplicate",
-    "percentile_extreme"
+    "family_duplicate"
    ]
   },
   "ram/g-skill-trident-z5-rgb-series-ddr5-ram-32gb-6400mhz": {
@@ -1042,7 +1044,8 @@
    "bing_impressions": 0,
    "bing_citations": 1,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "pergb_group_end"
    ]
   },
   "ram/kingston-fury-beast-16gb-5200mhz": {
@@ -1230,8 +1233,7 @@
    "bing_citations": 0,
    "reasons": [
     "long_history",
-    "percentile_extreme",
-    "pergb_group_end"
+    "percentile_extreme"
    ]
   },
   "ram/kingston-fury-renegade-white-rgb-16gb-6400mhz": {
@@ -1545,6 +1547,7 @@
    "bing_citations": 0,
    "reasons": [
     "long_history",
+    "percentile_extreme",
     "pre2021_history",
     "blurb_annotated"
    ]
@@ -1648,7 +1651,8 @@
    "bing_citations": 0,
    "reasons": [
     "gsc_crawled_not_indexed",
-    "long_history"
+    "long_history",
+    "percentile_extreme"
    ]
   },
   "ssd/bestoss-1tb-m-2-ssd-nvme-pcie4-0-2280": {
@@ -1908,7 +1912,7 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history"
+    "long_history"
    ]
   },
   "ssd/crucial-t500-pcie-gen4-nvme-500gb-ssd": {
@@ -2974,8 +2978,7 @@
    "bing_citations": 0,
    "reasons": [
     "family_duplicate",
-    "long_history",
-    "percentile_extreme"
+    "long_history"
    ]
   },
   "ssd/western-digital-wd-black-sn850x-4tb-nvme": {
