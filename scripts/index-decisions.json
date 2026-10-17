@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-16",
+ "generated": "2026-10-17",
  "rule": "requiredByBuild(p) || (healthy(p) && gatesPass(p))",
  "switches": {
   "GATES_ENABLED": true,
@@ -223,7 +223,6 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
-    "percentile_extreme",
     "blurb_display_only"
    ]
   },
@@ -508,7 +507,8 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "long_history"
+    "long_history",
+    "percentile_extreme"
    ]
   },
   "ram/crucial-16gb-ddr5-ram-5600mhz": {
@@ -589,6 +589,7 @@
    "bing_citations": 17,
    "reasons": [
     "long_history",
+    "percentile_extreme",
     "historical_demand",
     "bing_citations",
     "blurb_annotated"
@@ -740,7 +741,6 @@
    "bing_citations": 11,
    "reasons": [
     "sparse_history",
-    "percentile_extreme",
     "bing_citations"
    ]
   },
@@ -994,7 +994,8 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "percentile_extreme"
    ]
   },
   "ram/g-skill-trident-z5-rgb-series-ddr5-ram-64gb-6000mhz": {
@@ -1032,6 +1033,7 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
+    "pergb_group_end",
     "latency_distinct"
    ]
   },
@@ -1044,8 +1046,7 @@
    "bing_impressions": 0,
    "bing_citations": 1,
    "reasons": [
-    "sparse_history",
-    "pergb_group_end"
+    "sparse_history"
    ]
   },
   "ram/kingston-fury-beast-16gb-5200mhz": {
@@ -1107,8 +1108,7 @@
    "bing_citations": 0,
    "reasons": [
     "long_history",
-    "percentile_extreme",
-    "pergb_group_end"
+    "percentile_extreme"
    ]
   },
   "ram/kingston-fury-beast-32gb-6000mt-s-ddr5": {
@@ -1171,7 +1171,8 @@
    "bing_citations": 0,
    "reasons": [
     "long_history",
-    "percentile_extreme"
+    "percentile_extreme",
+    "pergb_group_end"
    ]
   },
   "ram/kingston-fury-beast-rgb-8gb-6000mt-s-ddr5": {
@@ -1282,7 +1283,8 @@
    "bing_impressions": 2,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history"
+    "sparse_history",
+    "pergb_group_end"
    ]
   },
   "ram/nemix-ram-16gb-2666mhz": {
@@ -1409,7 +1411,8 @@
    "bing_citations": 0,
    "reasons": [
     "sparse_history",
-    "gsc_crawled_not_indexed"
+    "gsc_crawled_not_indexed",
+    "percentile_extreme"
    ]
   },
   "ram/silicon-power-ddr5-64gb-6000mhz": {
@@ -1460,7 +1463,7 @@
    "bing_citations": 4,
    "reasons": [
     "sparse_history",
-    "pergb_group_end",
+    "percentile_extreme",
     "latency_distinct",
     "historical_demand"
    ]
@@ -1601,7 +1604,8 @@
    "bing_citations": 4,
    "reasons": [
     "gsc_crawled_not_indexed",
-    "long_history"
+    "long_history",
+    "percentile_extreme"
    ]
   },
   "ssd/500gb-optimus-5100-nvme-ssd-pcie-4-0": {
@@ -2008,8 +2012,7 @@
    "bing_impressions": 0,
    "bing_citations": 0,
    "reasons": [
-    "sparse_history",
-    "percentile_extreme"
+    "sparse_history"
    ]
   },
   "ssd/fikwot-fn203-m-2-sata-ssd-slc-cache-1tb": {
